@@ -1,7 +1,6 @@
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const rm = require('../game/roomManager');
-const { getPublicState } = require('../game/tournamentEngine');
 const { openSlots } = require('../game/draftEngine');
 
 const router = express.Router();
@@ -95,10 +94,8 @@ router.get('/:code/state', (req, res) => {
       ? { squad: member.squad, slots: member.slots, openSlots: openSlots(member), draftComplete: member.draftComplete }
       : null;
     base.poolRemaining = state.pool.size;
-  } else if (room.status === 'group_stage' || room.status === 'knockout' || room.status === 'finished') {
-    const state = rm.loadRoomState(room);
-    base.tournament = getPublicState(state);
   }
+  // Tournament view is fully socket-driven (room:state / tournament:advance) — see sockets/index.js.
 
   res.json(base);
 });

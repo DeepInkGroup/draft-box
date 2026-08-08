@@ -29,7 +29,9 @@ function maybeStartTournament(io, roomRow, roomState) {
   tournamentEngine.startTournament(roomState);
   rm.setRoomStatus(roomRow.id, 'group_stage');
   rm.persistTournamentSnapshot(roomState);
-  io.to(channelName(roomRow.code)).emit('tournament:started', tournamentEngine.getPublicState(roomState));
+  // Deliberately no results payload here: every member pulls the tournament's
+  // steps at their own pace via tournament:advance once they land on the view.
+  io.to(channelName(roomRow.code)).emit('tournament:started', {});
   return true;
 }
 
@@ -89,7 +91,16 @@ function registerSocketHandlers(io) {
         });
       } else {
         const state = rm.loadRoomState(roomRow);
-        socket.emit('room:state', { stage: 'tournament', ...lobbySnapshot(roomRow), tournament: tournamentEngine.getPublicState(state) });
+        const member = state.members.get(socket.user.id);
+        const viewedStep = member ? member.viewedStep : 0;
+        socket.emit('room:state', {
+          stage: 'tournament',
+          ...lobbySnapshot(roomRow),
+          myStep: viewedStep > 0 ? tournamentEngine.decorateStep(state, viewedStep - 1) : null,
+          viewedStep,
+          historyLength: tournamentEngine.historyLength(state),
+          tournamentStage: state.tournament.stage
+        });
       }
 
       io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(roomRow));
@@ -131,30 +142,51 @@ function registerSocketHandlers(io) {
       }
     });
 
-    socket.on('tournament:simulateNext', ({ code }) => {
+    // Each member pulls the shared tournament forward at their own pace: if the room's
+    // simulation is already ahead of what this member has seen, they just get caught up
+    // by one step (no new simulation). Only the member who is fully caught up and asks
+    // for more actually triggers the next matchday/round — which is why one person
+    // clicking through does NOT jump everyone else's screen forward; others only see a
+    // "new results available" ping until they click their own button.
+    socket.on('tournament:advance', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
-      if (!roomRow || !['group_stage', 'knockout'].includes(roomRow.status)) {
+      if (!roomRow || !['group_stage', 'knockout', 'finished'].includes(roomRow.status)) {
         return socket.emit('error:message', { error: 'tournament is not active for this room' });
       }
       const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      if (!member) return socket.emit('error:message', { error: 'not a member of this room' });
+      const t = state.tournament;
+
       try {
-        const step = tournamentEngine.simulateNextStep(state);
+        if (member.viewedStep >= tournamentEngine.historyLength(state)) {
+          if (t.stage === 'done') {
+            return socket.emit('error:message', { error: 'the tournament has already finished' });
+          }
+          tournamentEngine.simulateNextStep(state);
 
-        for (const member of state.members.values()) {
-          if (member.eliminated) rm.markMemberEliminated(roomRow.id, member.userId);
+          for (const m of state.members.values()) {
+            if (m.eliminated) rm.markMemberEliminated(roomRow.id, m.userId);
+          }
+          if (t.stage !== 'group' && roomRow.status === 'group_stage') {
+            rm.setRoomStatus(roomRow.id, 'knockout');
+          }
+          if (t.stage === 'done') {
+            rm.setRoomStatus(roomRow.id, 'finished');
+          }
+          rm.persistTournamentSnapshot(state);
+
+          socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: tournamentEngine.historyLength(state) });
         }
 
-        if (state.tournament.stage !== 'group' && roomRow.status === 'group_stage') {
-          rm.setRoomStatus(roomRow.id, 'knockout');
-        }
-        if (state.tournament.stage === 'done') {
-          rm.setRoomStatus(roomRow.id, 'finished');
-        }
-        rm.persistTournamentSnapshot(state);
+        member.viewedStep += 1;
+        rm.persistViewedStep(roomRow.id, socket.user.id, member.viewedStep);
 
-        io.to(channelName(roomRow.code)).emit('tournament:update', {
-          step,
-          tournament: tournamentEngine.getPublicState(state)
+        socket.emit('tournament:step', {
+          step: tournamentEngine.decorateStep(state, member.viewedStep - 1),
+          viewedStep: member.viewedStep,
+          historyLength: tournamentEngine.historyLength(state),
+          stage: t.stage
         });
       } catch (e) {
         socket.emit('error:message', { error: e.message });

@@ -94,7 +94,7 @@ function pickPlayer(roomState, userId, playerId, slotCode) {
   if (member.slots[slotCode]) throw new Error('that slot is already filled');
 
   roomState.pool.delete(playerId);
-  const entry = { id: player.id, name: player.name, pos: player.pos, overall: player.overall, team: team.code, slotCode };
+  const entry = { id: player.id, name: player.name, pos: player.pos, overall: player.overall, team: team.code, slotCode, isStar: !!player.isStar };
   member.slots[slotCode] = entry;
   member.squad.push(entry);
   member.currentReveal = null;

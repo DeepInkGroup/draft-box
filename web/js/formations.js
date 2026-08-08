@@ -194,6 +194,70 @@ const FORMATIONS = {
       { code: 'ST1', group: 'FW', short: 'ST', label: 'Striker', x: 38, y: 16 },
       { code: 'ST2', group: 'FW', short: 'ST', label: 'Striker', x: 62, y: 16 }
     ]
+  },
+  '5-2-3': {
+    description: 'A back five with only two in the middle — width and firepower up top, but the engine room can get overrun.',
+    slots: [
+      { code: 'GK', group: 'GK', short: 'GK', label: 'Goalkeeper', x: 50, y: 90 },
+      { code: 'LWB', group: 'DF', short: 'LWB', label: 'Left Wing Back', x: 10, y: 68 },
+      { code: 'CB1', group: 'DF', short: 'CB', label: 'Center Back', x: 30, y: 78 },
+      { code: 'CB2', group: 'DF', short: 'CB', label: 'Center Back', x: 50, y: 82 },
+      { code: 'CB3', group: 'DF', short: 'CB', label: 'Center Back', x: 70, y: 78 },
+      { code: 'RWB', group: 'DF', short: 'RWB', label: 'Right Wing Back', x: 90, y: 68 },
+      { code: 'CM1', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 38, y: 52 },
+      { code: 'CM2', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 62, y: 52 },
+      { code: 'LW', group: 'FW', short: 'LW', label: 'Left Winger', x: 18, y: 20 },
+      { code: 'ST', group: 'FW', short: 'ST', label: 'Striker', x: 50, y: 14 },
+      { code: 'RW', group: 'FW', short: 'RW', label: 'Right Winger', x: 82, y: 20 }
+    ]
+  },
+  '5-3-1-1': {
+    description: 'Extreme defensive solidity with a target man and a support striker linking play — built to absorb and break at pace.',
+    slots: [
+      { code: 'GK', group: 'GK', short: 'GK', label: 'Goalkeeper', x: 50, y: 90 },
+      { code: 'LWB', group: 'DF', short: 'LWB', label: 'Left Wing Back', x: 10, y: 68 },
+      { code: 'CB1', group: 'DF', short: 'CB', label: 'Center Back', x: 30, y: 78 },
+      { code: 'CB2', group: 'DF', short: 'CB', label: 'Center Back', x: 50, y: 82 },
+      { code: 'CB3', group: 'DF', short: 'CB', label: 'Center Back', x: 70, y: 78 },
+      { code: 'RWB', group: 'DF', short: 'RWB', label: 'Right Wing Back', x: 90, y: 68 },
+      { code: 'CM1', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 35, y: 52 },
+      { code: 'CM2', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 50, y: 56 },
+      { code: 'CM3', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 65, y: 52 },
+      { code: 'SS', group: 'FW', short: 'SS', label: 'Second Striker', x: 50, y: 26 },
+      { code: 'ST', group: 'FW', short: 'ST', label: 'Striker', x: 50, y: 12 }
+    ]
+  },
+  '3-2-4-1': {
+    description: 'A back three protected by a double pivot, exploding into four attacking outlets — thrilling going forward, thin at the back.',
+    slots: [
+      { code: 'GK', group: 'GK', short: 'GK', label: 'Goalkeeper', x: 50, y: 90 },
+      { code: 'CB1', group: 'DF', short: 'CB', label: 'Center Back', x: 28, y: 76 },
+      { code: 'CB2', group: 'DF', short: 'CB', label: 'Center Back', x: 50, y: 80 },
+      { code: 'CB3', group: 'DF', short: 'CB', label: 'Center Back', x: 72, y: 76 },
+      { code: 'CDM1', group: 'MF', short: 'CDM', label: 'Defensive Midfielder', x: 38, y: 62 },
+      { code: 'CDM2', group: 'MF', short: 'CDM', label: 'Defensive Midfielder', x: 62, y: 62 },
+      { code: 'LW', group: 'MF', short: 'LW', label: 'Left Winger', x: 12, y: 32 },
+      { code: 'LAM', group: 'MF', short: 'LAM', label: 'Left Attacking Mid', x: 34, y: 30 },
+      { code: 'RAM', group: 'MF', short: 'RAM', label: 'Right Attacking Mid', x: 66, y: 30 },
+      { code: 'RW', group: 'MF', short: 'RW', label: 'Right Winger', x: 88, y: 32 },
+      { code: 'ST', group: 'FW', short: 'ST', label: 'Striker', x: 50, y: 14 }
+    ]
+  },
+  '4-2-4': {
+    description: 'Four forwards, two midfielders. Devastatingly direct but leaves acres of space to exploit in midfield and behind.',
+    slots: [
+      { code: 'GK', group: 'GK', short: 'GK', label: 'Goalkeeper', x: 50, y: 90 },
+      { code: 'LB', group: 'DF', short: 'LB', label: 'Left Back', x: 15, y: 74 },
+      { code: 'CB1', group: 'DF', short: 'CB', label: 'Center Back', x: 37, y: 78 },
+      { code: 'CB2', group: 'DF', short: 'CB', label: 'Center Back', x: 63, y: 78 },
+      { code: 'RB', group: 'DF', short: 'RB', label: 'Right Back', x: 85, y: 74 },
+      { code: 'CM1', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 38, y: 54 },
+      { code: 'CM2', group: 'MF', short: 'CM', label: 'Central Midfielder', x: 62, y: 54 },
+      { code: 'LW', group: 'FW', short: 'LW', label: 'Left Winger', x: 15, y: 18 },
+      { code: 'ST1', group: 'FW', short: 'ST', label: 'Striker', x: 38, y: 12 },
+      { code: 'ST2', group: 'FW', short: 'ST', label: 'Striker', x: 62, y: 12 },
+      { code: 'RW', group: 'FW', short: 'RW', label: 'Right Winger', x: 85, y: 18 }
+    ]
   }
 };
 

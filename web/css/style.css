@@ -45,8 +45,6 @@ a { color: var(--accent-strong); }
   align-items: center;
   justify-content: space-between;
   padding: 14px 22px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
   position: sticky;
   top: 0;
   z-index: 10;
@@ -56,11 +54,11 @@ a { color: var(--accent-strong); }
   display: flex;
   align-items: center;
   gap: 8px;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: -0.01em;
+  font-family: 'Bebas Neue', 'Segoe UI', sans-serif;
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: .04em;
 }
-.brand-ball { font-size: 1.2rem; }
 
 .topbar-actions { display: flex; align-items: center; gap: 8px; }
 .whoami { color: var(--muted); font-size: .9rem; }
@@ -319,9 +317,9 @@ a { color: var(--accent-strong); }
 /* --- Footer --- */
 .site-footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 22px; border-top: 1px solid var(--border); background: var(--surface);
+  padding: 14px 22px;
   font-size: .8rem; color: var(--muted);
 }
-.site-footer .footer-center { font-weight: 600; color: var(--ink); }
+.site-footer .footer-center { font-family: 'Bebas Neue', 'Segoe UI', sans-serif; font-size: 1.1rem; letter-spacing: .04em; color: var(--ink); }
 .site-footer a.footer-github { color: var(--muted); display: flex; align-items: center; }
 .site-footer a.footer-github:hover { color: var(--ink); }

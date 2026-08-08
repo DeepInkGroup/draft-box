@@ -1,5 +1,5 @@
 const db = require('../db');
-const { allPlayerIds } = require('../data/teams');
+const { allPlayerIds, getPlayer } = require('../data/teams');
 const { isValidFormation, getSlots } = require('./formations');
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to avoid confusion
@@ -78,7 +78,8 @@ function loadRoomState(roomRow) {
     for (const s of getSlots(row.formation)) slots[s.code] = null;
     const squad = [];
     for (const d of drafted) {
-      const entry = { id: d.player_id, name: d.player_name, pos: d.pos, overall: d.overall, team: d.source_team, slotCode: d.slot_code };
+      const src = getPlayer(d.player_id);
+      const entry = { id: d.player_id, name: d.player_name, pos: d.pos, overall: d.overall, team: d.source_team, slotCode: d.slot_code, isStar: !!(src && src.isStar) };
       if (d.slot_code) slots[d.slot_code] = entry;
       squad.push(entry);
     }
@@ -90,6 +91,7 @@ function loadRoomState(roomRow) {
       squad,
       draftComplete: !!row.draft_complete,
       eliminated: !!row.eliminated,
+      viewedStep: row.viewed_step || 0,
       currentReveal: null,
       lastRevealedTeam: null,
       pickDeadline: null,
@@ -129,6 +131,10 @@ function markMemberDraftComplete(roomId, userId) {
 
 function markMemberEliminated(roomId, userId) {
   db.prepare('UPDATE room_members SET eliminated = 1 WHERE room_id = ? AND user_id = ?').run(roomId, userId);
+}
+
+function persistViewedStep(roomId, userId, step) {
+  db.prepare('UPDATE room_members SET viewed_step = ? WHERE room_id = ? AND user_id = ?').run(step, roomId, userId);
 }
 
 function setRoomStatus(roomId, status) {
@@ -172,6 +178,7 @@ module.exports = {
   persistPick,
   markMemberDraftComplete,
   markMemberEliminated,
+  persistViewedStep,
   setRoomStatus,
   persistTournamentSnapshot,
   allMembersDraftComplete,

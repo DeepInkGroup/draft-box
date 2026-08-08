@@ -1,8 +1,15 @@
 const { ALL_TEAMS, getTeam } = require('../data/teams');
 const { bestXI, teamStrength } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
+const { FORMATIONS } = require('./formations');
+
+const FORMATION_NAMES = Object.keys(FORMATIONS);
+function randomFormation() {
+  return FORMATION_NAMES[Math.floor(Math.random() * FORMATION_NAMES.length)];
+}
 
 const GROUP_LABELS = 'ABCDEFGHIJKL'.split('');
+const KNOCKOUT_LABEL = { r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter-Finals', sf: 'Semi-Finals', final: 'Final' };
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -42,14 +49,16 @@ function startTournament(roomState) {
       userId: member.userId,
       username: member.username,
       xi: member.squad,
+      formation: member.formation,
       strength: avg(member.squad.map((p) => p.overall)),
       eliminated: false
     });
   });
   botCodes.forEach((code) => {
     const team = getTeam(code);
-    const xi = bestXI(team);
-    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, strength: teamStrength(xi), eliminated: false });
+    const botFormation = randomFormation();
+    const xi = bestXI(team, botFormation);
+    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false });
   });
 
   const shuffledSlots = shuffle(slots);
@@ -85,6 +94,7 @@ function startTournament(roomState) {
     fixtures,
     bracket: {},
     matchLog: [],
+    history: [], // sequential step records — see simulateNextStep / decorateStep
     champion: null
   };
 
@@ -116,13 +126,17 @@ function rankGroup(t, label) {
     .sort((x, y) => (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (Math.random() - 0.5));
 }
 
+// Marks a slot (human OR bot) as eliminated so group-final/bracket displays are accurate
+// for everyone. Only human slots also flip the member's own "eliminated" (spectator) flag.
 function markEliminated(roomState, code) {
   const t = roomState.tournament;
   const slot = t.slotByCode[code];
-  if (!slot || !slot.isHuman) return;
+  if (!slot) return;
   slot.eliminated = true;
-  const member = roomState.members.get(slot.userId);
-  if (member) member.eliminated = true;
+  if (slot.isHuman) {
+    const member = roomState.members.get(slot.userId);
+    if (member) member.eliminated = true;
+  }
 }
 
 function finalizeGroupsAndSeedR32(roomState) {
@@ -183,14 +197,19 @@ function playKnockoutRound(roomState) {
   return { finishedStage, matches: t.matchLog.filter((m) => m.stage === finishedStage) };
 }
 
+// Runs exactly ONE more step of the shared, room-wide tournament simulation (one group
+// matchday, or one full knockout round) and appends it to the history log. This is the
+// single source of truth; per-user viewing progress (roomState.members.get(id).viewedStep)
+// is tracked separately so one member simulating doesn't force everyone else's screen
+// forward — see sockets/index.js's tournament:advance handler.
 function simulateNextStep(roomState) {
   const t = roomState.tournament;
-  if (!t || t.stage === 'done') return { type: 'done', champion: t ? t.champion : null };
+  if (!t || t.stage === 'done') return null;
 
   if (t.stage === 'group') {
     const mdIdx = t.groupMatchdaysPlayed;
     const md = t.fixtures[mdIdx];
-    const results = md.map((fx) => {
+    const rawMatches = md.map((fx) => {
       const a = t.slotByCode[fx.aCode];
       const b = t.slotByCode[fx.bCode];
       const sim = simulateMatch(a, b, { knockout: false });
@@ -200,46 +219,86 @@ function simulateNextStep(roomState) {
       return entry;
     });
     t.groupMatchdaysPlayed += 1;
-    if (t.groupMatchdaysPlayed === 3) finalizeGroupsAndSeedR32(roomState);
-    return { type: 'group', matchday: t.groupMatchdaysPlayed, matches: results, stage: t.stage };
+    const matchday = t.groupMatchdaysPlayed;
+    const groupFinal = matchday === 3;
+    if (groupFinal) finalizeGroupsAndSeedR32(roomState);
+
+    const step = {
+      index: t.history.length,
+      type: 'group',
+      label: `Group Stage — Matchday ${matchday}`,
+      matchday,
+      matches: rawMatches,
+      groupFinal
+    };
+    t.history.push(step);
+    return step;
   }
 
   const { finishedStage, matches } = playKnockoutRound(roomState);
-  return { type: 'knockout', finishedStage, matches, stage: t.stage, champion: t.champion };
+  const step = {
+    index: t.history.length,
+    type: 'knockout',
+    label: KNOCKOUT_LABEL[finishedStage] || finishedStage,
+    finishedStage,
+    matches,
+    champion: t.stage === 'done'
+  };
+  t.history.push(step);
+  return step;
 }
 
-function getPublicState(roomState) {
+// Turns a raw history[] record into everything a client needs to render that one step:
+// team names, human/username tags, winner highlighting, and (only when relevant) the
+// final group standings or the champion banner.
+function decorateStep(roomState, index) {
   const t = roomState.tournament;
-  if (!t) return null;
-  const groups = {};
-  for (const label of Object.keys(t.groups)) {
-    groups[label] = rankGroup(t, label).map((row) => ({
-      ...row,
-      name: t.slotByCode[row.code].name,
-      isHuman: t.slotByCode[row.code].isHuman,
-      username: t.slotByCode[row.code].username || null,
-      eliminated: t.slotByCode[row.code].eliminated
-    }));
-  }
-  const decorate = (m) => m && {
+  if (!t || !t.history[index]) return null;
+  const raw = t.history[index];
+  const name = (code) => t.slotByCode[code].name;
+  const isHuman = (code) => t.slotByCode[code].isHuman;
+  const username = (code) => t.slotByCode[code].username || null;
+
+  const matches = raw.matches.map((m) => ({
     ...m,
-    aName: t.slotByCode[m.aCode].name,
-    bName: t.slotByCode[m.bCode].name,
-    aHuman: t.slotByCode[m.aCode].isHuman,
-    bHuman: t.slotByCode[m.bCode].isHuman
-  };
-  const bracket = {};
-  for (const [round, matches] of Object.entries(t.bracket)) {
-    bracket[round] = matches.map(decorate);
+    aName: name(m.aCode),
+    bName: name(m.bCode),
+    aHuman: isHuman(m.aCode),
+    bHuman: isHuman(m.bCode),
+    aUsername: username(m.aCode),
+    bUsername: username(m.bCode)
+  }));
+
+  const decorated = { index: raw.index, type: raw.type, label: raw.label, matches };
+
+  if (raw.type === 'group') {
+    decorated.matchday = raw.matchday;
+    if (raw.groupFinal) {
+      const groups = {};
+      for (const label of Object.keys(t.groups)) {
+        groups[label] = rankGroup(t, label).map((row) => ({
+          ...row,
+          name: name(row.code),
+          isHuman: isHuman(row.code),
+          username: username(row.code),
+          advanced: !t.slotByCode[row.code].eliminated
+        }));
+      }
+      decorated.groupFinal = { groups };
+    }
+  } else {
+    decorated.finishedStage = raw.finishedStage;
+    if (raw.champion) {
+      decorated.champion = { code: t.champion, ...t.slotByCode[t.champion] };
+    }
   }
-  return {
-    stage: t.stage,
-    groupMatchdaysPlayed: t.groupMatchdaysPlayed,
-    groups,
-    bracket,
-    champion: t.champion ? { code: t.champion, ...t.slotByCode[t.champion] } : null,
-    recentMatches: t.matchLog.slice(-24)
-  };
+
+  return decorated;
 }
 
-module.exports = { startTournament, simulateNextStep, getPublicState };
+function historyLength(roomState) {
+  const t = roomState.tournament;
+  return t ? t.history.length : 0;
+}
+
+module.exports = { startTournament, simulateNextStep, decorateStep, historyLength };

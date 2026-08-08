@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS room_members (
   draft_complete INTEGER NOT NULL DEFAULT 0,
   country_code TEXT,
   eliminated INTEGER NOT NULL DEFAULT 0,
+  viewed_step INTEGER NOT NULL DEFAULT 0,
   joined_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(room_id, user_id),
   FOREIGN KEY (room_id) REFERENCES rooms(id),
@@ -79,6 +80,9 @@ if (!columnExists('rooms', 'show_overall')) {
 }
 if (!columnExists('drafted_players', 'slot_code')) {
   db.exec(`ALTER TABLE drafted_players ADD COLUMN slot_code TEXT NOT NULL DEFAULT '';`);
+}
+if (!columnExists('room_members', 'viewed_step')) {
+  db.exec(`ALTER TABLE room_members ADD COLUMN viewed_step INTEGER NOT NULL DEFAULT 0;`);
 }
 
 module.exports = db;
