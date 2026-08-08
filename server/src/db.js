@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   mode TEXT NOT NULL DEFAULT 'worldcup',
   human_slots_max INTEGER NOT NULL DEFAULT 32,
   single_player INTEGER NOT NULL DEFAULT 0,
+  show_overall INTEGER NOT NULL DEFAULT 1,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -59,11 +60,25 @@ CREATE TABLE IF NOT EXISTS drafted_players (
   source_team TEXT NOT NULL,
   pos TEXT NOT NULL,
   overall INTEGER NOT NULL,
+  slot_code TEXT NOT NULL DEFAULT '',
   drafted_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(room_id, player_id),
   FOREIGN KEY (room_id) REFERENCES rooms(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 `);
+
+// Lightweight migration guards for pre-existing local dev databases created before
+// show_overall / slot_code existed (CREATE TABLE IF NOT EXISTS won't add new columns).
+function columnExists(table, column) {
+  const rows = db.prepare(`PRAGMA table_info(${table})`).all();
+  return rows.some((r) => r.name === column);
+}
+if (!columnExists('rooms', 'show_overall')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN show_overall INTEGER NOT NULL DEFAULT 1;`);
+}
+if (!columnExists('drafted_players', 'slot_code')) {
+  db.exec(`ALTER TABLE drafted_players ADD COLUMN slot_code TEXT NOT NULL DEFAULT '';`);
+}
 
 module.exports = db;

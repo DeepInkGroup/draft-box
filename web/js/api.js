@@ -23,8 +23,8 @@ const Api = (() => {
     login: (username, password) => request('/api/auth/login', { method: 'POST', body: { username, password } }),
     me: () => request('/api/auth/me'),
 
-    createRoom: (name, humanSlotsMax, formation) => request('/api/rooms', { method: 'POST', body: { name, humanSlotsMax, formation } }),
-    createSingleplayer: (formation) => request('/api/rooms/singleplayer', { method: 'POST', body: { formation } }),
+    createRoom: (name, humanSlotsMax, formation, showOverall) => request('/api/rooms', { method: 'POST', body: { name, humanSlotsMax, formation, showOverall } }),
+    createSingleplayer: (formation, showOverall) => request('/api/rooms/singleplayer', { method: 'POST', body: { formation, showOverall } }),
     joinRoom: (code, formation) => request(`/api/rooms/${code}/join`, { method: 'POST', body: { formation } }),
     setFormation: (code, formation) => request(`/api/rooms/${code}/formation`, { method: 'POST', body: { formation } }),
     startDraft: (code) => request(`/api/rooms/${code}/start`, { method: 'POST' }),

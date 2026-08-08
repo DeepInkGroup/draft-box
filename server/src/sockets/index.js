@@ -8,6 +8,22 @@ function channelName(code) {
   return `room:${code}`;
 }
 
+function myDraftView(member) {
+  return {
+    squad: member.squad,
+    slots: member.slots,
+    openSlots: draftEngine.openSlots(member),
+    draftComplete: member.draftComplete
+  };
+}
+
+function clearPickTimer(member) {
+  if (member.pickTimer) {
+    clearTimeout(member.pickTimer);
+    member.pickTimer = null;
+  }
+}
+
 function maybeStartTournament(io, roomRow, roomState) {
   if (!rm.allMembersDraftComplete(roomState)) return false;
   tournamentEngine.startTournament(roomState);
@@ -15,6 +31,33 @@ function maybeStartTournament(io, roomRow, roomState) {
   rm.persistTournamentSnapshot(roomState);
   io.to(channelName(roomRow.code)).emit('tournament:started', tournamentEngine.getPublicState(roomState));
   return true;
+}
+
+// Shared by both the manual draft:pick handler and the auto-pick timeout, so a pick
+// always has the exact same persistence + broadcast side effects regardless of source.
+function applyPickSideEffects(io, code, roomState, userId, { player, slotCode, draftComplete }, auto) {
+  rm.persistPick(roomState.roomId, userId, player, player.sourceTeam, slotCode);
+  if (draftComplete) rm.markMemberDraftComplete(roomState.roomId, userId);
+
+  const member = roomState.members.get(userId);
+  io.to(channelName(code)).emit('draft:picked', { userId, player, slotCode, auto: !!auto, ...myDraftView(member) });
+  io.to(channelName(code)).emit('draft:poolUpdate', { playerId: player.id, poolRemaining: roomState.pool.size });
+
+  const freshRoomRow = rm.getRoomRow(roomState.roomId);
+  const started = maybeStartTournament(io, freshRoomRow, roomState);
+  if (!started) io.to(channelName(code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
+}
+
+function scheduleAutoPick(io, code, roomState, userId) {
+  const member = roomState.members.get(userId);
+  if (!member) return;
+  clearPickTimer(member);
+  // small grace buffer over the client-visible deadline to absorb network/render latency
+  member.pickTimer = setTimeout(() => {
+    member.pickTimer = null;
+    const result = draftEngine.autoPickForMember(roomState, userId);
+    if (result) applyPickSideEffects(io, code, roomState, userId, result, true);
+  }, draftEngine.PICK_TIME_MS + 250);
 }
 
 function registerSocketHandlers(io) {
@@ -41,12 +84,7 @@ function registerSocketHandlers(io) {
         socket.emit('room:state', {
           stage: 'drafting',
           ...lobbySnapshot(roomRow),
-          myDraft: member && {
-            squad: member.squad,
-            filled: member.filled,
-            remaining: draftEngine.slotsRemaining(member),
-            draftComplete: member.draftComplete
-          },
+          myDraft: member && myDraftView(member),
           poolRemaining: state.pool.size
         });
       } else {
@@ -73,34 +111,21 @@ function registerSocketHandlers(io) {
       try {
         const payload = draftEngine.revealForMember(state, socket.user.id);
         socket.emit('draft:reveal', payload);
+        if (!payload.done && !payload.exhausted) scheduleAutoPick(io, roomRow.code, state, socket.user.id);
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
     });
 
-    socket.on('draft:pick', ({ code, playerId }) => {
+    socket.on('draft:pick', ({ code, playerId, slotCode }) => {
       const roomRow = rm.getRoomByCode(code);
       if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
       const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
       try {
-        const { player, draftComplete } = draftEngine.pickPlayer(state, socket.user.id, playerId);
-        rm.persistPick(roomRow.id, socket.user.id, player, player.sourceTeam);
-        if (draftComplete) rm.markMemberDraftComplete(roomRow.id, socket.user.id);
-
-        const member = state.members.get(socket.user.id);
-        socket.emit('draft:picked', {
-          player,
-          squad: member.squad,
-          filled: member.filled,
-          remaining: draftEngine.slotsRemaining(member),
-          draftComplete
-        });
-        io.to(channelName(roomRow.code)).emit('draft:poolUpdate', { playerId: player.id, poolRemaining: state.pool.size });
-
-        const started = maybeStartTournament(io, rm.getRoomRow(roomRow.id), state);
-        if (!started) {
-          io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(rm.getRoomRow(roomRow.id)));
-        }
+        if (member) clearPickTimer(member);
+        const result = draftEngine.pickPlayer(state, socket.user.id, playerId, slotCode);
+        applyPickSideEffects(io, roomRow.code, state, socket.user.id, result, false);
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
@@ -137,7 +162,8 @@ function registerSocketHandlers(io) {
     });
 
     socket.on('disconnect', () => {
-      // no server-side game-state changes on disconnect; state persists and can be resumed.
+      // no server-side game-state changes on disconnect; state (and any running pick
+      // timer) persists in memory and the draft can be resumed on reconnect.
     });
   });
 }

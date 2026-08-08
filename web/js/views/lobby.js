@@ -29,7 +29,8 @@ const LobbyView = {
       </div>
       <div class="card">
         <h3>Your Formation</h3>
-        <select id="myFormation">${FORMATIONS.map((f) => `<option value="${f}">${f}</option>`).join('')}</select>
+        <p class="muted">Changing your formation resets which exact slots (e.g. LB vs RB) are open — pick it before the draft starts.</p>
+        <div id="myFormation"></div>
       </div>
       ${isCreator ? '<button id="btnStart" class="btn btn-primary btn-block">🚀 Start Draft</button>' : '<p class="muted center">Waiting for the room creator to start the game...</p>'}
       <div class="error-text hidden" id="lobbyError"></div>
@@ -49,12 +50,13 @@ const LobbyView = {
     }
     renderMembers(room);
 
-    const myFormationSelect = container.querySelector('#myFormation');
     const me = room.members.find((m) => m.userId === App.state.user.id);
-    if (me) myFormationSelect.value = me.formation;
-    myFormationSelect.addEventListener('change', async () => {
-      try { await Api.setFormation(code, myFormationSelect.value); }
-      catch (e) { App.toast(e.message, true); }
+    FormationPicker.render(container.querySelector('#myFormation'), {
+      selected: me ? me.formation : '4-3-3',
+      onChange: async (formation) => {
+        try { await Api.setFormation(code, formation); }
+        catch (e) { App.toast(e.message, true); }
+      }
     });
 
     const socket = App.ensureSocket();

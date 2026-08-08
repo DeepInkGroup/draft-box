@@ -2,7 +2,7 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const { getPublicState } = require('../game/tournamentEngine');
-const { slotsRemaining } = require('../game/draftEngine');
+const { openSlots } = require('../game/draftEngine');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -19,14 +19,21 @@ function serializeRoom(roomRow) {
 }
 
 router.post('/', (req, res) => {
-  const { name, humanSlotsMax } = req.body || {};
-  const room = rm.createRoom({ name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false });
+  const { name, humanSlotsMax, showOverall } = req.body || {};
+  const room = rm.createRoom({ name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false, showOverall: showOverall !== false });
   rm.joinRoom(room, req.user, req.body?.formation);
   res.status(201).json(serializeRoom(room));
 });
 
 router.post('/singleplayer', (req, res) => {
-  const room = rm.createRoom({ name: `تک‌نفره ${req.user.username}`, creatorId: req.user.id, humanSlotsMax: 1, singlePlayer: true });
+  const { showOverall } = req.body || {};
+  const room = rm.createRoom({
+    name: `${req.user.username}'s Solo Run`,
+    creatorId: req.user.id,
+    humanSlotsMax: 1,
+    singlePlayer: true,
+    showOverall: showOverall !== false
+  });
   rm.joinRoom(room, req.user, req.body?.formation);
   rm.setRoomStatus(room.id, 'drafting');
   const updated = rm.getRoomRow(room.id);
@@ -85,7 +92,7 @@ router.get('/:code/state', (req, res) => {
     const state = rm.loadRoomState(room);
     const member = state.members.get(req.user.id);
     base.myDraft = member
-      ? { squad: member.squad, filled: member.filled, remaining: slotsRemaining(member), draftComplete: member.draftComplete }
+      ? { squad: member.squad, slots: member.slots, openSlots: openSlots(member), draftComplete: member.draftComplete }
       : null;
     base.poolRemaining = state.pool.size;
   } else if (room.status === 'group_stage' || room.status === 'knockout' || room.status === 'finished') {

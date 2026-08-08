@@ -1,6 +1,6 @@
 const db = require('../db');
 const { allPlayerIds } = require('../data/teams');
-const { isValidFormation } = require('./formations');
+const { isValidFormation, getSlots } = require('./formations');
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to avoid confusion
 
@@ -22,15 +22,15 @@ function uniqueCode() {
 // active in-memory runtime state, keyed by room id. Rebuilt from DB on first access after a restart.
 const activeRooms = new Map();
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, 'lobby')`
     )
-    .run(code, name || `اتاق ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0);
+    .run(code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0);
   return getRoomRow(Number(info.lastInsertRowid));
 }
 
@@ -74,21 +74,26 @@ function loadRoomState(roomRow) {
   const members = new Map();
   for (const row of getMembers(roomRow.id)) {
     const drafted = db.prepare('SELECT * FROM drafted_players WHERE room_id = ? AND user_id = ?').all(roomRow.id, row.user_id);
-    const filled = { GK: 0, DF: 0, MF: 0, FW: 0 };
-    const squad = drafted.map((d) => {
-      filled[d.pos] = (filled[d.pos] || 0) + 1;
-      return { id: d.player_id, name: d.player_name, pos: d.pos, overall: d.overall, team: d.source_team };
-    });
+    const slots = {};
+    for (const s of getSlots(row.formation)) slots[s.code] = null;
+    const squad = [];
+    for (const d of drafted) {
+      const entry = { id: d.player_id, name: d.player_name, pos: d.pos, overall: d.overall, team: d.source_team, slotCode: d.slot_code };
+      if (d.slot_code) slots[d.slot_code] = entry;
+      squad.push(entry);
+    }
     members.set(row.user_id, {
       userId: row.user_id,
       username: row.username,
       formation: row.formation,
-      filled,
+      slots,
       squad,
       draftComplete: !!row.draft_complete,
       eliminated: !!row.eliminated,
       currentReveal: null,
-      lastRevealedTeam: null
+      lastRevealedTeam: null,
+      pickDeadline: null,
+      pickTimer: null
     });
   }
 
@@ -102,6 +107,7 @@ function loadRoomState(roomRow) {
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
     singlePlayer: !!roomRow.single_player,
+    showOverall: !!roomRow.show_overall,
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -110,11 +116,11 @@ function loadRoomState(roomRow) {
   return state;
 }
 
-function persistPick(roomId, userId, player, sourceTeam) {
+function persistPick(roomId, userId, player, sourceTeam, slotCode) {
   db.prepare(
-    `INSERT INTO drafted_players (room_id, user_id, player_id, player_name, source_team, pos, overall)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(roomId, userId, player.id, player.name, sourceTeam, player.pos, player.overall);
+    `INSERT INTO drafted_players (room_id, user_id, player_id, player_name, source_team, pos, overall, slot_code)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(roomId, userId, player.id, player.name, sourceTeam, player.pos, player.overall, slotCode);
 }
 
 function markMemberDraftComplete(roomId, userId) {
@@ -144,6 +150,7 @@ function lobbySnapshot(roomRow) {
     code: roomRow.code,
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
+    showOverall: !!roomRow.show_overall,
     members: getMembers(roomRow.id).map((m) => ({
       userId: m.user_id,
       username: m.username,
