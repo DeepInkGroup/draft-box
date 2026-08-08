@@ -1,4 +1,4 @@
-const { computeTeamRatings } = require('./ratings');
+const { computeTeamRatings, computeChemistry } = require('./ratings');
 const { getProfile } = require('./formations');
 
 // Simulates a match from each side's Attack/Defense ratings (player quality, weighted by
@@ -40,6 +40,12 @@ function expectedGoals(ratingFor, ratingAgainst, edge) {
 function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
+  const chemA = computeChemistry(teamA.xi, teamA.formation);
+  const chemB = computeChemistry(teamB.xi, teamB.formation);
+  ratingsA.attack *= chemA.multiplier;
+  ratingsA.defense *= chemA.multiplier;
+  ratingsB.attack *= chemB.multiplier;
+  ratingsB.defense *= chemB.multiplier;
   const edgeA = formationEdge(teamA.formation, teamB.formation);
   const edgeB = formationEdge(teamB.formation, teamA.formation);
 

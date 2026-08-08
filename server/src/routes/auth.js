@@ -52,4 +52,23 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: row });
 });
 
+router.post('/change-password', requireAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body || {};
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'currentPassword and newPassword are required' });
+  }
+  if (String(newPassword).length < 6) {
+    return res.status(400).json({ error: 'new password must be at least 6 characters' });
+  }
+
+  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  if (!row || !bcrypt.compareSync(currentPassword, row.password_hash)) {
+    return res.status(401).json({ error: 'current password is incorrect' });
+  }
+
+  const hash = bcrypt.hashSync(newPassword, 10);
+  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, req.user.id);
+  res.json({ ok: true });
+});
+
 module.exports = router;

@@ -2,7 +2,7 @@ const { ALL_TEAMS, getTeam } = require('../data/teams');
 const { getSlots, POSITION_GROUPS } = require('./formations');
 
 const MAX_REROLL_ATTEMPTS = 300;
-const PICK_TIME_MS = 20000;
+const DEFAULT_PICK_TIME_MS = 20000;
 
 function openSlots(member) {
   return getSlots(member.formation).filter((s) => !member.slots[s.code]);
@@ -33,12 +33,13 @@ function revealForMember(roomState, userId) {
   const candidates = ALL_TEAMS.filter((t) => t.code !== member.lastRevealedTeam);
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
+  const pickTimeMs = roomState.pickTimeMs || DEFAULT_PICK_TIME_MS;
 
   const reveal = (team) => {
     member.lastRevealedTeam = team.code;
     member.currentReveal = team.code;
-    member.pickDeadline = Date.now() + PICK_TIME_MS;
-    return buildRevealPayload(team, pool, wantedPositions, hideOverall, member);
+    member.pickDeadline = Date.now() + pickTimeMs;
+    return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs);
   };
 
   for (let i = 0; i < MAX_REROLL_ATTEMPTS; i++) {
@@ -56,7 +57,7 @@ function revealForMember(roomState, userId) {
   return { done: false, exhausted: true };
 }
 
-function buildRevealPayload(team, pool, wantedPositions, hideOverall, member) {
+function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs) {
   let players = team.players.map((p) => ({
     id: p.id,
     name: p.name,
@@ -75,7 +76,7 @@ function buildRevealPayload(team, pool, wantedPositions, hideOverall, member) {
     players,
     openSlots: openSlots(member),
     deadline: member.pickDeadline,
-    pickTimeMs: PICK_TIME_MS
+    pickTimeMs
   };
 }
 
@@ -136,5 +137,5 @@ module.exports = {
   openSlots,
   openSlotsForGroup,
   isDraftComplete,
-  PICK_TIME_MS
+  DEFAULT_PICK_TIME_MS
 };

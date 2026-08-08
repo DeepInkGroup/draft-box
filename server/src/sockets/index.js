@@ -13,8 +13,15 @@ function myDraftView(member) {
     squad: member.squad,
     slots: member.slots,
     openSlots: draftEngine.openSlots(member),
-    draftComplete: member.draftComplete
+    draftComplete: member.draftComplete,
+    captainSlot: member.captainSlot
   };
+}
+
+// A member is fully ready to enter the tournament once their draft is complete AND,
+// if the room has captains enabled, they've chosen one.
+function memberReady(member, captainEnabled) {
+  return member.draftComplete && (!captainEnabled || !!member.captainSlot);
 }
 
 function clearPickTimer(member) {
@@ -25,7 +32,8 @@ function clearPickTimer(member) {
 }
 
 function maybeStartTournament(io, roomRow, roomState) {
-  if (!rm.allMembersDraftComplete(roomState)) return false;
+  const allReady = Array.from(roomState.members.values()).every((m) => memberReady(m, roomState.captainEnabled));
+  if (!allReady) return false;
   tournamentEngine.startTournament(roomState);
   rm.setRoomStatus(roomRow.id, 'group_stage');
   rm.persistTournamentSnapshot(roomState);
@@ -59,7 +67,7 @@ function scheduleAutoPick(io, code, roomState, userId) {
     member.pickTimer = null;
     const result = draftEngine.autoPickForMember(roomState, userId);
     if (result) applyPickSideEffects(io, code, roomState, userId, result, true);
-  }, draftEngine.PICK_TIME_MS + 250);
+  }, (roomState.pickTimeMs || draftEngine.DEFAULT_PICK_TIME_MS) + 250);
 }
 
 function registerSocketHandlers(io) {
@@ -140,6 +148,25 @@ function registerSocketHandlers(io) {
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
+    });
+
+    socket.on('draft:setCaptain', ({ code, slotCode }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      if (!roomRow.captain_enabled) return socket.emit('error:message', { error: 'captains are not enabled for this room' });
+      const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      if (!member) return socket.emit('error:message', { error: 'not a member of this room' });
+      if (!member.draftComplete) return socket.emit('error:message', { error: 'finish drafting your squad before choosing a captain' });
+      if (!member.slots[slotCode]) return socket.emit('error:message', { error: 'that slot is not part of your squad' });
+
+      member.captainSlot = slotCode;
+      rm.persistCaptain(roomRow.id, socket.user.id, slotCode);
+      socket.emit('draft:captainSet', { slotCode });
+
+      const freshRoomRow = rm.getRoomRow(roomRow.id);
+      const started = maybeStartTournament(io, freshRoomRow, state);
+      if (!started) io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
     });
 
     // Each member pulls the shared tournament forward at their own pace: if the room's

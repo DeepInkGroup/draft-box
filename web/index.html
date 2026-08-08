@@ -16,9 +16,12 @@
       <span>Draft Box</span>
     </div>
     <nav class="topbar-actions">
-      <span id="whoami" class="whoami hidden"></span>
-      <button id="btnSettings" class="btn btn-ghost btn-sm" title="Server address settings">⚙️</button>
-      <button id="btnLogout" class="btn btn-ghost btn-sm hidden">Log out</button>
+      <button id="btnProfile" class="btn btn-ghost btn-sm icon-btn hidden" title="Profile">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+      <button id="btnSettings" class="btn btn-ghost btn-sm icon-btn" title="Server address settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+      </button>
     </nav>
   </header>
 
@@ -46,6 +49,36 @@
         <button value="save" id="btnSaveSettings" class="btn btn-primary">Save</button>
       </div>
     </form>
+  </dialog>
+
+  <dialog id="profileDialog" class="dialog">
+    <div class="dialog-form">
+      <h3>Profile</h3>
+      <div class="field">
+        <label>Username</label>
+        <input id="profileUsername" type="text" disabled />
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input id="profileEmail" type="text" disabled />
+      </div>
+      <hr style="border-color: var(--border); margin: 16px 0;" />
+      <h3>Change Password</h3>
+      <div class="field">
+        <label>Current Password</label>
+        <input id="profileCurrentPassword" type="password" />
+      </div>
+      <div class="field">
+        <label>New Password</label>
+        <input id="profileNewPassword" type="password" placeholder="at least 6 characters" />
+      </div>
+      <button id="btnChangePassword" class="btn btn-primary btn-block">Update Password</button>
+      <div class="error-text hidden" id="profileError"></div>
+      <div class="dialog-actions" style="justify-content: space-between; margin-top: 18px;">
+        <button id="btnLogout" class="btn btn-ghost" style="color: var(--danger);">Log out</button>
+        <button id="btnCloseProfile" class="btn btn-ghost">Close</button>
+      </div>
+    </div>
   </dialog>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>

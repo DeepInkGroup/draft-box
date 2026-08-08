@@ -1,4 +1,4 @@
-const { getSlots } = require('./formations');
+const { getSlots, getAdjacentPairs } = require('./formations');
 
 // Every slot gets a continuous attack/defense weight from its pitch depth (y):
 // y=0 (the opponent's goal line) is pure attack, y=100 (own goal/GK) is pure defense.
@@ -6,8 +6,13 @@ function slotWeights(y) {
   return { attack: 1 - y / 100, defense: y / 100 };
 }
 
+const CAPTAIN_BONUS = 6;
+
 // Weighted-average team ratings from an 11-player XI (each needs .overall and .slotCode)
-// plus a small composure bonus for real star players (capped at 3 stars).
+// plus a small composure bonus for real star players (capped at 3 stars). A designated
+// captain (member.captainSlot, room-optional) has their own overall boosted before
+// weighting, so the bonus counts for more or less depending on how advanced/deep their
+// slot is — same weighting logic as everyone else.
 function computeTeamRatings(xi, formation) {
   const slotByCode = new Map(getSlots(formation).map((s) => [s.code, s]));
 
@@ -22,11 +27,12 @@ function computeTeamRatings(xi, formation) {
     const slot = slotByCode.get(p.slotCode);
     const y = slot ? slot.y : 50;
     const w = slotWeights(y);
-    atkNum += p.overall * w.attack;
+    const overall = p.isCaptain ? Math.min(99, p.overall + CAPTAIN_BONUS) : p.overall;
+    atkNum += overall * w.attack;
     atkDen += w.attack;
-    defNum += p.overall * w.defense;
+    defNum += overall * w.defense;
     defDen += w.defense;
-    overallSum += p.overall;
+    overallSum += overall;
     if (p.isStar) stars += 1;
   }
 
@@ -41,4 +47,48 @@ function computeTeamRatings(xi, formation) {
   };
 }
 
-module.exports = { computeTeamRatings, slotWeights };
+function clamp01(n) {
+  return Math.max(0, Math.min(1, n));
+}
+
+// Chemistry: how well an 11-player XI plays as a unit, independent of raw quality.
+// Three parameters, each 0-1:
+//   Linkage  (L) = share of "adjacent" pitch partnerships (see getAdjacentPairs) where
+//                  both players were drafted from the same real source team — teammates
+//                  who already know each other's game.
+//   Balance  (B) = 1 - stdDev(overalls)/20, clamped — a tightly-matched XI (small gap
+//                  between best and worst player) is more cohesive than one star carrying
+//                  ten passengers.
+//   Leadership (S) = min(1, starPlayers / 3) — real, recognizable players anchor a squad.
+// Chemistry = average of the three, mapped to a 0.94-1.06 multiplier applied to both
+// Attack and Defense — a real but modest swing, same spirit as the formation edge.
+// Note: bot squads are entirely one real national team, so Linkage is always 1 for them —
+// a deliberate trade-off against human "all-star" squads assembled from many countries.
+function computeChemistry(xi, formation) {
+  const pairs = getAdjacentPairs(formation);
+  const bySlot = new Map(xi.map((p) => [p.slotCode, p]));
+
+  let linked = 0;
+  for (const [a, b] of pairs) {
+    const pa = bySlot.get(a);
+    const pb = bySlot.get(b);
+    if (pa && pb && pa.team && pa.team === pb.team) linked += 1;
+  }
+  const linkage = pairs.length ? linked / pairs.length : 0;
+
+  const overalls = xi.map((p) => p.overall);
+  const mean = overalls.reduce((s, o) => s + o, 0) / (overalls.length || 1);
+  const variance = overalls.reduce((s, o) => s + (o - mean) ** 2, 0) / (overalls.length || 1);
+  const stdDev = Math.sqrt(variance);
+  const balance = clamp01(1 - stdDev / 20);
+
+  const stars = xi.filter((p) => p.isStar).length;
+  const leadership = Math.min(1, stars / 3);
+
+  const chemistry = (linkage + balance + leadership) / 3;
+  const multiplier = 0.94 + chemistry * 0.12;
+
+  return { linkage, balance, leadership, chemistry, multiplier };
+}
+
+module.exports = { computeTeamRatings, computeChemistry, slotWeights, CAPTAIN_BONUS };

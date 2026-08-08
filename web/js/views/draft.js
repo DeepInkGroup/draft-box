@@ -9,6 +9,7 @@ const DraftView = {
     let timerInterval = null;
     let lastOpenSlots = [];
     let pickTimeMs = 20000;
+    let captainEnabled = false;
 
     container.innerHTML = `
       <div class="card" id="timerCard" style="display:none;">
@@ -121,6 +122,37 @@ const DraftView = {
       });
     }
 
+    function handleDraftComplete(slotsMap, captainSlot) {
+      stopTimer();
+      if (captainEnabled && !captainSlot) {
+        renderCaptainPicker(slotsMap, captainSlot);
+      } else {
+        revealCard.innerHTML = '';
+        waitingMsg.style.display = 'block';
+      }
+    }
+
+    function renderCaptainPicker(slotsMap, currentCaptainSlot) {
+      revealCard.innerHTML = `
+        <div class="reveal-team">Choose Your Captain</div>
+        <div class="reveal-sub">Your captain gets a rating boost for the whole tournament. Tap a player to pick them.</div>
+        <div id="captainPitch"></div>
+      `;
+      const pitchEl = revealCard.querySelector('#captainPitch');
+      Pitch.render(pitchEl, getSlots(myFormation), (slot) => {
+        const occupant = slotsMap[slot.code];
+        if (!occupant) return { text: slot.short, title: slot.label };
+        const isCaptain = slot.code === currentCaptainSlot;
+        return {
+          className: isCaptain ? 'filled' : 'clickable',
+          text: isCaptain ? 'C' : slot.short,
+          title: `${occupant.name}${isCaptain ? ' — Captain' : ''}`,
+          nameLabel: occupant.name.split(' ').slice(-1)[0],
+          onClick: () => socket.emit('draft:setCaptain', { code, slotCode: slot.code })
+        };
+      });
+    }
+
     function showSlotChoice(playerId, playerName, candidateSlots) {
       revealCard.innerHTML = `
         <div class="reveal-team">${playerName}</div>
@@ -143,11 +175,12 @@ const DraftView = {
     App.onSocket('room:state', (s) => {
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
+      captainEnabled = !!s.captainEnabled;
       if (s.myDraft) {
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
         if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
-        else { stopTimer(); revealCard.innerHTML = ''; waitingMsg.style.display = 'block'; }
+        else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot);
       }
     });
 
@@ -160,10 +193,13 @@ const DraftView = {
       if (!payload.draftComplete) {
         socket.emit('draft:reveal', { code });
       } else {
-        stopTimer();
-        revealCard.innerHTML = '';
-        waitingMsg.style.display = 'block';
+        handleDraftComplete(payload.slots, payload.captainSlot);
       }
+    });
+
+    App.onSocket('draft:captainSet', () => {
+      revealCard.innerHTML = '';
+      waitingMsg.style.display = 'block';
     });
 
     App.onSocket('draft:poolUpdate', (u) => {

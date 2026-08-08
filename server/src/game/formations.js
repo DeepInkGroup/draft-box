@@ -331,6 +331,32 @@ function getProfile(formation) {
   return profile;
 }
 
+// Outfield slot pairs close enough on the pitch to represent players who interact
+// constantly (a center back and the full back next to him, a central midfield trio,
+// etc.) — used by the chemistry system to reward squads where those local partnerships
+// share a real source team. Purely geometric: any two non-GK slots within ADJACENCY_DIST
+// of each other (straight-line distance in the same 0-100 x/y space used to draw the pitch).
+const ADJACENCY_DIST = 28;
+const adjacencyCache = new Map();
+
+function getAdjacentPairs(formation) {
+  if (adjacencyCache.has(formation)) return adjacencyCache.get(formation);
+
+  const slots = getSlots(formation).filter((s) => s.group !== 'GK');
+  const pairs = [];
+  for (let i = 0; i < slots.length; i++) {
+    for (let j = i + 1; j < slots.length; j++) {
+      const dx = slots[i].x - slots[j].x;
+      const dy = slots[i].y - slots[j].y;
+      if (Math.sqrt(dx * dx + dy * dy) <= ADJACENCY_DIST) {
+        pairs.push([slots[i].code, slots[j].code]);
+      }
+    }
+  }
+  adjacencyCache.set(formation, pairs);
+  return pairs;
+}
+
 module.exports = {
   FORMATIONS,
   POSITION_GROUPS,
@@ -340,5 +366,6 @@ module.exports = {
   slotsFor,
   isValidSlotCode,
   slotGroup,
-  getProfile
+  getProfile,
+  getAdjacentPairs
 };

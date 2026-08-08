@@ -1,8 +1,7 @@
 const App = (() => {
   const state = { user: null, socket: null, roomCode: null };
   const appEl = document.getElementById('app');
-  const whoamiEl = document.getElementById('whoami');
-  const logoutBtn = document.getElementById('btnLogout');
+  const profileBtn = document.getElementById('btnProfile');
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
 
@@ -15,14 +14,7 @@ const App = (() => {
   }
 
   function setHeader() {
-    if (state.user) {
-      whoamiEl.textContent = `👤 ${state.user.username}`;
-      whoamiEl.classList.remove('hidden');
-      logoutBtn.classList.remove('hidden');
-    } else {
-      whoamiEl.classList.add('hidden');
-      logoutBtn.classList.add('hidden');
-    }
+    profileBtn.classList.toggle('hidden', !state.user);
   }
 
   function ensureSocket() {
@@ -87,8 +79,6 @@ const App = (() => {
   }
 
   async function init() {
-    logoutBtn.addEventListener('click', logout);
-
     const settingsDialog = document.getElementById('settingsDialog');
     document.getElementById('btnSettings').addEventListener('click', () => {
       document.getElementById('apiBaseInput').value = getApiBase();
@@ -101,6 +91,42 @@ const App = (() => {
       settingsDialog.close();
       toast('Server address saved');
       disconnectSocket();
+    });
+
+    const profileDialog = document.getElementById('profileDialog');
+    const profileError = document.getElementById('profileError');
+    profileBtn.addEventListener('click', async () => {
+      profileError.classList.add('hidden');
+      document.getElementById('profileCurrentPassword').value = '';
+      document.getElementById('profileNewPassword').value = '';
+      document.getElementById('profileUsername').value = state.user ? state.user.username : '';
+      document.getElementById('profileEmail').value = '...';
+      profileDialog.showModal();
+      try {
+        const { user } = await Api.me();
+        document.getElementById('profileEmail').value = user.email;
+      } catch { /* ignore — dialog still usable for password change / logout */ }
+    });
+    document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());
+    document.getElementById('btnLogout').addEventListener('click', () => { profileDialog.close(); logout(); });
+    document.getElementById('btnChangePassword').addEventListener('click', async () => {
+      profileError.classList.add('hidden');
+      const currentPassword = document.getElementById('profileCurrentPassword').value;
+      const newPassword = document.getElementById('profileNewPassword').value;
+      if (!currentPassword || !newPassword) {
+        profileError.textContent = 'Fill in both password fields';
+        profileError.classList.remove('hidden');
+        return;
+      }
+      try {
+        await Api.changePassword(currentPassword, newPassword);
+        document.getElementById('profileCurrentPassword').value = '';
+        document.getElementById('profileNewPassword').value = '';
+        toast('Password updated');
+      } catch (e) {
+        profileError.textContent = e.message;
+        profileError.classList.remove('hidden');
+      }
     });
 
     const token = localStorage.getItem('draftbox.token');

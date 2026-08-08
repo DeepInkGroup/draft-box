@@ -22,15 +22,25 @@ function uniqueCode() {
 // active in-memory runtime state, keyed by room id. Rebuilt from DB on first access after a restart.
 const activeRooms = new Map();
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true }) {
+const ALLOWED_PICK_TIMES_MS = [10000, 20000, 30000, 60000];
+
+function normalizePickTime(ms) {
+  const n = Number(ms);
+  return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
+}
+
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, 'lobby')`
     )
-    .run(code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0);
+    .run(
+      code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
+      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0
+    );
   return getRoomRow(Number(info.lastInsertRowid));
 }
 
@@ -92,6 +102,7 @@ function loadRoomState(roomRow) {
       draftComplete: !!row.draft_complete,
       eliminated: !!row.eliminated,
       viewedStep: row.viewed_step || 0,
+      captainSlot: row.captain_slot || null,
       currentReveal: null,
       lastRevealedTeam: null,
       pickDeadline: null,
@@ -110,6 +121,8 @@ function loadRoomState(roomRow) {
     humanSlotsMax: roomRow.human_slots_max,
     singlePlayer: !!roomRow.single_player,
     showOverall: !!roomRow.show_overall,
+    pickTimeMs: roomRow.pick_time_ms,
+    captainEnabled: !!roomRow.captain_enabled,
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -137,6 +150,10 @@ function persistViewedStep(roomId, userId, step) {
   db.prepare('UPDATE room_members SET viewed_step = ? WHERE room_id = ? AND user_id = ?').run(step, roomId, userId);
 }
 
+function persistCaptain(roomId, userId, slotCode) {
+  db.prepare('UPDATE room_members SET captain_slot = ? WHERE room_id = ? AND user_id = ?').run(slotCode, roomId, userId);
+}
+
 function setRoomStatus(roomId, status) {
   db.prepare('UPDATE rooms SET status = ? WHERE id = ?').run(status, roomId);
 }
@@ -157,12 +174,15 @@ function lobbySnapshot(roomRow) {
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
     showOverall: !!roomRow.show_overall,
+    pickTimeMs: roomRow.pick_time_ms,
+    captainEnabled: !!roomRow.captain_enabled,
     members: getMembers(roomRow.id).map((m) => ({
       userId: m.user_id,
       username: m.username,
       formation: m.formation,
       draftComplete: !!m.draft_complete,
-      eliminated: !!m.eliminated
+      eliminated: !!m.eliminated,
+      captainSlot: m.captain_slot || null
     }))
   };
 }
@@ -179,8 +199,10 @@ module.exports = {
   markMemberDraftComplete,
   markMemberEliminated,
   persistViewedStep,
+  persistCaptain,
   setRoomStatus,
   persistTournamentSnapshot,
   allMembersDraftComplete,
-  lobbySnapshot
+  lobbySnapshot,
+  ALLOWED_PICK_TIMES_MS
 };

@@ -42,13 +42,14 @@ function startTournament(roomState) {
   const slots = [];
   humanCodes.forEach((code, i) => {
     const member = members[i];
+    const xi = member.squad.map((p) => ({ ...p, isCaptain: !!member.captainSlot && p.slotCode === member.captainSlot }));
     slots.push({
       code,
       name: getTeam(code).name,
       isHuman: true,
       userId: member.userId,
       username: member.username,
-      xi: member.squad,
+      xi,
       formation: member.formation,
       strength: avg(member.squad.map((p) => p.overall)),
       eliminated: false

@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS rooms (
   human_slots_max INTEGER NOT NULL DEFAULT 32,
   single_player INTEGER NOT NULL DEFAULT 0,
   show_overall INTEGER NOT NULL DEFAULT 1,
+  pick_time_ms INTEGER NOT NULL DEFAULT 20000,
+  captain_enabled INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -46,6 +48,7 @@ CREATE TABLE IF NOT EXISTS room_members (
   country_code TEXT,
   eliminated INTEGER NOT NULL DEFAULT 0,
   viewed_step INTEGER NOT NULL DEFAULT 0,
+  captain_slot TEXT,
   joined_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(room_id, user_id),
   FOREIGN KEY (room_id) REFERENCES rooms(id),
@@ -83,6 +86,15 @@ if (!columnExists('drafted_players', 'slot_code')) {
 }
 if (!columnExists('room_members', 'viewed_step')) {
   db.exec(`ALTER TABLE room_members ADD COLUMN viewed_step INTEGER NOT NULL DEFAULT 0;`);
+}
+if (!columnExists('rooms', 'pick_time_ms')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN pick_time_ms INTEGER NOT NULL DEFAULT 20000;`);
+}
+if (!columnExists('rooms', 'captain_enabled')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN captain_enabled INTEGER NOT NULL DEFAULT 0;`);
+}
+if (!columnExists('room_members', 'captain_slot')) {
+  db.exec(`ALTER TABLE room_members ADD COLUMN captain_slot TEXT;`);
 }
 
 module.exports = db;

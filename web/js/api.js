@@ -22,9 +22,13 @@ const Api = (() => {
     register: (username, email, password) => request('/api/auth/register', { method: 'POST', body: { username, email, password } }),
     login: (username, password) => request('/api/auth/login', { method: 'POST', body: { username, password } }),
     me: () => request('/api/auth/me'),
+    changePassword: (currentPassword, newPassword) =>
+      request('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
 
-    createRoom: (name, humanSlotsMax, formation, showOverall) => request('/api/rooms', { method: 'POST', body: { name, humanSlotsMax, formation, showOverall } }),
-    createSingleplayer: (formation, showOverall) => request('/api/rooms/singleplayer', { method: 'POST', body: { formation, showOverall } }),
+    createRoom: (name, humanSlotsMax, formation, showOverall, pickTimeMs, captainEnabled) =>
+      request('/api/rooms', { method: 'POST', body: { name, humanSlotsMax, formation, showOverall, pickTimeMs, captainEnabled } }),
+    createSingleplayer: (formation, showOverall, pickTimeMs, captainEnabled) =>
+      request('/api/rooms/singleplayer', { method: 'POST', body: { formation, showOverall, pickTimeMs, captainEnabled } }),
     joinRoom: (code, formation) => request(`/api/rooms/${code}/join`, { method: 'POST', body: { formation } }),
     setFormation: (code, formation) => request(`/api/rooms/${code}/formation`, { method: 'POST', body: { formation } }),
     startDraft: (code) => request(`/api/rooms/${code}/start`, { method: 'POST' }),
