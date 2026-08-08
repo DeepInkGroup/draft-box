@@ -110,10 +110,12 @@ function registerSocketHandlers(io) {
         const state = rm.loadRoomState(roomRow);
         const member = state.members.get(socket.user.id);
         const viewedStep = member ? member.viewedStep : 0;
+        const mySlot = Object.values(state.tournament.slotByCode).find((s) => s.isHuman && s.userId === socket.user.id);
         socket.emit('room:state', {
           stage: 'tournament',
           ...lobbySnapshot(roomRow),
-          myStep: viewedStep > 0 ? tournamentEngine.decorateStep(state, viewedStep - 1) : null,
+          myStep: viewedStep > 0 ? tournamentEngine.decorateStep(state, viewedStep - 1, socket.user.id) : null,
+          myLineup: mySlot ? { formation: mySlot.formation, xi: mySlot.xi, countryName: mySlot.name } : null,
           viewedStep,
           historyLength: tournamentEngine.historyLength(state),
           tournamentStage: state.tournament.stage
@@ -219,7 +221,7 @@ function registerSocketHandlers(io) {
         rm.persistViewedStep(roomRow.id, socket.user.id, member.viewedStep);
 
         socket.emit('tournament:step', {
-          step: tournamentEngine.decorateStep(state, member.viewedStep - 1),
+          step: tournamentEngine.decorateStep(state, member.viewedStep - 1, socket.user.id),
           viewedStep: member.viewedStep,
           historyLength: tournamentEngine.historyLength(state),
           stage: t.stage

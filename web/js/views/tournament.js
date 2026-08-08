@@ -10,10 +10,12 @@ const TournamentView = {
     let tournamentStage = 'group';
     let newResultsPing = false;
     let isCreator = false;
+    let lineupRevealShown = false;
 
     container.innerHTML = `
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
+      <div class="card" id="liveZone" style="display:none;"></div>
       <div class="card" id="stepCard"></div>
       <div class="card center" id="continueZone">
         <button class="btn btn-primary" id="btnContinue">▶ Continue</button>
@@ -22,6 +24,7 @@ const TournamentView = {
     `;
 
     const stagePill = container.querySelector('#stagePill');
+    const liveZone = container.querySelector('#liveZone');
     const stepCard = container.querySelector('#stepCard');
     const championZone = container.querySelector('#championZone');
     const continueZone = container.querySelector('#continueZone');
@@ -60,6 +63,134 @@ const TournamentView = {
       } else {
         btnContinue.textContent = '▶ Simulate Next Stage';
       }
+    }
+
+    // --- Live 90-minute report: plays out a step's events on a ticking clock before
+    // handing off to the normal, permanent results view (renderStep). Skippable.
+    function playLiveReport(step, onDone) {
+      const timeline = [];
+      step.matches.forEach((m, idx) => {
+        (m.events || []).forEach((e) => timeline.push({ ...e, matchIdx: idx }));
+      });
+      timeline.sort((a, b) => a.minute - b.minute);
+      const liveScores = step.matches.map(() => ({ a: 0, b: 0 }));
+
+      stepCard.style.display = 'none';
+      continueZone.style.display = 'none';
+      liveZone.style.display = 'block';
+      liveZone.innerHTML = `
+        <div class="center"><span class="live-clock" id="liveClock">0'</span></div>
+        <div class="live-feed" id="liveFeed"></div>
+        <div class="live-scoreboard" id="liveScoreboard"></div>
+        <button class="btn btn-block" id="btnSkipLive" style="margin-top:12px;">⏭ Skip to Full Results</button>
+      `;
+      const clockEl = liveZone.querySelector('#liveClock');
+      const feedEl = liveZone.querySelector('#liveFeed');
+      const boardEl = liveZone.querySelector('#liveScoreboard');
+
+      function renderBoard() {
+        boardEl.innerHTML = step.matches.map((m, idx) => `
+          <div class="live-score-row">
+            <span>${nameTag(m.aName, m.aHuman, m.aUsername)}</span>
+            <span class="live-score-val">${liveScores[idx].a} - ${liveScores[idx].b}</span>
+            <span>${nameTag(m.bName, m.bHuman, m.bUsername)}</span>
+          </div>
+        `).join('');
+      }
+      renderBoard();
+
+      let clock = 0;
+      let cursor = 0;
+      let finished = false;
+
+      function finish() {
+        if (finished) return;
+        finished = true;
+        clearInterval(timer);
+        liveZone.style.display = 'none';
+        stepCard.style.display = 'block';
+        continueZone.style.display = 'block';
+        onDone();
+      }
+
+      liveZone.querySelector('#btnSkipLive').addEventListener('click', finish);
+
+      const timer = setInterval(() => {
+        clock += 2;
+        clockEl.textContent = Math.min(clock, 90) + "'";
+        while (cursor < timeline.length && timeline[cursor].minute <= clock) {
+          const e = timeline[cursor];
+          const m = step.matches[e.matchIdx];
+          if (e.type === 'goal') {
+            if (e.side === 'A') liveScores[e.matchIdx].a += 1; else liveScores[e.matchIdx].b += 1;
+          }
+          const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
+          const line = document.createElement('div');
+          line.className = 'live-feed-line';
+          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player} <span class="muted">— ${m.aName} vs ${m.bName}</span>`;
+          feedEl.prepend(line);
+          cursor += 1;
+        }
+        renderBoard();
+        if (clock >= 90) finish();
+      }, 180);
+    }
+
+    // --- One-time reveal of the drafted XI, styled as a real lineup card, shown once
+    // right when the tournament begins (before Matchday 1).
+    function renderLineupReveal(lineup) {
+      stagePill.textContent = 'Your Squad';
+      championZone.innerHTML = '';
+      continueZone.style.display = 'none';
+
+      const slotDefs = getSlots(lineup.formation);
+      const bySlot = {};
+      for (const p of lineup.xi) bySlot[p.slotCode] = p;
+      const avgOverall = Math.round(lineup.xi.reduce((s, p) => s + p.overall, 0) / lineup.xi.length);
+
+      stepCard.innerHTML = `
+        <h3 class="center">You're representing ${lineup.countryName}!</h3>
+        <p class="muted center">${lineup.formation} &middot; OVR ${avgOverall}</p>
+        <div id="lineupPitch"></div>
+        <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">▶ Enter the World Cup</button>
+      `;
+      Pitch.render(stepCard.querySelector('#lineupPitch'), slotDefs, (slot) => {
+        const p = bySlot[slot.code];
+        if (!p) return { text: slot.short, title: slot.label };
+        return {
+          className: `${roleClass(slot.group)} ${p.isCaptain ? 'captain' : ''}`,
+          text: p.isCaptain ? 'C' : slot.short,
+          title: `${p.name} (${slot.label}) — OVR ${p.overall}`,
+          badge: p.overall,
+          nameLabel: p.name.split(' ').slice(-1)[0]
+        };
+      });
+      stepCard.querySelector('#btnEnterTournament').addEventListener('click', () => {
+        lineupRevealShown = true;
+        renderStep(null);
+      });
+    }
+
+    function myRecordCardHtml(record) {
+      if (!record) return '';
+      const half = Math.ceil(record.squad.length / 2);
+      const left = record.squad.slice(0, half);
+      const right = record.squad.slice(half);
+      const playerRow = (p) => `<div class="myteam-player"><span class="myteam-pos ${roleClass(p.pos)}">${p.pos}</span> ${p.name}${p.isCaptain ? ' <b>(C)</b>' : ''}</div>`;
+      const avgOvr = Math.round(record.squad.reduce((s, p) => s + p.overall, 0) / record.squad.length);
+      return `
+        <div class="myteam-card">
+          <div class="myteam-header">
+            <span>🌍 ${record.countryName}</span>
+            <span class="badge">${record.formation} &middot; OVR ${avgOvr}</span>
+          </div>
+          <div class="myteam-record">${record.w}-${record.d}-${record.l} W-D-L &middot; ${record.gf}-${record.ga} goals${record.topScorer ? ` &middot; ⭐ ${record.topScorer} (${record.topGoals})` : ''}</div>
+          <div class="myteam-players">
+            <div class="myteam-col">${left.map(playerRow).join('')}</div>
+            <div class="myteam-col">${right.map(playerRow).join('')}</div>
+          </div>
+        </div>
+      `;
     }
 
     function renderStep(step) {
@@ -132,7 +263,8 @@ const TournamentView = {
               <button class="btn btn-ghost" id="btnBackHome">🏠 Back to Dashboard</button>
               ${isCreator ? '<button class="btn btn-primary" id="btnNewRoom">🔁 Start New Room</button>' : ''}
             </div>
-          </div>`;
+          </div>
+          ${myRecordCardHtml(step.myRecord)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
@@ -149,14 +281,22 @@ const TournamentView = {
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
       isCreator = s.creatorId === App.state.user.id;
-      renderStep(s.myStep || null);
+      if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
+        renderLineupReveal(s.myLineup);
+      } else {
+        renderStep(s.myStep || null);
+      }
     });
 
     App.onSocket('tournament:step', (payload) => {
       viewedStep = payload.viewedStep;
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;
-      renderStep(payload.step);
+      if (payload.step && payload.step.matches && payload.step.matches.length) {
+        playLiveReport(payload.step, () => renderStep(payload.step));
+      } else {
+        renderStep(payload.step);
+      }
     });
 
     App.onSocket('tournament:newStepAvailable', (payload) => {
@@ -171,6 +311,7 @@ const TournamentView = {
       viewedStep = 0;
       historyLength = 0;
       tournamentStage = 'group';
+      if (!lineupRevealShown) return; // room:state (personalized, with myLineup) will handle the reveal
       renderStep(null);
     });
 

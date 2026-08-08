@@ -78,7 +78,12 @@ const DraftView = {
       Pitch.render(squadPitch, slotDefs, (slot) => {
         const occupant = slotsMap && slotsMap[slot.code];
         if (occupant) {
-          return { className: 'filled', text: slot.short, title: `${occupant.name} (${slot.label})`, nameLabel: occupant.name.split(' ').slice(-1)[0] };
+          return {
+            className: `filled ${roleClass(slot.group)}`,
+            text: slot.short,
+            title: `${occupant.name} (${slot.label})`,
+            nameLabel: occupant.name.split(' ').slice(-1)[0]
+          };
         }
         return { text: slot.short, title: slot.label };
       });
@@ -153,7 +158,7 @@ const DraftView = {
         if (!occupant) return { text: slot.short, title: slot.label };
         const isCaptain = slot.code === currentCaptainSlot;
         return {
-          className: isCaptain ? 'filled' : 'clickable',
+          className: `${roleClass(slot.group)} clickable ${isCaptain ? 'captain' : ''}`,
           text: isCaptain ? 'C' : slot.short,
           title: `${occupant.name}${isCaptain ? ' — Captain' : ''}`,
           nameLabel: occupant.name.split(' ').slice(-1)[0],

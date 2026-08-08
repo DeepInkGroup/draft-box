@@ -222,8 +222,28 @@ a { color: var(--accent-strong); }
   z-index: 1;
 }
 .pitch-dot.filled { background: var(--pitch-accent); border-color: #ffffff; color: #06240f; }
-.pitch-dot.clickable { cursor: pointer; background: var(--accent-soft); border-color: var(--accent-strong); color: var(--accent-strong); }
-.pitch-dot.clickable:hover { background: var(--accent); color: #fff; }
+/* Adds a click affordance without hiding a role color underneath it. */
+.pitch-dot.clickable { cursor: pointer; box-shadow: 0 0 0 2px rgba(255,255,255,.55); }
+.pitch-dot.clickable:not(.role-fw):not(.role-mf):not(.role-df):not(.role-gk):not(.filled) {
+  background: var(--accent-soft); border-color: var(--accent-strong); color: var(--accent-strong);
+}
+.pitch-dot.clickable:hover { box-shadow: 0 0 0 3px #fff; }
+
+/* Role colors: Attack=red, Midfield=green, Defence=blue, GK=yellow — consistent
+   everywhere a filled pitch dot represents an actual player. */
+.pitch-dot.role-fw { background: #ef4444; border-color: #fecaca; color: #ffffff; }
+.pitch-dot.role-mf { background: #22c55e; border-color: #bbf7d0; color: #06240f; }
+.pitch-dot.role-df { background: #3b82f6; border-color: #bfdbfe; color: #ffffff; }
+.pitch-dot.role-gk { background: #eab308; border-color: #fef08a; color: #3f2d00; }
+.pitch-dot.captain { box-shadow: 0 0 0 3px #fff, 0 0 0 5px var(--accent); }
+
+.pitch-badge {
+  position: absolute; top: -6px; right: -6px; width: 16px; height: 16px;
+  background: #fff; color: #111; font-size: .5rem; font-weight: 800;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(0,0,0,.3); z-index: 2;
+}
+
 .pitch-name {
   position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
   font-size: .55rem; color: #fff; white-space: nowrap; margin-top: 2px;
@@ -331,6 +351,39 @@ a { color: var(--accent-strong); }
 
 .matchlog { max-height: 220px; overflow-y: auto; font-size: .82rem; }
 .matchlog div { padding: 5px 0; border-bottom: 1px dashed var(--border-soft); }
+
+/* --- Live match report --- */
+.live-clock {
+  display: inline-block; font-size: 2.4rem; font-weight: 800; color: var(--pitch-accent);
+  font-variant-numeric: tabular-nums; margin-bottom: 14px;
+}
+.live-feed { max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
+.live-feed-line { padding: 5px 8px; border-bottom: 1px dashed var(--border-soft); font-size: .85rem; }
+.live-scoreboard { max-height: 260px; overflow-y: auto; }
+.live-score-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  margin-bottom: 6px; font-size: .82rem; background: var(--surface-2);
+}
+.live-score-val { font-weight: 700; color: var(--ink); flex: 0 0 auto; }
+
+/* --- My Team recap card --- */
+.myteam-card {
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface)); margin-top: 12px;
+}
+.myteam-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 8px; }
+.myteam-record { color: var(--muted); font-size: .85rem; margin-bottom: 14px; }
+.myteam-players { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
+.myteam-player { font-size: .85rem; padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.myteam-pos {
+  display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 18px;
+  border-radius: 4px; font-size: .62rem; font-weight: 800; color: #fff; flex: none;
+}
+.myteam-pos.role-fw { background: #ef4444; }
+.myteam-pos.role-mf { background: #22c55e; color: #06240f; }
+.myteam-pos.role-df { background: #3b82f6; }
+.myteam-pos.role-gk { background: #eab308; color: #3f2d00; }
 
 .error-text { color: var(--danger); font-size: .85rem; margin-top: 6px; }
 
