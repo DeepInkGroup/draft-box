@@ -132,8 +132,7 @@ a { color: var(--accent-strong); }
   padding: 26px 20px; text-align: center; cursor: pointer; transition: border-color .15s ease, transform .05s ease;
 }
 .mode-card:hover { border-color: var(--accent); transform: translateY(-2px); }
-.mode-card .mode-icon { font-size: 2rem; margin-bottom: 8px; }
-.mode-card h3 { margin: 0 0 6px; }
+.mode-card h3 { margin: 0 0 6px; font-family: 'Bebas Neue', 'Segoe UI', sans-serif; font-size: 1.6rem; font-weight: 400; letter-spacing: .03em; color: var(--accent-strong); }
 .mode-card p { margin: 0; font-size: .85rem; }
 
 .code-display {
@@ -232,6 +231,26 @@ a { color: var(--accent-strong); }
   overflow: hidden; text-overflow: ellipsis;
 }
 
+/* --- Squad ratings card --- */
+.ratings-card {
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+}
+.ratings-overall-label { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+.ratings-overall-value { font-size: 2.6rem; font-weight: 800; line-height: 1; margin: 2px 0 16px; color: var(--ink); }
+.ratings-bars { display: flex; flex-direction: column; gap: 10px; }
+.ratings-row { display: flex; align-items: center; gap: 10px; }
+.ratings-row-label { flex: 0 0 110px; font-size: .85rem; color: var(--ink); display: flex; align-items: center; gap: 6px; }
+.ratings-track { flex: 1; height: 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border-soft); overflow: hidden; }
+.ratings-fill { height: 100%; border-radius: 999px; }
+.ratings-fill-attack { background: linear-gradient(90deg, #ef4444, #f97316); }
+.ratings-fill-midfield { background: linear-gradient(90deg, #10b981, #22c55e); }
+.ratings-fill-defence { background: linear-gradient(90deg, #3b82f6, #06b6d4); }
+.ratings-fill-gk { background: linear-gradient(90deg, #eab308, #f59e0b); }
+.ratings-fill-chemistry { background: linear-gradient(90deg, #a855f7, #7c5cff); }
+.ratings-fill-starpower { background: linear-gradient(90deg, #ec4899, #f43f5e); }
+.ratings-row-value { flex: 0 0 28px; text-align: right; font-weight: 700; font-size: .88rem; color: var(--ink); }
+
 .slots-bar { display: flex; gap: 8px; margin-bottom: 18px; }
 .slot-pill {
   flex: 1; text-align: center; padding: 8px 4px; border-radius: var(--radius-sm);
@@ -295,6 +314,13 @@ a { color: var(--accent-strong); }
   background: var(--surface-2);
 }
 .match-row .winner { font-weight: 700; color: var(--pitch-accent); }
+.match-row-clickable { cursor: pointer; }
+.match-row-clickable:hover { border-color: var(--accent); }
+.match-report {
+  margin: -2px 0 10px; padding: 10px 14px; border: 1px dashed var(--border);
+  border-radius: var(--radius-sm); background: var(--surface); font-size: .82rem;
+}
+.report-line { padding: 3px 0; }
 
 .champion-banner {
   text-align: center; padding: 32px 20px; border: 2px solid var(--accent); border-radius: var(--radius);

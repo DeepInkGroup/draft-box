@@ -91,4 +91,30 @@ function computeChemistry(xi, formation) {
   return { linkage, balance, leadership, chemistry, multiplier };
 }
 
-module.exports = { computeTeamRatings, computeChemistry, slotWeights, CAPTAIN_BONUS };
+// A 6-stat squad summary card for the draft-complete screen: the classic
+// GK/Defence/Midfield/Attack position-group averages, plus two bars pulled straight
+// from mechanics already in this file — Chemistry (the composite score above) and
+// Star Power (how many real, recognizable players are on the XI).
+function computeSquadCard(squad, formation) {
+  const byGroup = { GK: [], DF: [], MF: [], FW: [] };
+  for (const p of squad) {
+    const overall = p.isCaptain ? Math.min(99, p.overall + CAPTAIN_BONUS) : p.overall;
+    byGroup[p.pos].push(overall);
+  }
+  const avg = (arr) => (arr.length ? Math.round(arr.reduce((s, o) => s + o, 0) / arr.length) : 0);
+  const overall = avg(squad.map((p) => (p.isCaptain ? Math.min(99, p.overall + CAPTAIN_BONUS) : p.overall)));
+  const chem = computeChemistry(squad, formation);
+  const stars = squad.filter((p) => p.isStar).length;
+
+  return {
+    overall,
+    attack: avg(byGroup.FW),
+    midfield: avg(byGroup.MF),
+    defence: avg(byGroup.DF),
+    gk: avg(byGroup.GK),
+    chemistry: Math.round(chem.chemistry * 100),
+    starPower: Math.round((Math.min(3, stars) / 3) * 100)
+  };
+}
+
+module.exports = { computeTeamRatings, computeChemistry, computeSquadCard, slotWeights, CAPTAIN_BONUS };

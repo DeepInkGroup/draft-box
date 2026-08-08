@@ -29,6 +29,7 @@ const DraftView = {
         <p class="muted center" id="squadProgress"></p>
         <div id="squadPitch"></div>
       </div>
+      <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
       <p class="muted center" id="waitingMsg" style="display:none;">✅ Your draft is complete! Waiting for other players before the World Cup starts...</p>
     `;
 
@@ -40,6 +41,13 @@ const DraftView = {
     const squadPitch = container.querySelector('#squadPitch');
     const poolCount = container.querySelector('#poolCount');
     const waitingMsg = container.querySelector('#waitingMsg');
+    const ratingsCardZone = container.querySelector('#ratingsCardZone');
+
+    function renderRatingsCard(data) {
+      if (!data) { ratingsCardZone.style.display = 'none'; return; }
+      ratingsCardZone.style.display = 'block';
+      RatingsCard.render(ratingsCardZone, data);
+    }
 
     function stopTimer() {
       if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
@@ -122,8 +130,9 @@ const DraftView = {
       });
     }
 
-    function handleDraftComplete(slotsMap, captainSlot) {
+    function handleDraftComplete(slotsMap, captainSlot, ratingsCard) {
       stopTimer();
+      renderRatingsCard(ratingsCard);
       if (captainEnabled && !captainSlot) {
         renderCaptainPicker(slotsMap, captainSlot);
       } else {
@@ -180,7 +189,7 @@ const DraftView = {
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
         if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
-        else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot);
+        else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot, s.myDraft.ratingsCard);
       }
     });
 
@@ -193,11 +202,12 @@ const DraftView = {
       if (!payload.draftComplete) {
         socket.emit('draft:reveal', { code });
       } else {
-        handleDraftComplete(payload.slots, payload.captainSlot);
+        handleDraftComplete(payload.slots, payload.captainSlot, payload.ratingsCard);
       }
     });
 
-    App.onSocket('draft:captainSet', () => {
+    App.onSocket('draft:captainSet', (payload) => {
+      renderRatingsCard(payload.ratingsCard);
       revealCard.innerHTML = '';
       waitingMsg.style.display = 'block';
     });

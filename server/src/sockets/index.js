@@ -2,19 +2,28 @@ const { verifyToken } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
+const { computeSquadCard } = require('../game/ratings');
 const { lobbySnapshot } = rm;
 
 function channelName(code) {
   return `room:${code}`;
 }
 
-function myDraftView(member) {
+// showOverall respects the room's "Show Ratings" setting: in blind-mode rooms we don't
+// send a ratings breakdown either, since that would leak exactly what the mode hides.
+function myDraftView(member, showOverall) {
+  let ratingsCard = null;
+  if (member.draftComplete && showOverall) {
+    const taggedSquad = member.squad.map((p) => ({ ...p, isCaptain: !!member.captainSlot && p.slotCode === member.captainSlot }));
+    ratingsCard = computeSquadCard(taggedSquad, member.formation);
+  }
   return {
     squad: member.squad,
     slots: member.slots,
     openSlots: draftEngine.openSlots(member),
     draftComplete: member.draftComplete,
-    captainSlot: member.captainSlot
+    captainSlot: member.captainSlot,
+    ratingsCard
   };
 }
 
@@ -50,7 +59,7 @@ function applyPickSideEffects(io, code, roomState, userId, { player, slotCode, d
   if (draftComplete) rm.markMemberDraftComplete(roomState.roomId, userId);
 
   const member = roomState.members.get(userId);
-  io.to(channelName(code)).emit('draft:picked', { userId, player, slotCode, auto: !!auto, ...myDraftView(member) });
+  io.to(channelName(code)).emit('draft:picked', { userId, player, slotCode, auto: !!auto, ...myDraftView(member, roomState.showOverall) });
   io.to(channelName(code)).emit('draft:poolUpdate', { playerId: player.id, poolRemaining: roomState.pool.size });
 
   const freshRoomRow = rm.getRoomRow(roomState.roomId);
@@ -94,7 +103,7 @@ function registerSocketHandlers(io) {
         socket.emit('room:state', {
           stage: 'drafting',
           ...lobbySnapshot(roomRow),
-          myDraft: member && myDraftView(member),
+          myDraft: member && myDraftView(member, state.showOverall),
           poolRemaining: state.pool.size
         });
       } else {
@@ -162,7 +171,7 @@ function registerSocketHandlers(io) {
 
       member.captainSlot = slotCode;
       rm.persistCaptain(roomRow.id, socket.user.id, slotCode);
-      socket.emit('draft:captainSet', { slotCode });
+      socket.emit('draft:captainSet', { slotCode, ...myDraftView(member, state.showOverall) });
 
       const freshRoomRow = rm.getRoomRow(roomRow.id);
       const started = maybeStartTournament(io, freshRoomRow, state);

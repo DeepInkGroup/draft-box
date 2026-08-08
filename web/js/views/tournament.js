@@ -9,6 +9,7 @@ const TournamentView = {
     let historyLength = 0;
     let tournamentStage = 'group';
     let newResultsPing = false;
+    let isCreator = false;
 
     container.innerHTML = `
       <div id="championZone"></div>
@@ -35,6 +36,14 @@ const TournamentView = {
 
     function nameTag(name, isHuman, username) {
       return `${name}${isHuman ? ` 👤 ${username}` : ''}`;
+    }
+
+    function eventLine(e) {
+      const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
+      const side = e.side === 'A' ? '←' : '→';
+      let text = `${icon} ${e.minute}' ${e.player}`;
+      if (e.type === 'goal' && e.assistBy) text += ` <span class="muted">(assist: ${e.assistBy})</span>`;
+      return `<div class="report-line">${side} ${text}</div>`;
     }
 
     function renderButton() {
@@ -64,11 +73,14 @@ const TournamentView = {
         return;
       }
 
-      const matchesHtml = step.matches.map((m) => `
-        <div class="match-row">
+      const matchesHtml = step.matches.map((m, idx) => `
+        <div class="match-row match-row-clickable" data-idx="${idx}">
           <span class="${m.winnerCode && m.winnerCode === m.aCode ? 'winner' : ''}">${nameTag(m.aName, m.aHuman, m.aUsername)}</span>
-          <span>${scoreText(m)}</span>
+          <span>${scoreText(m)} ${m.events && m.events.length ? '📋' : ''}</span>
           <span class="${m.winnerCode && m.winnerCode === m.bCode ? 'winner' : ''}">${nameTag(m.bName, m.bHuman, m.bUsername)}</span>
+        </div>
+        <div class="match-report hidden" id="report-${idx}">
+          ${m.events && m.events.length ? m.events.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
         </div>
       `).join('');
 
@@ -99,9 +111,16 @@ const TournamentView = {
 
       stepCard.innerHTML = `
         <h3>${step.label}</h3>
+        <p class="muted" style="margin-top:-8px;">Tap a match for the report (goals, assists, cards).</p>
         <div class="matchlog" style="max-height:none;">${matchesHtml}</div>
         ${groupFinalHtml}
       `;
+      stepCard.querySelectorAll('.match-row-clickable').forEach((row) => {
+        row.addEventListener('click', () => {
+          const report = stepCard.querySelector(`#report-${row.dataset.idx}`);
+          if (report) report.classList.toggle('hidden');
+        });
+      });
 
       if (step.champion) {
         championZone.innerHTML = `
@@ -109,7 +128,14 @@ const TournamentView = {
             <div class="trophy">🏆</div>
             <h2>World Cup Champion: ${step.champion.name}</h2>
             <p class="muted">${step.champion.isHuman ? `Controlled by ${step.champion.username} 👑` : 'A bot team won it all 🤖'}</p>
+            <div class="row" style="margin-top:16px;justify-content:center;">
+              <button class="btn btn-ghost" id="btnBackHome">🏠 Back to Dashboard</button>
+              ${isCreator ? '<button class="btn btn-primary" id="btnNewRoom">🔁 Start New Room</button>' : ''}
+            </div>
           </div>`;
+        championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
+        const newRoomBtn = championZone.querySelector('#btnNewRoom');
+        if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
       } else {
         championZone.innerHTML = '';
       }
@@ -122,6 +148,7 @@ const TournamentView = {
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
+      isCreator = s.creatorId === App.state.user.id;
       renderStep(s.myStep || null);
     });
 

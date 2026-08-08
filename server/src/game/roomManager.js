@@ -171,7 +171,9 @@ function allMembersDraftComplete(roomState) {
 function lobbySnapshot(roomRow) {
   return {
     code: roomRow.code,
+    name: roomRow.name,
     status: roomRow.status,
+    creatorId: roomRow.creator_id,
     humanSlotsMax: roomRow.human_slots_max,
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,

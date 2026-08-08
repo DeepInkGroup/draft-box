@@ -11,17 +11,14 @@ const DashboardView = {
       </div>
       <div class="mode-grid">
         <div class="mode-card" id="modeSingle">
-          <div class="mode-icon">⚡</div>
           <h3>Single Player</h3>
           <p class="muted">Draft alone, then take on 47 bot-controlled countries.</p>
         </div>
         <div class="mode-card" id="modeCreate">
-          <div class="mode-icon">➕</div>
           <h3>Create Room</h3>
           <p class="muted">Set up a room, get a code, invite friends.</p>
         </div>
         <div class="mode-card" id="modeJoin">
-          <div class="mode-icon">🔑</div>
           <h3>Join Room</h3>
           <p class="muted">Already have a code? Jump into a friend's room.</p>
         </div>

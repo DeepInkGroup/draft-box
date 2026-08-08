@@ -1,5 +1,5 @@
 const { computeTeamRatings, computeChemistry } = require('./ratings');
-const { getProfile } = require('./formations');
+const { getProfile, getSlots } = require('./formations');
 
 // Simulates a match from each side's Attack/Defense ratings (player quality, weighted by
 // slot depth) plus a formation "edge" term (attacking shape vs. the opponent's defensive
@@ -37,6 +37,68 @@ function expectedGoals(ratingFor, ratingAgainst, edge) {
   return clamp(1.35 + (ratingFor - ratingAgainst) / 18 + edge / 10, 0.15, 4.5);
 }
 
+function pickWeighted(candidates, weightFn) {
+  const weights = candidates.map((c) => Math.max(0.001, weightFn(c)));
+  const total = weights.reduce((s, w) => s + w, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < candidates.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return candidates[i];
+  }
+  return candidates[candidates.length - 1];
+}
+
+function slotY(player, formation) {
+  const slot = getSlots(formation).find((s) => s.code === player.slotCode);
+  return slot ? slot.y : 50;
+}
+
+// Goal events: scorer likelihood peaks up front (low y) and scales with quality; assists
+// (present on ~75% of goals) come mainly from midfield-depth players.
+function generateGoalEvents(team, count) {
+  const events = [];
+  const outfield = team.xi.filter((p) => p.pos !== 'GK');
+  const pool = outfield.length ? outfield : team.xi;
+  for (let i = 0; i < count; i++) {
+    const scorer = pickWeighted(pool, (p) => (1 - slotY(p, team.formation) / 100) * (0.6 + p.overall / 200));
+    let assist = null;
+    const assistCandidates = pool.filter((p) => p !== scorer);
+    if (assistCandidates.length && Math.random() < 0.75) {
+      assist = pickWeighted(assistCandidates, (p) => 1 - Math.abs(slotY(p, team.formation) - 45) / 60);
+    }
+    events.push({
+      minute: 1 + Math.floor(Math.random() * 90),
+      type: 'goal',
+      player: scorer.name,
+      pos: scorer.pos,
+      assistBy: assist ? assist.name : null
+    });
+  }
+  return events;
+}
+
+// Cards: a handful of yellows most matches, spread across both sides (any outfield
+// player), and a rare red. Purely flavor — doesn't affect the scoreline.
+function generateCardEvents(teamA, teamB) {
+  const events = [];
+  const pool = [
+    ...teamA.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'A' })),
+    ...teamB.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'B' }))
+  ];
+  if (!pool.length) return events;
+
+  const numYellows = Math.floor(Math.random() * 5); // 0-4
+  for (let i = 0; i < numYellows; i++) {
+    const p = pool[Math.floor(Math.random() * pool.length)];
+    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'yellow', player: p.name, pos: p.pos, side: p.side });
+  }
+  if (Math.random() < 0.07) {
+    const p = pool[Math.floor(Math.random() * pool.length)];
+    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'red', player: p.name, pos: p.pos, side: p.side });
+  }
+  return events;
+}
+
 function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
@@ -55,7 +117,14 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   let goalsA = clamp(poissonSample(xgA), 0, 9);
   let goalsB = clamp(poissonSample(xgB), 0, 9);
 
-  const result = { goalsA, goalsB, xgA, xgB, wentToPenalties: false, penaltyWinner: null };
+  const goalEvents = [
+    ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A' })),
+    ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B' }))
+  ];
+  const cardEvents = generateCardEvents(teamA, teamB);
+  const events = [...goalEvents, ...cardEvents].sort((a, b) => a.minute - b.minute);
+
+  const result = { goalsA, goalsB, xgA, xgB, wentToPenalties: false, penaltyWinner: null, events };
 
   if (knockout && goalsA === goalsB) {
     result.wentToPenalties = true;

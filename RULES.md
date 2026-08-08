@@ -113,10 +113,11 @@ Right now only "World Cup" mode is active (with the real 2026 World Cup teams an
 
 ## 9. About the Player Data (important)
 
-The list of 48 teams matches the real, official field of nations qualified for the 2026 FIFA World Cup. However, **each team's squad and player overall ratings are approximate, unofficial data made for gameplay purposes**, not a licensed/official FIFA database:
+The list of 48 teams matches the real, official field of nations qualified for the 2026 FIFA World Cup, and **every player in the game is a real member of that nation's actual 26-man 2026 World Cup squad** (1,248 real players total, sourced from Wikipedia's "2026 FIFA World Cup squads" article, itself compiled from FIFA's officially published squad lists).
 
-- For major teams, a handful of real, well-known star players (with approximate overall ratings) are included in the squad.
-- The rest of each team's squad (needed to have enough depth for every formation) is filled with **procedurally generated names in a style matching that country** — these players are not real.
-- Every player's overall rating is a **fictional value made up for gameplay**, not an official EA/FIFA rating.
+What's *not* official:
 
-This is intentional: the goal of the game is an exciting draft-and-simulation experience, not a precise statistical database. If you want, this data layer (`server/src/data/teams2026.json`) can easily be swapped out for a more accurate, licensed data source.
+- **Overall ratings are fictional**, made up for gameplay — no public, licensed rating dataset exists for these squads, so every player's overall is generated (with a hand-picked, higher overall for a few dozen widely recognized stars per major team).
+- **9 teams have exactly one generated (non-real) filler player each**, only where the real squad didn't have enough depth in one position group to field the most demanding formations (e.g. 3-2-4-1 needs 6 real midfielders): South Korea (1 FW), South Africa (1 MF), Qatar (1 MF), Haiti (1 MF), Australia (1 MF), Turkey (1 MF), Cape Verde (1 FW), Norway (1 FW), Uzbekistan (1 FW). Every other player on every other team — 1,248 of 1,257 total — is real.
+
+This is intentional: the goal of the game is an exciting draft-and-simulation experience built on real players, without claiming to be an officially licensed EA/FIFA ratings product. If you want, this data layer (`server/src/data/teams2026.json`, generated from `server/src/data/wc2026_real_squads.json`) can be swapped out for a different or more precise ratings source.

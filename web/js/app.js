@@ -1,6 +1,7 @@
 const App = (() => {
   const state = { user: null, socket: null, roomCode: null };
   const appEl = document.getElementById('app');
+  const homeBtn = document.getElementById('btnHome');
   const profileBtn = document.getElementById('btnProfile');
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
@@ -15,6 +16,7 @@ const App = (() => {
 
   function setHeader() {
     profileBtn.classList.toggle('hidden', !state.user);
+    homeBtn.classList.toggle('hidden', !state.user);
   }
 
   function ensureSocket() {
@@ -42,9 +44,10 @@ const App = (() => {
     AuthView.render(appEl);
   }
 
-  function goDashboard() {
+  function goDashboard(startMode) {
     location.hash = '';
     DashboardView.render(appEl);
+    if (startMode === 'create') DashboardView.renderCreateRoom(appEl);
   }
 
   function goLobby(code) {
@@ -79,6 +82,8 @@ const App = (() => {
   }
 
   async function init() {
+    homeBtn.addEventListener('click', () => goDashboard());
+
     const settingsDialog = document.getElementById('settingsDialog');
     document.getElementById('btnSettings').addEventListener('click', () => {
       document.getElementById('apiBaseInput').value = getApiBase();
