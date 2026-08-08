@@ -1,0 +1,16 @@
+services:
+  draft-box-server:
+    build: ./server
+    ports:
+      - "4321:4321"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-change-this-to-a-long-random-secret}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      PORT: 4321
+      DB_PATH: /app/data/draftbox.sqlite
+    volumes:
+      - draftbox-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  draftbox-data:

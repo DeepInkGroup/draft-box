@@ -1,0 +1,8453 @@
+{
+  "generatedAt": "2026-08-08T08:46:49.694Z",
+  "teams": [
+    {
+      "id": "MEX",
+      "name": "Mexico",
+      "code": "MEX",
+      "baseOverall": 79,
+      "players": [
+        {
+          "id": "MEX-FW1",
+          "name": "Santiago Giménez",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": true
+        },
+        {
+          "id": "MEX-MF1",
+          "name": "Edson Álvarez",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": true
+        },
+        {
+          "id": "MEX-MF2",
+          "name": "José Vargas",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "MEX-GK3",
+          "name": "Kevin Vargas",
+          "team": "MEX",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF7",
+          "name": "José Moreno",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF7",
+          "name": "Tajon Buchanan",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF2",
+          "name": "Junior Vargas",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF5",
+          "name": "Junior Ramírez",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW2",
+          "name": "Kevin Hernández",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MEX-GK1",
+          "name": "Alphonso Ramírez",
+          "team": "MEX",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW3",
+          "name": "Andrés Moreno",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "MEX-GK2",
+          "name": "Erick Moreno",
+          "team": "MEX",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF3",
+          "name": "José Castillo",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF3",
+          "name": "Carlos Larin",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF1",
+          "name": "Alphonso Castillo",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF4",
+          "name": "Carlos Buchanan",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF4",
+          "name": "Carlos Larin",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW4",
+          "name": "Junior Hernández",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF6",
+          "name": "Josh Ramírez",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF6",
+          "name": "Alphonso Jiménez",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF5",
+          "name": "Luis Ramírez",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "KOR",
+      "name": "South Korea",
+      "code": "KOR",
+      "baseOverall": 76,
+      "players": [
+        {
+          "id": "KOR-MF4",
+          "name": "Ji-ho Kim",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF5",
+          "name": "Do-yun Choi",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "KOR-FW3",
+          "name": "Tae-yang Suzuki",
+          "team": "KOR",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF7",
+          "name": "Min-jun Choi",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF6",
+          "name": "Ji-ho Watanabe",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "KOR-FW2",
+          "name": "Seo-jun Choi",
+          "team": "KOR",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "KOR-FW4",
+          "name": "Riku Yamamoto",
+          "team": "KOR",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF4",
+          "name": "Min-jun Yamamoto",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF1",
+          "name": "Haruto Park",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF3",
+          "name": "Do-yun Yamamoto",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "KOR-GK3",
+          "name": "Riku Jung",
+          "team": "KOR",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF2",
+          "name": "Sota Park",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF6",
+          "name": "Ren Watanabe",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "KOR-GK2",
+          "name": "Ji-ho Park",
+          "team": "KOR",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF3",
+          "name": "Ji-ho Kobayashi",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "KOR-FW1",
+          "name": "Min-jun Jung",
+          "team": "KOR",
+          "pos": "FW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "KOR-MF2",
+          "name": "Yuto Jung",
+          "team": "KOR",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "KOR-GK1",
+          "name": "Do-yun Yamamoto",
+          "team": "KOR",
+          "pos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF7",
+          "name": "Sota Watanabe",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF5",
+          "name": "Seo-jun Kim",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "KOR-DF1",
+          "name": "Seo-jun Choi",
+          "team": "KOR",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "RSA",
+      "name": "South Africa",
+      "code": "RSA",
+      "baseOverall": 68,
+      "players": [
+        {
+          "id": "RSA-FW4",
+          "name": "Ibrahim Traoré",
+          "team": "RSA",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF5",
+          "name": "Yusuf Diop",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF7",
+          "name": "Kwame Keita",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF4",
+          "name": "Bakary Boateng",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "RSA-FW2",
+          "name": "Sekou Toure",
+          "team": "RSA",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF7",
+          "name": "Bakary Cissé",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF3",
+          "name": "Joseph Toure",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "RSA-FW1",
+          "name": "Ibrahim Traoré",
+          "team": "RSA",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF5",
+          "name": "Bakary Bamba",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF2",
+          "name": "Bakary Sow",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF2",
+          "name": "Ismael Osei",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF6",
+          "name": "Aboubakar Fofana",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF4",
+          "name": "Yusuf Toure",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "RSA-FW3",
+          "name": "Baba Doumbia",
+          "team": "RSA",
+          "pos": "FW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF6",
+          "name": "Yusuf Cissé",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "RSA-GK1",
+          "name": "Baba Fofana",
+          "team": "RSA",
+          "pos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "RSA-GK2",
+          "name": "Baba Koné",
+          "team": "RSA",
+          "pos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "RSA-MF1",
+          "name": "Baba Koné",
+          "team": "RSA",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "RSA-GK3",
+          "name": "Chidi Boateng",
+          "team": "RSA",
+          "pos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF1",
+          "name": "Amadou Boateng",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "RSA-DF3",
+          "name": "Baba Doumbia",
+          "team": "RSA",
+          "pos": "DF",
+          "overall": 58,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CZE",
+      "name": "Czech Republic",
+      "code": "CZE",
+      "baseOverall": 73,
+      "players": [
+        {
+          "id": "CZE-FW1",
+          "name": "Ante Pavlović",
+          "team": "CZE",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF2",
+          "name": "Josip Perić",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF4",
+          "name": "Bojan Kovačević",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CZE-GK3",
+          "name": "Josip Vuković",
+          "team": "CZE",
+          "pos": "GK",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF7",
+          "name": "Dino Radić",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF3",
+          "name": "Josip Novak",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF1",
+          "name": "Stefan Babić",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF3",
+          "name": "Marko Vuković",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CZE-FW3",
+          "name": "Vedran Vuković",
+          "team": "CZE",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF5",
+          "name": "Marko Pavlović",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF6",
+          "name": "Josip Knežević",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "CZE-GK2",
+          "name": "Mario Babić",
+          "team": "CZE",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CZE-MF5",
+          "name": "Filip Knežević",
+          "team": "CZE",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF4",
+          "name": "Nikola Jurić",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF1",
+          "name": "Nikola Babić",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF7",
+          "name": "Filip Marić",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CZE-FW2",
+          "name": "Marko Novak",
+          "team": "CZE",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CZE-FW4",
+          "name": "Marko Radić",
+          "team": "CZE",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CZE-GK1",
+          "name": "Kristijan Perić",
+          "team": "CZE",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF6",
+          "name": "Dino Marić",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "CZE-DF2",
+          "name": "Nikola Radić",
+          "team": "CZE",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CAN",
+      "name": "Canada",
+      "code": "CAN",
+      "baseOverall": 77,
+      "players": [
+        {
+          "id": "CAN-DF1",
+          "name": "Alphonso Davies",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "CAN-FW1",
+          "name": "Jonathan David",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "CAN-MF5",
+          "name": "José Castillo",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF4",
+          "name": "Luis Charles",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF1",
+          "name": "Andrés Ramírez",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CAN-GK3",
+          "name": "Junior Vargas",
+          "team": "CAN",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CAN-FW3",
+          "name": "Erick Charles",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CAN-FW4",
+          "name": "Alphonso Ramírez",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF3",
+          "name": "Alphonso Ramírez",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF5",
+          "name": "Alphonso Moreno",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CAN-GK1",
+          "name": "José Hernández",
+          "team": "CAN",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "CAN-GK2",
+          "name": "Luis Moreno",
+          "team": "CAN",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF7",
+          "name": "Josh Castillo",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "CAN-FW2",
+          "name": "Kevin Ramírez",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF6",
+          "name": "José Charles",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF2",
+          "name": "Josh Buchanan",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF4",
+          "name": "Junior Castillo",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF2",
+          "name": "Alphonso David",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF3",
+          "name": "Josh Charles",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF7",
+          "name": "Alphonso Castillo",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF6",
+          "name": "Josh Ramírez",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "SUI",
+      "name": "Switzerland",
+      "code": "SUI",
+      "baseOverall": 79,
+      "players": [
+        {
+          "id": "SUI-MF1",
+          "name": "Granit Xhaka",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "SUI-DF1",
+          "name": "Manuel Akanji",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "SUI-FW3",
+          "name": "Leon Neumann",
+          "team": "SUI",
+          "pos": "FW",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "SUI-GK3",
+          "name": "Finn Fischer",
+          "team": "SUI",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF7",
+          "name": "Finn Weber",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "SUI-FW2",
+          "name": "Elias Wagner",
+          "team": "SUI",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF5",
+          "name": "Lukas Müller",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF6",
+          "name": "Jannik Richter",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SUI-FW4",
+          "name": "Paul Schmidt",
+          "team": "SUI",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF6",
+          "name": "Leon Fischer",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "SUI-GK1",
+          "name": "Robin Müller",
+          "team": "SUI",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SUI-FW1",
+          "name": "Paul Neumann",
+          "team": "SUI",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF2",
+          "name": "Jannik Schneider",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF3",
+          "name": "Paul Müller",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SUI-GK2",
+          "name": "Niklas Schneider",
+          "team": "SUI",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF7",
+          "name": "Julian Schneider",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SUI-MF4",
+          "name": "Maximilian Klein",
+          "team": "SUI",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF2",
+          "name": "Tom Koch",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF5",
+          "name": "Lukas Becker",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF4",
+          "name": "Tom Schneider",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "SUI-DF3",
+          "name": "Paul Neumann",
+          "team": "SUI",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "QAT",
+      "name": "Qatar",
+      "code": "QAT",
+      "baseOverall": 69,
+      "players": [
+        {
+          "id": "QAT-FW1",
+          "name": "Akram Afif",
+          "team": "QAT",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": true
+        },
+        {
+          "id": "QAT-MF1",
+          "name": "Fahad Mansour",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF1",
+          "name": "Zaid Qureshi",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "QAT-GK3",
+          "name": "Bilal Mansour",
+          "team": "QAT",
+          "pos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF7",
+          "name": "Hamza Belkacem",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "QAT-FW4",
+          "name": "Ahmed Rashid",
+          "team": "QAT",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF4",
+          "name": "Rami Mansour",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF6",
+          "name": "Hamza Khalil",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "QAT-GK1",
+          "name": "Anas Khalil",
+          "team": "QAT",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF7",
+          "name": "Bilal Zidan",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF4",
+          "name": "Rami Saleh",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF5",
+          "name": "Karim Tahiri",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF6",
+          "name": "Youssef Nasser",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "QAT-GK2",
+          "name": "Fahad Saleh",
+          "team": "QAT",
+          "pos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "QAT-FW3",
+          "name": "Fahad Saleh",
+          "team": "QAT",
+          "pos": "FW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF2",
+          "name": "Rami Khalil",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF2",
+          "name": "Tariq Rashid",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "QAT-MF3",
+          "name": "Khalid Qureshi",
+          "team": "QAT",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "QAT-FW2",
+          "name": "Karim Nasser",
+          "team": "QAT",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF3",
+          "name": "Sami Qureshi",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "QAT-DF5",
+          "name": "Tariq Karimi",
+          "team": "QAT",
+          "pos": "DF",
+          "overall": 59,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "BIH",
+      "name": "Bosnia and Herzegovina",
+      "code": "BIH",
+      "baseOverall": 72,
+      "players": [
+        {
+          "id": "BIH-FW3",
+          "name": "Vedran Kovačević",
+          "team": "BIH",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "BIH-GK3",
+          "name": "Bojan Pavlović",
+          "team": "BIH",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF1",
+          "name": "Filip Pavlović",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF6",
+          "name": "Filip Marić",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "BIH-FW1",
+          "name": "Petar Horvat",
+          "team": "BIH",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "BIH-FW4",
+          "name": "Dario Babić",
+          "team": "BIH",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF1",
+          "name": "Marko Tomić",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF2",
+          "name": "Kristijan Horvat",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF6",
+          "name": "Petar Kovačević",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF3",
+          "name": "Ante Marić",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF7",
+          "name": "Filip Novak",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF2",
+          "name": "Stefan Kovačević",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "BIH-GK1",
+          "name": "Stefan Babić",
+          "team": "BIH",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF4",
+          "name": "Josip Novak",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "BIH-FW2",
+          "name": "Marko Jurić",
+          "team": "BIH",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF7",
+          "name": "Stefan Vuković",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "BIH-GK2",
+          "name": "Dario Marić",
+          "team": "BIH",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "BIH-MF5",
+          "name": "Ante Tomić",
+          "team": "BIH",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF3",
+          "name": "Ante Perić",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF4",
+          "name": "Dario Novak",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "BIH-DF5",
+          "name": "Bojan Novak",
+          "team": "BIH",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "BRA",
+      "name": "Brazil",
+      "code": "BRA",
+      "baseOverall": 89,
+      "players": [
+        {
+          "id": "BRA-FW1",
+          "name": "Vinícius Júnior",
+          "team": "BRA",
+          "pos": "FW",
+          "overall": 92,
+          "isStar": true
+        },
+        {
+          "id": "BRA-MF4",
+          "name": "Yuri Nascimento",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "BRA-MF5",
+          "name": "Renan Santos",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "BRA-GK1",
+          "name": "Alisson",
+          "team": "BRA",
+          "pos": "GK",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "BRA-MF2",
+          "name": "Gabriel Oliveira",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "BRA-MF6",
+          "name": "Rafael Gomes",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "BRA-FW2",
+          "name": "Rodrygo",
+          "team": "BRA",
+          "pos": "FW",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "BRA-GK3",
+          "name": "Everton Silva",
+          "team": "BRA",
+          "pos": "GK",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF3",
+          "name": "Douglas Ribeiro",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF6",
+          "name": "Igor Nascimento",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "BRA-FW4",
+          "name": "Matheus Costa",
+          "team": "BRA",
+          "pos": "FW",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF2",
+          "name": "Everton Teixeira",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF7",
+          "name": "Douglas Santos",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "BRA-MF1",
+          "name": "Rafael Gomes",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "BRA-FW3",
+          "name": "Endrick",
+          "team": "BRA",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "BRA-DF1",
+          "name": "Lucas Santos",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "BRA-GK2",
+          "name": "Wesley Pereira",
+          "team": "BRA",
+          "pos": "GK",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "BRA-MF3",
+          "name": "Yuri Carvalho",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "BRA-MF7",
+          "name": "Matheus Carvalho",
+          "team": "BRA",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF4",
+          "name": "Everton Almeida",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "BRA-DF5",
+          "name": "Bruno Gomes",
+          "team": "BRA",
+          "pos": "DF",
+          "overall": 80,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "MAR",
+      "name": "Morocco",
+      "code": "MAR",
+      "baseOverall": 82,
+      "players": [
+        {
+          "id": "MAR-DF1",
+          "name": "Achraf Hakimi",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "MAR-MF5",
+          "name": "Ahmed Rashid",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF3",
+          "name": "Tariq Khalil",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "MAR-FW4",
+          "name": "Zaid Al-Sayed",
+          "team": "MAR",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "MAR-FW3",
+          "name": "Mohammed Mansour",
+          "team": "MAR",
+          "pos": "FW",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF1",
+          "name": "Hakim Ziyech",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": true
+        },
+        {
+          "id": "MAR-GK3",
+          "name": "Anas Hassan",
+          "team": "MAR",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF6",
+          "name": "Hamza Amrani",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF7",
+          "name": "Anas Nasser",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF2",
+          "name": "Rami Belkacem",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF4",
+          "name": "Youssef Rashid",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF6",
+          "name": "Karim Rashid",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF4",
+          "name": "Karim Al-Sayed",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "MAR-MF7",
+          "name": "Anas Mansour",
+          "team": "MAR",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "MAR-GK1",
+          "name": "Youssef Saleh",
+          "team": "MAR",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MAR-GK2",
+          "name": "Sami Aziz",
+          "team": "MAR",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF5",
+          "name": "Zaid Tahiri",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MAR-FW1",
+          "name": "Ali Mansour",
+          "team": "MAR",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "MAR-FW2",
+          "name": "Ali Karimi",
+          "team": "MAR",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF2",
+          "name": "Fahad Nasser",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "MAR-DF3",
+          "name": "Hamza Mansour",
+          "team": "MAR",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "SCO",
+      "name": "Scotland",
+      "code": "SCO",
+      "baseOverall": 75,
+      "players": [
+        {
+          "id": "SCO-MF6",
+          "name": "Kyle Hughes",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF2",
+          "name": "Mason Taylor",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF7",
+          "name": "Reece Hughes",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF1",
+          "name": "James Bennett",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF3",
+          "name": "Ryan Cole",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SCO-FW4",
+          "name": "Harry Fisher",
+          "team": "SCO",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF7",
+          "name": "Mason Hughes",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SCO-FW3",
+          "name": "Ben Hunt",
+          "team": "SCO",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF5",
+          "name": "Harry Edwards",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SCO-FW2",
+          "name": "Reece Cole",
+          "team": "SCO",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SCO-FW1",
+          "name": "Ryan Bennett",
+          "team": "SCO",
+          "pos": "FW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "SCO-GK3",
+          "name": "Marcus Marshall",
+          "team": "SCO",
+          "pos": "GK",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF4",
+          "name": "Curtis Jones",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF3",
+          "name": "Ben Evans",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF5",
+          "name": "Ryan Hunt",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF2",
+          "name": "Ethan Evans",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "SCO-MF4",
+          "name": "Curtis Hughes",
+          "team": "SCO",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "SCO-GK2",
+          "name": "Reece Fisher",
+          "team": "SCO",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF1",
+          "name": "Ben Bennett",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "SCO-GK1",
+          "name": "Tyler Jones",
+          "team": "SCO",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "SCO-DF6",
+          "name": "Kyle Bennett",
+          "team": "SCO",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "HAI",
+      "name": "Haiti",
+      "code": "HAI",
+      "baseOverall": 65,
+      "players": [
+        {
+          "id": "HAI-FW3",
+          "name": "Tajon Larin",
+          "team": "HAI",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "HAI-GK2",
+          "name": "Carlos Jiménez",
+          "team": "HAI",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "HAI-GK3",
+          "name": "Alphonso David",
+          "team": "HAI",
+          "pos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "HAI-FW2",
+          "name": "Erick Buchanan",
+          "team": "HAI",
+          "pos": "FW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "HAI-GK1",
+          "name": "Alphonso Charles",
+          "team": "HAI",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF4",
+          "name": "Carlos Hernández",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF2",
+          "name": "José David",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF4",
+          "name": "Alphonso Buchanan",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF1",
+          "name": "Erick Vargas",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF5",
+          "name": "Luis Moreno",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF6",
+          "name": "Alphonso Charles",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF7",
+          "name": "José Moreno",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-FW4",
+          "name": "Tajon Buchanan",
+          "team": "HAI",
+          "pos": "FW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF3",
+          "name": "José Moreno",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF2",
+          "name": "Tajon Castillo",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "HAI-MF3",
+          "name": "Josh Ramírez",
+          "team": "HAI",
+          "pos": "MF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "HAI-FW1",
+          "name": "Tajon Jiménez",
+          "team": "HAI",
+          "pos": "FW",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF7",
+          "name": "Junior Buchanan",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF5",
+          "name": "Erick Vargas",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF1",
+          "name": "Junior Buchanan",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "HAI-DF6",
+          "name": "Josh Moreno",
+          "team": "HAI",
+          "pos": "DF",
+          "overall": 56,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "USA",
+      "name": "USA",
+      "code": "USA",
+      "baseOverall": 80,
+      "players": [
+        {
+          "id": "USA-FW1",
+          "name": "Christian Pulisic",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "USA-MF1",
+          "name": "Weston McKennie",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": true
+        },
+        {
+          "id": "USA-FW2",
+          "name": "Kevin Castillo",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "USA-GK2",
+          "name": "Alphonso Charles",
+          "team": "USA",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF3",
+          "name": "Alphonso Hernández",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "USA-FW4",
+          "name": "Kevin Jiménez",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF1",
+          "name": "Tajon Hernández",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF4",
+          "name": "Alphonso David",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF6",
+          "name": "Junior Vargas",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF7",
+          "name": "Josh David",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF3",
+          "name": "Carlos Jiménez",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "USA-FW3",
+          "name": "Josh Charles",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF7",
+          "name": "Tajon Ramírez",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "USA-GK1",
+          "name": "Tajon Charles",
+          "team": "USA",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF2",
+          "name": "Kevin Charles",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF4",
+          "name": "Andrés Ramírez",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF5",
+          "name": "Josh Moreno",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF5",
+          "name": "José Moreno",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "USA-GK3",
+          "name": "Andrés Charles",
+          "team": "USA",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF6",
+          "name": "Erick Castillo",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF2",
+          "name": "José Jiménez",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "PAR",
+      "name": "Paraguay",
+      "code": "PAR",
+      "baseOverall": 74,
+      "players": [
+        {
+          "id": "PAR-MF5",
+          "name": "Diego Rodríguez",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "PAR-GK2",
+          "name": "Lucas Herrera",
+          "team": "PAR",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF1",
+          "name": "Ezequiel Vega",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF6",
+          "name": "Emiliano Herrera",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "PAR-GK3",
+          "name": "Franco Herrera",
+          "team": "PAR",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF3",
+          "name": "Ezequiel Rojas",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF3",
+          "name": "Joaquín Fernández",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF4",
+          "name": "Ramiro Silva",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF7",
+          "name": "Ramiro Martínez",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "PAR-FW4",
+          "name": "Emiliano Rodríguez",
+          "team": "PAR",
+          "pos": "FW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF5",
+          "name": "Joaquín Núñez",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF2",
+          "name": "Bruno Núñez",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAR-FW2",
+          "name": "Joaquín Cabrera",
+          "team": "PAR",
+          "pos": "FW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAR-FW3",
+          "name": "Joaquín Molina",
+          "team": "PAR",
+          "pos": "FW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF2",
+          "name": "Mateo Pérez",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF4",
+          "name": "Ramiro Molina",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF7",
+          "name": "Emiliano Aguirre",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAR-GK1",
+          "name": "Thiago Rojas",
+          "team": "PAR",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAR-MF6",
+          "name": "Thiago Rodríguez",
+          "team": "PAR",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAR-FW1",
+          "name": "Diego Paredes",
+          "team": "PAR",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAR-DF1",
+          "name": "Lucas Silva",
+          "team": "PAR",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "AUS",
+      "name": "Australia",
+      "code": "AUS",
+      "baseOverall": 73,
+      "players": [
+        {
+          "id": "AUS-MF4",
+          "name": "Finn Payne",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF7",
+          "name": "Cole Bell",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF2",
+          "name": "Marco Fallon",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "AUS-GK3",
+          "name": "Liam Kire",
+          "team": "AUS",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "AUS-FW3",
+          "name": "Finn Rufer",
+          "team": "AUS",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF5",
+          "name": "Levi Bell",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF6",
+          "name": "Finn Tuiloma",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "AUS-FW2",
+          "name": "Tyrone Vicelich",
+          "team": "AUS",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "AUS-FW1",
+          "name": "Tyrone Boxall",
+          "team": "AUS",
+          "pos": "FW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "AUS-GK1",
+          "name": "Marco Vicelich",
+          "team": "AUS",
+          "pos": "GK",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF3",
+          "name": "Liam Fallon",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF5",
+          "name": "Zane Tuiloma",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "AUS-FW4",
+          "name": "Finn Vicelich",
+          "team": "AUS",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF1",
+          "name": "Noah Kire",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF2",
+          "name": "Sione Vicelich",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF3",
+          "name": "Marco Payne",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF1",
+          "name": "Levi Wood",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "AUS-MF6",
+          "name": "Jack Wood",
+          "team": "AUS",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "AUS-GK2",
+          "name": "Sione Payne",
+          "team": "AUS",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF7",
+          "name": "Liam Sail",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "AUS-DF4",
+          "name": "Finn Sail",
+          "team": "AUS",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "TUR",
+      "name": "Turkey",
+      "code": "TUR",
+      "baseOverall": 78,
+      "players": [
+        {
+          "id": "TUR-MF5",
+          "name": "Emre Aydın",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF3",
+          "name": "Cenk Demir",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "TUR-FW2",
+          "name": "Burak Şahin",
+          "team": "TUR",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "TUR-FW4",
+          "name": "Emre Çelik",
+          "team": "TUR",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "TUR-FW3",
+          "name": "Serkan Kılıç",
+          "team": "TUR",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF6",
+          "name": "Kaan Yılmaz",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF4",
+          "name": "Kaan Demir",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "TUR-FW1",
+          "name": "Burak Çelik",
+          "team": "TUR",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "TUR-GK1",
+          "name": "Burak Kaya",
+          "team": "TUR",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF6",
+          "name": "Ugur Demir",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF1",
+          "name": "Emre Çelik",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF2",
+          "name": "Ugur Demir",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF7",
+          "name": "Tolga Demir",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF3",
+          "name": "Emre Öztürk",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF5",
+          "name": "Ugur Çelik",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "TUR-GK3",
+          "name": "Cenk Doğan",
+          "team": "TUR",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "TUR-GK2",
+          "name": "Kaan Arslan",
+          "team": "TUR",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF2",
+          "name": "Cenk Şahin",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUR-MF1",
+          "name": "Deniz Şahin",
+          "team": "TUR",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF4",
+          "name": "Serkan Öztürk",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "TUR-DF7",
+          "name": "Emre Öztürk",
+          "team": "TUR",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "GER",
+      "name": "Germany",
+      "code": "GER",
+      "baseOverall": 85,
+      "players": [
+        {
+          "id": "GER-MF1",
+          "name": "Jamal Musiala",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": true
+        },
+        {
+          "id": "GER-MF2",
+          "name": "Florian Wirtz",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "GER-FW2",
+          "name": "Lukas Weber",
+          "team": "GER",
+          "pos": "FW",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "GER-FW1",
+          "name": "Kai Havertz",
+          "team": "GER",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "GER-GK2",
+          "name": "Julian Schröder",
+          "team": "GER",
+          "pos": "GK",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "GER-GK1",
+          "name": "Manuel Neuer",
+          "team": "GER",
+          "pos": "GK",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "GER-DF6",
+          "name": "Moritz Neumann",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "GER-FW3",
+          "name": "Elias Klein",
+          "team": "GER",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "GER-FW4",
+          "name": "Moritz Becker",
+          "team": "GER",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF2",
+          "name": "Jannik Koch",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "GER-MF6",
+          "name": "Maximilian Wolf",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF4",
+          "name": "Lukas Wolf",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF5",
+          "name": "David Schneider",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "GER-MF4",
+          "name": "Felix Müller",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF3",
+          "name": "Leon Schneider",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "GER-MF3",
+          "name": "Niklas Meyer",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "GER-MF5",
+          "name": "Moritz Weber",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF7",
+          "name": "Niklas Fischer",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "GER-GK3",
+          "name": "Robin Schmidt",
+          "team": "GER",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "GER-DF1",
+          "name": "Paul Müller",
+          "team": "GER",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "GER-MF7",
+          "name": "Tom Koch",
+          "team": "GER",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "ECU",
+      "name": "Ecuador",
+      "code": "ECU",
+      "baseOverall": 78,
+      "players": [
+        {
+          "id": "ECU-MF1",
+          "name": "Moisés Caicedo",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "ECU-DF1",
+          "name": "Piero Hincapié",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": true
+        },
+        {
+          "id": "ECU-MF5",
+          "name": "Santiago Cabrera",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "ECU-GK1",
+          "name": "Facundo Herrera",
+          "team": "ECU",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "ECU-FW3",
+          "name": "Thiago Silva",
+          "team": "ECU",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "ECU-FW4",
+          "name": "Mateo Aguirre",
+          "team": "ECU",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF5",
+          "name": "Ramiro Rojas",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "ECU-MF7",
+          "name": "Franco Herrera",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "ECU-MF2",
+          "name": "Thiago Cabrera",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "ECU-FW1",
+          "name": "Thiago Rojas",
+          "team": "ECU",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "ECU-FW2",
+          "name": "Thiago Vega",
+          "team": "ECU",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF6",
+          "name": "Ezequiel Vega",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "ECU-MF3",
+          "name": "Emiliano Silva",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "ECU-MF6",
+          "name": "Joaquín Núñez",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "ECU-GK2",
+          "name": "Emiliano Silva",
+          "team": "ECU",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "ECU-GK3",
+          "name": "Ramiro Silva",
+          "team": "ECU",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF2",
+          "name": "Agustín Fernández",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF7",
+          "name": "Ezequiel Rodríguez",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "ECU-MF4",
+          "name": "Mateo Silva",
+          "team": "ECU",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF4",
+          "name": "Lucas Silva",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "ECU-DF3",
+          "name": "Ramiro Vega",
+          "team": "ECU",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CIV",
+      "name": "Ivory Coast",
+      "code": "CIV",
+      "baseOverall": 79,
+      "players": [
+        {
+          "id": "CIV-FW2",
+          "name": "Samuel Traoré",
+          "team": "CIV",
+          "pos": "FW",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF2",
+          "name": "Kwame Doumbia",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF5",
+          "name": "Aboubakar Osei",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CIV-FW4",
+          "name": "Bakary Boateng",
+          "team": "CIV",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF3",
+          "name": "Samuel Diallo",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF5",
+          "name": "Bakary Traoré",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF4",
+          "name": "Ibrahim Doumbia",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF7",
+          "name": "Samuel Camara",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF3",
+          "name": "Joseph Toure",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF1",
+          "name": "Amadou Keita",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF1",
+          "name": "Sekou Osei",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CIV-FW3",
+          "name": "Samuel Bamba",
+          "team": "CIV",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CIV-GK1",
+          "name": "Emmanuel Fofana",
+          "team": "CIV",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "CIV-GK3",
+          "name": "Ibrahim Osei",
+          "team": "CIV",
+          "pos": "GK",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF7",
+          "name": "Moussa Fofana",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CIV-FW1",
+          "name": "Joseph Traoré",
+          "team": "CIV",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF6",
+          "name": "Samuel Doumbia",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF4",
+          "name": "Baba Diallo",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CIV-MF6",
+          "name": "Ibrahim Camara",
+          "team": "CIV",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "CIV-GK2",
+          "name": "Idris Fofana",
+          "team": "CIV",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "CIV-DF2",
+          "name": "Joseph Traoré",
+          "team": "CIV",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CUW",
+      "name": "Curaçao",
+      "code": "CUW",
+      "baseOverall": 64,
+      "players": [
+        {
+          "id": "CUW-MF3",
+          "name": "Erick Larin",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF7",
+          "name": "Tajon Moreno",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF1",
+          "name": "Erick Ramírez",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "CUW-GK2",
+          "name": "Alphonso Vargas",
+          "team": "CUW",
+          "pos": "GK",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF3",
+          "name": "Luis Vargas",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF4",
+          "name": "Tajon David",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF5",
+          "name": "José Jiménez",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF7",
+          "name": "Erick Jiménez",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-FW1",
+          "name": "Andrés Ramírez",
+          "team": "CUW",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-FW2",
+          "name": "Alphonso Moreno",
+          "team": "CUW",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-FW3",
+          "name": "Erick Buchanan",
+          "team": "CUW",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-FW4",
+          "name": "Luis Jiménez",
+          "team": "CUW",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF2",
+          "name": "Andrés Buchanan",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "CUW-GK1",
+          "name": "Andrés Buchanan",
+          "team": "CUW",
+          "pos": "GK",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "CUW-MF6",
+          "name": "Junior Larin",
+          "team": "CUW",
+          "pos": "MF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF1",
+          "name": "Andrés Castillo",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF4",
+          "name": "José Ramírez",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF5",
+          "name": "José Hernández",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "CUW-GK3",
+          "name": "Tajon Castillo",
+          "team": "CUW",
+          "pos": "GK",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF6",
+          "name": "Andrés David",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "CUW-DF2",
+          "name": "Carlos Castillo",
+          "team": "CUW",
+          "pos": "DF",
+          "overall": 55,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "NED",
+      "name": "Netherlands",
+      "code": "NED",
+      "baseOverall": 84,
+      "players": [
+        {
+          "id": "NED-DF1",
+          "name": "Virgil van Dijk",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "NED-MF1",
+          "name": "Xavi Simons",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "NED-FW1",
+          "name": "Cody Gakpo",
+          "team": "NED",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "NED-FW2",
+          "name": "Wouter de Boer",
+          "team": "NED",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF7",
+          "name": "Bram Bos",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "NED-FW4",
+          "name": "Milan van Dijk",
+          "team": "NED",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "NED-GK1",
+          "name": "Bart Verbruggen",
+          "team": "NED",
+          "pos": "GK",
+          "overall": 82,
+          "isStar": true
+        },
+        {
+          "id": "NED-MF7",
+          "name": "Stijn Bos",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF4",
+          "name": "Joris Vos",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF5",
+          "name": "Tim de Groot",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "NED-MF6",
+          "name": "Bram Peters",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NED-FW3",
+          "name": "Stijn Visser",
+          "team": "NED",
+          "pos": "FW",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NED-GK2",
+          "name": "Wouter Mulder",
+          "team": "NED",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF6",
+          "name": "Niek Meijer",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "NED-MF4",
+          "name": "Joris Dekker",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "NED-GK3",
+          "name": "Sven Vos",
+          "team": "NED",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF2",
+          "name": "Jasper Visser",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NED-MF2",
+          "name": "Jasper Bakker",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NED-MF5",
+          "name": "Joris Brouwer",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NED-DF3",
+          "name": "Ruben Meijer",
+          "team": "NED",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "NED-MF3",
+          "name": "Koen Meijer",
+          "team": "NED",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "JPN",
+      "name": "Japan",
+      "code": "JPN",
+      "baseOverall": 80,
+      "players": [
+        {
+          "id": "JPN-FW1",
+          "name": "Takefusa Kubo",
+          "team": "JPN",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "JPN-FW2",
+          "name": "Kaoru Mitoma",
+          "team": "JPN",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "JPN-MF2",
+          "name": "Ren Tanaka",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "JPN-GK1",
+          "name": "Riku Park",
+          "team": "JPN",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF1",
+          "name": "Min-jun Yamamoto",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF6",
+          "name": "Haruto Park",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF1",
+          "name": "Sota Watanabe",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "JPN-FW3",
+          "name": "Min-jun Jung",
+          "team": "JPN",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF6",
+          "name": "Tae-yang Kobayashi",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF7",
+          "name": "Haruto Jung",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF4",
+          "name": "Seo-jun Kobayashi",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "JPN-GK2",
+          "name": "Sota Tanaka",
+          "team": "JPN",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "JPN-GK3",
+          "name": "Seo-jun Kobayashi",
+          "team": "JPN",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF5",
+          "name": "Tae-yang Suzuki",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF5",
+          "name": "Ji-ho Choi",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF3",
+          "name": "Min-jun Kobayashi",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "JPN-MF7",
+          "name": "Haruto Yamamoto",
+          "team": "JPN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "JPN-FW4",
+          "name": "Tae-yang Yamamoto",
+          "team": "JPN",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF3",
+          "name": "Min-jun Kobayashi",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF4",
+          "name": "Tae-yang Jung",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "JPN-DF2",
+          "name": "Ji-ho Choi",
+          "team": "JPN",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "TUN",
+      "name": "Tunisia",
+      "code": "TUN",
+      "baseOverall": 75,
+      "players": [
+        {
+          "id": "TUN-FW3",
+          "name": "Ahmed Zidan",
+          "team": "TUN",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF1",
+          "name": "Zaid Tahiri",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "TUN-GK2",
+          "name": "Fahad Zidan",
+          "team": "TUN",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF1",
+          "name": "Sami Qureshi",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF6",
+          "name": "Ali Qureshi",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF7",
+          "name": "Rami Saleh",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUN-FW4",
+          "name": "Khalid Aziz",
+          "team": "TUN",
+          "pos": "FW",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF2",
+          "name": "Bilal Karimi",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF4",
+          "name": "Sami Amrani",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF3",
+          "name": "Sami Nasser",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF6",
+          "name": "Fahad Khalil",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "TUN-GK1",
+          "name": "Hamza Hassan",
+          "team": "TUN",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF2",
+          "name": "Mohammed Zidan",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUN-FW1",
+          "name": "Ali Al-Sayed",
+          "team": "TUN",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUN-FW2",
+          "name": "Ahmed Tahiri",
+          "team": "TUN",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "TUN-GK3",
+          "name": "Zaid Tahiri",
+          "team": "TUN",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF3",
+          "name": "Ali Rashid",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "TUN-MF5",
+          "name": "Sami Hassan",
+          "team": "TUN",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF7",
+          "name": "Mohammed Tahiri",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF5",
+          "name": "Youssef Hassan",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "TUN-DF4",
+          "name": "Ahmed Amrani",
+          "team": "TUN",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "SWE",
+      "name": "Sweden",
+      "code": "SWE",
+      "baseOverall": 76,
+      "players": [
+        {
+          "id": "SWE-MF6",
+          "name": "Henrik Nilsson",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "SWE-FW4",
+          "name": "Viktor Eriksson",
+          "team": "SWE",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF5",
+          "name": "Fredrik Berg",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "SWE-FW2",
+          "name": "Viktor Karlsson",
+          "team": "SWE",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "SWE-GK2",
+          "name": "Erik Hansen",
+          "team": "SWE",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF5",
+          "name": "Kristian Eriksson",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF6",
+          "name": "Anders Lund",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SWE-FW1",
+          "name": "Anders Eriksson",
+          "team": "SWE",
+          "pos": "FW",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF1",
+          "name": "Henrik Solberg",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF3",
+          "name": "Erik Haugen",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF1",
+          "name": "Oscar Karlsson",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF2",
+          "name": "Viktor Solberg",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF3",
+          "name": "Kristian Dahl",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "SWE-GK3",
+          "name": "Fredrik Haugen",
+          "team": "SWE",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF2",
+          "name": "Viktor Olsen",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF7",
+          "name": "Kristian Johansson",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF7",
+          "name": "Henrik Hansen",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "SWE-FW3",
+          "name": "Jonas Andersson",
+          "team": "SWE",
+          "pos": "FW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "SWE-DF4",
+          "name": "Erik Dahl",
+          "team": "SWE",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "SWE-MF4",
+          "name": "Aksel Nilsson",
+          "team": "SWE",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "SWE-GK1",
+          "name": "Henrik Lund",
+          "team": "SWE",
+          "pos": "GK",
+          "overall": 68,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "BEL",
+      "name": "Belgium",
+      "code": "BEL",
+      "baseOverall": 83,
+      "players": [
+        {
+          "id": "BEL-MF1",
+          "name": "Kevin De Bruyne",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "BEL-FW2",
+          "name": "Jérémy Doku",
+          "team": "BEL",
+          "pos": "FW",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "BEL-FW3",
+          "name": "Koen Visser",
+          "team": "BEL",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "BEL-FW1",
+          "name": "Romelu Lukaku",
+          "team": "BEL",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": true
+        },
+        {
+          "id": "BEL-GK3",
+          "name": "Stijn Visser",
+          "team": "BEL",
+          "pos": "GK",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF3",
+          "name": "Jasper de Jong",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF5",
+          "name": "Joris van Dijk",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF6",
+          "name": "Daan de Boer",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "BEL-GK1",
+          "name": "Ruben de Groot",
+          "team": "BEL",
+          "pos": "GK",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF5",
+          "name": "Tim de Boer",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF7",
+          "name": "Bram Peters",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF4",
+          "name": "Koen de Groot",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF7",
+          "name": "Koen de Groot",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF2",
+          "name": "Jasper Meijer",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "BEL-FW4",
+          "name": "Milan Peters",
+          "team": "BEL",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF4",
+          "name": "Joris Brouwer",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF3",
+          "name": "Sven Bakker",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "BEL-MF6",
+          "name": "Joris Dekker",
+          "team": "BEL",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "BEL-GK2",
+          "name": "Niek Bakker",
+          "team": "BEL",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF1",
+          "name": "Koen Dekker",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "BEL-DF2",
+          "name": "Bram Smit",
+          "team": "BEL",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "IRN",
+      "name": "Iran",
+      "code": "IRN",
+      "baseOverall": 77,
+      "players": [
+        {
+          "id": "IRN-FW1",
+          "name": "Mehdi Taremi",
+          "team": "IRN",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": true
+        },
+        {
+          "id": "IRN-MF2",
+          "name": "Amir Sadeghi",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF6",
+          "name": "Pooya Ebrahimi",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "IRN-FW2",
+          "name": "Farhad Ghasemi",
+          "team": "IRN",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "IRN-FW3",
+          "name": "Kian Bahrami",
+          "team": "IRN",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF7",
+          "name": "Danial Hosseini",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF4",
+          "name": "Iman Karimi",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF5",
+          "name": "Behrad Karimi",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "IRN-GK3",
+          "name": "Amir Rezaei",
+          "team": "IRN",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF2",
+          "name": "Pooya Nasiri",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "IRN-GK2",
+          "name": "Milad Rostami",
+          "team": "IRN",
+          "pos": "GK",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF4",
+          "name": "Reza Salehi",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF5",
+          "name": "Kaveh Salehi",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "IRN-GK1",
+          "name": "Milad Karimi",
+          "team": "IRN",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF6",
+          "name": "Reza Bahrami",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "IRN-FW4",
+          "name": "Kaveh Jafari",
+          "team": "IRN",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF3",
+          "name": "Navid Bahrami",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF3",
+          "name": "Amir Salehi",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF7",
+          "name": "Arash Karimi",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "IRN-MF1",
+          "name": "Reza Hosseini",
+          "team": "IRN",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "IRN-DF1",
+          "name": "Pooya Hosseini",
+          "team": "IRN",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "EGY",
+      "name": "Egypt",
+      "code": "EGY",
+      "baseOverall": 78,
+      "players": [
+        {
+          "id": "EGY-FW1",
+          "name": "Mohamed Salah",
+          "team": "EGY",
+          "pos": "FW",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "EGY-MF5",
+          "name": "Ali Farouk",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "EGY-FW2",
+          "name": "Tariq Khalil",
+          "team": "EGY",
+          "pos": "FW",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "EGY-GK3",
+          "name": "Omar Hassan",
+          "team": "EGY",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF2",
+          "name": "Khalid Hassan",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "EGY-FW4",
+          "name": "Mohammed Mansour",
+          "team": "EGY",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "EGY-GK1",
+          "name": "Sami Belkacem",
+          "team": "EGY",
+          "pos": "GK",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF3",
+          "name": "Rami Mansour",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "EGY-GK2",
+          "name": "Fahad Aziz",
+          "team": "EGY",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF2",
+          "name": "Khalid Hassan",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF4",
+          "name": "Zaid Zidan",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF7",
+          "name": "Tariq Aziz",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF4",
+          "name": "Hamza Zidan",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF6",
+          "name": "Mohammed Tahiri",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF7",
+          "name": "Youssef Nasser",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "EGY-MF1",
+          "name": "Bilal Karimi",
+          "team": "EGY",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF5",
+          "name": "Sami Tahiri",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "EGY-FW3",
+          "name": "Hamza Farouk",
+          "team": "EGY",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF6",
+          "name": "Tariq Qureshi",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF1",
+          "name": "Omar Saleh",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "EGY-DF3",
+          "name": "Ali Farouk",
+          "team": "EGY",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "NZL",
+      "name": "New Zealand",
+      "code": "NZL",
+      "baseOverall": 66,
+      "players": [
+        {
+          "id": "NZL-MF3",
+          "name": "Levi Wood",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "NZL-FW3",
+          "name": "Tyrone Fallon",
+          "team": "NZL",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF5",
+          "name": "Jack Sail",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "NZL-FW4",
+          "name": "Marco Rufer",
+          "team": "NZL",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF2",
+          "name": "Liam Vicelich",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF1",
+          "name": "Marco Payne",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF5",
+          "name": "Marco Fallon",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF7",
+          "name": "Tyrone Vicelich",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "NZL-GK2",
+          "name": "Liam Bell",
+          "team": "NZL",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF4",
+          "name": "Finn Boxall",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF1",
+          "name": "Levi Rufer",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF4",
+          "name": "Noah Wood",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF2",
+          "name": "Finn Sail",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "NZL-FW1",
+          "name": "Jack Kire",
+          "team": "NZL",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF6",
+          "name": "Levi Boxall",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "NZL-MF7",
+          "name": "Liam Rufer",
+          "team": "NZL",
+          "pos": "MF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "NZL-FW2",
+          "name": "Noah Tuiloma",
+          "team": "NZL",
+          "pos": "FW",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "NZL-GK1",
+          "name": "Cole Sail",
+          "team": "NZL",
+          "pos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "NZL-GK3",
+          "name": "Sione Boxall",
+          "team": "NZL",
+          "pos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF3",
+          "name": "Tyrone Wood",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "NZL-DF6",
+          "name": "Finn Kire",
+          "team": "NZL",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "ESP",
+      "name": "Spain",
+      "code": "ESP",
+      "baseOverall": 90,
+      "players": [
+        {
+          "id": "ESP-FW1",
+          "name": "Lamine Yamal",
+          "team": "ESP",
+          "pos": "FW",
+          "overall": 91,
+          "isStar": true
+        },
+        {
+          "id": "ESP-MF2",
+          "name": "Rodri",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": true
+        },
+        {
+          "id": "ESP-MF3",
+          "name": "Álvaro Romero",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ESP-FW2",
+          "name": "Marc García",
+          "team": "ESP",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ESP-FW4",
+          "name": "Nuno Pinto",
+          "team": "ESP",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ESP-MF1",
+          "name": "Pedri",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "ESP-DF1",
+          "name": "Hugo García",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 89,
+          "isStar": false
+        },
+        {
+          "id": "ESP-DF6",
+          "name": "Marc Carvalho",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "ESP-DF3",
+          "name": "Hugo Costa",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ESP-DF5",
+          "name": "Rui Sánchez",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ESP-MF5",
+          "name": "João Serrano",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "ESP-GK1",
+          "name": "Unai Simón",
+          "team": "ESP",
+          "pos": "GK",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "ESP-DF2",
+          "name": "Gonçalo Sánchez",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "ESP-DF4",
+          "name": "Hugo López",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "ESP-MF6",
+          "name": "Sergio Pinto",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "ESP-FW3",
+          "name": "João Navarro",
+          "team": "ESP",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "ESP-DF7",
+          "name": "Rubén Costa",
+          "team": "ESP",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "ESP-MF4",
+          "name": "Marc Domínguez",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "ESP-MF7",
+          "name": "Álvaro Lopes",
+          "team": "ESP",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "ESP-GK2",
+          "name": "Rubén Romero",
+          "team": "ESP",
+          "pos": "GK",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "ESP-GK3",
+          "name": "Gonçalo Serrano",
+          "team": "ESP",
+          "pos": "GK",
+          "overall": 82,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "URU",
+      "name": "Uruguay",
+      "code": "URU",
+      "baseOverall": 82,
+      "players": [
+        {
+          "id": "URU-MF1",
+          "name": "Federico Valverde",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "URU-DF1",
+          "name": "Ronald Araújo",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "URU-FW1",
+          "name": "Darwin Núñez",
+          "team": "URU",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "URU-MF2",
+          "name": "Emiliano Correa",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "URU-MF7",
+          "name": "Facundo Rojas",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF2",
+          "name": "Joaquín Vega",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "URU-GK3",
+          "name": "Bruno Rojas",
+          "team": "URU",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "URU-MF5",
+          "name": "Facundo Núñez",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "URU-MF6",
+          "name": "Emiliano Aguirre",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "URU-FW2",
+          "name": "Lucas Rodríguez",
+          "team": "URU",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF3",
+          "name": "Mateo Molina",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF6",
+          "name": "Lucas Silva",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "URU-MF3",
+          "name": "Diego González",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "URU-MF4",
+          "name": "Diego Cabrera",
+          "team": "URU",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "URU-FW3",
+          "name": "Nicolás Herrera",
+          "team": "URU",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "URU-GK1",
+          "name": "Santiago Silva",
+          "team": "URU",
+          "pos": "GK",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF4",
+          "name": "Santiago Vega",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "URU-FW4",
+          "name": "Emiliano Fernández",
+          "team": "URU",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "URU-GK2",
+          "name": "Santiago Aguirre",
+          "team": "URU",
+          "pos": "GK",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF5",
+          "name": "Mateo Pérez",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "URU-DF7",
+          "name": "Mateo Vega",
+          "team": "URU",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "KSA",
+      "name": "Saudi Arabia",
+      "code": "KSA",
+      "baseOverall": 72,
+      "players": [
+        {
+          "id": "KSA-FW1",
+          "name": "Salem Al-Dawsari",
+          "team": "KSA",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": true
+        },
+        {
+          "id": "KSA-MF7",
+          "name": "Anas Karimi",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "KSA-FW2",
+          "name": "Karim Saleh",
+          "team": "KSA",
+          "pos": "FW",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "KSA-FW3",
+          "name": "Bilal Belkacem",
+          "team": "KSA",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "KSA-GK3",
+          "name": "Karim Farouk",
+          "team": "KSA",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF1",
+          "name": "Bilal Farouk",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF4",
+          "name": "Khalid Belkacem",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF3",
+          "name": "Zaid Aziz",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF2",
+          "name": "Anas Zidan",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF5",
+          "name": "Omar Tahiri",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF4",
+          "name": "Omar Qureshi",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF3",
+          "name": "Rami Karimi",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "KSA-FW4",
+          "name": "Khalid Khalil",
+          "team": "KSA",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "KSA-GK1",
+          "name": "Ahmed Al-Sayed",
+          "team": "KSA",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF1",
+          "name": "Khalid Al-Sayed",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF7",
+          "name": "Hamza Hassan",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "KSA-MF6",
+          "name": "Mohammed Tahiri",
+          "team": "KSA",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "KSA-GK2",
+          "name": "Khalid Karimi",
+          "team": "KSA",
+          "pos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF6",
+          "name": "Mohammed Tahiri",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF5",
+          "name": "Bilal Karimi",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "KSA-DF2",
+          "name": "Khalid Belkacem",
+          "team": "KSA",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CPV",
+      "name": "Cape Verde",
+      "code": "CPV",
+      "baseOverall": 67,
+      "players": [
+        {
+          "id": "CPV-GK1",
+          "name": "Chidi Diop",
+          "team": "CPV",
+          "pos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF3",
+          "name": "Yusuf Boateng",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF4",
+          "name": "Sekou Doumbia",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CPV-FW4",
+          "name": "Idris Mensah",
+          "team": "CPV",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF1",
+          "name": "Joseph Koné",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CPV-FW2",
+          "name": "Yusuf Diop",
+          "team": "CPV",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CPV-GK3",
+          "name": "Ismael Traoré",
+          "team": "CPV",
+          "pos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF5",
+          "name": "Samuel Osei",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF5",
+          "name": "Idris Mensah",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF2",
+          "name": "Yusuf Keita",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF6",
+          "name": "Idris Sow",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF7",
+          "name": "Idris Camara",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CPV-FW1",
+          "name": "Emmanuel Bamba",
+          "team": "CPV",
+          "pos": "FW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CPV-FW3",
+          "name": "Aboubakar Mensah",
+          "team": "CPV",
+          "pos": "FW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "CPV-GK2",
+          "name": "Amadou Camara",
+          "team": "CPV",
+          "pos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF1",
+          "name": "Samuel Boateng",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "CPV-MF2",
+          "name": "Amadou Cissé",
+          "team": "CPV",
+          "pos": "MF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF3",
+          "name": "Ismael Toure",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF4",
+          "name": "Bakary Boateng",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF6",
+          "name": "Joseph Mensah",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "CPV-DF7",
+          "name": "Ibrahim Sow",
+          "team": "CPV",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "FRA",
+      "name": "France",
+      "code": "FRA",
+      "baseOverall": 90,
+      "players": [
+        {
+          "id": "FRA-FW1",
+          "name": "Kylian Mbappé",
+          "team": "FRA",
+          "pos": "FW",
+          "overall": 94,
+          "isStar": true
+        },
+        {
+          "id": "FRA-DF7",
+          "name": "Malo Fontaine",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF3",
+          "name": "Lucas Blanchard",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF6",
+          "name": "Amine Blanchard",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF7",
+          "name": "Rayan Fabre",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "FRA-FW4",
+          "name": "Rayan Dubois",
+          "team": "FRA",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "FRA-FW2",
+          "name": "Ousmane Dembélé",
+          "team": "FRA",
+          "pos": "FW",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "FRA-DF2",
+          "name": "Yanis André",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 89,
+          "isStar": false
+        },
+        {
+          "id": "FRA-GK1",
+          "name": "Mike Maignan",
+          "team": "FRA",
+          "pos": "GK",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "FRA-DF3",
+          "name": "Mathis Rousseau",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF2",
+          "name": "Nathan Perrin",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF1",
+          "name": "Aurélien Tchouaméni",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "FRA-FW3",
+          "name": "Nathan Rousseau",
+          "team": "FRA",
+          "pos": "FW",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "FRA-GK3",
+          "name": "Yanis Moreau",
+          "team": "FRA",
+          "pos": "GK",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "FRA-DF4",
+          "name": "Yanis Perrin",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF5",
+          "name": "Lucas André",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "FRA-GK2",
+          "name": "Loïc Lefevre",
+          "team": "FRA",
+          "pos": "GK",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "FRA-DF1",
+          "name": "Malo Lefevre",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "FRA-DF6",
+          "name": "Yanis Lefevre",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "FRA-MF4",
+          "name": "Noé Blanchard",
+          "team": "FRA",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "FRA-DF5",
+          "name": "Yanis Marchand",
+          "team": "FRA",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "SEN",
+      "name": "Senegal",
+      "code": "SEN",
+      "baseOverall": 80,
+      "players": [
+        {
+          "id": "SEN-FW1",
+          "name": "Sadio Mané",
+          "team": "SEN",
+          "pos": "FW",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "SEN-DF1",
+          "name": "Kalidou Koulibaly",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 83,
+          "isStar": true
+        },
+        {
+          "id": "SEN-FW2",
+          "name": "Amadou Mensah",
+          "team": "SEN",
+          "pos": "FW",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF4",
+          "name": "Amadou Mensah",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF7",
+          "name": "Yusuf Diop",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "SEN-GK1",
+          "name": "Kwame Diop",
+          "team": "SEN",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF3",
+          "name": "Bakary Boateng",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF5",
+          "name": "Aboubakar Traoré",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF1",
+          "name": "Samuel Sow",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "SEN-GK2",
+          "name": "Emmanuel Bamba",
+          "team": "SEN",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF2",
+          "name": "Aboubakar Sow",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF6",
+          "name": "Sekou Koné",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SEN-FW3",
+          "name": "Ibrahim Boateng",
+          "team": "SEN",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SEN-FW4",
+          "name": "Samuel Cissé",
+          "team": "SEN",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF3",
+          "name": "Yusuf Fofana",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF2",
+          "name": "Ismael Toure",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "SEN-GK3",
+          "name": "Samuel Diop",
+          "team": "SEN",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF4",
+          "name": "Samuel Sow",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF7",
+          "name": "Joseph Sow",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "SEN-MF6",
+          "name": "Yusuf Traoré",
+          "team": "SEN",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "SEN-DF5",
+          "name": "Amadou Bamba",
+          "team": "SEN",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "NOR",
+      "name": "Norway",
+      "code": "NOR",
+      "baseOverall": 81,
+      "players": [
+        {
+          "id": "NOR-FW1",
+          "name": "Erling Haaland",
+          "team": "NOR",
+          "pos": "FW",
+          "overall": 93,
+          "isStar": true
+        },
+        {
+          "id": "NOR-MF1",
+          "name": "Martin Ødegaard",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "NOR-FW2",
+          "name": "Viktor Olsen",
+          "team": "NOR",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF6",
+          "name": "Kristian Larsen",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "NOR-FW3",
+          "name": "Jonas Eriksson",
+          "team": "NOR",
+          "pos": "FW",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF7",
+          "name": "Magnus Dahl",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF1",
+          "name": "Jonas Berg",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF3",
+          "name": "Anders Berg",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF4",
+          "name": "Emil Karlsson",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF5",
+          "name": "Emil Strand",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "NOR-FW4",
+          "name": "Sander Olsen",
+          "team": "NOR",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "NOR-GK1",
+          "name": "Mats Larsen",
+          "team": "NOR",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF7",
+          "name": "Oscar Karlsson",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF3",
+          "name": "Kristian Strand",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF6",
+          "name": "Anders Karlsson",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "NOR-MF2",
+          "name": "Mats Eriksson",
+          "team": "NOR",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "NOR-GK2",
+          "name": "Mats Berg",
+          "team": "NOR",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "NOR-GK3",
+          "name": "Erik Strand",
+          "team": "NOR",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF4",
+          "name": "Mats Solberg",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF2",
+          "name": "Magnus Johansson",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "NOR-DF5",
+          "name": "Anders Karlsson",
+          "team": "NOR",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "IRQ",
+      "name": "Iraq",
+      "code": "IRQ",
+      "baseOverall": 70,
+      "players": [
+        {
+          "id": "IRQ-FW4",
+          "name": "Anas Hassan",
+          "team": "IRQ",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF1",
+          "name": "Mohammed Zidan",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF1",
+          "name": "Ali Saleh",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF4",
+          "name": "Khalid Khalil",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF2",
+          "name": "Khalid Hassan",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF3",
+          "name": "Mohammed Belkacem",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-FW1",
+          "name": "Bilal Mansour",
+          "team": "IRQ",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-FW3",
+          "name": "Bilal Al-Sayed",
+          "team": "IRQ",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF3",
+          "name": "Sami Mansour",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF6",
+          "name": "Bilal Farouk",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-GK1",
+          "name": "Hamza Aziz",
+          "team": "IRQ",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-GK2",
+          "name": "Fahad Rashid",
+          "team": "IRQ",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF2",
+          "name": "Mohammed Tahiri",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF4",
+          "name": "Khalid Mansour",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF7",
+          "name": "Mohammed Tahiri",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-FW2",
+          "name": "Tariq Nasser",
+          "team": "IRQ",
+          "pos": "FW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-MF5",
+          "name": "Bilal Mansour",
+          "team": "IRQ",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-GK3",
+          "name": "Ali Aziz",
+          "team": "IRQ",
+          "pos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF5",
+          "name": "Karim Khalil",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF6",
+          "name": "Omar Karimi",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "IRQ-DF7",
+          "name": "Rami Al-Sayed",
+          "team": "IRQ",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "ARG",
+      "name": "Argentina",
+      "code": "ARG",
+      "baseOverall": 91,
+      "players": [
+        {
+          "id": "ARG-FW1",
+          "name": "Lionel Messi",
+          "team": "ARG",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": true
+        },
+        {
+          "id": "ARG-MF3",
+          "name": "Agustín Silva",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF6",
+          "name": "Emiliano Molina",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF7",
+          "name": "Lucas Correa",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ARG-FW3",
+          "name": "Thiago Molina",
+          "team": "ARG",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ARG-FW4",
+          "name": "Ramiro Correa",
+          "team": "ARG",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ARG-FW2",
+          "name": "Julián Álvarez",
+          "team": "ARG",
+          "pos": "FW",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "ARG-GK1",
+          "name": "Emiliano Martínez",
+          "team": "ARG",
+          "pos": "GK",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "ARG-DF2",
+          "name": "Agustín Rojas",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF1",
+          "name": "Enzo Fernández",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "ARG-DF1",
+          "name": "Emiliano Pérez",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ARG-DF7",
+          "name": "Bruno Herrera",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF2",
+          "name": "Emiliano Cabrera",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF4",
+          "name": "Lucas Rojas",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ARG-DF3",
+          "name": "Nicolás Rodríguez",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "ARG-GK3",
+          "name": "Diego Correa",
+          "team": "ARG",
+          "pos": "GK",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ARG-DF5",
+          "name": "Thiago Pérez",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ARG-DF6",
+          "name": "Gonzalo Martínez",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ARG-MF5",
+          "name": "Ramiro Rodríguez",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ARG-GK2",
+          "name": "Franco Silva",
+          "team": "ARG",
+          "pos": "GK",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "ARG-DF4",
+          "name": "Franco Fernández",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "ALG",
+      "name": "Algeria",
+      "code": "ALG",
+      "baseOverall": 79,
+      "players": [
+        {
+          "id": "ALG-FW1",
+          "name": "Riyad Mahrez",
+          "team": "ALG",
+          "pos": "FW",
+          "overall": 82,
+          "isStar": true
+        },
+        {
+          "id": "ALG-FW4",
+          "name": "Rami Rashid",
+          "team": "ALG",
+          "pos": "FW",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "ALG-GK2",
+          "name": "Omar Zidan",
+          "team": "ALG",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF6",
+          "name": "Bilal Al-Sayed",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF3",
+          "name": "Youssef Khalil",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF6",
+          "name": "Ahmed Farouk",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF3",
+          "name": "Ahmed Zidan",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF5",
+          "name": "Youssef Zidan",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF1",
+          "name": "Youssef Zidan",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF7",
+          "name": "Karim Saleh",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF1",
+          "name": "Ahmed Qureshi",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF4",
+          "name": "Mohammed Hassan",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF2",
+          "name": "Anas Rashid",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "ALG-GK3",
+          "name": "Tariq Belkacem",
+          "team": "ALG",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF4",
+          "name": "Rami Saleh",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "ALG-FW2",
+          "name": "Rami Saleh",
+          "team": "ALG",
+          "pos": "FW",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "ALG-DF5",
+          "name": "Zaid Tahiri",
+          "team": "ALG",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF2",
+          "name": "Fahad Saleh",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "ALG-MF7",
+          "name": "Sami Belkacem",
+          "team": "ALG",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "ALG-FW3",
+          "name": "Khalid Aziz",
+          "team": "ALG",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "ALG-GK1",
+          "name": "Omar Saleh",
+          "team": "ALG",
+          "pos": "GK",
+          "overall": 70,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "AUT",
+      "name": "Austria",
+      "code": "AUT",
+      "baseOverall": 78,
+      "players": [
+        {
+          "id": "AUT-FW2",
+          "name": "Tom Richter",
+          "team": "AUT",
+          "pos": "FW",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF1",
+          "name": "Jonas Schneider",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF4",
+          "name": "Paul Weber",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "AUT-FW1",
+          "name": "Niklas Schneider",
+          "team": "AUT",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF1",
+          "name": "Niklas Wagner",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF3",
+          "name": "Maximilian Wolf",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF6",
+          "name": "Moritz Wagner",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF5",
+          "name": "Paul Schneider",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF5",
+          "name": "Robin Wagner",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "AUT-FW3",
+          "name": "Finn Klein",
+          "team": "AUT",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "AUT-GK1",
+          "name": "Jonas Schröder",
+          "team": "AUT",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "AUT-GK3",
+          "name": "Tom Hofmann",
+          "team": "AUT",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF2",
+          "name": "Felix Hofmann",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF2",
+          "name": "Robin Weber",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "AUT-GK2",
+          "name": "Jannik Meyer",
+          "team": "AUT",
+          "pos": "GK",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "AUT-MF7",
+          "name": "Elias Meyer",
+          "team": "AUT",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "AUT-FW4",
+          "name": "Robin Becker",
+          "team": "AUT",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF6",
+          "name": "David Schmidt",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF4",
+          "name": "Leon Richter",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF7",
+          "name": "Jonas Klein",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "AUT-DF3",
+          "name": "Julian Neumann",
+          "team": "AUT",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "JOR",
+      "name": "Jordan",
+      "code": "JOR",
+      "baseOverall": 65,
+      "players": [
+        {
+          "id": "JOR-FW3",
+          "name": "Omar Nasser",
+          "team": "JOR",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF3",
+          "name": "Zaid Karimi",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF5",
+          "name": "Ahmed Belkacem",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF6",
+          "name": "Youssef Farouk",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF7",
+          "name": "Bilal Saleh",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF5",
+          "name": "Ali Zidan",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "JOR-FW2",
+          "name": "Khalid Farouk",
+          "team": "JOR",
+          "pos": "FW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "JOR-FW4",
+          "name": "Tariq Nasser",
+          "team": "JOR",
+          "pos": "FW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "JOR-GK1",
+          "name": "Tariq Al-Sayed",
+          "team": "JOR",
+          "pos": "GK",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF1",
+          "name": "Karim Tahiri",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF2",
+          "name": "Tariq Hassan",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF3",
+          "name": "Omar Mansour",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "JOR-GK2",
+          "name": "Hamza Saleh",
+          "team": "JOR",
+          "pos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF6",
+          "name": "Fahad Khalil",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "JOR-FW1",
+          "name": "Ali Farouk",
+          "team": "JOR",
+          "pos": "FW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF4",
+          "name": "Tariq Al-Sayed",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF1",
+          "name": "Sami Qureshi",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "JOR-MF4",
+          "name": "Karim Khalil",
+          "team": "JOR",
+          "pos": "MF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "JOR-GK3",
+          "name": "Sami Rashid",
+          "team": "JOR",
+          "pos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF2",
+          "name": "Khalid Tahiri",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "JOR-DF7",
+          "name": "Karim Belkacem",
+          "team": "JOR",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "POR",
+      "name": "Portugal",
+      "code": "POR",
+      "baseOverall": 87,
+      "players": [
+        {
+          "id": "POR-MF1",
+          "name": "Bruno Fernandes",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "POR-DF1",
+          "name": "Rúben Dias",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "POR-MF6",
+          "name": "Gonçalo Navarro",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "POR-FW3",
+          "name": "Álvaro Carvalho",
+          "team": "POR",
+          "pos": "FW",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "POR-GK1",
+          "name": "Diogo Costa",
+          "team": "POR",
+          "pos": "GK",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "POR-FW1",
+          "name": "Cristiano Ronaldo",
+          "team": "POR",
+          "pos": "FW",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "POR-DF2",
+          "name": "Sergio Ferreira",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "POR-DF3",
+          "name": "Hugo Romero",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "POR-DF7",
+          "name": "Tiago Domínguez",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "POR-MF2",
+          "name": "Miguel Ferreira",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "POR-MF5",
+          "name": "Tiago Ramos",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "POR-FW4",
+          "name": "Diego López",
+          "team": "POR",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "POR-GK2",
+          "name": "Nuno Sánchez",
+          "team": "POR",
+          "pos": "GK",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "POR-MF7",
+          "name": "Sergio López",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "POR-GK3",
+          "name": "Hugo Romero",
+          "team": "POR",
+          "pos": "GK",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "POR-DF4",
+          "name": "Rui Torres",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "POR-FW2",
+          "name": "Gonçalo Navarro",
+          "team": "POR",
+          "pos": "FW",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "POR-DF6",
+          "name": "Álvaro Serrano",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "POR-MF3",
+          "name": "Diego Domínguez",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "POR-MF4",
+          "name": "Diego Ramos",
+          "team": "POR",
+          "pos": "MF",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "POR-DF5",
+          "name": "Marc Navarro",
+          "team": "POR",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "COL",
+      "name": "Colombia",
+      "code": "COL",
+      "baseOverall": 82,
+      "players": [
+        {
+          "id": "COL-FW1",
+          "name": "Luis Díaz",
+          "team": "COL",
+          "pos": "FW",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "COL-MF3",
+          "name": "Mateo Correa",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF1",
+          "name": "James Rodríguez",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": true
+        },
+        {
+          "id": "COL-FW3",
+          "name": "Agustín Silva",
+          "team": "COL",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF6",
+          "name": "Agustín Molina",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF4",
+          "name": "Emiliano Vega",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF2",
+          "name": "Ramiro Paredes",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "COL-GK1",
+          "name": "Mateo González",
+          "team": "COL",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "COL-GK3",
+          "name": "Santiago Silva",
+          "team": "COL",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "COL-FW4",
+          "name": "Agustín González",
+          "team": "COL",
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF3",
+          "name": "Nicolás Aguirre",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "COL-GK2",
+          "name": "Facundo Aguirre",
+          "team": "COL",
+          "pos": "GK",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF7",
+          "name": "Nicolás Martínez",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "COL-FW2",
+          "name": "Bruno Cabrera",
+          "team": "COL",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF4",
+          "name": "Lucas Núñez",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF5",
+          "name": "Gonzalo González",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF1",
+          "name": "Mateo Paredes",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF5",
+          "name": "Franco Rodríguez",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF2",
+          "name": "Santiago Silva",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "COL-MF6",
+          "name": "Emiliano Paredes",
+          "team": "COL",
+          "pos": "MF",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "COL-DF7",
+          "name": "Franco Martínez",
+          "team": "COL",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "UZB",
+      "name": "Uzbekistan",
+      "code": "UZB",
+      "baseOverall": 66,
+      "players": [
+        {
+          "id": "UZB-MF6",
+          "name": "Sardor Ergashev",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "UZB-FW1",
+          "name": "Sherzod Karimov",
+          "team": "UZB",
+          "pos": "FW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF2",
+          "name": "Aziz Yusupov",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF5",
+          "name": "Sardor Ergashev",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF7",
+          "name": "Bekzod Ismoilov",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF4",
+          "name": "Sardor Karimov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF6",
+          "name": "Sardor Xolmatov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "UZB-GK2",
+          "name": "Jahongir Karimov",
+          "team": "UZB",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "UZB-FW4",
+          "name": "Diyor Sodiqov",
+          "team": "UZB",
+          "pos": "FW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF3",
+          "name": "Jahongir Yusupov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF5",
+          "name": "Botir Rashidov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF7",
+          "name": "Jahongir Tursunov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF3",
+          "name": "Sardor Tursunov",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF4",
+          "name": "Aziz Nazarov",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "UZB-FW2",
+          "name": "Aziz Xolmatov",
+          "team": "UZB",
+          "pos": "FW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "UZB-FW3",
+          "name": "Sardor Xolmatov",
+          "team": "UZB",
+          "pos": "FW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "UZB-GK1",
+          "name": "Sherzod Nazarov",
+          "team": "UZB",
+          "pos": "GK",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "UZB-MF1",
+          "name": "Otabek Karimov",
+          "team": "UZB",
+          "pos": "MF",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF1",
+          "name": "Otabek Ergashev",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "UZB-GK3",
+          "name": "Aziz Yusupov",
+          "team": "UZB",
+          "pos": "GK",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "UZB-DF2",
+          "name": "Jahongir Sodiqov",
+          "team": "UZB",
+          "pos": "DF",
+          "overall": 57,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "COD",
+      "name": "DR Congo",
+      "code": "COD",
+      "baseOverall": 68,
+      "players": [
+        {
+          "id": "COD-FW3",
+          "name": "Emmanuel Sow",
+          "team": "COD",
+          "pos": "FW",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF1",
+          "name": "Sekou Toure",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "COD-FW2",
+          "name": "Ismael Camara",
+          "team": "COD",
+          "pos": "FW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF6",
+          "name": "Moussa Cissé",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "COD-FW4",
+          "name": "Moussa Traoré",
+          "team": "COD",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "COD-GK3",
+          "name": "Chidi Sow",
+          "team": "COD",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF5",
+          "name": "Baba Keita",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF5",
+          "name": "Aboubakar Boateng",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF7",
+          "name": "Bakary Bamba",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF1",
+          "name": "Baba Doumbia",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "COD-GK1",
+          "name": "Joseph Cissé",
+          "team": "COD",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF2",
+          "name": "Kwame Bamba",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF7",
+          "name": "Aboubakar Camara",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF2",
+          "name": "Aboubakar Sow",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF3",
+          "name": "Kwame Mensah",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "COD-MF4",
+          "name": "Aboubakar Toure",
+          "team": "COD",
+          "pos": "MF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "COD-FW1",
+          "name": "Yusuf Mensah",
+          "team": "COD",
+          "pos": "FW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "COD-GK2",
+          "name": "Ibrahim Mensah",
+          "team": "COD",
+          "pos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF3",
+          "name": "Yusuf Osei",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF6",
+          "name": "Ismael Diop",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "COD-DF4",
+          "name": "Joseph Toure",
+          "team": "COD",
+          "pos": "DF",
+          "overall": 60,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "ENG",
+      "name": "England",
+      "code": "ENG",
+      "baseOverall": 88,
+      "players": [
+        {
+          "id": "ENG-MF1",
+          "name": "Jude Bellingham",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 91,
+          "isStar": true
+        },
+        {
+          "id": "ENG-FW4",
+          "name": "Ryan Reid",
+          "team": "ENG",
+          "pos": "FW",
+          "overall": 90,
+          "isStar": false
+        },
+        {
+          "id": "ENG-FW1",
+          "name": "Bukayo Saka",
+          "team": "ENG",
+          "pos": "FW",
+          "overall": 89,
+          "isStar": true
+        },
+        {
+          "id": "ENG-MF7",
+          "name": "James Taylor",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 89,
+          "isStar": false
+        },
+        {
+          "id": "ENG-MF2",
+          "name": "Phil Foden",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 88,
+          "isStar": true
+        },
+        {
+          "id": "ENG-DF5",
+          "name": "Curtis Wright",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 88,
+          "isStar": false
+        },
+        {
+          "id": "ENG-DF6",
+          "name": "Ethan Hughes",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": false
+        },
+        {
+          "id": "ENG-GK3",
+          "name": "Reece Hughes",
+          "team": "ENG",
+          "pos": "GK",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "ENG-DF3",
+          "name": "Ethan Bennett",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "ENG-DF7",
+          "name": "Reece Hughes",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 86,
+          "isStar": false
+        },
+        {
+          "id": "ENG-GK1",
+          "name": "Jordan Pickford",
+          "team": "ENG",
+          "pos": "GK",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "ENG-DF2",
+          "name": "Reece Reid",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 85,
+          "isStar": false
+        },
+        {
+          "id": "ENG-MF3",
+          "name": "Ryan Wright",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ENG-FW2",
+          "name": "Reece Evans",
+          "team": "ENG",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "ENG-FW3",
+          "name": "James Edwards",
+          "team": "ENG",
+          "pos": "FW",
+          "overall": 83,
+          "isStar": false
+        },
+        {
+          "id": "ENG-MF4",
+          "name": "Curtis Edwards",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "ENG-MF6",
+          "name": "Mason Cole",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "ENG-MF5",
+          "name": "Ryan Hughes",
+          "team": "ENG",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "ENG-GK2",
+          "name": "Aaron Hunt",
+          "team": "ENG",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "ENG-DF1",
+          "name": "Ethan Marshall",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "ENG-DF4",
+          "name": "Marcus Reid",
+          "team": "ENG",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "CRO",
+      "name": "Croatia",
+      "code": "CRO",
+      "baseOverall": 82,
+      "players": [
+        {
+          "id": "CRO-DF1",
+          "name": "Josko Gvardiol",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 87,
+          "isStar": true
+        },
+        {
+          "id": "CRO-MF1",
+          "name": "Luka Modrić",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 86,
+          "isStar": true
+        },
+        {
+          "id": "CRO-MF3",
+          "name": "Petar Kovačević",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "CRO-FW1",
+          "name": "Dario Kovačević",
+          "team": "CRO",
+          "pos": "FW",
+          "overall": 84,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF4",
+          "name": "Marko Marić",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "CRO-FW2",
+          "name": "Bojan Babić",
+          "team": "CRO",
+          "pos": "FW",
+          "overall": 82,
+          "isStar": false
+        },
+        {
+          "id": "CRO-GK3",
+          "name": "Stefan Vuković",
+          "team": "CRO",
+          "pos": "GK",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "CRO-MF6",
+          "name": "Mario Tomić",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false
+        },
+        {
+          "id": "CRO-GK1",
+          "name": "Petar Horvat",
+          "team": "CRO",
+          "pos": "GK",
+          "overall": 80,
+          "isStar": false
+        },
+        {
+          "id": "CRO-GK2",
+          "name": "Luka Kovač",
+          "team": "CRO",
+          "pos": "GK",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF2",
+          "name": "Stefan Novak",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CRO-MF2",
+          "name": "Josip Perić",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CRO-MF4",
+          "name": "Marko Kovačević",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF7",
+          "name": "Filip Kovač",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "CRO-MF5",
+          "name": "Josip Horvat",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "CRO-FW4",
+          "name": "Luka Babić",
+          "team": "CRO",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF3",
+          "name": "Dino Jurić",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CRO-FW3",
+          "name": "Dino Radić",
+          "team": "CRO",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "CRO-MF7",
+          "name": "Dino Knežević",
+          "team": "CRO",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF6",
+          "name": "Petar Kovačević",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CRO-DF5",
+          "name": "Stefan Babić",
+          "team": "CRO",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "GHA",
+      "name": "Ghana",
+      "code": "GHA",
+      "baseOverall": 76,
+      "players": [
+        {
+          "id": "GHA-MF1",
+          "name": "Mohammed Kudus",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 85,
+          "isStar": true
+        },
+        {
+          "id": "GHA-MF2",
+          "name": "Thomas Partey",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": true
+        },
+        {
+          "id": "GHA-FW1",
+          "name": "Emmanuel Traoré",
+          "team": "GHA",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "GHA-MF6",
+          "name": "Baba Diop",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "GHA-FW4",
+          "name": "Baba Osei",
+          "team": "GHA",
+          "pos": "FW",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "GHA-MF7",
+          "name": "Aboubakar Bamba",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "GHA-MF5",
+          "name": "Ismael Osei",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "GHA-GK1",
+          "name": "Joseph Toure",
+          "team": "GHA",
+          "pos": "GK",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF6",
+          "name": "Ibrahim Toure",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "GHA-MF3",
+          "name": "Samuel Koné",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "GHA-FW3",
+          "name": "Joseph Keita",
+          "team": "GHA",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF5",
+          "name": "Bakary Boateng",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "GHA-MF4",
+          "name": "Emmanuel Toure",
+          "team": "GHA",
+          "pos": "MF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "GHA-FW2",
+          "name": "Baba Cissé",
+          "team": "GHA",
+          "pos": "FW",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "GHA-GK2",
+          "name": "Emmanuel Fofana",
+          "team": "GHA",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF7",
+          "name": "Aboubakar Toure",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF1",
+          "name": "Idris Cissé",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF3",
+          "name": "Samuel Doumbia",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "GHA-GK3",
+          "name": "Moussa Traoré",
+          "team": "GHA",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF4",
+          "name": "Bakary Fofana",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "GHA-DF2",
+          "name": "Baba Sow",
+          "team": "GHA",
+          "pos": "DF",
+          "overall": 66,
+          "isStar": false
+        }
+      ]
+    },
+    {
+      "id": "PAN",
+      "name": "Panama",
+      "code": "PAN",
+      "baseOverall": 70,
+      "players": [
+        {
+          "id": "PAN-DF1",
+          "name": "Junior David",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF6",
+          "name": "Josh Larin",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAN-FW4",
+          "name": "Josh Castillo",
+          "team": "PAN",
+          "pos": "FW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF4",
+          "name": "Tajon Jiménez",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF7",
+          "name": "Erick Larin",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF5",
+          "name": "Tajon Castillo",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "PAN-GK2",
+          "name": "Carlos Moreno",
+          "team": "PAN",
+          "pos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF2",
+          "name": "Luis Jiménez",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF6",
+          "name": "Carlos Moreno",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "PAN-GK1",
+          "name": "Alphonso Vargas",
+          "team": "PAN",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF4",
+          "name": "Junior Buchanan",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF7",
+          "name": "Luis Vargas",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "PAN-FW2",
+          "name": "Josh Larin",
+          "team": "PAN",
+          "pos": "FW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "PAN-GK3",
+          "name": "Carlos Buchanan",
+          "team": "PAN",
+          "pos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF2",
+          "name": "Josh Hernández",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF3",
+          "name": "Andrés Buchanan",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "PAN-FW3",
+          "name": "Josh Moreno",
+          "team": "PAN",
+          "pos": "FW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "PAN-MF1",
+          "name": "Luis Jiménez",
+          "team": "PAN",
+          "pos": "MF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "PAN-FW1",
+          "name": "Erick Jiménez",
+          "team": "PAN",
+          "pos": "FW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF3",
+          "name": "Alphonso Castillo",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "PAN-DF5",
+          "name": "Luis Charles",
+          "team": "PAN",
+          "pos": "DF",
+          "overall": 62,
+          "isStar": false
+        }
+      ]
+    }
+  ]
+}
