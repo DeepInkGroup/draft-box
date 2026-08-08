@@ -1,6 +1,6 @@
 const TournamentView = {
   async render(container, code) {
-    container.innerHTML = `<div class="card center muted">در حال بارگذاری جام جهانی...</div>`;
+    container.innerHTML = `<div class="card center muted">Loading the World Cup...</div>`;
 
     const socket = App.ensureSocket();
     socket.emit('room:join', { code });
@@ -9,18 +9,18 @@ const TournamentView = {
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
       <div class="card center" id="simZone">
-        <button class="btn btn-primary" id="btnSimNext">▶ شبیه‌سازی مرحله بعد</button>
+        <button class="btn btn-primary" id="btnSimNext">▶ Simulate Next Stage</button>
       </div>
       <div class="card">
-        <h3>📋 گروه‌ها</h3>
+        <h3>📋 Groups</h3>
         <div class="group-grid" id="groupGrid"></div>
       </div>
       <div class="card" id="bracketCard" style="display:none;">
-        <h3>🏆 مرحله حذفی</h3>
+        <h3>🏆 Knockout Stage</h3>
         <div id="bracketZone"></div>
       </div>
       <div class="card">
-        <h3>📜 آخرین نتایج</h3>
+        <h3>📜 Recent Results</h3>
         <div class="matchlog" id="matchLog"></div>
       </div>
     `;
@@ -33,12 +33,12 @@ const TournamentView = {
     const championZone = container.querySelector('#championZone');
     const simZone = container.querySelector('#simZone');
 
-    const ROUND_LABEL = { r32: 'یک‌شانزدهم نهایی', r16: 'یک‌هشتم نهایی', qf: 'ربع‌نهایی', sf: 'نیمه‌نهایی', final: 'فینال' };
+    const ROUND_LABEL = { r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter-finals', sf: 'Semi-finals', final: 'Final' };
 
     function scoreText(m) {
-      if (!m.result) return 'در انتظار';
+      if (!m.result) return 'Pending';
       let s = `${m.result.goalsA} - ${m.result.goalsB}`;
-      if (m.result.wentToPenalties) s += ` (پن: ${m.result.penalties.A}-${m.result.penalties.B})`;
+      if (m.result.wentToPenalties) s += ` (pens: ${m.result.penalties.A}-${m.result.penalties.B})`;
       return s;
     }
 
@@ -49,8 +49,8 @@ const TournamentView = {
         championZone.innerHTML = `
           <div class="champion-banner">
             <div class="trophy">🏆</div>
-            <h2>قهرمان جام جهانی: ${t.champion.name}</h2>
-            <p class="muted">${t.champion.isHuman ? `کنترل‌شده توسط ${t.champion.username} 👑` : 'یک تیم بات قهرمان شد 🤖'}</p>
+            <h2>World Cup Champion: ${t.champion.name}</h2>
+            <p class="muted">${t.champion.isHuman ? `Controlled by ${t.champion.username} 👑` : 'A bot team won it all 🤖'}</p>
           </div>`;
         simZone.style.display = 'none';
       } else {
@@ -60,9 +60,9 @@ const TournamentView = {
 
       groupGrid.innerHTML = Object.entries(t.groups).map(([label, rows]) => `
         <div>
-          <h4>گروه ${label}</h4>
+          <h4>Group ${label}</h4>
           <table class="group-table">
-            <thead><tr><th>تیم</th><th>ب</th><th>زده</th><th>خورده</th><th>تفاضل</th><th>امت</th></tr></thead>
+            <thead><tr><th>Team</th><th>P</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
             <tbody>
               ${rows.map((r) => `
                 <tr class="${r.isHuman ? 'human' : ''} ${r.eliminated ? 'eliminated' : ''}">
@@ -100,9 +100,9 @@ const TournamentView = {
         const aName = t.groups ? (findName(t, m.aCode)) : m.aCode;
         const bName = findName(t, m.bCode);
         let s = `${m.goalsA} - ${m.goalsB}`;
-        if (m.wentToPenalties) s += ` (پن)`;
+        if (m.wentToPenalties) s += ` (pens)`;
         return `<div>${aName} <b>${s}</b> ${bName}</div>`;
-      }).join('') || '<p class="muted">هنوز بازی‌ای انجام نشده.</p>';
+      }).join('') || '<p class="muted">No matches played yet.</p>';
     }
 
     function findName(t, code) {

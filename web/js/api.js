@@ -14,7 +14,7 @@ const Api = (() => {
     });
     let data = null;
     try { data = await res.json(); } catch { /* no body */ }
-    if (!res.ok) throw new Error((data && data.error) || `خطای سرور (${res.status})`);
+    if (!res.ok) throw new Error((data && data.error) || `Server error (${res.status})`);
     return data;
   }
 

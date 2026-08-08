@@ -2,49 +2,49 @@ const DashboardView = {
   render(container) {
     container.innerHTML = `
       <div class="card center">
-        <h2>🌍 جام جهانی ۲۰۲۶</h2>
-        <p class="muted">تنها حالت فعال در حال حاضر. لیگ باشگاهی به‌زودی.</p>
+        <h2>🌍 World Cup 2026</h2>
+        <p class="muted">Currently the only active mode. Club league mode is coming soon.</p>
       </div>
 
       <div class="card">
-        <h3>⚡ بازی تک‌نفره</h3>
-        <p class="muted">بلافاصله درفت را شروع کن و در جام جهانی با ۴۷ تیم بات رقابت کن.</p>
+        <h3>⚡ Single Player</h3>
+        <p class="muted">Jump straight into the draft and compete in the World Cup against 47 bot teams.</p>
         <div class="field">
-          <label>فرمیشن</label>
+          <label>Formation</label>
           <select id="spFormation">${FORMATIONS.map((f) => `<option value="${f}">${f}</option>`).join('')}</select>
         </div>
-        <button id="btnSingleplayer" class="btn btn-primary btn-block">شروع بازی تک‌نفره</button>
+        <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
       </div>
 
       <div class="row">
         <div class="card">
-          <h3>➕ ساخت روم جدید</h3>
+          <h3>➕ Create a New Room</h3>
           <div class="field">
-            <label>نام روم</label>
-            <input type="text" id="crName" placeholder="روم دوستان" />
+            <label>Room name</label>
+            <input type="text" id="crName" placeholder="Friends Room" />
           </div>
           <div class="field">
-            <label>حداکثر بازیکن حقیقی (۱ تا ۳۲)</label>
+            <label>Max human players (1 to 32)</label>
             <input type="number" id="crSlots" min="1" max="32" value="8" />
           </div>
           <div class="field">
-            <label>فرمیشن تو</label>
+            <label>Your formation</label>
             <select id="crFormation">${FORMATIONS.map((f) => `<option value="${f}">${f}</option>`).join('')}</select>
           </div>
-          <button id="btnCreateRoom" class="btn btn-primary btn-block">ساخت روم و دریافت کد</button>
+          <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         </div>
 
         <div class="card">
-          <h3>🔑 پیوستن با کد</h3>
+          <h3>🔑 Join with a Code</h3>
           <div class="field">
-            <label>کد روم</label>
-            <input type="text" id="joinCode" placeholder="مثلاً AB12CD" style="text-transform:uppercase" />
+            <label>Room code</label>
+            <input type="text" id="joinCode" placeholder="e.g. AB12CD" style="text-transform:uppercase" />
           </div>
           <div class="field">
-            <label>فرمیشن تو</label>
+            <label>Your formation</label>
             <select id="joinFormation">${FORMATIONS.map((f) => `<option value="${f}">${f}</option>`).join('')}</select>
           </div>
-          <button id="btnJoinRoom" class="btn btn-primary btn-block">پیوستن</button>
+          <button id="btnJoinRoom" class="btn btn-primary btn-block">Join</button>
         </div>
       </div>
       <div class="error-text hidden" id="dashError"></div>
@@ -74,7 +74,7 @@ const DashboardView = {
       try {
         const code = container.querySelector('#joinCode').value.trim().toUpperCase();
         const formation = container.querySelector('#joinFormation').value;
-        if (!code) return showErr(new Error('کد روم را وارد کن'));
+        if (!code) return showErr(new Error('Enter a room code'));
         await Api.joinRoom(code, formation);
         App.goLobby(code);
       } catch (e) { showErr(e); }

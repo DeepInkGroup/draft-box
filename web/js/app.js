@@ -28,7 +28,7 @@ const App = (() => {
   function ensureSocket() {
     if (state.socket) return state.socket;
     state.socket = io(getApiBase(), { auth: { token: localStorage.getItem('draftbox.token') } });
-    state.socket.on('connect_error', (e) => toast('خطا در اتصال به سرور: ' + e.message, true));
+    state.socket.on('connect_error', (e) => toast('Server connection error: ' + e.message, true));
     return state.socket;
   }
 
@@ -77,7 +77,7 @@ const App = (() => {
     localStorage.setItem('draftbox.token', token);
     state.user = user;
     setHeader();
-    toast(`خوش آمدی ${user.username}!`);
+    toast(`Welcome, ${user.username}!`);
     goDashboard();
   }
 
@@ -99,7 +99,7 @@ const App = (() => {
       const val = document.getElementById('apiBaseInput').value.trim();
       if (val) setApiBase(val);
       settingsDialog.close();
-      toast('آدرس سرور ذخیره شد');
+      toast('Server address saved');
       disconnectSocket();
     });
 

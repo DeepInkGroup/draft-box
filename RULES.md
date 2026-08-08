@@ -1,122 +1,122 @@
-# 📖 Draft Box — رول‌بوک رسمی جام جهانی
+# 📖 Draft Box — Official World Cup Rulebook
 
-> این بازی **لیگ فانتزی نیست**. اینجا برخلاف فانتزی لیگ‌های معمول، تو بازیکنی رو که می‌خوای «آگاهانه از یک لیست» انتخاب نمی‌کنی؛ هر راند یک **تیم ملی واقعی، به‌طور کاملاً تصادفی** جلوت رو می‌شه و باید از همون تیم یک نفر رو برای اسکواد خودت برداری. شانس، سرعت تصمیم و مدیریت پست‌های خالی تیمت، قلب این بازی هستن.
-
----
-
-## ۱. یک نگاه کلی
-
-1. ثبت‌نام می‌کنی.
-2. یک **روم** می‌سازی (و یک کد ۶ رقمی می‌گیری) یا با کد یک روم دیگه **می‌پیوندی** — یا مستقیم **تک‌نفره** بازی می‌کنی.
-3. فرمیشن تیمت رو انتخاب می‌کنی (مثلاً ۴-۳-۳).
-4. وارد فاز **درفت** می‌شی: هر راند یک تیم ملی واقعی رندوم نشونت داده می‌شه، یک بازیکن ازش برمی‌داری، تیم بعدی رندوم میاد... تا اسکواد ۱۱ نفره‌ت کامل بشه.
-5. وقتی همهٔ اعضای روم درفتشون تموم شد، **جام جهانی ۲۰۲۶** با ۴۸ تیم شروع می‌شه — تیم‌های بدون بازیکن حقیقی رو ربات‌ها با بهترین ترکیب واقعی‌شون اداره می‌کنن.
-6. مرحله گروهی، بعد یک‌شانزدهم تا فینال رو دنبال می‌کنی، تا یک قهرمان مشخص بشه — یک نفر واقعی یا یک ربات.
+> This game is **not a fantasy league**. Unlike a typical fantasy draft where you knowingly pick a player from a list, here every round a **completely random real national team** is revealed to you, and you must take one player from that team for your squad. Speed of decision, luck, and managing which positions on your team are still open are the heart of this game.
 
 ---
 
-## ۲. ثبت‌نام، روم و کد دعوت
+## 1. Overview
 
-- هر کاربر با نام کاربری/ایمیل/رمز عبور ثبت‌نام می‌کنه.
-- سازنده‌ی روم مشخص می‌کنه چند نفر واقعی حداکثر می‌تونن در اون روم بازی کنن: **بین ۱ تا ۳۲ نفر** (قابل تنظیم، پیش‌فرض ۳۲).
-- روم یک **کد ۶ کاراکتری** می‌گیره (حروف بزرگ و اعداد، بدون حروف/ارقام شبیه به هم مثل `0`/`O`). این کد رو به بقیه بده تا بپیوندن.
-- تا وقتی روم در حالت «لابی»‌ست، اعضا می‌تونن بپیوندن و فرمیشن‌شون رو عوض کنن. وقتی سازنده روم بازی رو شروع کرد، دیگه عضو جدید نمی‌تونه بپیونده.
-- **بازی تک‌نفره**: یک میان‌بر برای شروع فوری — یک روم با ظرفیت ۱ نفر ساخته می‌شه و بلافاصله درفت شروع می‌شه. تو تنها بازیکن واقعی جام جهانی هستی و ۴۷ تیم دیگه رباتن.
+1. You register an account.
+2. You create a **room** (and get a 6-character code) or **join** another room with a code — or just play **Single Player**.
+3. You pick your formation (e.g. 4-3-3).
+4. You enter the **draft** phase: each round a random real national team is revealed, you take one player from it, the next random team appears... until your 11-man squad is complete.
+5. Once every member of the room has finished drafting, the **2026 World Cup** begins with 48 teams — any team without a human player is run by a bot using its best real lineup.
+6. You follow the group stage, then Round of 32 through the final, until a champion is decided — a real person or a bot.
 
 ---
 
-## ۳. فرمیشن‌ها
+## 2. Registration, Rooms & Invite Codes
 
-هر بازیکن هنگام ساخت/پیوستن به روم، فرمیشن تیم خودش رو انتخاب می‌کنه. فرمیشن تعیین می‌کنه از هر **گروه پستی** (دروازه‌بان GK / مدافع DF / هافبک MF / مهاجم FW) چند نفر لازم داری:
+- Every user registers with a username, email, and password.
+- The room creator sets the maximum number of human players allowed in that room: **between 1 and 32** (configurable, default 32).
+- Each room gets a **6-character code** (uppercase letters and digits, excluding look-alike characters like `0`/`O`). Share this code with others so they can join.
+- While a room is in the "lobby" state, members can join and change their formation. Once the creator starts the game, no new members can join.
+- **Single Player**: an instant-start shortcut — a room with a capacity of 1 is created and the draft begins immediately. You're the only human in the World Cup; the other 47 teams are bots.
 
-| فرمیشن | GK | DF | MF | FW |
+---
+
+## 3. Formations
+
+Each player picks their own formation when creating/joining a room. The formation determines how many players you need from each **position group** (Goalkeeper GK / Defender DF / Midfielder MF / Forward FW):
+
+| Formation | GK | DF | MF | FW |
 |---|---|---|---|---|
-| ۴-۳-۳ | ۱ | ۴ | ۳ | ۳ |
-| ۴-۴-۲ | ۱ | ۴ | ۴ | ۲ |
-| ۴-۲-۳-۱ | ۱ | ۴ | ۵ | ۱ |
-| ۳-۵-۲ | ۱ | ۳ | ۵ | ۲ |
-| ۵-۳-۲ | ۱ | ۵ | ۳ | ۲ |
-| ۴-۱-۴-۱ | ۱ | ۴ | ۵ | ۱ |
+| 4-3-3 | 1 | 4 | 3 | 3 |
+| 4-4-2 | 1 | 4 | 4 | 2 |
+| 4-2-3-1 | 1 | 4 | 5 | 1 |
+| 3-5-2 | 1 | 3 | 5 | 2 |
+| 5-3-2 | 1 | 5 | 3 | 2 |
+| 4-1-4-1 | 1 | 4 | 5 | 1 |
 
-جمع همیشه ۱۱ نفره. فرمیشن فقط تعداد لازم از هر گروه پستی رو مشخص می‌کنه؛ داخل یک گروه (مثلاً همه‌ی ۴ مدافع) خودت تصمیم می‌گیری کدوم بازیکن‌ها رو برمی‌داری.
-
----
-
-## ۴. فاز درفت — قلب تپنده‌ی بازی
-
-### مکانیک اصلی
-هر راند:
-1. سرور به‌طور کاملاً تصادفی **یک تیم ملی واقعی** از بین تیم‌های جام جهانی ۲۰۲۶ انتخاب می‌کنه و کل اسکواد اون تیم (با نام، پست و overall واقعی هر بازیکن) رو نشونت می‌ده.
-2. تو از بین بازیکنانی که «قابل انتخاب» هستن، **دقیقاً یک نفر** رو برمی‌داری.
-3. به‌محض انتخاب، اون بازیکن برای همیشه از اسکواد تو ثبت می‌شه و تیم بعدی به‌صورت رندوم نشون داده می‌شه.
-4. این چرخه تا وقتی ادامه داره که هر ۱۱ اسلات فرمیشنت پر بشه.
-
-### چرا یک بازیکن «قابل انتخاب نیست»
-یک بازیکن در تیم رندوم نشون داده‌شده، خاکستری (غیرقابل کلیک) می‌مونه اگر:
-- **پستش قبلاً برای تو پر شده باشه** (مثلاً اگه هر ۴ اسلات مدافعت پر شده، مدافع‌های تیم بعدی دیگه قابل برداشت نیستن، هرچقدرم خوب باشن)، یا
-- **یکی دیگه از بازیکنان روم قبل از تو همون بازیکن رو برداشته باشه.**
-
-### استخر مشترک و «رقابت واقعی» روی بازیکن‌ها
-همهٔ ۱۰۰۸ بازیکن جام جهانی (۴۸ تیم × ۲۱ بازیکن) در یک **استخر مشترک بین همهٔ اعضای روم** هستن. همین که یک نفر بازیکنی رو برداره، اون بازیکن برای همه‌ی بقیه اعضای روم هم از دسترس خارج می‌شه. چون درفت **هم‌زمان و مستقل** انجام می‌شه (نه نوبتی)، ممکنه دقیقاً همون لحظه‌ای که داری روی یک ستاره تصمیم می‌گیری، یکی دیگه از اعضای روم اون رو برداره و دفعهٔ بعد که همون تیم برات رندوم بیاد، دیگه نباشه. این عمدیه: **سرعت و قاطعیت تصمیم** بخشی از استراتژی بازیه.
-
-### رد کردن (Skip)
-اگه از بازیکنان قابل‌انتخاب تیم نمایش داده‌شده خوشت نیومد، می‌تونی بدون انتخاب، دکمه‌ی «رد کردن و نمایش تیم بعدی» رو بزنی تا یک تیم رندوم دیگه بیاد. تعداد دفعات رد کردن محدودیتی نداره.
-
-### اسکواد نهایی
-هر عضو دقیقاً **۱۱ بازیکن اصلی** (بدون ذخیره) برمی‌داره. این ۱۱ نفر، دقیقاً همون ترکیبیه که در طول کل جام جهانی برای اون کاربر بازی می‌کنه.
+The total is always 11 players. The formation only sets how many you need from each position group; within a group (say, all 4 defenders) it's up to you which players you take.
 
 ---
 
-## ۵. جام جهانی ۲۰۲۶ — فرمت واقعی
+## 4. The Draft Phase — the Heart of the Game
 
-### ۴۸ تیم، ۱۲ گروه
-همین که همهٔ اعضای روم درفتشون تموم شد، جام جهانی شروع می‌شه:
+### Core mechanic
+Each round:
+1. The server randomly picks **one real national team** from the 2026 World Cup field and shows you its full squad (with each player's real name, position, and overall rating).
+2. From the players who are "pickable," you take **exactly one**.
+3. The instant you pick, that player is locked into your squad forever, and the next random team is revealed.
+4. This cycle continues until all 11 slots in your formation are filled.
 
-1. از بین ۴۸ تیم واقعی جام جهانی ۲۰۲۶، به تعداد اعضای حاضر در روم (حداکثر ۳۲ نفر)، **به‌صورت کاملاً تصادفی یک کشور** به هر کاربر واقعی اختصاص داده می‌شه. اسکواد ۱۱نفره‌ای که خودت درفت کردی، حالا نمایندهٔ اون کشور در جام جهانیه — نه اسکواد واقعی اون کشور!
-2. تیم‌های بدون بازیکن حقیقی، توسط **ربات** اداره می‌شن: ربات از بین بازیکنان واقعی همون کشور، بهترین ترکیب ۱۱ نفرهٔ ممکن (بر اساس overall، در فرمیشن ۴-۳-۳) رو خودکار می‌بنده.
-3. هر ۴۸ تیم به‌صورت تصادفی در ۱۲ گروه چهارتایی (A تا L) قرار می‌گیرن.
-4. هر گروه به‌صورت دوره‌ای (هر تیم یک‌بار مقابل بقیهٔ گروه) بازی می‌کنه — ۶ بازی در هر گروه، طی ۳ «مرحله».
-5. **صعود**: نفرات اول و دوم هر گروه (۲۴ تیم) + **۸ تیم بهترین سوم گروه‌ها** (بر اساس امتیاز، تفاضل گل، گل زده) مستقیم به **یک‌شانزدهم نهایی** (Round of 32) صعود می‌کنن. این دقیقاً فرمت واقعی جام جهانی ۲۰۲۶ فیفاست.
+### Why a player might not be pickable
+A player in the currently revealed team stays greyed out (unclickable) if:
+- **Their position is already full for you** (e.g. if all 4 of your defender slots are filled, any defenders on the next revealed team are off-limits no matter how good they are), or
+- **Someone else in the room already took that exact player before you did.**
 
-### مرحله حذفی
-یک‌شانزدهم نهایی (۳۲ تیم) → یک‌هشتم نهایی (۱۶) → ربع‌نهایی (۸) → نیمه‌نهایی (۴) → فینال (۲) → قهرمان.
-جفت‌شدن تیم‌ها در هر دور به‌صورت تصادفی انجام می‌شه. اگه یک بازی حذفی با تساوی تموم بشه، **ضربات پنالتی** تکلیف رو مشخص می‌کنه.
+### A shared pool — real competition over players
+All 1,008 World Cup players (48 teams × 21 players) sit in one **pool shared by every member of the room**. The moment someone drafts a player, that player becomes unavailable to everyone else in the room too. Because drafting happens **simultaneously and independently** (not turn-based), it's entirely possible that right while you're deciding on a star player, someone else in the room grabs them — and the next time that same team is revealed to you, that player is gone. This is intentional: **decisiveness and speed** are part of the strategy.
 
-### شبیه‌سازی نتیجه‌ی بازی‌ها
-نتیجه‌ی هر بازی (چه بین دو ربات، چه انسان-ربات، چه انسان-انسان) با یک مدل آماری ساده تعیین می‌شه:
-- قدرت هر تیم = میانگین overall آن ۱۱ بازیکن.
-- بر اساس اختلاف قدرت دو تیم، یک «گل مورد انتظار» (Expected Goals) برای هرکدوم محاسبه می‌شه.
-- تعداد گل‌های واقعی هر تیم با توزیع پواسون (Poisson) از روی همون عدد نمونه‌برداری می‌شه — یعنی همیشه یک عنصر شانس هست؛ تیم ضعیف‌تر هم می‌تونه ببره، فقط احتمالش کمتره.
-- در مراحل حذفی، تساوی یعنی پنالتی؛ برنده‌ی پنالتی هم عمدتاً شانسیه ولی تیم قوی‌تر یک مزیت جزئی داره.
+### Skipping
+If you don't like any of the pickable players on the revealed team, you can hit "Skip & show next team" without picking, and a new random team appears. There's no limit on how many times you can skip.
 
-هر عضو روم می‌تونه با دکمهٔ «شبیه‌سازی مرحله بعد» موتور بازی رو برای پیش‌روی به مرحله‌ی بعدی (مثلاً بازی‌های مرحلهٔ دوم گروهی، یا کل یک دور حذفی) فعال کنه؛ نتایج برای همهٔ اعضای روم هم‌زمان و زنده نمایش داده می‌شه.
-
----
-
-## ۶. حذف شدن = تماشاگر شدن
-
-اگه تیمی که نمایندگی می‌کنی (چه در گروه، چه در مرحله حذفی) حذف بشه، خودت به‌عنوان بازیکن **حذف نمی‌شی** — فقط دیگه اسکوادت وارد بازی نمی‌شه و از اون لحظه به بعد، به‌عنوان **تماشاگر (Spectator)** ادامهٔ جام جهانی رو در همون روم دنبال می‌کنی تا مشخص بشه قهرمان نهایی کیه (یک بازیکن واقعی دیگه، یا یک ربات).
+### Final squad
+Every member drafts exactly **11 starting players** (no substitutes). This 11-man squad is exactly what plays for that user throughout the entire World Cup.
 
 ---
 
-## ۷. حالت تک‌نفره
+## 5. The 2026 World Cup — the Real Format
 
-توی حالت تک‌نفره، تو تنها انسان روم هستی و ۴۷ کشور دیگه رو ربات‌ها اداره می‌کنن. همهٔ قوانین درفت، فرمیشن، جام جهانی و شبیه‌سازی دقیقاً همینه که بالاتر گفته شد — فقط منتظر عضو دیگه‌ای نمی‌مونی و بلافاصله بعد از تمام‌شدن درفتت، جام جهانی شروع می‌شه.
+### 48 teams, 12 groups
+As soon as every member of the room finishes drafting, the World Cup begins:
+
+1. Out of the 48 real 2026 World Cup teams, a **completely random country** is assigned to each human player present in the room (up to 32 humans). The 11-man squad you drafted now represents that country in the World Cup — not that country's real squad!
+2. Teams with no human player are run by a **bot**: the bot automatically fields the best possible 11 (by overall rating, in a 4-3-3) from that country's real player pool.
+3. All 48 teams are randomly placed into 12 groups of four (A through L).
+4. Each group plays a round robin (every team plays every other team in its group once) — 6 matches per group, across 3 "matchdays."
+5. **Advancement**: the top 2 finishers of every group (24 teams) plus the **8 best third-placed teams** (by points, goal difference, goals scored) advance directly to the **Round of 32**. This matches the real FIFA 2026 World Cup format exactly.
+
+### Knockout stage
+Round of 32 (32 teams) → Round of 16 (16) → Quarter-finals (8) → Semi-finals (4) → Final (2) → Champion.
+Pairings in each round are random. If a knockout match ends level, a **penalty shootout** decides the winner.
+
+### Match result simulation
+The outcome of every match (bot vs. bot, human vs. bot, or human vs. human) is decided by a simple statistical model:
+- Each team's strength = the average overall rating of its 11 players.
+- Based on the strength difference between the two teams, an "expected goals" value is computed for each.
+- The actual number of goals for each team is sampled from a Poisson distribution around that number — so there's always an element of luck; the weaker team can still win, just less often.
+- In knockout rounds, a draw goes to penalties; the shootout winner is mostly luck-based, with a slight edge for the stronger team.
+
+Any member of the room can hit "Simulate Next Stage" to advance the game engine (e.g. the next matchday of the group stage, or an entire knockout round); results are shown live to everyone in the room at once.
 
 ---
 
-## ۸. محدودیت فعلی: فقط جام جهانی
+## 6. Getting Eliminated = Becoming a Spectator
 
-در حال حاضر فقط حالت «جام جهانی» فعاله (با تیم‌ها و بازیکنان جام جهانی ۲۰۲۶). حالت «لیگ/باشگاهی» در نقشهٔ راه آینده‌ی بازیه و بعداً اضافه می‌شه.
+If the team you represent (whether in the group stage or the knockout stage) gets eliminated, you as a player are **not removed from the game** — your squad simply stops playing, and from that point on you follow the rest of the room's World Cup as a **spectator**, to see who the eventual champion turns out to be (another human player, or a bot).
 
 ---
 
-## ۹. دربارهٔ داده‌ی بازیکنان (مهم)
+## 7. Single Player Mode
 
-فهرست ۴۸ تیم، همون فهرست واقعی و رسمی تیم‌های راه‌یافته به جام جهانی ۲۰۲۶ فیفاست. اما **اسکواد و overall هر بازیکن، داده‌ای تقریبی و غیررسمی برای اهداف بازی‌سازی است**، نه یک دیتابیس مجاز/رسمی فیفا:
+In Single Player mode, you're the only human in the room, and bots run the other 47 countries. Every rule about drafting, formations, the World Cup, and match simulation described above applies exactly the same — you just don't wait for anyone else, and the World Cup begins the moment your own draft is complete.
 
-- برای تیم‌های بزرگ، چند بازیکن ستارهٔ واقعی و شناخته‌شده (با overall تقریبی) در اسکواد گنجانده شده.
-- بقیهٔ اسکواد هر تیم (برای رسیدن به عمق کافی برای همهٔ فرمیشن‌ها) به‌صورت **نام‌های تولیدشده و به‌سبک همون کشور** تکمیل شده — این بازیکن‌ها واقعی نیستن.
-- Overall همه‌ی بازیکنان یک مقدار **فرضی و مخصوص گیم‌پلی** است، نه ریتینگ رسمی EA/FIFA.
+---
 
-این طراحی عمدیه: هدف بازی، تجربه‌ی هیجان‌انگیز درفت و شبیه‌سازیه، نه یک دیتابیس دقیق آماری. اگه بخوای، این لایه‌ی داده (`server/src/data/teams2026.json`) به‌راحتی قابل جایگزینی با یک منبع دادهٔ دقیق‌تر و مجاز است.
+## 8. Current Scope: World Cup Only
+
+Right now only "World Cup" mode is active (with the real 2026 World Cup teams and players). A "club league" mode is on the roadmap and will be added later.
+
+---
+
+## 9. About the Player Data (important)
+
+The list of 48 teams matches the real, official field of nations qualified for the 2026 FIFA World Cup. However, **each team's squad and player overall ratings are approximate, unofficial data made for gameplay purposes**, not a licensed/official FIFA database:
+
+- For major teams, a handful of real, well-known star players (with approximate overall ratings) are included in the squad.
+- The rest of each team's squad (needed to have enough depth for every formation) is filled with **procedurally generated names in a style matching that country** — these players are not real.
+- Every player's overall rating is a **fictional value made up for gameplay**, not an official EA/FIFA rating.
+
+This is intentional: the goal of the game is an exciting draft-and-simulation experience, not a precise statistical database. If you want, this data layer (`server/src/data/teams2026.json`) can easily be swapped out for a more accurate, licensed data source.

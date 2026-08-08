@@ -2,7 +2,7 @@
 
 A real-time multiplayer football **draft** game (not a fantasy league!). Players build an 11-man squad by getting one randomly-revealed real national team per round and grabbing one player from it, then take that squad into a full 2026-format, 48-team World Cup — group stage through the final — against real-country bot squads and other players in the room.
 
-Full game design & rules (Persian): **[RULES.md](RULES.md)**
+Full game design & rules: **[RULES.md](RULES.md)**
 
 - 🌍 World Cup mode only for now (2026 field: 48 teams, 12 groups of 4, top 2 + best 8 thirds advance to Round of 32)
 - 🔑 Create a room → get a 6-character code → friends join with it (up to 32 human-controlled slots, configurable)
@@ -51,4 +51,4 @@ This builds and runs the backend on port `4321` with a persisted SQLite volume. 
 
 ## Data disclaimer
 
-The 48-team list matches the real 2026 World Cup field. Squad rosters are a mix of a handful of real, well-known players per major team plus procedurally generated names/ratings to fill out playable squads — **not an official/licensed dataset**. See [RULES.md §9](RULES.md#۹-دربارهٔ-دادهٔ-بازیکنان-مهم) for details; swap `server/src/data/teams2026.json` for a different source if you need accuracy.
+The 48-team list matches the real 2026 World Cup field. Squad rosters are a mix of a handful of real, well-known players per major team plus procedurally generated names/ratings to fill out playable squads — **not an official/licensed dataset**. See [RULES.md §9](RULES.md#9-about-the-player-data-important) for details; swap `server/src/data/teams2026.json` for a different source if you need accuracy.

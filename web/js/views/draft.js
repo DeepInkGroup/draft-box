@@ -1,6 +1,6 @@
 const DraftView = {
   async render(container, code) {
-    container.innerHTML = `<div class="card center muted">در حال اتصال به درفت...</div>`;
+    container.innerHTML = `<div class="card center muted">Connecting to the draft...</div>`;
 
     const socket = App.ensureSocket();
     socket.emit('room:join', { code });
@@ -8,16 +8,16 @@ const DraftView = {
     container.innerHTML = `
       <div class="slots-bar" id="slotsBar"></div>
       <div class="card" id="revealCard">
-        <p class="muted center">در حال دریافت اولین تیم تصادفی...</p>
+        <p class="muted center">Fetching the first random team...</p>
       </div>
       <div class="card">
         <div class="row" style="align-items:center;">
-          <h3 style="margin:0;">👤 تیم من</h3>
-          <span class="muted" style="text-align:left;">استخر باقی‌مانده: <b id="poolCount">-</b> بازیکن</span>
+          <h3 style="margin:0;">👤 My Squad</h3>
+          <span class="muted" style="text-align:right;">Players left in pool: <b id="poolCount">-</b></span>
         </div>
         <ul class="squad-list" id="squadList"></ul>
       </div>
-      <p class="muted center" id="waitingMsg" style="display:none;">✅ درفت تو تمام شد! منتظر بقیه بازیکنان برای شروع جام جهانی...</p>
+      <p class="muted center" id="waitingMsg" style="display:none;">✅ Your draft is complete! Waiting for other players before the World Cup starts...</p>
     `;
 
     const slotsBar = container.querySelector('#slotsBar');
@@ -38,7 +38,7 @@ const DraftView = {
     function renderSquad(squad) {
       squadList.innerHTML = squad.map((p) => `
         <li><b>${p.name}</b><br><span class="muted">${POS_LABEL[p.pos]} · ${p.team} · OVR ${p.overall}</span></li>
-      `).join('') || '<li class="muted">هنوز بازیکنی انتخاب نکردی</li>';
+      `).join('') || '<li class="muted">You haven\'t picked any players yet</li>';
     }
 
     function renderReveal(payload) {
@@ -48,14 +48,14 @@ const DraftView = {
         return;
       }
       if (payload.exhausted) {
-        revealCard.innerHTML = '<p class="error-text center">بازیکن مناسبی برای پست‌های باقی‌مانده پیدا نشد. لطفاً صفحه را رفرش کن.</p>';
+        revealCard.innerHTML = '<p class="error-text center">No suitable player was found for the remaining positions. Please refresh the page.</p>';
         return;
       }
       revealCard.innerHTML = `
         <div class="reveal-team">${payload.team.name}</div>
-        <div class="reveal-sub">یک بازیکن از این تیم برای اسکواد خودت انتخاب کن</div>
+        <div class="reveal-sub">Pick one player from this team for your squad</div>
         <div class="player-grid" id="playerGrid"></div>
-        <button class="btn btn-block" id="btnSkip">🔄 رد کردن و نمایش تیم بعدی</button>
+        <button class="btn btn-block" id="btnSkip">🔄 Skip &amp; show next team</button>
       `;
       const grid = revealCard.querySelector('#playerGrid');
       grid.innerHTML = payload.players

@@ -3,23 +3,23 @@ const AuthView = {
     container.innerHTML = `
       <div class="card" style="max-width:380px;margin:40px auto;">
         <div class="tabs">
-          <div class="tab active" data-tab="login">ورود</div>
-          <div class="tab" data-tab="register">ثبت‌نام</div>
+          <div class="tab active" data-tab="login">Log in</div>
+          <div class="tab" data-tab="register">Sign up</div>
         </div>
         <form id="authForm">
           <div class="field regOnly hidden">
-            <label>ایمیل</label>
+            <label>Email</label>
             <input type="email" id="authEmail" placeholder="you@example.com" />
           </div>
           <div class="field">
-            <label>نام کاربری</label>
-            <input type="text" id="authUsername" placeholder="مثلاً artin" required />
+            <label>Username</label>
+            <input type="text" id="authUsername" placeholder="e.g. artin" required />
           </div>
           <div class="field">
-            <label>رمز عبور</label>
-            <input type="password" id="authPassword" placeholder="حداقل ۶ کاراکتر" required />
+            <label>Password</label>
+            <input type="password" id="authPassword" placeholder="at least 6 characters" required />
           </div>
-          <button type="submit" class="btn btn-primary btn-block" id="authSubmit">ورود</button>
+          <button type="submit" class="btn btn-primary btn-block" id="authSubmit">Log in</button>
           <div class="error-text hidden" id="authError"></div>
         </form>
       </div>
@@ -37,7 +37,7 @@ const AuthView = {
         tab.classList.add('active');
         mode = tab.dataset.tab;
         regOnly.classList.toggle('hidden', mode !== 'register');
-        submitBtn.textContent = mode === 'register' ? 'ثبت‌نام' : 'ورود';
+        submitBtn.textContent = mode === 'register' ? 'Sign up' : 'Log in';
         errorBox.classList.add('hidden');
       });
     });
