@@ -2,7 +2,7 @@ const { verifyToken } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
-const { computeSquadCard } = require('../game/ratings');
+const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { lobbySnapshot } = rm;
 
 function channelName(code) {
@@ -111,11 +111,25 @@ function registerSocketHandlers(io) {
         const member = state.members.get(socket.user.id);
         const viewedStep = member ? member.viewedStep : 0;
         const mySlot = Object.values(state.tournament.slotByCode).find((s) => s.isHuman && s.userId === socket.user.id);
+        let myLineup = null;
+        if (mySlot) {
+          const odds = computeChampionshipOdds(state.tournament.slotByCode);
+          const prediction = predictKeyPlayers(mySlot.xi, mySlot.formation);
+          myLineup = {
+            code: mySlot.code,
+            formation: mySlot.formation,
+            xi: mySlot.xi,
+            countryName: mySlot.name,
+            championshipChance: odds[mySlot.code],
+            predictedTopScorer: prediction.topScorer,
+            predictedTopAssist: prediction.topAssist
+          };
+        }
         socket.emit('room:state', {
           stage: 'tournament',
           ...lobbySnapshot(roomRow),
           myStep: viewedStep > 0 ? tournamentEngine.decorateStep(state, viewedStep - 1, socket.user.id) : null,
-          myLineup: mySlot ? { formation: mySlot.formation, xi: mySlot.xi, countryName: mySlot.name } : null,
+          myLineup,
           viewedStep,
           historyLength: tournamentEngine.historyLength(state),
           tournamentStage: state.tournament.stage

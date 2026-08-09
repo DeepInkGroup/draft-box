@@ -84,8 +84,8 @@ a { color: var(--accent-strong); }
 }
 .btn:hover { background: #21212b; border-color: #33333e; }
 .btn:active { transform: scale(.98); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 600; }
-.btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+.btn-primary { background: transparent; border: 1.5px solid var(--accent); color: var(--accent-strong); font-weight: 600; }
+.btn-primary:hover { background: var(--accent-soft); border-color: var(--accent-strong); }
 .btn-ghost { border-color: transparent; background: transparent; }
 .btn-ghost:hover { background: var(--surface-2); }
 .btn-sm { padding: 6px 10px; font-size: .85rem; }
@@ -322,8 +322,8 @@ a { color: var(--accent-strong); }
 .group-table tr.eliminated td:first-child { text-decoration: line-through; color: var(--muted); }
 
 .stage-pill {
-  display: inline-block; padding: 5px 16px; border-radius: 999px; background: var(--accent);
-  color: var(--accent-ink); font-weight: 700; font-size: .85rem; margin-bottom: 14px;
+  display: inline-block; padding: 5px 16px; border-radius: 999px; background: transparent;
+  border: 1.5px solid var(--accent); color: var(--accent-strong); font-weight: 700; font-size: .85rem; margin-bottom: 14px;
 }
 
 .bracket-round { margin-bottom: 14px; }
@@ -359,13 +359,13 @@ a { color: var(--accent-strong); }
 }
 .live-feed { max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
 .live-feed-line { padding: 5px 8px; border-bottom: 1px dashed var(--border-soft); font-size: .85rem; }
-.live-scoreboard { max-height: 260px; overflow-y: auto; }
-.live-score-row {
-  display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);
-  margin-bottom: 6px; font-size: .82rem; background: var(--surface-2);
+.live-picker-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.live-picker-row select {
+  flex: 1; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--ink); font-size: .85rem;
 }
-.live-score-val { font-weight: 700; color: var(--ink); flex: 0 0 auto; }
+.live-final-score { text-align: center; font-size: 1rem; margin-bottom: 12px; }
+.live-final-score b { color: var(--pitch-accent); font-size: 1.2rem; }
 
 /* --- My Team recap card --- */
 .myteam-card {
@@ -384,6 +384,12 @@ a { color: var(--accent-strong); }
 .myteam-pos.role-mf { background: #22c55e; color: #06240f; }
 .myteam-pos.role-df { background: #3b82f6; }
 .myteam-pos.role-gk { background: #eab308; color: #3f2d00; }
+
+/* --- Lineup reveal predictions --- */
+.lineup-predictions { text-align: center; margin: 18px 0 4px; }
+.lineup-prediction-stat { margin-bottom: 10px; }
+.lineup-prediction-value { display: block; font-size: 2rem; font-weight: 800; color: var(--accent-strong); line-height: 1; }
+.lineup-prediction-line { font-size: .85rem; color: var(--ink); margin-top: 4px; }
 
 .error-text { color: var(--danger); font-size: .85rem; margin-top: 6px; }
 

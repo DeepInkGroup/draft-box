@@ -64,7 +64,7 @@ const DashboardView = {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
-        <h3>⚡ Single Player</h3>
+        <h3>Single Player</h3>
         <p class="muted">Jump straight into the draft and compete in the World Cup against 47 bot teams.</p>
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
@@ -98,7 +98,7 @@ const DashboardView = {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
-        <h3>➕ Create a New Room</h3>
+        <h3>Create a New Room</h3>
         <div class="field">
           <label>Room name</label>
           <input type="text" id="crName" placeholder="Friends Room" />
@@ -141,12 +141,12 @@ const DashboardView = {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
-        <h3>🔑 Join with a Code</h3>
+        <h3>Join with a Code</h3>
         <div class="field">
           <label>Room code</label>
           <input type="text" id="joinCode" placeholder="e.g. AB12CD" style="text-transform:uppercase" />
         </div>
-        <div id="joinFormation"></div>
+        <div id="joinFormation" style="margin-bottom:24px;"></div>
         <button id="btnJoinRoom" class="btn btn-primary btn-block">Join</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>

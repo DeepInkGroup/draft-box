@@ -117,4 +117,62 @@ function computeSquadCard(squad, formation) {
   };
 }
 
-module.exports = { computeTeamRatings, computeChemistry, computeSquadCard, slotWeights, CAPTAIN_BONUS };
+// A single "power" number per team, combining the same Attack/Defense ratings and
+// Chemistry multiplier the match engine actually simulates with — so the odds below are
+// a genuine reflection of the engine, not a separate guess.
+function computePower(xi, formation) {
+  const ratings = computeTeamRatings(xi, formation);
+  const chem = computeChemistry(xi, formation);
+  return ((ratings.attack + ratings.defense) / 2) * chem.multiplier;
+}
+
+// Rough championship-odds estimate across the whole 48-team field: each team's power is
+// raised to an exponent (spreads out otherwise-close power scores into a believable
+// favorites-vs-underdogs distribution) and normalized into a probability. This is a
+// pre-tournament estimate shown for fun on the lineup reveal screen — the actual
+// simulation (with its Poisson randomness) is what really decides the champion.
+const ODDS_EXPONENT = 12;
+function computeChampionshipOdds(slotByCode) {
+  const codes = Object.keys(slotByCode);
+  const powers = codes.map((c) => computePower(slotByCode[c].xi, slotByCode[c].formation));
+  const weighted = powers.map((p) => Math.pow(Math.max(1, p), ODDS_EXPONENT));
+  const total = weighted.reduce((s, w) => s + w, 0) || 1;
+  const odds = {};
+  codes.forEach((c, i) => { odds[c] = weighted[i] / total; });
+  return odds;
+}
+
+// Predicts which of an XI's own players is most likely to end up its top scorer/assist
+// provider, using the exact same attack/support weighting matchSim uses to pick real
+// goal/assist events — so the prediction and the simulation agree with each other.
+function predictKeyPlayers(xi, formation) {
+  const slotByCode = new Map(getSlots(formation).map((s) => [s.code, s]));
+  let bestScorer = null;
+  let bestScorerScore = -1;
+  let bestAssist = null;
+  let bestAssistScore = -1;
+
+  for (const p of xi) {
+    const slot = slotByCode.get(p.slotCode);
+    const y = slot ? slot.y : 50;
+    const atkScore = (1 - y / 100) * p.overall;
+    const assistScore = (1 - Math.abs(y - 45) / 60) * p.overall;
+    if (atkScore > bestScorerScore) { bestScorerScore = atkScore; bestScorer = p; }
+    if (assistScore > bestAssistScore) { bestAssistScore = assistScore; bestAssist = p; }
+  }
+
+  return {
+    topScorer: bestScorer ? bestScorer.name : null,
+    topAssist: bestAssist ? bestAssist.name : null
+  };
+}
+
+module.exports = {
+  computeTeamRatings,
+  computeChemistry,
+  computeSquadCard,
+  computeChampionshipOdds,
+  predictKeyPlayers,
+  slotWeights,
+  CAPTAIN_BONUS
+};

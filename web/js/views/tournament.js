@@ -11,6 +11,7 @@ const TournamentView = {
     let newResultsPing = false;
     let isCreator = false;
     let lineupRevealShown = false;
+    let myCode = null;
 
     container.innerHTML = `
       <div id="championZone"></div>
@@ -65,43 +66,25 @@ const TournamentView = {
       }
     }
 
-    // --- Live 90-minute report: plays out a step's events on a ticking clock before
-    // handing off to the normal, permanent results view (renderStep). Skippable.
-    function playLiveReport(step, onDone) {
-      const timeline = [];
-      step.matches.forEach((m, idx) => {
-        (m.events || []).forEach((e) => timeline.push({ ...e, matchIdx: idx }));
-      });
-      timeline.sort((a, b) => a.minute - b.minute);
-      const liveScores = step.matches.map(() => ({ a: 0, b: 0 }));
+    // --- Live 90-minute report: only the viewer's own match plays out on a ticking
+    // clock; every other match in the step is already decided, so it's offered as a
+    // static "final report" the viewer can switch to via the picker, without spoiling
+    // the live pacing of their own game. Skippable. Hands off to the normal, permanent
+    // results view (renderStep) when done.
+    function playLiveReport(step, forCode, onDone) {
+      const myMatchIdx = step.matches.findIndex((m) => m.aCode === forCode || m.bCode === forCode);
+      if (myMatchIdx === -1) { onDone(); return; } // no match of mine this round — nothing to watch live
+
+      const myTimeline = (step.matches[myMatchIdx].events || []).slice().sort((a, b) => a.minute - b.minute);
+      const myScore = { a: 0, b: 0 };
+      let viewIdx = myMatchIdx;
+      let clock = 0;
+      let cursor = 0;
+      let finished = false;
 
       stepCard.style.display = 'none';
       continueZone.style.display = 'none';
       liveZone.style.display = 'block';
-      liveZone.innerHTML = `
-        <div class="center"><span class="live-clock" id="liveClock">0'</span></div>
-        <div class="live-feed" id="liveFeed"></div>
-        <div class="live-scoreboard" id="liveScoreboard"></div>
-        <button class="btn btn-block" id="btnSkipLive" style="margin-top:12px;">⏭ Skip to Full Results</button>
-      `;
-      const clockEl = liveZone.querySelector('#liveClock');
-      const feedEl = liveZone.querySelector('#liveFeed');
-      const boardEl = liveZone.querySelector('#liveScoreboard');
-
-      function renderBoard() {
-        boardEl.innerHTML = step.matches.map((m, idx) => `
-          <div class="live-score-row">
-            <span>${nameTag(m.aName, m.aHuman, m.aUsername)}</span>
-            <span class="live-score-val">${liveScores[idx].a} - ${liveScores[idx].b}</span>
-            <span>${nameTag(m.bName, m.bHuman, m.bUsername)}</span>
-          </div>
-        `).join('');
-      }
-      renderBoard();
-
-      let clock = 0;
-      let cursor = 0;
-      let finished = false;
 
       function finish() {
         if (finished) return;
@@ -113,25 +96,72 @@ const TournamentView = {
         onDone();
       }
 
-      liveZone.querySelector('#btnSkipLive').addEventListener('click', finish);
+      function myMatchBody() {
+        const m = step.matches[myMatchIdx];
+        return `
+          <div class="center"><span class="live-clock" id="liveClock">${Math.min(clock, 90)}'</span></div>
+          <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
+          <div class="live-feed" id="liveFeed"></div>
+        `;
+      }
 
-      const timer = setInterval(() => {
-        clock += 2;
-        clockEl.textContent = Math.min(clock, 90) + "'";
-        while (cursor < timeline.length && timeline[cursor].minute <= clock) {
-          const e = timeline[cursor];
-          const m = step.matches[e.matchIdx];
-          if (e.type === 'goal') {
-            if (e.side === 'A') liveScores[e.matchIdx].a += 1; else liveScores[e.matchIdx].b += 1;
-          }
+      function otherMatchBody(idx) {
+        const m = step.matches[idx];
+        const evs = m.events || [];
+        return `
+          <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b>${scoreText(m)}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
+          <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
+        `;
+      }
+
+      function renderFeedUpToNow() {
+        const feedEl = liveZone.querySelector('#liveFeed');
+        if (!feedEl) return;
+        feedEl.innerHTML = '';
+        for (let i = cursor - 1; i >= 0; i--) {
+          const e = myTimeline[i];
           const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
           const line = document.createElement('div');
           line.className = 'live-feed-line';
-          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player} <span class="muted">— ${m.aName} vs ${m.bName}</span>`;
-          feedEl.prepend(line);
+          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player}${e.assistBy ? ` <span class="muted">(assist: ${e.assistBy})</span>` : ''}`;
+          feedEl.appendChild(line);
+        }
+      }
+
+      function renderView() {
+        const picker = `
+          <div class="live-picker-row">
+            <span class="muted">Watching:</span>
+            <select id="liveMatchSelect">
+              ${step.matches.map((m, idx) => `<option value="${idx}" ${idx === viewIdx ? 'selected' : ''}>${m.aName} vs ${m.bName}${idx === myMatchIdx ? ' — Your Match' : ''}</option>`).join('')}
+            </select>
+          </div>
+        `;
+        liveZone.innerHTML = `${picker}<div id="liveBody">${viewIdx === myMatchIdx ? myMatchBody() : otherMatchBody(viewIdx)}</div><button class="btn btn-block" id="btnSkipLive" style="margin-top:12px;">⏭ Skip to Full Results</button>`;
+        liveZone.querySelector('#liveMatchSelect').addEventListener('change', (e) => {
+          viewIdx = Number(e.target.value);
+          renderView();
+        });
+        liveZone.querySelector('#btnSkipLive').addEventListener('click', finish);
+        if (viewIdx === myMatchIdx) renderFeedUpToNow();
+      }
+
+      renderView();
+
+      const timer = setInterval(() => {
+        clock += 2;
+        while (cursor < myTimeline.length && myTimeline[cursor].minute <= clock) {
+          const e = myTimeline[cursor];
+          if (e.type === 'goal') { if (e.side === 'A') myScore.a += 1; else myScore.b += 1; }
           cursor += 1;
         }
-        renderBoard();
+        if (viewIdx === myMatchIdx) {
+          const clockEl = liveZone.querySelector('#liveClock');
+          const scoreEl = liveZone.querySelector('#liveMyScore');
+          if (clockEl) clockEl.textContent = Math.min(clock, 90) + "'";
+          if (scoreEl) scoreEl.textContent = `${myScore.a} - ${myScore.b}`;
+          renderFeedUpToNow();
+        }
         if (clock >= 90) finish();
       }, 180);
     }
@@ -147,12 +177,22 @@ const TournamentView = {
       const bySlot = {};
       for (const p of lineup.xi) bySlot[p.slotCode] = p;
       const avgOverall = Math.round(lineup.xi.reduce((s, p) => s + p.overall, 0) / lineup.xi.length);
+      const chancePct = lineup.championshipChance * 100;
+      const chanceText = chancePct >= 0.1 ? `${chancePct.toFixed(1)}%` : '<0.1%';
 
       stepCard.innerHTML = `
         <h3 class="center">You're representing ${lineup.countryName}!</h3>
         <p class="muted center">${lineup.formation} &middot; OVR ${avgOverall}</p>
         <div id="lineupPitch"></div>
-        <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">▶ Enter the World Cup</button>
+        <div class="lineup-predictions">
+          <div class="lineup-prediction-stat">
+            <span class="lineup-prediction-value">${chanceText}</span>
+            <span class="muted">predicted title chance</span>
+          </div>
+          ${lineup.predictedTopScorer ? `<div class="lineup-prediction-line">⚽ Predicted top scorer: <b>${lineup.predictedTopScorer}</b></div>` : ''}
+          ${lineup.predictedTopAssist ? `<div class="lineup-prediction-line">🎯 Predicted top assists: <b>${lineup.predictedTopAssist}</b></div>` : ''}
+        </div>
+        <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">Enter the World Cup</button>
       `;
       Pitch.render(stepCard.querySelector('#lineupPitch'), slotDefs, (slot) => {
         const p = bySlot[slot.code];
@@ -281,6 +321,7 @@ const TournamentView = {
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
       isCreator = s.creatorId === App.state.user.id;
+      if (s.myLineup) myCode = s.myLineup.code;
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
         renderLineupReveal(s.myLineup);
       } else {
@@ -292,8 +333,8 @@ const TournamentView = {
       viewedStep = payload.viewedStep;
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;
-      if (payload.step && payload.step.matches && payload.step.matches.length) {
-        playLiveReport(payload.step, () => renderStep(payload.step));
+      if (payload.step && payload.step.matches && payload.step.matches.length && myCode) {
+        playLiveReport(payload.step, myCode, () => renderStep(payload.step));
       } else {
         renderStep(payload.step);
       }

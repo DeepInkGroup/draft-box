@@ -32,7 +32,7 @@ const LobbyView = {
         <p class="muted">Changing your formation resets which exact slots (e.g. LB vs RB) are open — pick it before the draft starts.</p>
         <div id="myFormation"></div>
       </div>
-      ${isCreator ? '<button id="btnStart" class="btn btn-primary btn-block">🚀 Start Draft</button>' : '<p class="muted center">Waiting for the room creator to start the game...</p>'}
+      ${isCreator ? '<button id="btnStart" class="btn btn-primary btn-block">Start Draft</button>' : '<p class="muted center">Waiting for the room creator to start the game...</p>'}
       <div class="error-text hidden" id="lobbyError"></div>
     `;
 
