@@ -34,8 +34,25 @@ const TournamentView = {
 
     function scoreText(m) {
       let s = `${m.goalsA} - ${m.goalsB}`;
+      if (m.wentToExtraTime) s += ' (AET)';
       if (m.wentToPenalties) s += ` (pens: ${m.penalties.A}-${m.penalties.B})`;
       return s;
+    }
+
+    function penaltyShootoutHtml(m) {
+      if (!m.wentToPenalties || !m.penaltyKicks) return '';
+      const rows = m.penaltyKicks.map((k) => `
+        <div class="pen-kick-line ${k.scored ? 'scored' : 'missed'}">
+          <span>${k.side === 'A' ? '←' : '→'} ${k.player}</span>
+          <span class="pen-kick-result">${k.scored ? 'Scored' : 'Missed'}</span>
+        </div>
+      `).join('');
+      return `
+        <div class="pen-shootout">
+          <div class="pen-shootout-title">Penalty Shootout — ${m.penalties.A}-${m.penalties.B}</div>
+          ${rows}
+        </div>
+      `;
     }
 
     function nameTag(name, isHuman, username) {
@@ -61,19 +78,35 @@ const TournamentView = {
     }
 
     // Interpolates the same stats toward their final values as the live clock ticks, so
-    // the numbers build up over the 90 minutes instead of appearing fully-formed at
-    // kickoff. xG and pass counts accumulate roughly linearly with time; possession gets
-    // a per-match random early wobble that settles down to the true final split by the
-    // final whistle, the way a live "possession so far" stat behaves in a real broadcast.
-    function liveStatsAtClock(m, clock, possessionJitter) {
+    // the numbers build up over the match instead of appearing fully-formed at kickoff.
+    // xG, passes, shots, corners and fouls accumulate roughly linearly with time;
+    // possession gets a per-match random early wobble that settles down to the true
+    // final split by the final whistle, the way a live "possession so far" stat behaves
+    // in a real broadcast. matchLenMinutes is 90 or 120 (extra time) so the fraction
+    // reflects the whole match, not just normal time. Cards/saves are exact — passed in
+    // separately by the caller, derived from events actually revealed so far.
+    function liveStatsAtClock(m, clock, possessionJitter, matchLenMinutes, cardCounts) {
       if (!m.stats) return null;
-      const frac = clamp(clock / 90, 0, 1);
+      const frac = clamp(clock / matchLenMinutes, 0, 1);
       const decay = 1 - frac;
       const possA = Math.round(clamp(m.stats.A.possession + possessionJitter * decay, 20, 80));
       const possB = 100 - possA;
+      const scale = (n) => Math.round(n * frac);
+      const side = (s, sideKey) => ({
+        possession: sideKey === 'A' ? possA : possB,
+        passAccuracy: s.passAccuracy,
+        passes: scale(s.passes),
+        shots: scale(s.shots),
+        shotsOnTarget: scale(s.shotsOnTarget),
+        corners: scale(s.corners),
+        fouls: scale(s.fouls),
+        yellowCards: cardCounts ? cardCounts.A_yellow : 0,
+        redCards: cardCounts ? cardCounts.A_red : 0,
+        saves: scale(s.saves)
+      });
       return {
-        A: { possession: possA, passAccuracy: m.stats.A.passAccuracy, passes: Math.round(m.stats.A.passes * frac) },
-        B: { possession: possB, passAccuracy: m.stats.B.passAccuracy, passes: Math.round(m.stats.B.passes * frac) },
+        A: side(m.stats.A, 'A'),
+        B: { ...side(m.stats.B, 'B'), yellowCards: cardCounts ? cardCounts.B_yellow : 0, redCards: cardCounts ? cardCounts.B_red : 0 },
         xgA: m.xgA * frac,
         xgB: m.xgB * frac
       };
@@ -88,10 +121,21 @@ const TournamentView = {
           <span class="stat-val">${b}</span>
         </div>
       `;
+      const cardsText = (s) => {
+        const parts = [];
+        if (s.yellowCards) parts.push(`${s.yellowCards}Y`);
+        if (s.redCards) parts.push(`${s.redCards}R`);
+        return parts.length ? parts.join(' ') : '—';
+      };
       return `
         <div class="match-stats">
           ${row('Possession', `${stats.A.possession}%`, `${stats.B.possession}%`)}
+          ${row('Shots (on target)', `${stats.A.shots} (${stats.A.shotsOnTarget})`, `${stats.B.shots} (${stats.B.shotsOnTarget})`)}
           ${row('Passes (acc.)', `${stats.A.passes} (${stats.A.passAccuracy}%)`, `${stats.B.passes} (${stats.B.passAccuracy}%)`)}
+          ${row('Corners', stats.A.corners, stats.B.corners)}
+          ${row('Fouls', stats.A.fouls, stats.B.fouls)}
+          ${row('Cards', cardsText(stats.A), cardsText(stats.B))}
+          ${row('Saves', stats.A.saves, stats.B.saves)}
           ${row('xG', stats.xgA.toFixed(2), stats.xgB.toFixed(2))}
         </div>
       `;
@@ -113,21 +157,36 @@ const TournamentView = {
       }
     }
 
-    // --- Live 90-minute report: only the viewer's own match plays out on a ticking
-    // clock; every other match in the step is already decided, so it's offered as a
-    // static "final report" the viewer can switch to via the picker, without spoiling
-    // the live pacing of their own game. Skippable. Hands off to the normal, permanent
-    // results view (renderStep) when done.
+    function countCardsSoFar(timeline, cursor) {
+      const counts = { A_yellow: 0, A_red: 0, B_yellow: 0, B_red: 0 };
+      for (let i = 0; i < cursor; i++) {
+        const e = timeline[i];
+        if (e.type === 'yellow') counts[`${e.side}_yellow`] += 1;
+        else if (e.type === 'red') counts[`${e.side}_red`] += 1;
+      }
+      return counts;
+    }
+
+    // --- Live match report: only the viewer's own match plays out on a ticking clock
+    // (through extra time and, if needed, a kick-by-kick penalty shootout — never an
+    // instant jump to a final penalty score); every other match in the step is already
+    // decided, offered as a static "final report" via the picker. Skippable. Hands off
+    // to the normal, permanent results view (renderStep) when done.
     function playLiveReport(step, forCode, onDone) {
       const myMatchIdx = step.matches.findIndex((m) => m.aCode === forCode || m.bCode === forCode);
       if (myMatchIdx === -1) { onDone(); return; } // no match of mine this round — nothing to watch live
 
-      const myTimeline = (step.matches[myMatchIdx].events || []).filter((e) => e.type !== 'save').slice().sort((a, b) => a.minute - b.minute);
+      const m = step.matches[myMatchIdx];
+      const matchLenMinutes = m.wentToExtraTime ? 120 : 90;
+      const myTimeline = (m.events || []).filter((e) => e.type !== 'save').slice().sort((a, b) => a.minute - b.minute);
       const myScore = { a: 0, b: 0 };
       let viewIdx = myMatchIdx;
       let clock = 0;
       let cursor = 0;
       let finished = false;
+      let penaltyPhase = false;
+      let penIdx = 0;
+      const penScore = { a: 0, b: 0 };
       const possessionJitter = (Math.random() - 0.5) * 20; // settles to 0 by full time
 
       stepCard.style.display = 'none';
@@ -145,21 +204,23 @@ const TournamentView = {
       }
 
       function myMatchBody() {
-        const m = step.matches[myMatchIdx];
+        const clockLabel = penaltyPhase ? 'PENS' : `${Math.min(clock, matchLenMinutes)}'${clock > 90 ? ' ET' : ''}`;
         return `
-          <div class="center"><span class="live-clock" id="liveClock">${Math.min(clock, 90)}'</span></div>
+          <div class="center"><span class="live-clock" id="liveClock">${clockLabel}</span></div>
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
-          <div id="liveStatsZone">${matchStatsHtml(liveStatsAtClock(m, clock, possessionJitter))}</div>
+          ${m.wentToPenalties ? `<div class="center muted" id="livePenScore" style="${penaltyPhase ? '' : 'display:none;'}margin-bottom:10px;">Penalties: <b>${penScore.a} - ${penScore.b}</b></div>` : ''}
+          <div id="liveStatsZone" style="${penaltyPhase ? 'display:none;' : ''}">${matchStatsHtml(liveStatsAtClock(m, clock, possessionJitter, matchLenMinutes, countCardsSoFar(myTimeline, cursor)))}</div>
           <div class="live-feed" id="liveFeed"></div>
         `;
       }
 
       function otherMatchBody(idx) {
-        const m = step.matches[idx];
-        const evs = (m.events || []).filter((e) => e.type !== 'save');
+        const om = step.matches[idx];
+        const evs = (om.events || []).filter((e) => e.type !== 'save');
         return `
-          <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b>${scoreText(m)}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
-          ${matchStatsHtml(finalMatchStats(m))}
+          <div class="live-final-score">${nameTag(om.aName, om.aHuman, om.aUsername)} <b>${scoreText(om)}</b> ${nameTag(om.bName, om.bHuman, om.bUsername)}</div>
+          ${matchStatsHtml(finalMatchStats(om))}
+          ${penaltyShootoutHtml(om)}
           <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
         `;
       }
@@ -178,12 +239,25 @@ const TournamentView = {
         }
       }
 
+      function renderPenaltyFeed() {
+        const feedEl = liveZone.querySelector('#liveFeed');
+        if (!feedEl) return;
+        feedEl.innerHTML = '';
+        for (let i = penIdx - 1; i >= 0; i--) {
+          const k = m.penaltyKicks[i];
+          const line = document.createElement('div');
+          line.className = 'live-feed-line';
+          line.innerHTML = `${k.side === 'A' ? '←' : '→'} ${k.scored ? '⚽' : '❌'} ${k.player} <span class="muted">${k.scored ? 'scored' : 'missed'}</span>`;
+          feedEl.appendChild(line);
+        }
+      }
+
       function renderView() {
         const picker = `
           <div class="live-picker-row">
             <span class="muted">Watching:</span>
             <select id="liveMatchSelect">
-              ${step.matches.map((m, idx) => `<option value="${idx}" ${idx === viewIdx ? 'selected' : ''}>${m.aName} vs ${m.bName}${idx === myMatchIdx ? ' — Your Match' : ''}</option>`).join('')}
+              ${step.matches.map((sm, idx) => `<option value="${idx}" ${idx === viewIdx ? 'selected' : ''}>${sm.aName} vs ${sm.bName}${idx === myMatchIdx ? ' — Your Match' : ''}</option>`).join('')}
             </select>
           </div>
         `;
@@ -193,11 +267,30 @@ const TournamentView = {
           renderView();
         });
         liveZone.querySelector('#btnSkipLive').addEventListener('click', finish);
-        if (viewIdx === myMatchIdx) renderFeedUpToNow();
+        if (viewIdx === myMatchIdx) { if (penaltyPhase) renderPenaltyFeed(); else renderFeedUpToNow(); }
       }
 
       renderView();
 
+      function startPenaltyPhase() {
+        penaltyPhase = true;
+        clearInterval(timer);
+        if (viewIdx === myMatchIdx) renderView();
+        penaltyTimer = setInterval(() => {
+          if (penIdx >= m.penaltyKicks.length) { clearInterval(penaltyTimer); finish(); return; }
+          const k = m.penaltyKicks[penIdx];
+          if (k.scored) { if (k.side === 'A') penScore.a += 1; else penScore.b += 1; }
+          penIdx += 1;
+          if (viewIdx === myMatchIdx) {
+            const scoreEl = liveZone.querySelector('#livePenScore b');
+            if (scoreEl) scoreEl.textContent = `${penScore.a} - ${penScore.b}`;
+            renderPenaltyFeed();
+          }
+          if (penIdx >= m.penaltyKicks.length) { clearInterval(penaltyTimer); finish(); }
+        }, 650);
+      }
+
+      let penaltyTimer = null;
       const timer = setInterval(() => {
         clock += 2;
         while (cursor < myTimeline.length && myTimeline[cursor].minute <= clock) {
@@ -209,12 +302,15 @@ const TournamentView = {
           const clockEl = liveZone.querySelector('#liveClock');
           const scoreEl = liveZone.querySelector('#liveMyScore');
           const statsEl = liveZone.querySelector('#liveStatsZone');
-          if (clockEl) clockEl.textContent = Math.min(clock, 90) + "'";
+          if (clockEl) clockEl.textContent = `${Math.min(clock, matchLenMinutes)}'${clock > 90 ? ' ET' : ''}`;
           if (scoreEl) scoreEl.textContent = `${myScore.a} - ${myScore.b}`;
-          if (statsEl) statsEl.innerHTML = matchStatsHtml(liveStatsAtClock(step.matches[myMatchIdx], clock, possessionJitter));
+          if (statsEl) statsEl.innerHTML = matchStatsHtml(liveStatsAtClock(m, clock, possessionJitter, matchLenMinutes, countCardsSoFar(myTimeline, cursor)));
           renderFeedUpToNow();
         }
-        if (clock >= 90) finish();
+        if (clock >= matchLenMinutes) {
+          if (m.wentToPenalties) startPenaltyPhase();
+          else finish();
+        }
       }, 180);
     }
 
@@ -364,6 +460,7 @@ const TournamentView = {
           <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername)}</span></div>
           <div class="match-score-box">
             <span class="match-score-val">${m.goalsA} - ${m.goalsB}</span>
+            ${m.wentToExtraTime ? `<span class="match-score-pens">AET</span>` : ''}
             ${m.wentToPenalties ? `<span class="match-score-pens">pens ${m.penalties.A}-${m.penalties.B}</span>` : ''}
           </div>
           <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername)}</span></div>
@@ -371,6 +468,7 @@ const TournamentView = {
         </div>
         <div class="match-report hidden" id="report-${idx}">
           ${matchStatsHtml(finalMatchStats(m))}
+          ${penaltyShootoutHtml(m)}
           ${visibleEvents.length ? visibleEvents.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
         </div>
       `;

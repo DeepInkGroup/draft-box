@@ -40,15 +40,24 @@ function clearPickTimer(member) {
   }
 }
 
-function maybeStartTournament(io, roomRow, roomState) {
-  const allReady = Array.from(roomState.members.values()).every((m) => memberReady(m, roomState.captainEnabled));
-  if (!allReady) return false;
+function startTournamentNow(io, roomRow, roomState) {
   tournamentEngine.startTournament(roomState);
   rm.setRoomStatus(roomRow.id, 'group_stage');
   rm.persistTournamentSnapshot(roomState);
   // Deliberately no results payload here: every member pulls the tournament's
   // steps at their own pace via tournament:advance once they land on the view.
   io.to(channelName(roomRow.code)).emit('tournament:started', {});
+}
+
+// Singleplayer auto-starts the instant the lone drafter is ready — there's nobody to
+// coordinate with. Multiplayer rooms instead wait for the creator's explicit
+// confirmation (room:startTournament) once everyone is ready, so nobody gets yanked
+// into the World Cup mid-draft while a teammate is still finishing up.
+function maybeStartTournament(io, roomRow, roomState) {
+  if (!roomState.singlePlayer) return false;
+  const allReady = Array.from(roomState.members.values()).every((m) => memberReady(m, roomState.captainEnabled));
+  if (!allReady) return false;
+  startTournamentNow(io, roomRow, roomState);
   return true;
 }
 
@@ -71,12 +80,15 @@ function scheduleAutoPick(io, code, roomState, userId) {
   const member = roomState.members.get(userId);
   if (!member) return;
   clearPickTimer(member);
+  // "No Limit" rooms (pickTimeMs === 0) never auto-pick — the drafter can take as long as they want.
+  if (roomState.pickTimeMs === 0) return;
   // small grace buffer over the client-visible deadline to absorb network/render latency
+  const pickTimeMs = roomState.pickTimeMs != null ? roomState.pickTimeMs : draftEngine.DEFAULT_PICK_TIME_MS;
   member.pickTimer = setTimeout(() => {
     member.pickTimer = null;
     const result = draftEngine.autoPickForMember(roomState, userId);
     if (result) applyPickSideEffects(io, code, roomState, userId, result, true);
-  }, (roomState.pickTimeMs || draftEngine.DEFAULT_PICK_TIME_MS) + 250);
+  }, pickTimeMs + 250);
 }
 
 function registerSocketHandlers(io) {
@@ -241,6 +253,20 @@ function registerSocketHandlers(io) {
       const freshRoomRow = rm.getRoomRow(roomRow.id);
       const started = maybeStartTournament(io, freshRoomRow, state);
       if (!started) io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
+    });
+
+    // Multiplayer-only: once every member is ready (draft complete + captain if
+    // required), the room creator explicitly confirms the tournament start — see
+    // maybeStartTournament above for why this doesn't just happen automatically.
+    socket.on('room:startTournament', ({ code }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
+      if (roomRow.creator_id !== socket.user.id) return socket.emit('error:message', { error: 'only the room creator can start the tournament' });
+      if (roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'the draft is not ready to start the tournament' });
+      const state = rm.loadRoomState(roomRow);
+      const allReady = Array.from(state.members.values()).every((m) => memberReady(m, state.captainEnabled));
+      if (!allReady) return socket.emit('error:message', { error: 'not everyone has finished drafting yet' });
+      startTournamentNow(io, roomRow, state);
     });
 
     // Each member pulls the shared tournament forward at their own pace: if the room's

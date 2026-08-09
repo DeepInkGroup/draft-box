@@ -38,13 +38,15 @@ function revealForMember(roomState, userId) {
   const candidates = teamPool.filter((t) => !member.seenTeams.has(t.code));
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
-  const pickTimeMs = roomState.pickTimeMs || DEFAULT_PICK_TIME_MS;
+  // 0 is a valid, deliberate "No Limit" setting — must not fall through to the default
+  // via a falsy-OR check, which would silently re-enable a 20s countdown.
+  const pickTimeMs = roomState.pickTimeMs != null ? roomState.pickTimeMs : DEFAULT_PICK_TIME_MS;
 
   const reveal = (team) => {
     member.seenTeams.add(team.code);
     member.lastRevealedTeam = team.code;
     member.currentReveal = team.code;
-    member.pickDeadline = Date.now() + pickTimeMs;
+    member.pickDeadline = pickTimeMs > 0 ? Date.now() + pickTimeMs : null;
     return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs, roomState);
   };
 

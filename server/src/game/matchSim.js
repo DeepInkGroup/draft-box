@@ -157,11 +157,12 @@ function generateCardEvents(teamA, teamB) {
   return { events, dismissals };
 }
 
-// Match stats (possession, pass accuracy, pass count) are derived straight from the
+// Match stats (possession, passes, shots, corners, fouls) are derived straight from the
 // same Attack/Defense ratings used for xG — the better/more cohesive side tends to see
-// more of the ball and pass it more cleanly. Narrative, like the event feed; doesn't
-// feed back into the scoreline.
-function computeMatchStats(ratingsA, ratingsB) {
+// more of the ball, pass it more cleanly, and generate more shots/corners. Cards and
+// saves are exact tallies from the already-generated event list (final, including any
+// extra-time events). Narrative, like the event feed; doesn't feed back into the score.
+function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events) {
   const qualityDiff = (ratingsA.attack + ratingsA.defense) - (ratingsB.attack + ratingsB.defense);
   const possessionA = Math.round(clamp(50 + qualityDiff * 0.6, 32, 68));
   const possessionB = 100 - possessionA;
@@ -175,10 +176,96 @@ function computeMatchStats(ratingsA, ratingsB) {
   const passesA = Math.round((totalPasses * possessionA) / 100);
   const passesB = totalPasses - passesA;
 
+  // Shots on target reuse the same ~0.3-xG-per-shot approximation as save events;
+  // total shots assume roughly 42% land on target, a typical real-football rate.
+  const shotsOnTargetA = Math.max(goalsA, Math.round(xgA / 0.3));
+  const shotsOnTargetB = Math.max(goalsB, Math.round(xgB / 0.3));
+  const shotsA = Math.round(shotsOnTargetA / 0.42);
+  const shotsB = Math.round(shotsOnTargetB / 0.42);
+
+  const cornersTotal = 7 + Math.floor(Math.random() * 7); // 7-13
+  const cornersA = Math.round((cornersTotal * possessionA) / 100);
+  const cornersB = cornersTotal - cornersA;
+
+  // Fouls correlate loosely with chasing the game — the side seeing less of the ball
+  // tends to commit a few more.
+  const foulsA = Math.round(clamp(10 + (possessionB - possessionA) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
+  const foulsB = Math.round(clamp(10 + (possessionA - possessionB) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
+
+  const tally = (type, side) => events.filter((e) => e.type === type && e.side === side).length;
+
   return {
-    A: { possession: possessionA, passAccuracy: passAccuracyA, passes: passesA },
-    B: { possession: possessionB, passAccuracy: passAccuracyB, passes: passesB }
+    A: {
+      possession: possessionA, passAccuracy: passAccuracyA, passes: passesA,
+      shots: shotsA, shotsOnTarget: shotsOnTargetA, corners: cornersA, fouls: foulsA,
+      yellowCards: tally('yellow', 'A'), redCards: tally('red', 'A'), saves: tally('save', 'A')
+    },
+    B: {
+      possession: possessionB, passAccuracy: passAccuracyB, passes: passesB,
+      shots: shotsB, shotsOnTarget: shotsOnTargetB, corners: cornersB, fouls: foulsB,
+      yellowCards: tally('yellow', 'B'), redCards: tally('red', 'B'), saves: tally('save', 'B')
+    }
   };
+}
+
+// Extra time: two 15-minute periods (minutes 91-120), only reached in knockout matches
+// still level after 90'. Lower-scoring than normal time — legs are tired and sides play
+// more cautiously — modeled as roughly a third of a full match's expected goals.
+function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB) {
+  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * (30 / 90);
+  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * (30 / 90);
+  const goalsA = clamp(poissonSample(etXgA), 0, 4);
+  const goalsB = clamp(poissonSample(etXgB), 0, 4);
+  const events = [
+    ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A', minute: 91 + Math.floor(Math.random() * 30) })),
+    ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B', minute: 91 + Math.floor(Math.random() * 30) }))
+  ];
+  return { goalsA, goalsB, events };
+}
+
+// Penalty shootout: proper kick-by-kick, not an instant coin flip. Each side's best
+// takers (by overall) go first; success chance is quality-weighted. Standard 5 rounds
+// each, with the real-football early-stop rule (stop once the trailing side can no
+// longer mathematically catch up in the remaining initial-round kicks), then sudden
+// death — one kick each per round — until someone is left standing.
+function orderedKickers(team) {
+  const outfield = team.xi.filter((p) => p.pos !== 'GK');
+  const pool = outfield.length ? outfield : team.xi;
+  return pool.slice().sort((a, b) => b.overall - a.overall);
+}
+
+function simulatePenaltyShootout(teamA, teamB) {
+  const kickersA = orderedKickers(teamA);
+  const kickersB = orderedKickers(teamB);
+  const kickProb = (p) => clamp(0.62 + (p.overall - 75) / 200, 0.45, 0.9);
+
+  const kicks = [];
+  let scoreA = 0;
+  let scoreB = 0;
+  let round = 1;
+  while (true) {
+    const kA = kickersA[(round - 1) % kickersA.length];
+    const scoredA = Math.random() < kickProb(kA);
+    kicks.push({ side: 'A', player: kA.name, scored: scoredA, round });
+    if (scoredA) scoreA += 1;
+
+    const kB = kickersB[(round - 1) % kickersB.length];
+    const scoredB = Math.random() < kickProb(kB);
+    kicks.push({ side: 'B', player: kB.name, scored: scoredB, round });
+    if (scoredB) scoreB += 1;
+
+    if (round >= 5) {
+      if (scoreA !== scoreB) break; // decided after at least 5 rounds each
+      round += 1; // sudden death: continue one kick each per round until decided
+      continue;
+    }
+
+    const remaining = 5 - round;
+    if (scoreA > scoreB + remaining || scoreB > scoreA + remaining) break; // trailing side can no longer catch up
+    round += 1;
+  }
+
+  return { kicks, penaltyWinner: scoreA > scoreB ? 'A' : 'B', penalties: { A: scoreA, B: scoreB } };
 }
 
 function simulateMatch(teamA, teamB, { knockout = false } = {}) {
@@ -215,26 +302,43 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateSaveEvents(teamA, 'A', xgB, goalsB),
     ...generateSaveEvents(teamB, 'B', xgA, goalsA)
   ];
-  const events = [...goalEvents, ...cardPlan.events, ...saveEvents].sort((a, b) => a.minute - b.minute);
-  const stats = computeMatchStats(ratingsA, ratingsB);
+  let events = [...goalEvents, ...cardPlan.events, ...saveEvents];
 
-  const result = { goalsA, goalsB, xgA, xgB, stats, wentToPenalties: false, penaltyWinner: null, events };
+  let wentToExtraTime = false;
+  let etGoalsA = 0;
+  let etGoalsB = 0;
+  let wentToPenalties = false;
+  let penaltyWinner = null;
+  let penalties = null;
+  let penaltyKicks = null;
 
+  // Knockout draws play extra time before penalties — never straight to a shootout.
   if (knockout && goalsA === goalsB) {
-    result.wentToPenalties = true;
-    const composureA = ratingsA.attack + ratingsA.defense;
-    const composureB = ratingsB.attack + ratingsB.defense;
-    const probA = clamp(0.5 + (composureA - composureB) / 400, 0.35, 0.65);
-    const aWins = Math.random() < probA;
-    const winnerPens = 3 + Math.floor(Math.random() * 3); // 3-5
-    const loserPens = Math.max(0, winnerPens - (1 + Math.floor(Math.random() * 3)));
-    result.penaltyWinner = aWins ? 'A' : 'B';
-    result.penalties = aWins
-      ? { A: winnerPens, B: loserPens }
-      : { A: loserPens, B: winnerPens };
+    wentToExtraTime = true;
+    const et = simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB);
+    etGoalsA = et.goalsA;
+    etGoalsB = et.goalsB;
+    goalsA += etGoalsA;
+    goalsB += etGoalsB;
+    events = [...events, ...et.events];
+
+    if (goalsA === goalsB) {
+      wentToPenalties = true;
+      const shootout = simulatePenaltyShootout(teamA, teamB);
+      penaltyWinner = shootout.penaltyWinner;
+      penalties = shootout.penalties;
+      penaltyKicks = shootout.kicks;
+    }
   }
 
-  return result;
+  events.sort((a, b) => a.minute - b.minute);
+  const stats = computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events);
+
+  return {
+    goalsA, goalsB, xgA, xgB, stats, events,
+    wentToExtraTime, etGoalsA, etGoalsB,
+    wentToPenalties, penaltyWinner, penalties, penaltyKicks
+  };
 }
 
 module.exports = { simulateMatch, poissonSample, formationEdge };

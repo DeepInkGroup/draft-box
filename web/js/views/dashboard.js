@@ -1,3 +1,14 @@
+// Real football confederations for the 48 qualified 2026 World Cup nations, used to
+// group the draft team-restriction picker instead of one flat 48-item list.
+const CONFEDERATIONS = [
+  { name: 'UEFA (Europe)', codes: ['CZE', 'BIH', 'SCO', 'SUI', 'TUR', 'GER', 'NED', 'SWE', 'BEL', 'ESP', 'FRA', 'NOR', 'AUT', 'POR', 'ENG', 'CRO'] },
+  { name: 'CONMEBOL (South America)', codes: ['BRA', 'PAR', 'ECU', 'URU', 'ARG', 'COL'] },
+  { name: 'CONCACAF (North/Central America)', codes: ['MEX', 'CAN', 'HAI', 'USA', 'CUW', 'PAN'] },
+  { name: 'AFC (Asia)', codes: ['KOR', 'QAT', 'AUS', 'JPN', 'IRN', 'KSA', 'IRQ', 'JOR', 'UZB'] },
+  { name: 'CAF (Africa)', codes: ['RSA', 'MAR', 'CIV', 'TUN', 'EGY', 'CPV', 'SEN', 'ALG', 'COD', 'GHA'] },
+  { name: 'OFC (Oceania)', codes: ['NZL'] }
+];
+
 const DashboardView = {
   render(container) {
     this.renderModeSelect(container);
@@ -109,6 +120,12 @@ const DashboardView = {
         return;
       }
       teamsLoaded = true;
+      const nameByCode = new Map(teams.map((t) => [t.code, t.name]));
+      const grouped = CONFEDERATIONS.map((conf) => ({
+        name: conf.name,
+        teams: conf.codes.filter((c) => nameByCode.has(c)).map((c) => ({ code: c, name: nameByCode.get(c) }))
+      })).filter((g) => g.teams.length);
+
       bodyEl.innerHTML = `
         <div class="team-picker">
           <div class="team-picker-actions">
@@ -116,12 +133,17 @@ const DashboardView = {
             <button type="button" class="btn btn-ghost btn-sm" id="tpClear">Clear</button>
             <span class="muted team-picker-count" id="tpCount">0 selected — pick at least 4</span>
           </div>
-          <div class="team-picker-grid">
-            ${teams.map((t) => `
-              <label class="team-picker-item">
-                <input type="checkbox" data-code="${t.code}" />
-                <span>${t.name}</span>
-              </label>
+          <div class="team-picker-groups">
+            ${grouped.map((g, gi) => `
+              <div class="team-group">
+                <div class="team-group-header">
+                  <span class="team-group-title">${g.name}</span>
+                  <button type="button" class="team-group-toggle" data-group="${gi}">select all</button>
+                </div>
+                <div class="team-chips">
+                  ${g.teams.map((t) => `<button type="button" class="team-chip" data-code="${t.code}">${t.name}</button>`).join('')}
+                </div>
+              </div>
             `).join('')}
           </div>
         </div>
@@ -131,20 +153,37 @@ const DashboardView = {
         if (selected.size < 4) countEl.textContent = `${selected.size} selected — pick at least 4`;
         else countEl.textContent = `${selected.size} teams selected`;
       };
-      const boxes = Array.from(bodyEl.querySelectorAll('input[type="checkbox"]'));
-      boxes.forEach((b) => {
-        b.checked = selected.has(b.dataset.code);
-        b.addEventListener('change', () => {
-          if (b.checked) selected.add(b.dataset.code); else selected.delete(b.dataset.code);
+      const chips = Array.from(bodyEl.querySelectorAll('.team-chip'));
+      const syncChip = (chip) => chip.classList.toggle('selected', selected.has(chip.dataset.code));
+      chips.forEach((chip) => {
+        syncChip(chip);
+        chip.addEventListener('click', () => {
+          if (selected.has(chip.dataset.code)) selected.delete(chip.dataset.code);
+          else selected.add(chip.dataset.code);
+          syncChip(chip);
+          updateCount();
+        });
+      });
+      bodyEl.querySelectorAll('.team-group-toggle').forEach((btn, gi) => {
+        btn.addEventListener('click', () => {
+          const groupChips = chips.filter((c) => c.closest('.team-group') === btn.closest('.team-group'));
+          const allSelected = groupChips.every((c) => selected.has(c.dataset.code));
+          groupChips.forEach((c) => {
+            if (allSelected) selected.delete(c.dataset.code); else selected.add(c.dataset.code);
+            syncChip(c);
+          });
+          btn.textContent = allSelected ? 'select all' : 'clear';
           updateCount();
         });
       });
       bodyEl.querySelector('#tpSelectAll').addEventListener('click', () => {
-        boxes.forEach((b) => { b.checked = true; selected.add(b.dataset.code); });
+        chips.forEach((c) => { selected.add(c.dataset.code); syncChip(c); });
+        bodyEl.querySelectorAll('.team-group-toggle').forEach((b) => { b.textContent = 'clear'; });
         updateCount();
       });
       bodyEl.querySelector('#tpClear').addEventListener('click', () => {
-        boxes.forEach((b) => { b.checked = false; });
+        chips.forEach((c) => { selected.delete(c.dataset.code); syncChip(c); });
+        bodyEl.querySelectorAll('.team-group-toggle').forEach((b) => { b.textContent = 'select all'; });
         selected.clear();
         updateCount();
       });
@@ -163,7 +202,9 @@ const DashboardView = {
       { value: 10000, title: '10s', sub: 'Fast' },
       { value: 20000, title: '20s', sub: 'Default' },
       { value: 30000, title: '30s', sub: 'Relaxed' },
-      { value: 60000, title: '60s', sub: 'Chill' }
+      { value: 45000, title: '45s', sub: 'Leisurely' },
+      { value: 60000, title: '60s', sub: 'Chill' },
+      { value: 0, title: 'No Limit', sub: 'Take your time' }
     ];
   },
 

@@ -12,6 +12,10 @@ const DraftView = {
     let captainEnabled = false;
     let sortMode = 'rating';
     let lastPlayers = [];
+    let isCreator = false;
+    let singlePlayer = false;
+    let allReady = false;
+    let iAmReady = false;
 
     const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 };
     function sortPlayers(players, mode) {
@@ -48,7 +52,7 @@ const DraftView = {
         <div id="squadPitch"></div>
       </div>
       <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
-      <p class="muted center" id="waitingMsg" style="display:none;">✅ Your draft is complete! Waiting for other players before the World Cup starts...</p>
+      <div id="waitingZone"></div>
     `;
 
     const timerCard = container.querySelector('#timerCard');
@@ -58,8 +62,38 @@ const DraftView = {
     const squadProgress = container.querySelector('#squadProgress');
     const squadPitch = container.querySelector('#squadPitch');
     const poolCount = container.querySelector('#poolCount');
-    const waitingMsg = container.querySelector('#waitingMsg');
+    const waitingZone = container.querySelector('#waitingZone');
     const ratingsCardZone = container.querySelector('#ratingsCardZone');
+
+    // Multiplayer rooms wait for the room creator's explicit confirmation once everyone
+    // is ready, instead of yanking every player into the tournament the instant the last
+    // person finishes drafting. Singleplayer auto-starts (nobody else to coordinate with).
+    function renderWaitingZone() {
+      if (!iAmReady) { waitingZone.innerHTML = ''; return; }
+      if (singlePlayer) {
+        waitingZone.innerHTML = `<p class="muted center">Your draft is complete! Starting the World Cup...</p>`;
+        return;
+      }
+      if (!allReady) {
+        waitingZone.innerHTML = `<p class="muted center">Your draft is complete! Waiting for other players to finish their drafts...</p>`;
+        return;
+      }
+      if (isCreator) {
+        waitingZone.innerHTML = `
+          <div class="card center">
+            <p class="muted">Everyone's ready!</p>
+            <button class="btn btn-primary btn-block" id="btnStartTournament">Start Tournament</button>
+          </div>
+        `;
+        waitingZone.querySelector('#btnStartTournament').addEventListener('click', (e) => {
+          e.target.disabled = true;
+          e.target.textContent = 'Starting...';
+          socket.emit('room:startTournament', { code });
+        });
+      } else {
+        waitingZone.innerHTML = `<p class="muted center">Everyone's ready! Waiting for the room creator to start the tournament...</p>`;
+      }
+    }
 
     function renderRatingsCard(data) {
       if (!data) { ratingsCardZone.style.display = 'none'; return; }
@@ -74,6 +108,7 @@ const DraftView = {
 
     function startTimer(deadline, durationMs) {
       stopTimer();
+      if (deadline == null) return; // "No Limit" room — no countdown UI at all
       pickTimeMs = durationMs || pickTimeMs;
       timerCard.style.display = 'block';
       const tick = () => {
@@ -131,7 +166,7 @@ const DraftView = {
 
       revealCard.innerHTML = `
         <div class="reveal-team">${payload.team.name}</div>
-        <div class="reveal-sub">Pick one player from this team for your squad — no skipping, the clock is running</div>
+        <div class="reveal-sub">${payload.deadline == null ? 'Pick one player from this team for your squad — no time limit, take your time' : 'Pick one player from this team for your squad — no skipping, the clock is running'}</div>
         <div class="sort-toolbar" id="sortToolbar">
           ${ratingsVisible ? `<button type="button" class="sort-btn" data-mode="rating" title="Sort by rating"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg></button>` : ''}
           <button type="button" class="sort-btn" data-mode="position" title="Sort by position"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
@@ -193,10 +228,12 @@ const DraftView = {
       stopTimer();
       renderRatingsCard(ratingsCard);
       if (captainEnabled && !captainSlot) {
+        iAmReady = false;
         renderCaptainPicker(slotsMap, captainSlot);
       } else {
+        iAmReady = true;
         revealCard.innerHTML = '';
-        waitingMsg.style.display = 'block';
+        renderWaitingZone();
       }
     }
 
@@ -244,12 +281,20 @@ const DraftView = {
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
       captainEnabled = !!s.captainEnabled;
+      isCreator = s.creatorId === App.state.user.id;
+      singlePlayer = !!s.singlePlayer;
+      allReady = !!s.allReady;
       if (s.myDraft) {
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
         if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
         else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot, s.myDraft.ratingsCard);
       }
+    });
+
+    App.onSocket('room:memberUpdate', (snap) => {
+      allReady = !!snap.allReady;
+      renderWaitingZone();
     });
 
     App.onSocket('draft:reveal', renderReveal);
@@ -268,7 +313,8 @@ const DraftView = {
     App.onSocket('draft:captainSet', (payload) => {
       renderRatingsCard(payload.ratingsCard);
       revealCard.innerHTML = '';
-      waitingMsg.style.display = 'block';
+      iAmReady = true;
+      renderWaitingZone();
     });
 
     App.onSocket('draft:poolUpdate', (u) => {

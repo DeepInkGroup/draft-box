@@ -45,7 +45,8 @@ function uniqueCode() {
 // active in-memory runtime state, keyed by room id. Rebuilt from DB on first access after a restart.
 const activeRooms = new Map();
 
-const ALLOWED_PICK_TIMES_MS = [10000, 20000, 30000, 60000];
+// 0 is a sentinel meaning "No Limit" — no auto-pick countdown at all.
+const ALLOWED_PICK_TIMES_MS = [10000, 20000, 30000, 45000, 60000, 0];
 
 function normalizePickTime(ms) {
   const n = Number(ms);
@@ -204,19 +205,26 @@ function allMembersDraftComplete(roomState) {
 }
 
 function lobbySnapshot(roomRow) {
+  const members = getMembers(roomRow.id);
+  const captainEnabled = !!roomRow.captain_enabled;
+  const allReady = members.length > 0 && members.every((m) => !!m.draft_complete && (!captainEnabled || !!m.captain_slot));
   return {
     code: roomRow.code,
     name: roomRow.name,
     status: roomRow.status,
     creatorId: roomRow.creator_id,
     humanSlotsMax: roomRow.human_slots_max,
+    singlePlayer: !!roomRow.single_player,
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,
-    captainEnabled: !!roomRow.captain_enabled,
+    captainEnabled,
     tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
     allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
     rerollsAllowed: normalizeRerolls(roomRow.rerolls_allowed),
-    members: getMembers(roomRow.id).map((m) => ({
+    // All members finished drafting (+ captain if required) — the room creator can now
+    // confirm the start of the tournament (multiplayer) or it auto-starts (singleplayer).
+    allReady,
+    members: members.map((m) => ({
       userId: m.user_id,
       username: m.username,
       formation: m.formation,

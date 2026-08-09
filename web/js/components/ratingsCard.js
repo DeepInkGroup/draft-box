@@ -5,12 +5,12 @@
 const RatingsCard = {
   render(container, data) {
     const rows = [
-      { key: 'attack', label: 'Attack', icon: '⚡', cls: 'attack' },
-      { key: 'midfield', label: 'Midfield', icon: '🧭', cls: 'midfield' },
-      { key: 'defence', label: 'Defence', icon: '🛡️', cls: 'defence' },
-      { key: 'gk', label: 'GK', icon: '🧤', cls: 'gk' },
-      { key: 'chemistry', label: 'Chemistry', icon: '🔗', cls: 'chemistry' },
-      { key: 'starPower', label: 'Star Power', icon: '⭐', cls: 'starpower' }
+      { key: 'attack', label: 'Attack', cls: 'attack' },
+      { key: 'midfield', label: 'Midfield', cls: 'midfield' },
+      { key: 'defence', label: 'Defence', cls: 'defence' },
+      { key: 'gk', label: 'GK', cls: 'gk' },
+      { key: 'chemistry', label: 'Chemistry', cls: 'chemistry' },
+      { key: 'starPower', label: 'Star Power', cls: 'starpower' }
     ];
 
     container.innerHTML = `
@@ -20,7 +20,7 @@ const RatingsCard = {
         <div class="ratings-bars">
           ${rows.map((r) => `
             <div class="ratings-row">
-              <div class="ratings-row-label"><span>${r.icon}</span> ${r.label}</div>
+              <div class="ratings-row-label">${r.label}</div>
               <div class="ratings-track"><div class="ratings-fill ratings-fill-${r.cls}" style="width:${data[r.key]}%"></div></div>
               <div class="ratings-row-value">${data[r.key]}</div>
             </div>
