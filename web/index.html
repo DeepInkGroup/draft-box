@@ -99,14 +99,10 @@
   <dialog id="rulebookDialog" class="dialog dialog-wide">
     <div class="dialog-form">
       <div class="dialog-actions" style="justify-content: space-between; margin-bottom: 8px;">
-        <h3 style="margin:0;">📖 Rulebook</h3>
+        <h3 style="margin:0;">Rulebook</h3>
         <button id="btnCloseRulebook" class="btn btn-ghost btn-sm">Close</button>
       </div>
       <div class="rulebook-body">
-        <a class="rulebook-pdf-link" href="rulebook.pdf" target="_blank" rel="noopener noreferrer" download>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-          Download full Match Engine PDF
-        </a>
         <p class="muted">This is <b>not</b> a fantasy league. Every draft round reveals one random real national team — you take exactly one player from it for your squad. Speed, luck, and managing which slots you still need are the whole game.</p>
 
         <h3>Rooms &amp; Settings</h3>
@@ -118,6 +114,7 @@
           <li><b>Team Captain</b> — if on, everyone must choose a captain (+6 overall, applied before position weighting) once their draft is complete.</li>
           <li><b>Tournament Length</b> — Off (full 48-team group stage), <b>Blitz</b> (skip straight to the Round of 32), or <b>Top 8</b> (skip straight to the Quarter-Finals, 1/4). Every human is guaranteed a spot in a shortened bracket; bots are randomly trimmed to fill the rest.</li>
           <li><b>Restrict Draft Teams (optional)</b> — the creator can limit which nations are eligible to be revealed during the draft to a hand-picked list of at least 4 teams. Leave it empty for the default: all 48 teams eligible.</li>
+          <li><b>Rerolls</b> — Off, 1, 2, or 3 per drafter. A reroll skips the currently revealed team for a brand new one without picking from it — that skipped team still counts as seen and won't come back around later.</li>
         </ul>
 
         <h3>The Draft</h3>
@@ -145,8 +142,16 @@
         <h3>Elimination</h3>
         <p>If your team is knocked out, you're not removed from the room — you become a spectator for the rest of that World Cup, right through to the champion.</p>
 
+        <h3>Tournament Awards</h3>
+        <p>Once a champion is crowned, the results screen tallies the whole tournament — every match, every team — into four awards: Top Scorer, Top Assists, Most Saves (goalkeepers), and Player of the Tournament (a composite of goals, assists, and saves). Purely narrative, like the match event reports — they don't feed back into any score.</p>
+
         <h3>Data</h3>
         <p class="muted">All 48 qualified nations and every player are real 2026 World Cup squad members (sourced from official squad lists). Overall ratings are gameplay values, not an official license.</p>
+
+        <a class="rulebook-pdf-link" href="rulebook.pdf" target="_blank" rel="noopener noreferrer" download>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          Download full Match Engine PDF
+        </a>
       </div>
     </div>
   </dialog>

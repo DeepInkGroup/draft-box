@@ -3,10 +3,16 @@ const { allPlayerIds, getPlayer, ALL_TEAMS } = require('../data/teams');
 const { isValidFormation, getSlots } = require('./formations');
 
 const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
+const ALLOWED_REROLLS = [0, 1, 2, 3];
 const VALID_TEAM_CODES = new Set(ALL_TEAMS.map((t) => t.code));
 
 function normalizeTournamentLength(v) {
   return ALLOWED_TOURNAMENT_LENGTHS.includes(v) ? v : 'full';
+}
+
+function normalizeRerolls(n) {
+  const v = Number(n);
+  return ALLOWED_REROLLS.includes(v) ? v : 0;
 }
 
 // Optional creator-chosen restriction on which nations can appear in the draft reveal.
@@ -46,20 +52,21 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0 }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const length = normalizeTournamentLength(tournamentLength);
   const teams = normalizeAllowedTeams(allowedTeams);
+  const rerolls = normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null
+      teams ? JSON.stringify(teams) : null, rerolls
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -126,7 +133,12 @@ function loadRoomState(roomRow) {
       currentReveal: null,
       lastRevealedTeam: null,
       pickDeadline: null,
-      pickTimer: null
+      pickTimer: null,
+      // Every team ever revealed to this member (picked from or rerolled away from) —
+      // a team is never shown twice. Seeded from their already-drafted squad on rehydrate;
+      // in-memory only for the lifetime of the room, same as currentReveal/pickTimer.
+      seenTeams: new Set(squad.map((p) => p.team)),
+      rerollsUsed: 0
     });
   }
 
@@ -145,6 +157,7 @@ function loadRoomState(roomRow) {
     captainEnabled: !!roomRow.captain_enabled,
     tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
     allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
+    rerollsAllowed: normalizeRerolls(roomRow.rerolls_allowed),
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -202,6 +215,7 @@ function lobbySnapshot(roomRow) {
     captainEnabled: !!roomRow.captain_enabled,
     tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
     allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
+    rerollsAllowed: normalizeRerolls(roomRow.rerolls_allowed),
     members: getMembers(roomRow.id).map((m) => ({
       userId: m.user_id,
       username: m.username,
@@ -231,5 +245,6 @@ module.exports = {
   allMembersDraftComplete,
   lobbySnapshot,
   ALLOWED_PICK_TIMES_MS,
-  ALLOWED_TOURNAMENT_LENGTHS
+  ALLOWED_TOURNAMENT_LENGTHS,
+  ALLOWED_REROLLS
 };

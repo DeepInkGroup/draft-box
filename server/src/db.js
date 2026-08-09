@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   blitz_mode INTEGER NOT NULL DEFAULT 0,
   tournament_length TEXT NOT NULL DEFAULT 'full',
   allowed_teams TEXT,
+  rerolls_allowed INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -107,6 +108,9 @@ if (!columnExists('rooms', 'tournament_length')) {
 }
 if (!columnExists('rooms', 'allowed_teams')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN allowed_teams TEXT;`);
+}
+if (!columnExists('rooms', 'rerolls_allowed')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN rerolls_allowed INTEGER NOT NULL DEFAULT 0;`);
 }
 
 module.exports = db;

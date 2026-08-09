@@ -126,6 +126,9 @@ const DraftView = {
       if (sortMode === 'rating' && !ratingsVisible) sortMode = 'position';
       startTimer(payload.deadline, payload.pickTimeMs);
 
+      const rerollsAllowed = payload.rerollsAllowed || 0;
+      const rerollsRemaining = payload.rerollsRemaining || 0;
+
       revealCard.innerHTML = `
         <div class="reveal-team">${payload.team.name}</div>
         <div class="reveal-sub">Pick one player from this team for your squad — no skipping, the clock is running</div>
@@ -133,19 +136,27 @@ const DraftView = {
           ${ratingsVisible ? `<button type="button" class="sort-btn" data-mode="rating" title="Sort by rating"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg></button>` : ''}
           <button type="button" class="sort-btn" data-mode="position" title="Sort by position"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
           <button type="button" class="sort-btn" data-mode="random" title="Random order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+          ${rerollsAllowed > 0 ? `<button type="button" class="sort-btn reroll-btn" id="btnReroll" title="Skip this team (${rerollsRemaining} reroll${rerollsRemaining === 1 ? '' : 's'} left)" ${rerollsRemaining <= 0 ? 'disabled' : ''}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span class="reroll-count">${rerollsRemaining}</span></button>` : ''}
         </div>
         <div class="player-grid" id="playerGrid"></div>
       `;
 
       const toolbar = revealCard.querySelector('#sortToolbar');
-      toolbar.querySelectorAll('.sort-btn').forEach((btn) => {
+      toolbar.querySelectorAll('.sort-btn:not(.reroll-btn)').forEach((btn) => {
         btn.classList.toggle('selected', btn.dataset.mode === sortMode);
         btn.addEventListener('click', () => {
           sortMode = btn.dataset.mode;
-          toolbar.querySelectorAll('.sort-btn').forEach((b) => b.classList.toggle('selected', b === btn));
+          toolbar.querySelectorAll('.sort-btn:not(.reroll-btn)').forEach((b) => b.classList.toggle('selected', b === btn));
           renderPlayerGrid();
         });
       });
+      const rerollBtn = toolbar.querySelector('#btnReroll');
+      if (rerollBtn) {
+        rerollBtn.addEventListener('click', () => {
+          rerollBtn.disabled = true;
+          socket.emit('draft:reroll', { code });
+        });
+      }
 
       renderPlayerGrid();
     }

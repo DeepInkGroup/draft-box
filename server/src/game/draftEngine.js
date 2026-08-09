@@ -24,9 +24,8 @@ function isDraftComplete(member) {
 
 // Finds a random real team that still has at least one player this member can use
 // (undrafted room-wide AND matching a position group the member still has an open slot for).
-// A team is never revealed twice to the same member: every reveal always ends in a pick
-// (no skipping), so "already seen" is exactly the set of teams already in their squad,
-// plus whichever team is currently mid-reveal (not yet picked from).
+// A team is never revealed twice to the same member — member.seenTeams accumulates every
+// team ever shown to them, whether they picked from it or rerolled away from it.
 function revealForMember(roomState, userId) {
   const member = roomState.members.get(userId);
   if (!member) throw new Error('not a member of this room');
@@ -36,18 +35,17 @@ function revealForMember(roomState, userId) {
   const teamPool = roomState.allowedTeams
     ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
     : ALL_TEAMS;
-  const seenTeamCodes = new Set(member.squad.map((p) => p.team));
-  if (member.lastRevealedTeam) seenTeamCodes.add(member.lastRevealedTeam);
-  const candidates = teamPool.filter((t) => !seenTeamCodes.has(t.code));
+  const candidates = teamPool.filter((t) => !member.seenTeams.has(t.code));
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
   const pickTimeMs = roomState.pickTimeMs || DEFAULT_PICK_TIME_MS;
 
   const reveal = (team) => {
+    member.seenTeams.add(team.code);
     member.lastRevealedTeam = team.code;
     member.currentReveal = team.code;
     member.pickDeadline = Date.now() + pickTimeMs;
-    return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs);
+    return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs, roomState);
   };
 
   const canSupply = (team) => team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
@@ -71,7 +69,23 @@ function revealForMember(roomState, userId) {
   return { done: false, exhausted: true };
 }
 
-function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs) {
+// Consumes one of the member's rerolls (if any remain) and immediately reveals a fresh
+// team in place of the current one — the skipped team still counts as "seen" (it was
+// already added to member.seenTeams by the reveal() that first showed it) so it can
+// never come back around later in the draft.
+function rerollForMember(roomState, userId) {
+  const member = roomState.members.get(userId);
+  if (!member) throw new Error('not a member of this room');
+  const rerollsAllowed = roomState.rerollsAllowed || 0;
+  if (rerollsAllowed <= 0) throw new Error('rerolls are not enabled for this room');
+  if (!member.currentReveal) throw new Error('nothing to reroll right now');
+  if (member.rerollsUsed >= rerollsAllowed) throw new Error('no rerolls remaining');
+
+  member.rerollsUsed += 1;
+  return revealForMember(roomState, userId);
+}
+
+function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs, roomState) {
   let players = team.players.map((p) => ({
     id: p.id,
     name: p.name,
@@ -84,13 +98,17 @@ function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pi
     ? players.slice().sort((a, b) => a.name.localeCompare(b.name))
     : players.slice().sort((a, b) => b.overall - a.overall);
 
+  const rerollsAllowed = (roomState && roomState.rerollsAllowed) || 0;
+
   return {
     done: false,
     team: { code: team.code, name: team.name },
     players,
     openSlots: openSlots(member),
     deadline: member.pickDeadline,
-    pickTimeMs
+    pickTimeMs,
+    rerollsAllowed,
+    rerollsRemaining: Math.max(0, rerollsAllowed - member.rerollsUsed)
   };
 }
 
@@ -145,6 +163,7 @@ function autoPickForMember(roomState, userId) {
 
 module.exports = {
   revealForMember,
+  rerollForMember,
   pickPlayer,
   autoPickForMember,
   slotsRemaining,

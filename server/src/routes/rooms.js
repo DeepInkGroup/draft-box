@@ -18,12 +18,12 @@ function serializeRoom(roomRow) {
 }
 
 router.post('/', (req, res) => {
-  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams } = req.body || {};
+  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed } = req.body || {};
   try {
     const room = rm.createRoom({
       name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
       showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled,
-      tournamentLength, allowedTeams
+      tournamentLength, allowedTeams, rerollsAllowed
     });
     rm.joinRoom(room, req.user, req.body?.formation);
     res.status(201).json(serializeRoom(room));
@@ -33,7 +33,7 @@ router.post('/', (req, res) => {
 });
 
 router.post('/singleplayer', (req, res) => {
-  const { showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams } = req.body || {};
+  const { showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed } = req.body || {};
   try {
     const room = rm.createRoom({
       name: `${req.user.username}'s Solo Run`,
@@ -44,7 +44,8 @@ router.post('/singleplayer', (req, res) => {
       pickTimeMs,
       captainEnabled: !!captainEnabled,
       tournamentLength,
-      allowedTeams
+      allowedTeams,
+      rerollsAllowed
     });
     rm.joinRoom(room, req.user, req.body?.formation);
     rm.setRoomStatus(room.id, 'drafting');

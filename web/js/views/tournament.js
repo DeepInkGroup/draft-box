@@ -75,7 +75,7 @@ const TournamentView = {
       const myMatchIdx = step.matches.findIndex((m) => m.aCode === forCode || m.bCode === forCode);
       if (myMatchIdx === -1) { onDone(); return; } // no match of mine this round — nothing to watch live
 
-      const myTimeline = (step.matches[myMatchIdx].events || []).slice().sort((a, b) => a.minute - b.minute);
+      const myTimeline = (step.matches[myMatchIdx].events || []).filter((e) => e.type !== 'save').slice().sort((a, b) => a.minute - b.minute);
       const myScore = { a: 0, b: 0 };
       let viewIdx = myMatchIdx;
       let clock = 0;
@@ -107,7 +107,7 @@ const TournamentView = {
 
       function otherMatchBody(idx) {
         const m = step.matches[idx];
-        const evs = m.events || [];
+        const evs = (m.events || []).filter((e) => e.type !== 'save');
         return `
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b>${scoreText(m)}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
           <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
@@ -233,8 +233,43 @@ const TournamentView = {
       `;
     }
 
+    function tournamentAwardsHtml(awards) {
+      if (!awards) return '';
+      const row = (label, entry, unit) => entry ? `
+        <div class="award-row">
+          <span class="award-label">${label}</span>
+          <span class="award-value">${entry.player}</span>
+          <span class="muted">${entry.count} ${unit}</span>
+        </div>
+      ` : '';
+      const potmRow = awards.playerOfTournament ? `
+        <div class="award-row">
+          <span class="award-label">Player of the Tournament</span>
+          <span class="award-value">${awards.playerOfTournament.player}</span>
+        </div>
+      ` : '';
+      const body = [
+        row('Top Scorer', awards.topScorer, 'goals'),
+        row('Top Assists', awards.topAssist, 'assists'),
+        row('Most Saves', awards.mostSaves, 'saves'),
+        potmRow
+      ].join('');
+      if (!body.trim()) return '';
+      return `
+        <div class="myteam-card">
+          <div class="myteam-header"><span>Tournament Awards</span></div>
+          ${body}
+        </div>
+      `;
+    }
+
     function renderStep(step) {
-      stagePill.textContent = STAGE_LABEL[tournamentStage] || tournamentStage;
+      if (tournamentStage === 'done') {
+        stagePill.parentElement.style.display = 'none';
+      } else {
+        stagePill.parentElement.style.display = '';
+        stagePill.textContent = STAGE_LABEL[tournamentStage] || tournamentStage;
+      }
       newResultsPing = false;
 
       if (!step) {
@@ -244,16 +279,19 @@ const TournamentView = {
         return;
       }
 
-      const matchesHtml = step.matches.map((m, idx) => `
+      const matchesHtml = step.matches.map((m, idx) => {
+        const visibleEvents = (m.events || []).filter((e) => e.type !== 'save');
+        return `
         <div class="match-row match-row-clickable" data-idx="${idx}">
           <span class="${m.winnerCode && m.winnerCode === m.aCode ? 'winner' : ''}">${nameTag(m.aName, m.aHuman, m.aUsername)}</span>
-          <span>${scoreText(m)} ${m.events && m.events.length ? '📋' : ''}</span>
+          <span>${scoreText(m)} ${visibleEvents.length ? '📋' : ''}</span>
           <span class="${m.winnerCode && m.winnerCode === m.bCode ? 'winner' : ''}">${nameTag(m.bName, m.bHuman, m.bUsername)}</span>
         </div>
         <div class="match-report hidden" id="report-${idx}">
-          ${m.events && m.events.length ? m.events.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
+          ${visibleEvents.length ? visibleEvents.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
         </div>
-      `).join('');
+      `;
+      }).join('');
 
       let groupFinalHtml = '';
       if (step.groupFinal) {
@@ -305,7 +343,8 @@ const TournamentView = {
               ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
-          ${myRecordCardHtml(step.myRecord)}`;
+          ${myRecordCardHtml(step.myRecord)}
+          ${tournamentAwardsHtml(step.tournamentAwards)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));

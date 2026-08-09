@@ -77,6 +77,22 @@ function generateGoalEvents(team, count) {
   return events;
 }
 
+// Save events: the defending goalkeeper's saves against the shots the attacking side
+// didn't convert. xgFaced approximates shot volume/quality (roughly one shot on target
+// per 0.3 xG); goalsConceded of those became goals, the rest are saves. Purely flavor
+// for the tournament-wide "Most Saves" award — doesn't affect the scoreline.
+function generateSaveEvents(team, side, xgFaced, goalsConceded) {
+  const gk = team.xi.find((p) => p.pos === 'GK');
+  if (!gk) return [];
+  const shotsOnTarget = Math.max(goalsConceded, Math.round(xgFaced / 0.3));
+  const saves = clamp(shotsOnTarget - goalsConceded, 0, 12);
+  const events = [];
+  for (let i = 0; i < saves; i++) {
+    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'save', player: gk.name, pos: 'GK', side });
+  }
+  return events;
+}
+
 // Cards: a handful of yellows most matches, spread across both sides (any outfield
 // player), and a rare red. Purely flavor — doesn't affect the scoreline.
 function generateCardEvents(teamA, teamB) {
@@ -122,7 +138,11 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B' }))
   ];
   const cardEvents = generateCardEvents(teamA, teamB);
-  const events = [...goalEvents, ...cardEvents].sort((a, b) => a.minute - b.minute);
+  const saveEvents = [
+    ...generateSaveEvents(teamA, 'A', xgB, goalsB),
+    ...generateSaveEvents(teamB, 'B', xgA, goalsA)
+  ];
+  const events = [...goalEvents, ...cardEvents, ...saveEvents].sort((a, b) => a.minute - b.minute);
 
   const result = { goalsA, goalsB, xgA, xgB, wentToPenalties: false, penaltyWinner: null, events };
 

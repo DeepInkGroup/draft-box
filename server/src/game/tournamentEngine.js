@@ -353,6 +353,50 @@ function computeTeamRecord(t, myCode) {
   };
 }
 
+// Tournament-wide awards, aggregated once the champion is decided from every match's
+// events (goals/assists/saves) across the whole matchLog — every team, not just the
+// viewer's. Player of the Tournament is a simple composite (goals worth more than
+// assists, assists worth more than saves) — narrative only, doesn't feed back into
+// any score or rating.
+function computeTournamentAwards(t) {
+  const goals = {};
+  const assists = {};
+  const saves = {};
+
+  for (const m of t.matchLog) {
+    for (const e of m.events || []) {
+      if (e.type === 'goal') {
+        goals[e.player] = (goals[e.player] || 0) + 1;
+        if (e.assistBy) assists[e.assistBy] = (assists[e.assistBy] || 0) + 1;
+      } else if (e.type === 'save') {
+        saves[e.player] = (saves[e.player] || 0) + 1;
+      }
+    }
+  }
+
+  const topOf = (map) => {
+    let bestName = null;
+    let bestCount = 0;
+    for (const [name, count] of Object.entries(map)) {
+      if (count > bestCount) { bestCount = count; bestName = name; }
+    }
+    return bestName ? { player: bestName, count: bestCount } : null;
+  };
+
+  const composite = {};
+  for (const [name, c] of Object.entries(goals)) composite[name] = (composite[name] || 0) + c * 4;
+  for (const [name, c] of Object.entries(assists)) composite[name] = (composite[name] || 0) + c * 2;
+  for (const [name, c] of Object.entries(saves)) composite[name] = (composite[name] || 0) + c * 1;
+  const potm = topOf(composite);
+
+  return {
+    topScorer: topOf(goals),
+    topAssist: topOf(assists),
+    mostSaves: topOf(saves),
+    playerOfTournament: potm ? { player: potm.player, score: potm.count } : null
+  };
+}
+
 // team names, human/username tags, winner highlighting, and (only when relevant) the
 // final group standings or the champion banner. forUserId (optional) additionally
 // reorders matches — the viewer's own match first, then any human-involving matches,
@@ -411,6 +455,7 @@ function decorateStep(roomState, index, forUserId) {
 
   if (raw.champion) {
     decorated.myRecord = computeTeamRecord(t, myCode);
+    decorated.tournamentAwards = computeTournamentAwards(t);
   }
 
   return decorated;
@@ -421,4 +466,4 @@ function historyLength(roomState) {
   return t ? t.history.length : 0;
 }
 
-module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, findMyCode };
+module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, computeTournamentAwards, findMyCode };

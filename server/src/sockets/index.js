@@ -169,7 +169,8 @@ function registerSocketHandlers(io) {
         pickTimeMs: roomRow.pick_time_ms,
         captainEnabled: !!roomRow.captain_enabled,
         tournamentLength: roomRow.tournament_length,
-        allowedTeams
+        allowedTeams,
+        rerollsAllowed: roomRow.rerolls_allowed
       });
       for (const m of members) {
         rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation);
@@ -184,6 +185,24 @@ function registerSocketHandlers(io) {
       const state = rm.loadRoomState(roomRow);
       try {
         const payload = draftEngine.revealForMember(state, socket.user.id);
+        socket.emit('draft:reveal', payload);
+        if (!payload.done && !payload.exhausted) scheduleAutoPick(io, roomRow.code, state, socket.user.id);
+      } catch (e) {
+        socket.emit('error:message', { error: e.message });
+      }
+    });
+
+    // Skips the currently revealed team for a brand new one, consuming one of the
+    // member's rerolls — reuses the 'draft:reveal' event so the client's existing
+    // reveal handler renders it with no separate listener needed.
+    socket.on('draft:reroll', ({ code }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      try {
+        if (member) clearPickTimer(member);
+        const payload = draftEngine.rerollForMember(state, socket.user.id);
         socket.emit('draft:reveal', payload);
         if (!payload.done && !payload.exhausted) scheduleAutoPick(io, roomRow.code, state, socket.user.id);
       } catch (e) {
