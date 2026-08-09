@@ -103,8 +103,6 @@
         <button id="btnCloseRulebook" class="btn btn-ghost btn-sm">Close</button>
       </div>
       <div class="rulebook-body">
-        <p class="muted">This is <b>not</b> a fantasy league. Every draft round reveals one random real national team — you take exactly one player from it for your squad. Speed, luck, and managing which slots you still need are the whole game.</p>
-
         <h3>Rooms &amp; Settings</h3>
         <p>Create a room to get a 6-character invite code, or join one with a friend's code, or jump straight into <b>Single Player</b> against 47 bots. The room creator configures:</p>
         <ul>
@@ -130,6 +128,7 @@
           <li><b>Chemistry</b> — a 0.94-1.06 multiplier from three factors: Linkage (do neighboring players share a real source nation), Balance (consistent squad quality), and Leadership (real star players). Bot squads are one real nation, so they always have perfect Linkage — a deliberate trade-off against human "all-star" squads built from many countries.</li>
           <li><b>Formation Edge</b> — attacking shape vs. the opponent's defensive shape, plus a width mismatch bonus.</li>
           <li><b>Captain Bonus</b> — a designated captain's overall is boosted before all of the above.</li>
+          <li><b>Red Card Morale Hit</b> — a player sent off rattles their own team for a short spell afterward, regardless of that player's individual quality: a temporary Attack + Defense reduction. Losing the captain hits harder — the affected spell runs 1.8x longer.</li>
         </ul>
         <p class="muted">Goals are then sampled from a Poisson distribution around each side's "expected goals," so the better team wins more often — never automatically. Full formulas are in the downloadable Match Engine PDF.</p>
 
@@ -137,7 +136,7 @@
         <p>48 real teams, 12 random groups of 4, round-robin (3 matchdays). Top 2 of each group plus the best 8 third-placed teams (24 + 8 = 32) advance to the Round of 32 — the real FIFA 2026 format. Then single elimination: Round of 32 → Round of 16 → Quarter-finals → Semi-finals → Final. Knockout draws go to penalties. <b>Blitz Game</b> rooms skip straight to the Round of 32; <b>Top 8</b> rooms skip straight to the Quarter-Finals with only 8 teams.</p>
 
         <h3>Live Reports &amp; Results</h3>
-        <p>Results arrive one stage at a time — nobody is forced to watch 24 matches at once, and one person clicking "Continue" doesn't drag anyone else's screen forward. Your own match plays out on a live ticking clock (goals, assists, cards); every other match in that round is available as a static final report via the match picker.</p>
+        <p>Results arrive one stage at a time — nobody is forced to watch 24 matches at once, and one person clicking "Continue" doesn't drag anyone else's screen forward. Your own match plays out on a live ticking clock (goals, assists, cards); every other match in that round is available as a static final report via the match picker. Every report also shows team performance stats — possession, pass count and accuracy, and xG — derived from the same Attack/Defense ratings that decided the match.</p>
 
         <h3>Elimination</h3>
         <p>If your team is knocked out, you're not removed from the room — you become a spectator for the rest of that World Cup, right through to the champion.</p>

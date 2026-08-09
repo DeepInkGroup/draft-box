@@ -386,6 +386,20 @@ a { color: var(--accent-strong); }
 .live-final-score { text-align: center; font-size: 1rem; margin-bottom: 12px; }
 .live-final-score b { color: var(--pitch-accent); font-size: 1.2rem; }
 
+.match-stats {
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 12px;
+  background: var(--surface-2); margin-bottom: 14px;
+}
+.stat-row {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px dashed var(--border-soft); font-size: .82rem;
+}
+.stat-row:last-child { border-bottom: none; }
+.stat-val { font-weight: 700; }
+.stat-val:first-child { text-align: left; }
+.stat-val:last-child { text-align: right; }
+.stat-label { color: var(--muted); text-align: center; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; }
+
 /* --- My Team recap card --- */
 .myteam-card {
   border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;

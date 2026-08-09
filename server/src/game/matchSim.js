@@ -93,26 +93,73 @@ function generateSaveEvents(team, side, xgFaced, goalsConceded) {
   return events;
 }
 
+// Red card morale hit: getting a player sent off rattles the whole team for a short
+// spell afterward, regardless of that individual player's own quality — modeled as a
+// temporary Attack+Defense reduction. Since the engine decides a match in one shot
+// (not minute-by-minute), the "short spell" is expressed as a fraction of the full 90
+// minutes and converted into an average-over-the-match rating reduction. Losing the
+// captain specifically hits morale harder — the affected spell runs 1.8x longer.
+const REDCARD_CHANCE = 0.07;
+const REDCARD_IMPACT_PCT = 0.20;
+const REDCARD_BASE_MINUTES = 15;
+const CAPTAIN_REDCARD_MULTIPLIER = 1.8;
+
+function decideRedCard(teamA, teamB) {
+  if (Math.random() >= REDCARD_CHANCE) return null;
+  const side = Math.random() < 0.5 ? 'A' : 'B';
+  const team = side === 'A' ? teamA : teamB;
+  const outfield = team.xi.filter((p) => p.pos !== 'GK');
+  if (!outfield.length) return null;
+  const player = outfield[Math.floor(Math.random() * outfield.length)];
+  const affectedMinutes = REDCARD_BASE_MINUTES * (player.isCaptain ? CAPTAIN_REDCARD_MULTIPLIER : 1);
+  const moraleImpact = REDCARD_IMPACT_PCT * (affectedMinutes / 90);
+  return { side, player, affectedMinutes, moraleImpact };
+}
+
 // Cards: a handful of yellows most matches, spread across both sides (any outfield
-// player), and a rare red. Purely flavor — doesn't affect the scoreline.
-function generateCardEvents(teamA, teamB) {
+// player), plus the (already-decided) red, if any. Yellows are purely flavor; the red's
+// morale impact was already folded into the ratings before xG was computed.
+function generateCardEvents(teamA, teamB, redCard) {
   const events = [];
   const pool = [
     ...teamA.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'A' })),
     ...teamB.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'B' }))
   ];
-  if (!pool.length) return events;
-
-  const numYellows = Math.floor(Math.random() * 5); // 0-4
-  for (let i = 0; i < numYellows; i++) {
-    const p = pool[Math.floor(Math.random() * pool.length)];
-    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'yellow', player: p.name, pos: p.pos, side: p.side });
+  if (pool.length) {
+    const numYellows = Math.floor(Math.random() * 5); // 0-4
+    for (let i = 0; i < numYellows; i++) {
+      const p = pool[Math.floor(Math.random() * pool.length)];
+      events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'yellow', player: p.name, pos: p.pos, side: p.side });
+    }
   }
-  if (Math.random() < 0.07) {
-    const p = pool[Math.floor(Math.random() * pool.length)];
-    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'red', player: p.name, pos: p.pos, side: p.side });
+  if (redCard) {
+    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'red', player: redCard.player.name, pos: redCard.player.pos, side: redCard.side });
   }
   return events;
+}
+
+// Match stats (possession, pass accuracy, pass count) are derived straight from the
+// same Attack/Defense ratings used for xG — the better/more cohesive side tends to see
+// more of the ball and pass it more cleanly. Narrative, like the event feed; doesn't
+// feed back into the scoreline.
+function computeMatchStats(ratingsA, ratingsB) {
+  const qualityDiff = (ratingsA.attack + ratingsA.defense) - (ratingsB.attack + ratingsB.defense);
+  const possessionA = Math.round(clamp(50 + qualityDiff * 0.6, 32, 68));
+  const possessionB = 100 - possessionA;
+
+  const avgA = (ratingsA.attack + ratingsA.defense) / 2;
+  const avgB = (ratingsB.attack + ratingsB.defense) / 2;
+  const passAccuracyA = Math.round(clamp(68 + (avgA - 75) * 0.7, 55, 94));
+  const passAccuracyB = Math.round(clamp(68 + (avgB - 75) * 0.7, 55, 94));
+
+  const totalPasses = 780 + Math.round((Math.random() - 0.5) * 120);
+  const passesA = Math.round((totalPasses * possessionA) / 100);
+  const passesB = totalPasses - passesA;
+
+  return {
+    A: { possession: possessionA, passAccuracy: passAccuracyA, passes: passesA },
+    B: { possession: possessionB, passAccuracy: passAccuracyB, passes: passesB }
+  };
 }
 
 function simulateMatch(teamA, teamB, { knockout = false } = {}) {
@@ -124,6 +171,14 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   ratingsA.defense *= chemA.multiplier;
   ratingsB.attack *= chemB.multiplier;
   ratingsB.defense *= chemB.multiplier;
+
+  const redCard = decideRedCard(teamA, teamB);
+  if (redCard) {
+    const affected = redCard.side === 'A' ? ratingsA : ratingsB;
+    affected.attack *= (1 - redCard.moraleImpact);
+    affected.defense *= (1 - redCard.moraleImpact);
+  }
+
   const edgeA = formationEdge(teamA.formation, teamB.formation);
   const edgeB = formationEdge(teamB.formation, teamA.formation);
 
@@ -137,14 +192,15 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A' })),
     ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B' }))
   ];
-  const cardEvents = generateCardEvents(teamA, teamB);
+  const cardEvents = generateCardEvents(teamA, teamB, redCard);
   const saveEvents = [
     ...generateSaveEvents(teamA, 'A', xgB, goalsB),
     ...generateSaveEvents(teamB, 'B', xgA, goalsA)
   ];
   const events = [...goalEvents, ...cardEvents, ...saveEvents].sort((a, b) => a.minute - b.minute);
+  const stats = computeMatchStats(ratingsA, ratingsB);
 
-  const result = { goalsA, goalsB, xgA, xgB, wentToPenalties: false, penaltyWinner: null, events };
+  const result = { goalsA, goalsB, xgA, xgB, stats, wentToPenalties: false, penaltyWinner: null, events };
 
   if (knockout && goalsA === goalsB) {
     result.wentToPenalties = true;

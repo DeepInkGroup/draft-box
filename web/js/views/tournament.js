@@ -50,6 +50,25 @@ const TournamentView = {
       return `<div class="report-line">${side} ${text}</div>`;
     }
 
+    function matchStatsHtml(m) {
+      if (!m.stats) return '';
+      const s = m.stats;
+      const row = (label, a, b) => `
+        <div class="stat-row">
+          <span class="stat-val">${a}</span>
+          <span class="stat-label">${label}</span>
+          <span class="stat-val">${b}</span>
+        </div>
+      `;
+      return `
+        <div class="match-stats">
+          ${row('Possession', `${s.A.possession}%`, `${s.B.possession}%`)}
+          ${row('Passes (acc.)', `${s.A.passes} (${s.A.passAccuracy}%)`, `${s.B.passes} (${s.B.passAccuracy}%)`)}
+          ${row('xG', m.xgA.toFixed(2), m.xgB.toFixed(2))}
+        </div>
+      `;
+    }
+
     function renderButton() {
       newPing.style.display = newResultsPing ? 'block' : 'none';
       if (tournamentStage === 'done' && viewedStep >= historyLength) {
@@ -101,6 +120,7 @@ const TournamentView = {
         return `
           <div class="center"><span class="live-clock" id="liveClock">${Math.min(clock, 90)}'</span></div>
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
+          ${matchStatsHtml(m)}
           <div class="live-feed" id="liveFeed"></div>
         `;
       }
@@ -110,6 +130,7 @@ const TournamentView = {
         const evs = (m.events || []).filter((e) => e.type !== 'save');
         return `
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b>${scoreText(m)}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
+          ${matchStatsHtml(m)}
           <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
         `;
       }
