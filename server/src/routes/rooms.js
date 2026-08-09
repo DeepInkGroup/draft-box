@@ -18,31 +18,41 @@ function serializeRoom(roomRow) {
 }
 
 router.post('/', (req, res) => {
-  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, blitzMode } = req.body || {};
-  const room = rm.createRoom({
-    name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
-    showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled, blitzMode: !!blitzMode
-  });
-  rm.joinRoom(room, req.user, req.body?.formation);
-  res.status(201).json(serializeRoom(room));
+  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams } = req.body || {};
+  try {
+    const room = rm.createRoom({
+      name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
+      showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled,
+      tournamentLength, allowedTeams
+    });
+    rm.joinRoom(room, req.user, req.body?.formation);
+    res.status(201).json(serializeRoom(room));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.post('/singleplayer', (req, res) => {
-  const { showOverall, pickTimeMs, captainEnabled, blitzMode } = req.body || {};
-  const room = rm.createRoom({
-    name: `${req.user.username}'s Solo Run`,
-    creatorId: req.user.id,
-    humanSlotsMax: 1,
-    singlePlayer: true,
-    showOverall: showOverall !== false,
-    pickTimeMs,
-    captainEnabled: !!captainEnabled,
-    blitzMode: !!blitzMode
-  });
-  rm.joinRoom(room, req.user, req.body?.formation);
-  rm.setRoomStatus(room.id, 'drafting');
-  const updated = rm.getRoomRow(room.id);
-  res.status(201).json(serializeRoom(updated));
+  const { showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams } = req.body || {};
+  try {
+    const room = rm.createRoom({
+      name: `${req.user.username}'s Solo Run`,
+      creatorId: req.user.id,
+      humanSlotsMax: 1,
+      singlePlayer: true,
+      showOverall: showOverall !== false,
+      pickTimeMs,
+      captainEnabled: !!captainEnabled,
+      tournamentLength,
+      allowedTeams
+    });
+    rm.joinRoom(room, req.user, req.body?.formation);
+    rm.setRoomStatus(room.id, 'drafting');
+    const updated = rm.getRoomRow(room.id);
+    res.status(201).json(serializeRoom(updated));
+  } catch (e) {
+    res.status(400).json({ error: e.message });
+  }
 });
 
 router.post('/:code/join', (req, res) => {

@@ -51,11 +51,66 @@ const DashboardView = {
     ];
   },
 
-  blitzOptions() {
+  tournamentLengthOptions() {
     return [
-      { value: false, title: 'Off', sub: 'Full 48-team group stage' },
-      { value: true, title: 'Blitz', sub: 'Skip groups — start at Round of 32' }
+      { value: 'full', title: 'Off', sub: 'Full 48-team group stage' },
+      { value: 'blitz', title: 'Blitz', sub: 'Skip groups — start at Round of 32' },
+      { value: 'quarter', title: 'Top 8', sub: 'Start at the Quarter-Finals (1/4)' }
     ];
+  },
+
+  // Renders an (optional) checkbox grid the creator can use to restrict which nations
+  // are eligible to be revealed during the draft. Returns { get value() } yielding null
+  // (unrestricted — the default) or an array of selected team codes.
+  async renderTeamPicker(el) {
+    el.innerHTML = '<p class="muted" style="font-size:.82rem;">Loading teams...</p>';
+    let teams = [];
+    try {
+      ({ teams } = await Api.teams());
+    } catch {
+      el.innerHTML = '<p class="muted" style="font-size:.82rem;">Could not load team list — restriction unavailable.</p>';
+      return { get value() { return null; } };
+    }
+    const selected = new Set();
+    el.innerHTML = `
+      <div class="team-picker-actions">
+        <button type="button" class="btn btn-ghost btn-sm" id="tpSelectAll">Select all</button>
+        <button type="button" class="btn btn-ghost btn-sm" id="tpClear">Clear (unrestricted)</button>
+        <span class="muted team-picker-count" id="tpCount">Unrestricted — all 48 teams eligible</span>
+      </div>
+      <div class="team-picker-grid">
+        ${teams.map((t) => `
+          <label class="team-picker-item">
+            <input type="checkbox" data-code="${t.code}" />
+            <span>${t.name}</span>
+          </label>
+        `).join('')}
+      </div>
+    `;
+    const countEl = el.querySelector('#tpCount');
+    const updateCount = () => {
+      if (selected.size === 0) countEl.textContent = 'Unrestricted — all 48 teams eligible';
+      else if (selected.size < 4) countEl.textContent = `${selected.size} selected — pick at least 4 to restrict`;
+      else countEl.textContent = `${selected.size} teams selected`;
+    };
+    const boxes = Array.from(el.querySelectorAll('input[type="checkbox"]'));
+    boxes.forEach((b) => b.addEventListener('change', () => {
+      if (b.checked) selected.add(b.dataset.code); else selected.delete(b.dataset.code);
+      updateCount();
+    }));
+    el.querySelector('#tpSelectAll').addEventListener('click', () => {
+      boxes.forEach((b) => { b.checked = true; selected.add(b.dataset.code); });
+      updateCount();
+    });
+    el.querySelector('#tpClear').addEventListener('click', () => {
+      boxes.forEach((b) => { b.checked = false; });
+      selected.clear();
+      updateCount();
+    });
+    return {
+      get value() { return selected.size >= 4 ? Array.from(selected) : null; },
+      get count() { return selected.size; }
+    };
   },
 
   timerOptions() {
@@ -67,7 +122,7 @@ const DashboardView = {
     ];
   },
 
-  renderSingleplayer(container) {
+  async renderSingleplayer(container) {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
@@ -81,7 +136,9 @@ const DashboardView = {
         <div class="field"><label>Team Captain</label></div>
         <div id="spCaptain" style="margin-bottom:16px;"></div>
         <div class="field"><label>Tournament Length</label></div>
-        <div id="spBlitz" style="margin-bottom:16px;"></div>
+        <div id="spLength" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Restrict Draft Teams (optional)</label></div>
+        <div id="spTeams" class="team-picker" style="margin-bottom:16px;"></div>
         <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -94,17 +151,22 @@ const DashboardView = {
     const spTimer = ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
     const spRatings = ToggleGroup.render(container.querySelector('#spRatings'), { options: this.ratingsOptions(), selected: true });
     const spCaptain = ToggleGroup.render(container.querySelector('#spCaptain'), { options: this.captainOptions(), selected: false });
-    const spBlitz = ToggleGroup.render(container.querySelector('#spBlitz'), { options: this.blitzOptions(), selected: false });
+    const spLength = ToggleGroup.render(container.querySelector('#spLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
+    const spTeams = await this.renderTeamPicker(container.querySelector('#spTeams'));
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
+      if (spTeams.count > 0 && spTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
       try {
-        const room = await Api.createSingleplayer(spFormation.value, spRatings.value, spTimer.value, spCaptain.value, spBlitz.value);
+        const room = await Api.createSingleplayer({
+          formation: spFormation.value, showOverall: spRatings.value, pickTimeMs: spTimer.value,
+          captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value
+        });
         App.goDraft(room.code);
       } catch (e) { showErr(e); }
     });
   },
 
-  renderCreateRoom(container) {
+  async renderCreateRoom(container) {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
@@ -125,7 +187,9 @@ const DashboardView = {
         <div class="field"><label>Team Captain</label></div>
         <div id="crCaptain" style="margin-bottom:16px;"></div>
         <div class="field"><label>Tournament Length</label></div>
-        <div id="crBlitz" style="margin-bottom:16px;"></div>
+        <div id="crLength" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Restrict Draft Teams (optional)</label></div>
+        <div id="crTeams" class="team-picker" style="margin-bottom:16px;"></div>
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -138,13 +202,19 @@ const DashboardView = {
     const crTimer = ToggleGroup.render(container.querySelector('#crTimer'), { options: this.timerOptions(), selected: 20000 });
     const crRatings = ToggleGroup.render(container.querySelector('#crRatings'), { options: this.ratingsOptions(), selected: true });
     const crCaptain = ToggleGroup.render(container.querySelector('#crCaptain'), { options: this.captainOptions(), selected: false });
-    const crBlitz = ToggleGroup.render(container.querySelector('#crBlitz'), { options: this.blitzOptions(), selected: false });
+    const crLength = ToggleGroup.render(container.querySelector('#crLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
+    const crTeams = await this.renderTeamPicker(container.querySelector('#crTeams'));
 
     container.querySelector('#btnCreateRoom').addEventListener('click', async () => {
+      if (crTeams.count > 0 && crTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
       try {
         const name = container.querySelector('#crName').value.trim();
         const slots = Number(container.querySelector('#crSlots').value) || 8;
-        const room = await Api.createRoom(name, slots, crFormation.value, crRatings.value, crTimer.value, crCaptain.value, crBlitz.value);
+        const room = await Api.createRoom({
+          name, humanSlotsMax: slots, formation: crFormation.value, showOverall: crRatings.value,
+          pickTimeMs: crTimer.value, captainEnabled: crCaptain.value, tournamentLength: crLength.value,
+          allowedTeams: crTeams.value
+        });
         App.goLobby(room.code);
       } catch (e) { showErr(e); }
     });

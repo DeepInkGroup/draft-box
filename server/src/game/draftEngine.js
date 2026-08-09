@@ -30,7 +30,10 @@ function revealForMember(roomState, userId) {
   if (isDraftComplete(member)) return { done: true };
 
   const wantedPositions = new Set(openSlots(member).map((s) => s.group));
-  const candidates = ALL_TEAMS.filter((t) => t.code !== member.lastRevealedTeam);
+  const teamPool = roomState.allowedTeams
+    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
+    : ALL_TEAMS;
+  const candidates = teamPool.filter((t) => t.code !== member.lastRevealedTeam);
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
   const pickTimeMs = roomState.pickTimeMs || DEFAULT_PICK_TIME_MS;
@@ -48,8 +51,8 @@ function revealForMember(roomState, userId) {
     if (available) return reveal(team);
   }
 
-  // Fallback: exhaustively scan every team once (covers small unlucky pools).
-  for (const team of ALL_TEAMS) {
+  // Fallback: exhaustively scan every eligible team once (covers small unlucky pools).
+  for (const team of teamPool) {
     const available = team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
     if (available) return reveal(team);
   }

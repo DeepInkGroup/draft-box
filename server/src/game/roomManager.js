@@ -1,6 +1,23 @@
 const db = require('../db');
-const { allPlayerIds, getPlayer } = require('../data/teams');
+const { allPlayerIds, getPlayer, ALL_TEAMS } = require('../data/teams');
 const { isValidFormation, getSlots } = require('./formations');
+
+const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
+const VALID_TEAM_CODES = new Set(ALL_TEAMS.map((t) => t.code));
+
+function normalizeTournamentLength(v) {
+  return ALLOWED_TOURNAMENT_LENGTHS.includes(v) ? v : 'full';
+}
+
+// Optional creator-chosen restriction on which nations can appear in the draft reveal.
+// null/empty means unrestricted (all 48 teams eligible) — the default. At least 4 valid
+// team codes are required if the creator opts in, so every position group stays reachable.
+function normalizeAllowedTeams(codes) {
+  if (!Array.isArray(codes) || codes.length === 0) return null;
+  const valid = [...new Set(codes.filter((c) => VALID_TEAM_CODES.has(c)))];
+  if (valid.length < 4) throw new Error('pick at least 4 teams to restrict the draft pool');
+  return valid;
+}
 
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I to avoid confusion
 
@@ -29,17 +46,20 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, blitzMode = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
+  const length = normalizeTournamentLength(tournamentLength);
+  const teams = normalizeAllowedTeams(allowedTeams);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
-      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, blitzMode ? 1 : 0
+      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
+      teams ? JSON.stringify(teams) : null
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -123,7 +143,8 @@ function loadRoomState(roomRow) {
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,
     captainEnabled: !!roomRow.captain_enabled,
-    blitzMode: !!roomRow.blitz_mode,
+    tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
+    allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -179,7 +200,8 @@ function lobbySnapshot(roomRow) {
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,
     captainEnabled: !!roomRow.captain_enabled,
-    blitzMode: !!roomRow.blitz_mode,
+    tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
+    allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
     members: getMembers(roomRow.id).map((m) => ({
       userId: m.user_id,
       username: m.username,
@@ -208,5 +230,6 @@ module.exports = {
   persistTournamentSnapshot,
   allMembersDraftComplete,
   lobbySnapshot,
-  ALLOWED_PICK_TIMES_MS
+  ALLOWED_PICK_TIMES_MS,
+  ALLOWED_TOURNAMENT_LENGTHS
 };

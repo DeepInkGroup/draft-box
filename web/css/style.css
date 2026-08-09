@@ -416,6 +416,29 @@ a { color: var(--accent-strong); }
 .rulebook-body ul { margin: 0 0 10px; padding-inline-start: 20px; font-size: .88rem; line-height: 1.55; }
 .rulebook-body li { margin-bottom: 4px; }
 
+.profile-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+.profile-col h4 { margin: 4px 0 10px; color: var(--accent-strong); font-size: .9rem; text-transform: uppercase; letter-spacing: .04em; }
+@media (max-width: 560px) {
+  .profile-columns { grid-template-columns: 1fr; }
+}
+
+.rulebook-pdf-link {
+  display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 14px;
+  font-size: .82rem; color: var(--accent-strong); text-decoration: none; border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 6px 12px;
+}
+.rulebook-pdf-link:hover { border-color: var(--accent-strong); }
+
+.team-picker { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; background: var(--surface-2); }
+.team-picker-actions { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.team-picker-count { font-size: .78rem; }
+.team-picker-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 4px 10px;
+  max-height: 200px; overflow-y: auto; padding-right: 4px;
+}
+.team-picker-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; padding: 3px 0; cursor: pointer; }
+.team-picker-item input { width: auto; margin: 0; }
+
 .career-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 4px; }
 .career-stat {
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);

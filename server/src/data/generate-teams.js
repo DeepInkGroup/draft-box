@@ -3,98 +3,20 @@
  *
  * Data note: every player is a real member of that nation's actual 2026 World Cup
  * squad (26 players each, sourced from Wikipedia's "2026 FIFA World Cup squads"
- * article, itself drawn from FIFA's officially published squad lists). Overall
- * ratings are NOT official — they're generated for gameplay, since no public,
- * licensed rating dataset exists for these squads. A handful of well-known stars
- * per major team get a hand-set overall instead of the generated one. A very small
- * number of teams (9, one position group each) fall just short of the depth the
- * most demanding formations need (e.g. 6 real midfielders for 3-2-4-1) and get a
- * single generated filler player to cover the gap — see RULES.md for the full
- * breakdown of which teams/positions that applies to.
+ * article, itself drawn from FIFA's officially published squad lists). No fictional
+ * or generated players are ever added — a team with fewer real players in a given
+ * position group than a demanding formation calls for simply won't be revealed to a
+ * drafter who still needs that position (see draftEngine.revealForMember), and bots
+ * fall back to reusing their weakest already-selected player rather than inventing
+ * one (see botEngine.bestXI). Overall ratings are NOT official — they're generated
+ * for gameplay, since no public, licensed rating dataset exists for these squads. A
+ * handful of well-known stars per major team get a hand-set overall instead of the
+ * generated one.
  */
 const fs = require('fs');
 const path = require('path');
 
 const REAL_SQUADS = JSON.parse(fs.readFileSync(path.join(__dirname, 'wc2026_real_squads.json'), 'utf8'));
-
-// name banks grouped by loose linguistic/regional style, used to fill out squads
-const NAME_BANKS = {
-  latam: {
-    first: ['Diego', 'Mateo', 'Santiago', 'Nicolás', 'Facundo', 'Agustín', 'Bruno', 'Lucas', 'Emiliano', 'Joaquín', 'Thiago', 'Gonzalo', 'Franco', 'Ezequiel', 'Ramiro'],
-    last: ['Fernández', 'González', 'Rodríguez', 'Martínez', 'Pérez', 'Silva', 'Rojas', 'Herrera', 'Núñez', 'Cabrera', 'Molina', 'Aguirre', 'Vega', 'Correa', 'Paredes']
-  },
-  brazil: {
-    first: ['Gabriel', 'Matheus', 'Rafael', 'Wesley', 'Kayky', 'Igor', 'Bruno', 'Caio', 'Vitor', 'Everton', 'Douglas', 'Lucas', 'André', 'Renan', 'Yuri'],
-    last: ['Silva', 'Santos', 'Oliveira', 'Souza', 'Costa', 'Pereira', 'Almeida', 'Ribeiro', 'Carvalho', 'Gomes', 'Barbosa', 'Rocha', 'Dias', 'Nascimento', 'Teixeira']
-  },
-  english: {
-    first: ['Harry', 'James', 'Jack', 'Callum', 'Marcus', 'Ben', 'Ethan', 'Tyler', 'Reece', 'Curtis', 'Mason', 'Aaron', 'Kyle', 'Ollie', 'Ryan'],
-    last: ['Smith', 'Jones', 'Taylor', 'Walker', 'Clarke', 'Wright', 'Evans', 'Hughes', 'Edwards', 'Bennett', 'Marshall', 'Cole', 'Hunt', 'Fisher', 'Reid']
-  },
-  french: {
-    first: ['Antoine', 'Hugo', 'Lucas', 'Théo', 'Mathis', 'Nathan', 'Enzo', 'Yanis', 'Bilal', 'Rayan', 'Amine', 'Malo', 'Loïc', 'Jules', 'Noé'],
-    last: ['Bernard', 'Dubois', 'Moreau', 'Lefevre', 'Girard', 'André', 'Fontaine', 'Perrin', 'Rousseau', 'Blanchard', 'Marchand', 'Barbier', 'Renaud', 'Fabre', 'Gauthier']
-  },
-  german: {
-    first: ['Lukas', 'Finn', 'Jonas', 'Julian', 'Niklas', 'Maximilian', 'Elias', 'David', 'Tom', 'Leon', 'Paul', 'Moritz', 'Felix', 'Jannik', 'Robin'],
-    last: ['Müller', 'Schmidt', 'Schneider', 'Fischer', 'Weber', 'Meyer', 'Wagner', 'Becker', 'Hofmann', 'Koch', 'Richter', 'Klein', 'Wolf', 'Schröder', 'Neumann']
-  },
-  dutch: {
-    first: ['Daan', 'Sem', 'Lars', 'Milan', 'Bram', 'Thijs', 'Ruben', 'Jasper', 'Stijn', 'Tim', 'Niek', 'Joris', 'Wouter', 'Koen', 'Sven'],
-    last: ['de Jong', 'Bakker', 'Visser', 'Smit', 'Meijer', 'Mulder', 'de Boer', 'Bos', 'Vos', 'Peters', 'Hendriks', 'van Dijk', 'Dekker', 'Brouwer', 'de Groot']
-  },
-  iberian: {
-    first: ['Álvaro', 'Pablo', 'Sergio', 'Adrián', 'Iker', 'Marc', 'Hugo', 'Rubén', 'Diego', 'Nuno', 'Tiago', 'João', 'Rui', 'Miguel', 'Gonçalo'],
-    last: ['García', 'López', 'Sánchez', 'Torres', 'Romero', 'Navarro', 'Costa', 'Ferreira', 'Ramos', 'Domínguez', 'Serrano', 'Vidal', 'Carvalho', 'Lopes', 'Pinto']
-  },
-  balkan: {
-    first: ['Luka', 'Marko', 'Ivan', 'Petar', 'Nikola', 'Dario', 'Ante', 'Josip', 'Bojan', 'Filip', 'Stefan', 'Dino', 'Vedran', 'Kristijan', 'Mario'],
-    last: ['Horvat', 'Kovačević', 'Perić', 'Jurić', 'Novak', 'Babić', 'Marić', 'Knežević', 'Radić', 'Vuković', 'Šimić', 'Pavlović', 'Kovač', 'Ivanović', 'Tomić']
-  },
-  scandi: {
-    first: ['Erik', 'Anders', 'Magnus', 'Oscar', 'Viktor', 'Emil', 'Gustav', 'Sander', 'Fredrik', 'Kristian', 'Henrik', 'Aksel', 'Jonas', 'Mats', 'Nils'],
-    last: ['Andersson', 'Johansson', 'Karlsson', 'Nilsson', 'Eriksson', 'Larsen', 'Hansen', 'Pedersen', 'Olsen', 'Berg', 'Haugen', 'Lund', 'Dahl', 'Solberg', 'Strand']
-  },
-  arab: {
-    first: ['Ahmed', 'Mohammed', 'Youssef', 'Omar', 'Khalid', 'Ali', 'Hamza', 'Karim', 'Bilal', 'Tariq', 'Sami', 'Anas', 'Zaid', 'Rami', 'Fahad'],
-    last: ['Al-Sayed', 'Hassan', 'Farouk', 'Mansour', 'Saleh', 'Khalil', 'Nasser', 'Rashid', 'Qureshi', 'Amrani', 'Belkacem', 'Tahiri', 'Aziz', 'Karimi', 'Zidan']
-  },
-  persian: {
-    first: ['Reza', 'Amir', 'Arman', 'Kian', 'Sina', 'Pooya', 'Navid', 'Farhad', 'Milad', 'Behrad', 'Danial', 'Arash', 'Kaveh', 'Shayan', 'Iman'],
-    last: ['Hosseini', 'Karimi', 'Rezaei', 'Ahmadi', 'Moradi', 'Ebrahimi', 'Ghasemi', 'Nasiri', 'Sadeghi', 'Jafari', 'Norouzi', 'Rostami', 'Salehi', 'Bahrami', 'Fallahi']
-  },
-  african: {
-    first: ['Emmanuel', 'Ibrahim', 'Samuel', 'Joseph', 'Moussa', 'Aboubakar', 'Kwame', 'Yusuf', 'Chidi', 'Idris', 'Baba', 'Sekou', 'Amadou', 'Bakary', 'Ismael'],
-    last: ['Diallo', 'Traoré', 'Koné', 'Mensah', 'Boateng', 'Osei', 'Camara', 'Cissé', 'Keita', 'Toure', 'Diop', 'Fofana', 'Bamba', 'Sow', 'Doumbia']
-  },
-  eastasia: {
-    first: ['Haruto', 'Yuto', 'Sota', 'Ren', 'Riku', 'Min-jun', 'Ji-ho', 'Seo-jun', 'Do-yun', 'Tae-yang'],
-    last: ['Tanaka', 'Suzuki', 'Yamamoto', 'Watanabe', 'Kobayashi', 'Kim', 'Lee', 'Park', 'Jung', 'Choi']
-  },
-  centralasia: {
-    first: ['Aziz', 'Sardor', 'Botir', 'Jahongir', 'Diyor', 'Otabek', 'Islom', 'Sherzod', 'Farrukh', 'Bekzod'],
-    last: ['Yusupov', 'Rashidov', 'Karimov', 'Tursunov', 'Nazarov', 'Abdullayev', 'Ismoilov', 'Xolmatov', 'Sodiqov', 'Ergashev']
-  },
-  concacaf: {
-    first: ['Carlos', 'Luis', 'José', 'Andrés', 'Kevin', 'Erick', 'Josh', 'Tajon', 'Alphonso', 'Junior'],
-    last: ['Hernández', 'Ramírez', 'Vargas', 'Jiménez', 'Castillo', 'Moreno', 'David', 'Buchanan', 'Larin', 'Charles']
-  },
-  turkic: {
-    first: ['Emre', 'Kaan', 'Burak', 'Cenk', 'Onur', 'Baris', 'Ugur', 'Serkan', 'Deniz', 'Tolga'],
-    last: ['Yılmaz', 'Kaya', 'Demir', 'Şahin', 'Çelik', 'Aydın', 'Öztürk', 'Arslan', 'Doğan', 'Kılıç']
-  },
-  oceania: {
-    first: ['Liam', 'Noah', 'Jack', 'Cole', 'Finn', 'Zane', 'Tyrone', 'Marco', 'Levi', 'Sione'],
-    last: ['Wood', 'Fallon', 'Rufer', 'Boxall', 'Bell', 'Tuiloma', 'Sail', 'Kire', 'Vicelich', 'Payne']
-  }
-};
-
-const POSITIONS = ['GK', 'DF', 'MF', 'FW'];
-// Minimum players needed per position group to field ANY of the 16 formations (the
-// most demanding being 3-2-4-1's 6 midfielders, 5-2-3/4-2-4's 4 forwards, and the
-// back-five formations' 5 defenders) — used only to top up the handful of real
-// squads that fall just short in one group.
-const MIN_PER_GROUP = { GK: 1, DF: 5, MF: 6, FW: 4 };
 
 // 48 qualified nations (2026 World Cup), grouped by their real draw groups (A-L).
 // baseOverall = rough fictional team-strength tier for gameplay purposes only.
@@ -192,31 +114,12 @@ const STARS = {
   QAT: [['Akram Afif', 'FW', 79]]
 };
 
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
-
-function genName(region) {
-  const bank = NAME_BANKS[region] || NAME_BANKS.latam;
-  return `${pick(bank.first)} ${pick(bank.last)}`;
-}
 
 function genOverall(team, pos) {
   const posAdjust = { GK: -1, DF: -2, MF: 0, FW: 1 }[pos];
   const variance = Math.round((Math.random() - 0.5) * 10);
   return clamp(team.base + posAdjust + variance - 3, 52, 90);
-}
-
-// Filler player — only used for the handful of real squads that fall short of
-// MIN_PER_GROUP in one position (see header comment). Never a star.
-function genFillerPlayer(team, pos, idx) {
-  return {
-    id: `${team.code}-${pos}-fill${idx}`,
-    name: genName(team.region),
-    team: team.code,
-    pos,
-    overall: genOverall(team, pos),
-    isStar: false
-  };
 }
 
 function buildTeam(team) {
@@ -234,17 +137,6 @@ function buildTeam(team) {
       isStar
     };
   });
-
-  const counts = { GK: 0, DF: 0, MF: 0, FW: 0 };
-  for (const p of players) counts[p.pos] += 1;
-  for (const pos of POSITIONS) {
-    let fillerIdx = 0;
-    while (counts[pos] < MIN_PER_GROUP[pos]) {
-      fillerIdx += 1;
-      players.push(genFillerPlayer(team, pos, fillerIdx));
-      counts[pos] += 1;
-    }
-  }
 
   players.sort((a, b) => b.overall - a.overall);
 

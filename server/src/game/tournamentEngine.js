@@ -30,20 +30,29 @@ function chunk(arr, size) {
   return out;
 }
 
+// Total slots (human + bot) each shortened tournament length starts with.
+const LENGTH_SLOT_COUNT = { blitz: 32, quarter: 8 };
+
 function startTournament(roomState) {
   const members = Array.from(roomState.members.values());
   const humanCount = members.length;
-  if (humanCount > 32) throw new Error('at most 32 human-controlled slots are allowed');
-  const blitzMode = !!roomState.blitzMode;
+  const length = roomState.tournamentLength || (roomState.blitzMode ? 'blitz' : 'full');
+  const startingSlots = LENGTH_SLOT_COUNT[length] || null;
+
+  if (startingSlots) {
+    if (humanCount > startingSlots) throw new Error(`at most ${startingSlots} human-controlled slots are allowed for this tournament length`);
+  } else if (humanCount > 32) {
+    throw new Error('at most 32 human-controlled slots are allowed');
+  }
 
   const shuffledCodes = shuffle(ALL_TEAMS.map((t) => t.code));
   const humanCodes = shuffledCodes.slice(0, humanCount);
   let botCodes = shuffledCodes.slice(humanCount);
 
-  // Blitz Game: skip the group stage entirely and start at the Round of 32. Every
-  // human is guaranteed a spot; bots are randomly trimmed from 48 down to fill the
-  // remaining 32 - humanCount slots, so no group-stage matches are ever simulated.
-  if (blitzMode) botCodes = botCodes.slice(0, Math.max(0, 32 - humanCount));
+  // Blitz / Top 8: skip the group stage entirely and start straight in the knockout
+  // bracket. Every human is guaranteed a spot; bots are randomly trimmed from 48 down
+  // to fill the remaining slots, so no group-stage matches are ever simulated.
+  if (startingSlots) botCodes = botCodes.slice(0, Math.max(0, startingSlots - humanCount));
 
   const slots = [];
   humanCodes.forEach((code, i) => {
@@ -68,23 +77,24 @@ function startTournament(roomState) {
     slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false });
   });
 
-  if (blitzMode) {
+  if (startingSlots) {
+    const startStage = length === 'quarter' ? 'qf' : 'r32';
     const slotByCode = {};
     for (const s of slots) slotByCode[s.code] = s;
     const advancing = shuffle(slots.map((s) => s.code));
-    const r32 = [];
+    const matches = [];
     for (let i = 0; i < advancing.length; i += 2) {
-      r32.push({ aCode: advancing[i], bCode: advancing[i + 1], result: null, winnerCode: null });
+      matches.push({ aCode: advancing[i], bCode: advancing[i + 1], result: null, winnerCode: null });
     }
 
     roomState.tournament = {
-      stage: 'r32',
+      stage: startStage,
       slotByCode,
       groups: {},
       standings: {},
       groupMatchdaysPlayed: 0,
       fixtures: [],
-      bracket: { r32 },
+      bracket: { [startStage]: matches },
       matchLog: [],
       history: [],
       champion: null

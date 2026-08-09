@@ -8,12 +8,16 @@ require('./db'); // ensures schema is created on boot
 const authRoutes = require('./routes/auth');
 const roomRoutes = require('./routes/rooms');
 const { registerSocketHandlers } = require('./sockets');
+const { ALL_TEAMS } = require('./data/teams');
 
 const app = express();
 app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins }));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server' }));
+app.get('/api/teams', (req, res) => {
+  res.json({ teams: ALL_TEAMS.map((t) => ({ code: t.code, name: t.name })) });
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 

@@ -25,11 +25,10 @@ const Api = (() => {
     changePassword: (currentPassword, newPassword) =>
       request('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
     careerStats: () => request('/api/auth/me/career'),
+    teams: () => request('/api/teams'),
 
-    createRoom: (name, humanSlotsMax, formation, showOverall, pickTimeMs, captainEnabled, blitzMode) =>
-      request('/api/rooms', { method: 'POST', body: { name, humanSlotsMax, formation, showOverall, pickTimeMs, captainEnabled, blitzMode } }),
-    createSingleplayer: (formation, showOverall, pickTimeMs, captainEnabled, blitzMode) =>
-      request('/api/rooms/singleplayer', { method: 'POST', body: { formation, showOverall, pickTimeMs, captainEnabled, blitzMode } }),
+    createRoom: (opts) => request('/api/rooms', { method: 'POST', body: opts }),
+    createSingleplayer: (opts) => request('/api/rooms/singleplayer', { method: 'POST', body: opts }),
     joinRoom: (code, formation) => request(`/api/rooms/${code}/join`, { method: 'POST', body: { formation } }),
     setFormation: (code, formation) => request(`/api/rooms/${code}/formation`, { method: 'POST', body: { formation } }),
     startDraft: (code) => request(`/api/rooms/${code}/start`, { method: 'POST' }),
