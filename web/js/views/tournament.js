@@ -39,7 +39,7 @@ const TournamentView = {
     }
 
     function nameTag(name, isHuman, username) {
-      return `${name}${isHuman ? ` 👤 ${username}` : ''}`;
+      return `${name}${isHuman ? ` <span class="player-chip">${username}</span>` : ''}`;
     }
 
     function eventLine(e) {
@@ -50,9 +50,36 @@ const TournamentView = {
       return `<div class="report-line">${side} ${text}</div>`;
     }
 
-    function matchStatsHtml(m) {
-      if (!m.stats) return '';
-      const s = m.stats;
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+    // Final, already-decided stats for a match — used for every static ("final report")
+    // display, where there's no clock to animate against.
+    function finalMatchStats(m) {
+      if (!m.stats) return null;
+      return { A: m.stats.A, B: m.stats.B, xgA: m.xgA, xgB: m.xgB };
+    }
+
+    // Interpolates the same stats toward their final values as the live clock ticks, so
+    // the numbers build up over the 90 minutes instead of appearing fully-formed at
+    // kickoff. xG and pass counts accumulate roughly linearly with time; possession gets
+    // a per-match random early wobble that settles down to the true final split by the
+    // final whistle, the way a live "possession so far" stat behaves in a real broadcast.
+    function liveStatsAtClock(m, clock, possessionJitter) {
+      if (!m.stats) return null;
+      const frac = clamp(clock / 90, 0, 1);
+      const decay = 1 - frac;
+      const possA = Math.round(clamp(m.stats.A.possession + possessionJitter * decay, 20, 80));
+      const possB = 100 - possA;
+      return {
+        A: { possession: possA, passAccuracy: m.stats.A.passAccuracy, passes: Math.round(m.stats.A.passes * frac) },
+        B: { possession: possB, passAccuracy: m.stats.B.passAccuracy, passes: Math.round(m.stats.B.passes * frac) },
+        xgA: m.xgA * frac,
+        xgB: m.xgB * frac
+      };
+    }
+
+    function matchStatsHtml(stats) {
+      if (!stats) return '';
       const row = (label, a, b) => `
         <div class="stat-row">
           <span class="stat-val">${a}</span>
@@ -62,9 +89,9 @@ const TournamentView = {
       `;
       return `
         <div class="match-stats">
-          ${row('Possession', `${s.A.possession}%`, `${s.B.possession}%`)}
-          ${row('Passes (acc.)', `${s.A.passes} (${s.A.passAccuracy}%)`, `${s.B.passes} (${s.B.passAccuracy}%)`)}
-          ${row('xG', m.xgA.toFixed(2), m.xgB.toFixed(2))}
+          ${row('Possession', `${stats.A.possession}%`, `${stats.B.possession}%`)}
+          ${row('Passes (acc.)', `${stats.A.passes} (${stats.A.passAccuracy}%)`, `${stats.B.passes} (${stats.B.passAccuracy}%)`)}
+          ${row('xG', stats.xgA.toFixed(2), stats.xgB.toFixed(2))}
         </div>
       `;
     }
@@ -100,6 +127,7 @@ const TournamentView = {
       let clock = 0;
       let cursor = 0;
       let finished = false;
+      const possessionJitter = (Math.random() - 0.5) * 20; // settles to 0 by full time
 
       stepCard.style.display = 'none';
       continueZone.style.display = 'none';
@@ -120,7 +148,7 @@ const TournamentView = {
         return `
           <div class="center"><span class="live-clock" id="liveClock">${Math.min(clock, 90)}'</span></div>
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
-          ${matchStatsHtml(m)}
+          <div id="liveStatsZone">${matchStatsHtml(liveStatsAtClock(m, clock, possessionJitter))}</div>
           <div class="live-feed" id="liveFeed"></div>
         `;
       }
@@ -130,7 +158,7 @@ const TournamentView = {
         const evs = (m.events || []).filter((e) => e.type !== 'save');
         return `
           <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b>${scoreText(m)}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
-          ${matchStatsHtml(m)}
+          ${matchStatsHtml(finalMatchStats(m))}
           <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
         `;
       }
@@ -179,8 +207,10 @@ const TournamentView = {
         if (viewIdx === myMatchIdx) {
           const clockEl = liveZone.querySelector('#liveClock');
           const scoreEl = liveZone.querySelector('#liveMyScore');
+          const statsEl = liveZone.querySelector('#liveStatsZone');
           if (clockEl) clockEl.textContent = Math.min(clock, 90) + "'";
           if (scoreEl) scoreEl.textContent = `${myScore.a} - ${myScore.b}`;
+          if (statsEl) statsEl.innerHTML = matchStatsHtml(liveStatsAtClock(step.matches[myMatchIdx], clock, possessionJitter));
           renderFeedUpToNow();
         }
         if (clock >= 90) finish();
@@ -300,15 +330,24 @@ const TournamentView = {
         return;
       }
 
+      const chevronIcon = '<svg class="match-expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
       const matchesHtml = step.matches.map((m, idx) => {
         const visibleEvents = (m.events || []).filter((e) => e.type !== 'save');
+        const aWin = m.winnerCode && m.winnerCode === m.aCode;
+        const bWin = m.winnerCode && m.winnerCode === m.bCode;
         return `
         <div class="match-row match-row-clickable" data-idx="${idx}">
-          <span class="${m.winnerCode && m.winnerCode === m.aCode ? 'winner' : ''}">${nameTag(m.aName, m.aHuman, m.aUsername)}</span>
-          <span>${scoreText(m)} ${visibleEvents.length ? '📋' : ''}</span>
-          <span class="${m.winnerCode && m.winnerCode === m.bCode ? 'winner' : ''}">${nameTag(m.bName, m.bHuman, m.bUsername)}</span>
+          <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername)}</span></div>
+          <div class="match-score-box">
+            <span class="match-score-val">${m.goalsA} - ${m.goalsB}</span>
+            ${m.wentToPenalties ? `<span class="match-score-pens">pens ${m.penalties.A}-${m.penalties.B}</span>` : ''}
+          </div>
+          <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername)}</span></div>
+          ${chevronIcon}
         </div>
         <div class="match-report hidden" id="report-${idx}">
+          ${matchStatsHtml(finalMatchStats(m))}
           ${visibleEvents.length ? visibleEvents.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
         </div>
       `;
@@ -317,7 +356,7 @@ const TournamentView = {
       let groupFinalHtml = '';
       if (step.groupFinal) {
         groupFinalHtml = `
-          <h3 style="margin-top:18px;">📋 Final Group Standings</h3>
+          <h3 style="margin-top:18px;">Final Group Standings</h3>
           <div class="group-grid">
             ${Object.entries(step.groupFinal.groups).map(([label, rows]) => `
               <div>
@@ -327,7 +366,7 @@ const TournamentView = {
                   <tbody>
                     ${rows.map((r) => `
                       <tr class="${r.isHuman ? 'human' : ''} ${r.advanced ? '' : 'eliminated'}">
-                        <td>${r.name}${r.isHuman ? ` (${r.username})` : ''}${r.advanced ? ' ✅' : ''}</td>
+                        <td>${r.name}${r.isHuman ? ` (${r.username})` : ''}</td>
                         <td>${r.played}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf - r.ga}</td><td><b>${r.pts}</b></td>
                       </tr>
                     `).join('')}
@@ -341,7 +380,7 @@ const TournamentView = {
 
       stepCard.innerHTML = `
         <h3>${step.label}</h3>
-        <p class="muted" style="margin-top:-8px;">Tap a match for the report (goals, assists, cards).</p>
+        <p class="muted" style="margin-top:-8px;">Tap a match for the full report — stats, goals, assists, cards.</p>
         <div class="matchlog" style="max-height:none;">${matchesHtml}</div>
         ${groupFinalHtml}
       `;
@@ -349,6 +388,7 @@ const TournamentView = {
         row.addEventListener('click', () => {
           const report = stepCard.querySelector(`#report-${row.dataset.idx}`);
           if (report) report.classList.toggle('hidden');
+          row.classList.toggle('expanded');
         });
       });
 
