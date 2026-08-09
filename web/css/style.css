@@ -289,7 +289,16 @@ a { color: var(--accent-strong); }
 .reveal-team {
   text-align: center; font-weight: 700; font-size: 1.3rem; margin-bottom: 4px;
 }
-.reveal-sub { text-align: center; color: var(--muted); margin-bottom: 16px; font-size: .85rem; }
+.reveal-sub { text-align: center; color: var(--muted); margin-bottom: 12px; font-size: .85rem; }
+
+.sort-toolbar { display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; }
+.sort-btn {
+  display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); background: transparent; color: var(--muted);
+  cursor: pointer;
+}
+.sort-btn:hover { color: var(--ink); border-color: var(--accent); }
+.sort-btn.selected { color: var(--accent-strong); border-color: var(--accent-strong); }
 
 .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-bottom: 16px; }
 .player-card {
@@ -343,11 +352,13 @@ a { color: var(--accent-strong); }
 .report-line { padding: 3px 0; }
 
 .champion-banner {
-  text-align: center; padding: 32px 20px; border: 2px solid var(--accent); border-radius: var(--radius);
-  background: linear-gradient(180deg, var(--accent-soft), transparent); margin-bottom: 18px;
+  text-align: center; padding: 28px 20px; border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-2); margin-bottom: 18px;
 }
-.champion-banner .trophy { font-size: 2.6rem; }
-.champion-banner h2 { margin: 8px 0 0; }
+.champion-banner .champion-label {
+  font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+}
+.champion-banner h2 { margin: 6px 0 4px; font-size: 1.7rem; color: var(--accent-strong); }
 
 .matchlog { max-height: 220px; overflow-y: auto; font-size: .82rem; }
 .matchlog div { padding: 5px 0; border-bottom: 1px dashed var(--border-soft); }
@@ -370,7 +381,7 @@ a { color: var(--accent-strong); }
 /* --- My Team recap card --- */
 .myteam-card {
   border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
-  background: linear-gradient(180deg, var(--surface-2), var(--surface)); margin-top: 12px;
+  background: var(--surface); margin-top: 12px;
 }
 .myteam-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 8px; }
 .myteam-record { color: var(--muted); font-size: .85rem; margin-bottom: 14px; }

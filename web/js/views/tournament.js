@@ -221,10 +221,10 @@ const TournamentView = {
       return `
         <div class="myteam-card">
           <div class="myteam-header">
-            <span>🌍 ${record.countryName}</span>
+            <span>${record.countryName}</span>
             <span class="badge">${record.formation} &middot; OVR ${avgOvr}</span>
           </div>
-          <div class="myteam-record">${record.w}-${record.d}-${record.l} W-D-L &middot; ${record.gf}-${record.ga} goals${record.topScorer ? ` &middot; ⭐ ${record.topScorer} (${record.topGoals})` : ''}</div>
+          <div class="myteam-record">${record.w}-${record.d}-${record.l} W-D-L &middot; ${record.gf}-${record.ga} goals${record.topScorer ? ` &middot; Top scorer: ${record.topScorer} (${record.topGoals})` : ''}</div>
           <div class="myteam-players">
             <div class="myteam-col">${left.map(playerRow).join('')}</div>
             <div class="myteam-col">${right.map(playerRow).join('')}</div>
@@ -296,18 +296,25 @@ const TournamentView = {
       if (step.champion) {
         championZone.innerHTML = `
           <div class="champion-banner">
-            <div class="trophy">🏆</div>
-            <h2>World Cup Champion: ${step.champion.name}</h2>
-            <p class="muted">${step.champion.isHuman ? `Controlled by ${step.champion.username} 👑` : 'A bot team won it all 🤖'}</p>
+            <div class="champion-label">World Cup Champion</div>
+            <h2>${step.champion.name}</h2>
+            <p class="muted">${step.champion.isHuman ? `Won by ${step.champion.username}` : 'Won by a bot-controlled nation'}</p>
             <div class="row" style="margin-top:16px;justify-content:center;">
-              <button class="btn btn-ghost" id="btnBackHome">🏠 Back to Dashboard</button>
-              ${isCreator ? '<button class="btn btn-primary" id="btnNewRoom">🔁 Start New Room</button>' : ''}
+              <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
+              ${isCreator ? '<button class="btn btn-ghost" id="btnNewRoom">Start New Room</button>' : ''}
+              ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
           ${myRecordCardHtml(step.myRecord)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
+        const rematchBtn = championZone.querySelector('#btnRematch');
+        if (rematchBtn) rematchBtn.addEventListener('click', () => {
+          rematchBtn.disabled = true;
+          rematchBtn.textContent = 'Setting up rematch...';
+          socket.emit('room:rematch', { code });
+        });
       } else {
         championZone.innerHTML = '';
       }
@@ -354,6 +361,11 @@ const TournamentView = {
       tournamentStage = 'group';
       if (!lineupRevealShown) return; // room:state (personalized, with myLineup) will handle the reveal
       renderStep(null);
+    });
+
+    App.onSocket('room:rematchReady', ({ newCode }) => {
+      App.toast('Rematch room ready — joining now');
+      App.goLobby(newCode);
     });
 
     App.onSocket('error:message', (e) => App.toast(e.error, true));

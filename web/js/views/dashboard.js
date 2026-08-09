@@ -59,57 +59,93 @@ const DashboardView = {
     ];
   },
 
-  // Renders an (optional) checkbox grid the creator can use to restrict which nations
-  // are eligible to be revealed during the draft. Returns { get value() } yielding null
-  // (unrestricted — the default) or an array of selected team codes.
-  async renderTeamPicker(el) {
-    el.innerHTML = '<p class="muted" style="font-size:.82rem;">Loading teams...</p>';
-    let teams = [];
-    try {
-      ({ teams } = await Api.teams());
-    } catch {
-      el.innerHTML = '<p class="muted" style="font-size:.82rem;">Could not load team list — restriction unavailable.</p>';
-      return { get value() { return null; } };
-    }
-    const selected = new Set();
+  // Renders an Off/On toggle for restricting which nations can be revealed during the
+  // draft. The 48-team checkbox grid itself only loads and appears once the creator
+  // opts in — in the default (Off) state nothing team-related is shown at all.
+  renderTeamPicker(el) {
+    let selected = new Set();
+    let enabled = false;
+    let teamsLoaded = false;
+
     el.innerHTML = `
-      <div class="team-picker-actions">
-        <button type="button" class="btn btn-ghost btn-sm" id="tpSelectAll">Select all</button>
-        <button type="button" class="btn btn-ghost btn-sm" id="tpClear">Clear (unrestricted)</button>
-        <span class="muted team-picker-count" id="tpCount">Unrestricted — all 48 teams eligible</span>
-      </div>
-      <div class="team-picker-grid">
-        ${teams.map((t) => `
-          <label class="team-picker-item">
-            <input type="checkbox" data-code="${t.code}" />
-            <span>${t.name}</span>
-          </label>
-        `).join('')}
-      </div>
+      <div id="tpToggle" style="margin-bottom:8px;"></div>
+      <div id="tpBody"></div>
     `;
-    const countEl = el.querySelector('#tpCount');
-    const updateCount = () => {
-      if (selected.size === 0) countEl.textContent = 'Unrestricted — all 48 teams eligible';
-      else if (selected.size < 4) countEl.textContent = `${selected.size} selected — pick at least 4 to restrict`;
-      else countEl.textContent = `${selected.size} teams selected`;
-    };
-    const boxes = Array.from(el.querySelectorAll('input[type="checkbox"]'));
-    boxes.forEach((b) => b.addEventListener('change', () => {
-      if (b.checked) selected.add(b.dataset.code); else selected.delete(b.dataset.code);
-      updateCount();
-    }));
-    el.querySelector('#tpSelectAll').addEventListener('click', () => {
-      boxes.forEach((b) => { b.checked = true; selected.add(b.dataset.code); });
-      updateCount();
+    const bodyEl = el.querySelector('#tpBody');
+
+    const toggle = ToggleGroup.render(el.querySelector('#tpToggle'), {
+      options: [
+        { value: false, title: 'Off', sub: 'All 48 teams eligible' },
+        { value: true, title: 'Restrict', sub: 'Pick specific nations only' }
+      ],
+      selected: false,
+      onChange: async (val) => {
+        enabled = val;
+        if (!enabled) {
+          bodyEl.innerHTML = '';
+          return;
+        }
+        if (!teamsLoaded) await loadTeamGrid();
+        else bodyEl.style.display = 'block';
+      }
     });
-    el.querySelector('#tpClear').addEventListener('click', () => {
-      boxes.forEach((b) => { b.checked = false; });
-      selected.clear();
+
+    async function loadTeamGrid() {
+      bodyEl.innerHTML = '<p class="muted" style="font-size:.82rem;">Loading teams...</p>';
+      let teams = [];
+      try {
+        ({ teams } = await Api.teams());
+      } catch {
+        bodyEl.innerHTML = '<p class="muted" style="font-size:.82rem;">Could not load team list — restriction unavailable.</p>';
+        return;
+      }
+      teamsLoaded = true;
+      bodyEl.innerHTML = `
+        <div class="team-picker">
+          <div class="team-picker-actions">
+            <button type="button" class="btn btn-ghost btn-sm" id="tpSelectAll">Select all</button>
+            <button type="button" class="btn btn-ghost btn-sm" id="tpClear">Clear</button>
+            <span class="muted team-picker-count" id="tpCount">0 selected — pick at least 4</span>
+          </div>
+          <div class="team-picker-grid">
+            ${teams.map((t) => `
+              <label class="team-picker-item">
+                <input type="checkbox" data-code="${t.code}" />
+                <span>${t.name}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
+      const countEl = bodyEl.querySelector('#tpCount');
+      const updateCount = () => {
+        if (selected.size < 4) countEl.textContent = `${selected.size} selected — pick at least 4`;
+        else countEl.textContent = `${selected.size} teams selected`;
+      };
+      const boxes = Array.from(bodyEl.querySelectorAll('input[type="checkbox"]'));
+      boxes.forEach((b) => {
+        b.checked = selected.has(b.dataset.code);
+        b.addEventListener('change', () => {
+          if (b.checked) selected.add(b.dataset.code); else selected.delete(b.dataset.code);
+          updateCount();
+        });
+      });
+      bodyEl.querySelector('#tpSelectAll').addEventListener('click', () => {
+        boxes.forEach((b) => { b.checked = true; selected.add(b.dataset.code); });
+        updateCount();
+      });
+      bodyEl.querySelector('#tpClear').addEventListener('click', () => {
+        boxes.forEach((b) => { b.checked = false; });
+        selected.clear();
+        updateCount();
+      });
       updateCount();
-    });
+    }
+
     return {
-      get value() { return selected.size >= 4 ? Array.from(selected) : null; },
-      get count() { return selected.size; }
+      get value() { return enabled && selected.size >= 4 ? Array.from(selected) : null; },
+      get count() { return enabled ? selected.size : 0; },
+      get enabled() { return enabled; }
     };
   },
 
@@ -138,7 +174,7 @@ const DashboardView = {
         <div class="field"><label>Tournament Length</label></div>
         <div id="spLength" style="margin-bottom:16px;"></div>
         <div class="field"><label>Restrict Draft Teams (optional)</label></div>
-        <div id="spTeams" class="team-picker" style="margin-bottom:16px;"></div>
+        <div id="spTeams" style="margin-bottom:16px;"></div>
         <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -189,7 +225,7 @@ const DashboardView = {
         <div class="field"><label>Tournament Length</label></div>
         <div id="crLength" style="margin-bottom:16px;"></div>
         <div class="field"><label>Restrict Draft Teams (optional)</label></div>
-        <div id="crTeams" class="team-picker" style="margin-bottom:16px;"></div>
+        <div id="crTeams" style="margin-bottom:16px;"></div>
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>

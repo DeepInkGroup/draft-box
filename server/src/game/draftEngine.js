@@ -24,6 +24,9 @@ function isDraftComplete(member) {
 
 // Finds a random real team that still has at least one player this member can use
 // (undrafted room-wide AND matching a position group the member still has an open slot for).
+// A team is never revealed twice to the same member: every reveal always ends in a pick
+// (no skipping), so "already seen" is exactly the set of teams already in their squad,
+// plus whichever team is currently mid-reveal (not yet picked from).
 function revealForMember(roomState, userId) {
   const member = roomState.members.get(userId);
   if (!member) throw new Error('not a member of this room');
@@ -33,7 +36,9 @@ function revealForMember(roomState, userId) {
   const teamPool = roomState.allowedTeams
     ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
     : ALL_TEAMS;
-  const candidates = teamPool.filter((t) => t.code !== member.lastRevealedTeam);
+  const seenTeamCodes = new Set(member.squad.map((p) => p.team));
+  if (member.lastRevealedTeam) seenTeamCodes.add(member.lastRevealedTeam);
+  const candidates = teamPool.filter((t) => !seenTeamCodes.has(t.code));
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
   const pickTimeMs = roomState.pickTimeMs || DEFAULT_PICK_TIME_MS;
@@ -45,16 +50,22 @@ function revealForMember(roomState, userId) {
     return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs);
   };
 
-  for (let i = 0; i < MAX_REROLL_ATTEMPTS; i++) {
+  const canSupply = (team) => team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
+
+  for (let i = 0; i < MAX_REROLL_ATTEMPTS && candidates.length; i++) {
     const team = candidates[Math.floor(Math.random() * candidates.length)];
-    const available = team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
-    if (available) return reveal(team);
+    if (canSupply(team)) return reveal(team);
   }
 
-  // Fallback: exhaustively scan every eligible team once (covers small unlucky pools).
+  // Fallback: exhaustively scan every still-unseen eligible team once (covers small unlucky pools).
+  for (const team of candidates) {
+    if (canSupply(team)) return reveal(team);
+  }
+
+  // Last resort: repeating a team is better than stalling the draft — only reached when
+  // no unseen team can supply the position (e.g. a heavily restricted team pool).
   for (const team of teamPool) {
-    const available = team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
-    if (available) return reveal(team);
+    if (canSupply(team)) return reveal(team);
   }
 
   return { done: false, exhausted: true };

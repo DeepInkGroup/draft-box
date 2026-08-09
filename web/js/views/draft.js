@@ -10,6 +10,24 @@ const DraftView = {
     let lastOpenSlots = [];
     let pickTimeMs = 20000;
     let captainEnabled = false;
+    let sortMode = 'rating';
+    let lastPlayers = [];
+
+    const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 };
+    function sortPlayers(players, mode) {
+      const arr = players.slice();
+      if (mode === 'position') {
+        arr.sort((a, b) => (POS_ORDER[a.pos] - POS_ORDER[b.pos]) || (b.overall ?? 0) - (a.overall ?? 0));
+      } else if (mode === 'random') {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      } else {
+        arr.sort((a, b) => (b.overall ?? -1) - (a.overall ?? -1));
+      }
+      return arr;
+    }
 
     container.innerHTML = `
       <div class="card" id="timerCard" style="display:none;">
@@ -103,15 +121,40 @@ const DraftView = {
       }
 
       lastOpenSlots = payload.openSlots;
+      lastPlayers = payload.players;
+      const ratingsVisible = payload.players.some((p) => p.overall !== null);
+      if (sortMode === 'rating' && !ratingsVisible) sortMode = 'position';
       startTimer(payload.deadline, payload.pickTimeMs);
 
       revealCard.innerHTML = `
         <div class="reveal-team">${payload.team.name}</div>
         <div class="reveal-sub">Pick one player from this team for your squad — no skipping, the clock is running</div>
+        <div class="sort-toolbar" id="sortToolbar">
+          ${ratingsVisible ? `<button type="button" class="sort-btn" data-mode="rating" title="Sort by rating"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg></button>` : ''}
+          <button type="button" class="sort-btn" data-mode="position" title="Sort by position"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+          <button type="button" class="sort-btn" data-mode="random" title="Random order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
+        </div>
         <div class="player-grid" id="playerGrid"></div>
       `;
+
+      const toolbar = revealCard.querySelector('#sortToolbar');
+      toolbar.querySelectorAll('.sort-btn').forEach((btn) => {
+        btn.classList.toggle('selected', btn.dataset.mode === sortMode);
+        btn.addEventListener('click', () => {
+          sortMode = btn.dataset.mode;
+          toolbar.querySelectorAll('.sort-btn').forEach((b) => b.classList.toggle('selected', b === btn));
+          renderPlayerGrid();
+        });
+      });
+
+      renderPlayerGrid();
+    }
+
+    function renderPlayerGrid() {
       const grid = revealCard.querySelector('#playerGrid');
-      grid.innerHTML = payload.players.map((p) => `
+      if (!grid) return;
+      const players = sortPlayers(lastPlayers, sortMode);
+      grid.innerHTML = players.map((p) => `
         <div class="player-card ${p.available ? '' : 'unavailable'}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
           <div class="pname">${p.isStar ? '<span class="star">★</span> ' : ''}${p.name}</div>
           <div class="pmeta"><span>${POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>

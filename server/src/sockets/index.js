@@ -148,6 +148,36 @@ function registerSocketHandlers(io) {
       io.to(channelName(roomRow.code)).emit('room:started', {});
     });
 
+    // Recreates a finished room with identical settings and auto-joins every previous
+    // human member (carrying over their prior formation) so nobody needs to be manually
+    // re-invited via a new code — every connected client in the old room's channel gets
+    // redirected straight into the new lobby.
+    socket.on('room:rematch', ({ code }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
+      if (roomRow.creator_id !== socket.user.id) return socket.emit('error:message', { error: 'only the room creator can start a rematch' });
+      if (roomRow.status !== 'finished') return socket.emit('error:message', { error: 'the tournament has not finished yet' });
+
+      const members = rm.getMembers(roomRow.id);
+      const allowedTeams = roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null;
+      const newRoom = rm.createRoom({
+        name: roomRow.name,
+        creatorId: roomRow.creator_id,
+        humanSlotsMax: roomRow.human_slots_max,
+        singlePlayer: !!roomRow.single_player,
+        showOverall: !!roomRow.show_overall,
+        pickTimeMs: roomRow.pick_time_ms,
+        captainEnabled: !!roomRow.captain_enabled,
+        tournamentLength: roomRow.tournament_length,
+        allowedTeams
+      });
+      for (const m of members) {
+        rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation);
+      }
+      if (newRoom.single_player) rm.setRoomStatus(newRoom.id, 'drafting');
+      io.to(channelName(roomRow.code)).emit('room:rematchReady', { newCode: newRoom.code });
+    });
+
     socket.on('draft:reveal', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
       if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
