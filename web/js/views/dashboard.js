@@ -51,6 +51,13 @@ const DashboardView = {
     ];
   },
 
+  blitzOptions() {
+    return [
+      { value: false, title: 'Off', sub: 'Full 48-team group stage' },
+      { value: true, title: 'Blitz', sub: 'Skip groups — start at Round of 32' }
+    ];
+  },
+
   timerOptions() {
     return [
       { value: 10000, title: '10s', sub: 'Fast' },
@@ -73,6 +80,8 @@ const DashboardView = {
         <div id="spRatings" style="margin-bottom:16px;"></div>
         <div class="field"><label>Team Captain</label></div>
         <div id="spCaptain" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Tournament Length</label></div>
+        <div id="spBlitz" style="margin-bottom:16px;"></div>
         <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -85,10 +94,11 @@ const DashboardView = {
     const spTimer = ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
     const spRatings = ToggleGroup.render(container.querySelector('#spRatings'), { options: this.ratingsOptions(), selected: true });
     const spCaptain = ToggleGroup.render(container.querySelector('#spCaptain'), { options: this.captainOptions(), selected: false });
+    const spBlitz = ToggleGroup.render(container.querySelector('#spBlitz'), { options: this.blitzOptions(), selected: false });
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
       try {
-        const room = await Api.createSingleplayer(spFormation.value, spRatings.value, spTimer.value, spCaptain.value);
+        const room = await Api.createSingleplayer(spFormation.value, spRatings.value, spTimer.value, spCaptain.value, spBlitz.value);
         App.goDraft(room.code);
       } catch (e) { showErr(e); }
     });
@@ -114,6 +124,8 @@ const DashboardView = {
         <div id="crRatings" style="margin-bottom:16px;"></div>
         <div class="field"><label>Team Captain</label></div>
         <div id="crCaptain" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Tournament Length</label></div>
+        <div id="crBlitz" style="margin-bottom:16px;"></div>
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -126,12 +138,13 @@ const DashboardView = {
     const crTimer = ToggleGroup.render(container.querySelector('#crTimer'), { options: this.timerOptions(), selected: 20000 });
     const crRatings = ToggleGroup.render(container.querySelector('#crRatings'), { options: this.ratingsOptions(), selected: true });
     const crCaptain = ToggleGroup.render(container.querySelector('#crCaptain'), { options: this.captainOptions(), selected: false });
+    const crBlitz = ToggleGroup.render(container.querySelector('#crBlitz'), { options: this.blitzOptions(), selected: false });
 
     container.querySelector('#btnCreateRoom').addEventListener('click', async () => {
       try {
         const name = container.querySelector('#crName').value.trim();
         const slots = Number(container.querySelector('#crSlots').value) || 8;
-        const room = await Api.createRoom(name, slots, crFormation.value, crRatings.value, crTimer.value, crCaptain.value);
+        const room = await Api.createRoom(name, slots, crFormation.value, crRatings.value, crTimer.value, crCaptain.value, crBlitz.value);
         App.goLobby(room.code);
       } catch (e) { showErr(e); }
     });

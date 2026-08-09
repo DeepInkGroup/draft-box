@@ -98,6 +98,10 @@ const App = (() => {
       disconnectSocket();
     });
 
+    const rulebookDialog = document.getElementById('rulebookDialog');
+    document.getElementById('btnRulebook').addEventListener('click', () => rulebookDialog.showModal());
+    document.getElementById('btnCloseRulebook').addEventListener('click', () => rulebookDialog.close());
+
     const profileDialog = document.getElementById('profileDialog');
     const profileError = document.getElementById('profileError');
     profileBtn.addEventListener('click', async () => {
@@ -106,11 +110,26 @@ const App = (() => {
       document.getElementById('profileNewPassword').value = '';
       document.getElementById('profileUsername').value = state.user ? state.user.username : '';
       document.getElementById('profileEmail').value = '...';
+      const careerEl = document.getElementById('profileCareer');
+      careerEl.innerHTML = '<p class="muted">Loading...</p>';
       profileDialog.showModal();
       try {
         const { user } = await Api.me();
         document.getElementById('profileEmail').value = user.email;
       } catch { /* ignore — dialog still usable for password change / logout */ }
+      try {
+        const stats = await Api.careerStats();
+        const winRate = stats.w + stats.d + stats.l > 0 ? Math.round((stats.w / (stats.w + stats.d + stats.l)) * 100) : 0;
+        careerEl.innerHTML = `
+          <div class="career-stat"><span class="career-value">${stats.tournaments}</span><span class="career-label">Tournaments</span></div>
+          <div class="career-stat"><span class="career-value">🏆 ${stats.titles}</span><span class="career-label">Titles</span></div>
+          <div class="career-stat"><span class="career-value">${stats.w}-${stats.d}-${stats.l}</span><span class="career-label">W-D-L</span></div>
+          <div class="career-stat"><span class="career-value">${stats.gf}-${stats.ga}</span><span class="career-label">Goals For-Against</span></div>
+          <div class="career-stat" style="grid-column: 1 / -1;"><span class="career-value">${winRate}%</span><span class="career-label">Win Rate</span></div>
+        `;
+      } catch {
+        careerEl.innerHTML = '<p class="muted">Career stats unavailable right now.</p>';
+      }
     });
     document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());
     document.getElementById('btnLogout').addEventListener('click', () => { profileDialog.close(); logout(); });

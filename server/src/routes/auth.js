@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { signToken, requireAuth } = require('../middleware/auth');
+const { computeTeamRecord, findMyCode } = require('../game/tournamentEngine');
 
 const router = express.Router();
 
@@ -69,6 +70,43 @@ router.post('/change-password', requireAuth, (req, res) => {
   const hash = bcrypt.hashSync(newPassword, 10);
   db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(hash, req.user.id);
   res.json({ ok: true });
+});
+
+// Career stats: scans every finished tournament this user was a human participant in
+// and aggregates titles/record/goals from the same matchLog + events used for the
+// in-tournament "My Team" recap card — same source of truth, just summed across rooms.
+router.get('/me/career', requireAuth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT r.tournament_state FROM rooms r
+    JOIN room_members rm ON rm.room_id = r.id
+    WHERE rm.user_id = ? AND r.status = 'finished' AND r.tournament_state IS NOT NULL
+  `).all(req.user.id);
+
+  let tournaments = 0;
+  let titles = 0;
+  let w = 0;
+  let d = 0;
+  let l = 0;
+  let gf = 0;
+  let ga = 0;
+
+  for (const row of rows) {
+    let t;
+    try { t = JSON.parse(row.tournament_state); } catch { continue; }
+    if (!t || !t.slotByCode) continue;
+    const myCode = findMyCode(t, req.user.id);
+    if (!myCode) continue;
+
+    tournaments += 1;
+    if (t.champion === myCode) titles += 1;
+
+    const record = computeTeamRecord(t, myCode);
+    if (record) {
+      w += record.w; d += record.d; l += record.l; gf += record.gf; ga += record.ga;
+    }
+  }
+
+  res.json({ tournaments, titles, w, d, l, gf, ga });
 });
 
 module.exports = router;

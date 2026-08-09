@@ -408,6 +408,22 @@ a { color: var(--accent-strong); }
 .dialog-form input { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); margin: 10px 0; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
+.dialog-wide { width: min(680px, 92vw); }
+.rulebook-body { max-height: 70vh; overflow-y: auto; padding-right: 6px; }
+.rulebook-body h3 { margin: 18px 0 6px; color: var(--accent-strong); }
+.rulebook-body h3:first-child { margin-top: 0; }
+.rulebook-body p { font-size: .88rem; line-height: 1.55; margin: 0 0 8px; }
+.rulebook-body ul { margin: 0 0 10px; padding-inline-start: 20px; font-size: .88rem; line-height: 1.55; }
+.rulebook-body li { margin-bottom: 4px; }
+
+.career-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 4px; }
+.career-stat {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 10px 12px; text-align: center;
+}
+.career-stat .career-value { font-size: 1.3rem; font-weight: 800; color: var(--accent-strong); display: block; }
+.career-stat .career-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
 .center { text-align: center; }
 .spacer { height: 10px; }
 

@@ -34,10 +34,16 @@ function startTournament(roomState) {
   const members = Array.from(roomState.members.values());
   const humanCount = members.length;
   if (humanCount > 32) throw new Error('at most 32 human-controlled slots are allowed');
+  const blitzMode = !!roomState.blitzMode;
 
   const shuffledCodes = shuffle(ALL_TEAMS.map((t) => t.code));
   const humanCodes = shuffledCodes.slice(0, humanCount);
-  const botCodes = shuffledCodes.slice(humanCount);
+  let botCodes = shuffledCodes.slice(humanCount);
+
+  // Blitz Game: skip the group stage entirely and start at the Round of 32. Every
+  // human is guaranteed a spot; bots are randomly trimmed from 48 down to fill the
+  // remaining 32 - humanCount slots, so no group-stage matches are ever simulated.
+  if (blitzMode) botCodes = botCodes.slice(0, Math.max(0, 32 - humanCount));
 
   const slots = [];
   humanCodes.forEach((code, i) => {
@@ -61,6 +67,30 @@ function startTournament(roomState) {
     const xi = bestXI(team, botFormation);
     slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false });
   });
+
+  if (blitzMode) {
+    const slotByCode = {};
+    for (const s of slots) slotByCode[s.code] = s;
+    const advancing = shuffle(slots.map((s) => s.code));
+    const r32 = [];
+    for (let i = 0; i < advancing.length; i += 2) {
+      r32.push({ aCode: advancing[i], bCode: advancing[i + 1], result: null, winnerCode: null });
+    }
+
+    roomState.tournament = {
+      stage: 'r32',
+      slotByCode,
+      groups: {},
+      standings: {},
+      groupMatchdaysPlayed: 0,
+      fixtures: [],
+      bracket: { r32 },
+      matchLog: [],
+      history: [],
+      champion: null
+    };
+    return roomState.tournament;
+  }
 
   const shuffledSlots = shuffle(slots);
   const groupChunks = chunk(shuffledSlots, 4);
@@ -381,4 +411,4 @@ function historyLength(roomState) {
   return t ? t.history.length : 0;
 }
 
-module.exports = { startTournament, simulateNextStep, decorateStep, historyLength };
+module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, findMyCode };

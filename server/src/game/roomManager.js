@@ -29,17 +29,17 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, blitzMode = false }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
-      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0
+      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, blitzMode ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -123,6 +123,7 @@ function loadRoomState(roomRow) {
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,
     captainEnabled: !!roomRow.captain_enabled,
+    blitzMode: !!roomRow.blitz_mode,
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -178,6 +179,7 @@ function lobbySnapshot(roomRow) {
     showOverall: !!roomRow.show_overall,
     pickTimeMs: roomRow.pick_time_ms,
     captainEnabled: !!roomRow.captain_enabled,
+    blitzMode: !!roomRow.blitz_mode,
     members: getMembers(roomRow.id).map((m) => ({
       userId: m.user_id,
       username: m.username,

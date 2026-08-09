@@ -18,17 +18,17 @@ function serializeRoom(roomRow) {
 }
 
 router.post('/', (req, res) => {
-  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled } = req.body || {};
+  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, blitzMode } = req.body || {};
   const room = rm.createRoom({
     name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
-    showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled
+    showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled, blitzMode: !!blitzMode
   });
   rm.joinRoom(room, req.user, req.body?.formation);
   res.status(201).json(serializeRoom(room));
 });
 
 router.post('/singleplayer', (req, res) => {
-  const { showOverall, pickTimeMs, captainEnabled } = req.body || {};
+  const { showOverall, pickTimeMs, captainEnabled, blitzMode } = req.body || {};
   const room = rm.createRoom({
     name: `${req.user.username}'s Solo Run`,
     creatorId: req.user.id,
@@ -36,7 +36,8 @@ router.post('/singleplayer', (req, res) => {
     singlePlayer: true,
     showOverall: showOverall !== false,
     pickTimeMs,
-    captainEnabled: !!captainEnabled
+    captainEnabled: !!captainEnabled,
+    blitzMode: !!blitzMode
   });
   rm.joinRoom(room, req.user, req.body?.formation);
   rm.setRoomStatus(room.id, 'drafting');

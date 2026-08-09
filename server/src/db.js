@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   show_overall INTEGER NOT NULL DEFAULT 1,
   pick_time_ms INTEGER NOT NULL DEFAULT 20000,
   captain_enabled INTEGER NOT NULL DEFAULT 0,
+  blitz_mode INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -95,6 +96,9 @@ if (!columnExists('rooms', 'captain_enabled')) {
 }
 if (!columnExists('room_members', 'captain_slot')) {
   db.exec(`ALTER TABLE room_members ADD COLUMN captain_slot TEXT;`);
+}
+if (!columnExists('rooms', 'blitz_mode')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN blitz_mode INTEGER NOT NULL DEFAULT 0;`);
 }
 
 module.exports = db;
