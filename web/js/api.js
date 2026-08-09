@@ -1,6 +1,11 @@
 const Api = (() => {
   function token() {
-    return localStorage.getItem('draftbox.token');
+    // sessionStorage, not localStorage: localStorage is shared across every tab of this
+    // origin, so logging in as a second user in another tab would silently overwrite the
+    // first tab's token and misattribute its next action to the wrong account. sessionStorage
+    // is isolated per tab, which is exactly what's needed when testing/using multiple
+    // accounts (e.g. a room creator and a friend) in the same browser.
+    return sessionStorage.getItem('draftbox.token');
   }
 
   async function request(path, { method = 'GET', body } = {}) {

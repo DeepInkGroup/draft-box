@@ -21,7 +21,7 @@ const App = (() => {
 
   function ensureSocket() {
     if (state.socket) return state.socket;
-    state.socket = io(getApiBase(), { auth: { token: localStorage.getItem('draftbox.token') } });
+    state.socket = io(getApiBase(), { auth: { token: sessionStorage.getItem('draftbox.token') } });
     state.socket.on('connect_error', (e) => toast('Server connection error: ' + e.message, true));
     return state.socket;
   }
@@ -69,7 +69,7 @@ const App = (() => {
   }
 
   function onAuthed(user, token) {
-    localStorage.setItem('draftbox.token', token);
+    sessionStorage.setItem('draftbox.token', token);
     state.user = user;
     setHeader();
     toast(`Welcome, ${user.username}!`);
@@ -77,7 +77,7 @@ const App = (() => {
   }
 
   function logout() {
-    localStorage.removeItem('draftbox.token');
+    sessionStorage.removeItem('draftbox.token');
     goAuth();
   }
 
@@ -153,7 +153,7 @@ const App = (() => {
       }
     });
 
-    const token = localStorage.getItem('draftbox.token');
+    const token = sessionStorage.getItem('draftbox.token');
     if (!token) return goAuth();
 
     try {

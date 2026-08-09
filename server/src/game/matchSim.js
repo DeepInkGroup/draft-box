@@ -93,49 +93,68 @@ function generateSaveEvents(team, side, xgFaced, goalsConceded) {
   return events;
 }
 
-// Red card morale hit: getting a player sent off rattles the whole team for a short
-// spell afterward, regardless of that individual player's own quality — modeled as a
+// Card system: yellow-card incidents are tracked per player over the match, so a player
+// who picks up a second yellow is properly sent off (not just handed another yellow
+// event) — plus a small independent chance of a straight (violent-conduct-style) red.
+// Either way, a sending-off rattles the dismissed player's own team for a short spell
+// afterward, regardless of that individual player's own quality — modeled as a
 // temporary Attack+Defense reduction. Since the engine decides a match in one shot
 // (not minute-by-minute), the "short spell" is expressed as a fraction of the full 90
 // minutes and converted into an average-over-the-match rating reduction. Losing the
 // captain specifically hits morale harder — the affected spell runs 1.8x longer.
-const REDCARD_CHANCE = 0.07;
+const YELLOW_INCIDENTS_MAX = 6; // 0-5 yellow-card incidents per match, shared across both sides
+const STRAIGHT_RED_CHANCE = 0.035; // per side, independent of accumulated yellows
 const REDCARD_IMPACT_PCT = 0.20;
 const REDCARD_BASE_MINUTES = 15;
 const CAPTAIN_REDCARD_MULTIPLIER = 1.8;
 
-function decideRedCard(teamA, teamB) {
-  if (Math.random() >= REDCARD_CHANCE) return null;
-  const side = Math.random() < 0.5 ? 'A' : 'B';
-  const team = side === 'A' ? teamA : teamB;
-  const outfield = team.xi.filter((p) => p.pos !== 'GK');
-  if (!outfield.length) return null;
-  const player = outfield[Math.floor(Math.random() * outfield.length)];
-  const affectedMinutes = REDCARD_BASE_MINUTES * (player.isCaptain ? CAPTAIN_REDCARD_MULTIPLIER : 1);
-  const moraleImpact = REDCARD_IMPACT_PCT * (affectedMinutes / 90);
-  return { side, player, affectedMinutes, moraleImpact };
-}
-
-// Cards: a handful of yellows most matches, spread across both sides (any outfield
-// player), plus the (already-decided) red, if any. Yellows are purely flavor; the red's
-// morale impact was already folded into the ratings before xG was computed.
-function generateCardEvents(teamA, teamB, redCard) {
+function generateCardEvents(teamA, teamB) {
   const events = [];
-  const pool = [
-    ...teamA.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'A' })),
-    ...teamB.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side: 'B' }))
-  ];
-  if (pool.length) {
-    const numYellows = Math.floor(Math.random() * 5); // 0-4
-    for (let i = 0; i < numYellows; i++) {
-      const p = pool[Math.floor(Math.random() * pool.length)];
-      events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'yellow', player: p.name, pos: p.pos, side: p.side });
-    }
+  const dismissals = [];
+  const sentOff = new Set();
+  const yellowCount = new Map();
+
+  const sidePool = (team, side) => team.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side }));
+  const pool = [...sidePool(teamA, 'A'), ...sidePool(teamB, 'B')];
+  if (!pool.length) return { events, dismissals };
+
+  const key = (p) => `${p.side}:${p.id}`;
+  const eligible = (side) => pool.filter((p) => !sentOff.has(key(p)) && (!side || p.side === side));
+
+  function eject(p, minute, reason) {
+    sentOff.add(key(p));
+    events.push({ minute, type: 'red', player: p.name, pos: p.pos, side: p.side, reason });
+    const affectedMinutes = REDCARD_BASE_MINUTES * (p.isCaptain ? CAPTAIN_REDCARD_MULTIPLIER : 1);
+    dismissals.push({ side: p.side, player: p, moraleImpact: REDCARD_IMPACT_PCT * (affectedMinutes / 90) });
   }
-  if (redCard) {
-    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'red', player: redCard.player.name, pos: redCard.player.pos, side: redCard.side });
+
+  // Yellow-card incidents, resolved chronologically so a second yellow for the same
+  // player is recognized as it happens (rather than two independent, unlinked yellows).
+  const numYellowIncidents = Math.floor(Math.random() * YELLOW_INCIDENTS_MAX);
+  const incidentMinutes = Array.from({ length: numYellowIncidents }, () => 1 + Math.floor(Math.random() * 90)).sort((a, b) => a - b);
+  for (const minute of incidentMinutes) {
+    const avail = eligible();
+    if (!avail.length) break;
+    const p = avail[Math.floor(Math.random() * avail.length)];
+    const count = (yellowCount.get(key(p)) || 0) + 1;
+    yellowCount.set(key(p), count);
+    events.push({ minute, type: 'yellow', player: p.name, pos: p.pos, side: p.side });
+    if (count >= 2) eject(p, minute, 'second-yellow');
   }
-  return events;
+
+  // Independent straight-red chance per side (at most one dismissal per side from this
+  // path). Restricted to players with no card yet at all — a player who already picked
+  // up a yellow this match can only be sent off via a second yellow, never an unrelated
+  // straight red, so their card history never contradicts itself in minute order.
+  for (const side of ['A', 'B']) {
+    if (Math.random() >= STRAIGHT_RED_CHANCE) continue;
+    const avail = eligible(side).filter((p) => !yellowCount.has(key(p)));
+    if (!avail.length) continue;
+    const p = avail[Math.floor(Math.random() * avail.length)];
+    eject(p, 1 + Math.floor(Math.random() * 90), 'straight-red');
+  }
+
+  return { events, dismissals };
 }
 
 // Match stats (possession, pass accuracy, pass count) are derived straight from the
@@ -172,11 +191,11 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   ratingsB.attack *= chemB.multiplier;
   ratingsB.defense *= chemB.multiplier;
 
-  const redCard = decideRedCard(teamA, teamB);
-  if (redCard) {
-    const affected = redCard.side === 'A' ? ratingsA : ratingsB;
-    affected.attack *= (1 - redCard.moraleImpact);
-    affected.defense *= (1 - redCard.moraleImpact);
+  const cardPlan = generateCardEvents(teamA, teamB);
+  for (const d of cardPlan.dismissals) {
+    const affected = d.side === 'A' ? ratingsA : ratingsB;
+    affected.attack *= (1 - d.moraleImpact);
+    affected.defense *= (1 - d.moraleImpact);
   }
 
   const edgeA = formationEdge(teamA.formation, teamB.formation);
@@ -192,12 +211,11 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A' })),
     ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B' }))
   ];
-  const cardEvents = generateCardEvents(teamA, teamB, redCard);
   const saveEvents = [
     ...generateSaveEvents(teamA, 'A', xgB, goalsB),
     ...generateSaveEvents(teamB, 'B', xgA, goalsA)
   ];
-  const events = [...goalEvents, ...cardEvents, ...saveEvents].sort((a, b) => a.minute - b.minute);
+  const events = [...goalEvents, ...cardPlan.events, ...saveEvents].sort((a, b) => a.minute - b.minute);
   const stats = computeMatchStats(ratingsA, ratingsB);
 
   const result = { goalsA, goalsB, xgA, xgB, stats, wentToPenalties: false, penaltyWinner: null, events };

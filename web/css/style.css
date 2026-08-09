@@ -419,12 +419,15 @@ a { color: var(--accent-strong); }
 .stat-val:last-child { text-align: right; }
 .stat-label { color: var(--muted); text-align: center; font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; }
 
+#championZone:not(:empty) { margin-bottom: 18px; }
+
 /* --- My Team recap card --- */
 .myteam-card {
   border: 1px solid var(--border); border-radius: var(--radius); padding: 18px;
   background: var(--surface); margin-top: 12px;
 }
 .myteam-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 8px; }
+.tournament-summary-line { font-size: .82rem; margin: 0 0 12px; }
 .myteam-record { color: var(--muted); font-size: .85rem; margin-bottom: 14px; }
 .myteam-players { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 16px; }
 .myteam-player { font-size: .85rem; padding: 4px 0; display: flex; align-items: center; gap: 8px; }

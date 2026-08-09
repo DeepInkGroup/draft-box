@@ -354,22 +354,29 @@ function computeTeamRecord(t, myCode) {
 }
 
 // Tournament-wide awards, aggregated once the champion is decided from every match's
-// events (goals/assists/saves) across the whole matchLog — every team, not just the
-// viewer's. Player of the Tournament is a simple composite (goals worth more than
-// assists, assists worth more than saves) — narrative only, doesn't feed back into
-// any score or rating.
+// events (goals/assists/saves/cards) across the whole matchLog — every team, not just
+// the viewer's. Narrative only — none of this feeds back into any score or rating.
 function computeTournamentAwards(t) {
   const goals = {};
   const assists = {};
   const saves = {};
+  const yellows = {};
+  const reds = {};
+  const teamOf = {};
 
   for (const m of t.matchLog) {
     for (const e of m.events || []) {
+      const teamCode = e.side === 'A' ? m.aCode : m.bCode;
+      if (!teamOf[e.player]) teamOf[e.player] = teamCode;
       if (e.type === 'goal') {
         goals[e.player] = (goals[e.player] || 0) + 1;
         if (e.assistBy) assists[e.assistBy] = (assists[e.assistBy] || 0) + 1;
       } else if (e.type === 'save') {
         saves[e.player] = (saves[e.player] || 0) + 1;
+      } else if (e.type === 'yellow') {
+        yellows[e.player] = (yellows[e.player] || 0) + 1;
+      } else if (e.type === 'red') {
+        reds[e.player] = (reds[e.player] || 0) + 1;
       }
     }
   }
@@ -383,18 +390,66 @@ function computeTournamentAwards(t) {
     return bestName ? { player: bestName, count: bestCount } : null;
   };
 
-  const composite = {};
-  for (const [name, c] of Object.entries(goals)) composite[name] = (composite[name] || 0) + c * 4;
-  for (const [name, c] of Object.entries(assists)) composite[name] = (composite[name] || 0) + c * 2;
-  for (const [name, c] of Object.entries(saves)) composite[name] = (composite[name] || 0) + c * 1;
-  const potm = topOf(composite);
+  // Player of the Tournament: a holistic score across the player's whole tournament —
+  // goals and assists carry the most weight (as in real Golden Ball voting), saves
+  // count for less (so one busy goalkeeper doesn't automatically dominate a small
+  // sample of matches), cards are a discipline penalty, and reaching the final with
+  // the champion nation is a modest bonus for team success.
+  const allNames = new Set([
+    ...Object.keys(goals), ...Object.keys(assists), ...Object.keys(saves),
+    ...Object.keys(yellows), ...Object.keys(reds)
+  ]);
+  let potmName = null;
+  let potmScore = -Infinity;
+  let potmBreakdown = null;
+  for (const name of allNames) {
+    const g = goals[name] || 0;
+    const a = assists[name] || 0;
+    const s = saves[name] || 0;
+    const y = yellows[name] || 0;
+    const r = reds[name] || 0;
+    const isChampion = t.champion && teamOf[name] === t.champion;
+    const score = g * 4 + a * 2.5 + s * 0.5 - y * 0.5 - r * 3 + (isChampion ? 3 : 0);
+    if (score > potmScore) {
+      potmScore = score;
+      potmName = name;
+      potmBreakdown = { goals: g, assists: a, saves: s, isChampion };
+    }
+  }
 
   return {
     topScorer: topOf(goals),
     topAssist: topOf(assists),
     mostSaves: topOf(saves),
-    playerOfTournament: potm ? { player: potm.player, score: potm.count } : null
+    playerOfTournament: potmName
+      ? { player: potmName, score: Math.round(potmScore * 10) / 10, ...potmBreakdown }
+      : null
   };
+}
+
+// Whole-tournament headline numbers: matches played, total/average goals, and the
+// single biggest-margin result — a quick narrative summary alongside the awards.
+function computeTournamentSummary(t) {
+  const matches = t.matchLog;
+  const totalMatches = matches.length;
+  const totalGoals = matches.reduce((s, m) => s + m.goalsA + m.goalsB, 0);
+  const avgGoalsPerMatch = totalMatches ? totalGoals / totalMatches : 0;
+
+  let biggest = null;
+  for (const m of matches) {
+    const margin = Math.abs(m.goalsA - m.goalsB);
+    if (!biggest || margin > biggest.margin) {
+      biggest = {
+        margin,
+        aName: t.slotByCode[m.aCode].name,
+        bName: t.slotByCode[m.bCode].name,
+        goalsA: m.goalsA,
+        goalsB: m.goalsB
+      };
+    }
+  }
+
+  return { totalMatches, totalGoals, avgGoalsPerMatch: Math.round(avgGoalsPerMatch * 100) / 100, biggest };
 }
 
 // team names, human/username tags, winner highlighting, and (only when relevant) the
@@ -456,6 +511,7 @@ function decorateStep(roomState, index, forUserId) {
   if (raw.champion) {
     decorated.myRecord = computeTeamRecord(t, myCode);
     decorated.tournamentAwards = computeTournamentAwards(t);
+    decorated.tournamentSummary = computeTournamentSummary(t);
   }
 
   return decorated;
@@ -466,4 +522,4 @@ function historyLength(roomState) {
   return t ? t.history.length : 0;
 }
 
-module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, computeTournamentAwards, findMyCode };
+module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, computeTournamentAwards, computeTournamentSummary, findMyCode };

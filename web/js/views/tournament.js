@@ -47,6 +47,7 @@ const TournamentView = {
       const side = e.side === 'A' ? '←' : '→';
       let text = `${icon} ${e.minute}' ${e.player}`;
       if (e.type === 'goal' && e.assistBy) text += ` <span class="muted">(assist: ${e.assistBy})</span>`;
+      if (e.type === 'red') text += e.reason === 'second-yellow' ? ` <span class="muted">(2nd yellow)</span>` : ` <span class="muted">(straight red)</span>`;
       return `<div class="report-line">${side} ${text}</div>`;
     }
 
@@ -264,9 +265,11 @@ const TournamentView = {
 
     function myRecordCardHtml(record) {
       if (!record) return '';
-      const half = Math.ceil(record.squad.length / 2);
-      const left = record.squad.slice(0, half);
-      const right = record.squad.slice(half);
+      const POS_ORDER = { FW: 0, MF: 1, DF: 2, GK: 3 };
+      const orderedSquad = record.squad.slice().sort((a, b) => POS_ORDER[a.pos] - POS_ORDER[b.pos]);
+      const half = Math.ceil(orderedSquad.length / 2);
+      const left = orderedSquad.slice(0, half);
+      const right = orderedSquad.slice(half);
       const playerRow = (p) => `<div class="myteam-player"><span class="myteam-pos ${roleClass(p.pos)}">${p.pos}</span> ${p.name}${p.isCaptain ? ' <b>(C)</b>' : ''}</div>`;
       const avgOvr = Math.round(record.squad.reduce((s, p) => s + p.overall, 0) / record.squad.length);
       return `
@@ -284,7 +287,18 @@ const TournamentView = {
       `;
     }
 
-    function tournamentAwardsHtml(awards) {
+    function tournamentSummaryLine(summary) {
+      if (!summary || !summary.totalMatches) return '';
+      let line = `${summary.totalMatches} matches played, ${summary.totalGoals} goals scored (${summary.avgGoalsPerMatch} per match)`;
+      if (summary.biggest && summary.biggest.margin > 0) {
+        const b = summary.biggest;
+        const winnerFirst = b.goalsA >= b.goalsB;
+        line += ` — biggest result: ${winnerFirst ? b.aName : b.bName} ${Math.max(b.goalsA, b.goalsB)}-${Math.min(b.goalsA, b.goalsB)} ${winnerFirst ? b.bName : b.aName}`;
+      }
+      return `<p class="muted tournament-summary-line">${line}</p>`;
+    }
+
+    function tournamentAwardsHtml(awards, summary) {
       if (!awards) return '';
       const row = (label, entry, unit) => entry ? `
         <div class="award-row">
@@ -293,10 +307,18 @@ const TournamentView = {
           <span class="muted">${entry.count} ${unit}</span>
         </div>
       ` : '';
-      const potmRow = awards.playerOfTournament ? `
+      const potm = awards.playerOfTournament;
+      const potmDetail = potm ? [
+        potm.goals ? `${potm.goals} goal${potm.goals === 1 ? '' : 's'}` : null,
+        potm.assists ? `${potm.assists} assist${potm.assists === 1 ? '' : 's'}` : null,
+        potm.saves ? `${potm.saves} save${potm.saves === 1 ? '' : 's'}` : null,
+        potm.isChampion ? 'champion' : null
+      ].filter(Boolean).join(', ') : '';
+      const potmRow = potm ? `
         <div class="award-row">
           <span class="award-label">Player of the Tournament</span>
-          <span class="award-value">${awards.playerOfTournament.player}</span>
+          <span class="award-value">${potm.player}</span>
+          <span class="muted">${potmDetail}</span>
         </div>
       ` : '';
       const body = [
@@ -309,6 +331,7 @@ const TournamentView = {
       return `
         <div class="myteam-card">
           <div class="myteam-header"><span>Tournament Awards</span></div>
+          ${tournamentSummaryLine(summary)}
           ${body}
         </div>
       `;
@@ -405,7 +428,7 @@ const TournamentView = {
             </div>
           </div>
           ${myRecordCardHtml(step.myRecord)}
-          ${tournamentAwardsHtml(step.tournamentAwards)}`;
+          ${tournamentAwardsHtml(step.tournamentAwards, step.tournamentSummary)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
