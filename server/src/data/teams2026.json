@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-09T20:55:03.682Z",
+  "generatedAt": "2026-08-10T10:45:45.318Z",
   "teams": [
     {
       "id": "MEX",
@@ -8,68 +8,28 @@
       "baseOverall": 79,
       "players": [
         {
-          "id": "MEX-FW10",
-          "name": "Santiago Giménez",
-          "team": "MEX",
-          "pos": "FW",
-          "overall": 83,
-          "isStar": true
-        },
-        {
-          "id": "MEX-DF3",
-          "name": "Edson Álvarez",
-          "team": "MEX",
-          "pos": "DF",
-          "overall": 82,
-          "isStar": true
-        },
-        {
-          "id": "MEX-FW21",
-          "name": "Guillermo Martínez",
+          "id": "MEX-FW15",
+          "name": "Julián Quiñones",
           "team": "MEX",
           "pos": "FW",
           "overall": 81,
           "isStar": false
         },
         {
-          "id": "MEX-GK11",
-          "name": "Carlos Acevedo",
-          "team": "MEX",
-          "pos": "GK",
-          "overall": 80,
-          "isStar": false
-        },
-        {
-          "id": "MEX-MF23",
-          "name": "Luis Chávez",
-          "team": "MEX",
-          "pos": "MF",
-          "overall": 80,
-          "isStar": false
-        },
-        {
-          "id": "MEX-FW24",
-          "name": "Roberto Alvarado",
-          "team": "MEX",
-          "pos": "FW",
-          "overall": 80,
-          "isStar": false
-        },
-        {
-          "id": "MEX-MF25",
-          "name": "Brian Gutiérrez",
-          "team": "MEX",
-          "pos": "MF",
-          "overall": 80,
-          "isStar": false
-        },
-        {
-          "id": "MEX-FW13",
-          "name": "Armando González",
+          "id": "MEX-FW10",
+          "name": "Santiago Giménez",
           "team": "MEX",
           "pos": "FW",
           "overall": 79,
-          "isStar": false
+          "isStar": true
+        },
+        {
+          "id": "MEX-DF3",
+          "name": "Edson Álvarez",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": true
         },
         {
           "id": "MEX-FW9",
@@ -80,11 +40,67 @@
           "isStar": false
         },
         {
+          "id": "MEX-FW8",
+          "name": "Raúl Jiménez",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 78,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF7",
+          "name": "Álvaro Fidalgo",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF16",
+          "name": "Orbelín Pineda",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF22",
+          "name": "Jesús Gallardo",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 77,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF23",
+          "name": "Luis Chávez",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW24",
+          "name": "Roberto Alvarado",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
           "id": "MEX-GK0",
           "name": "Raúl Rangel",
           "team": "MEX",
           "pos": "GK",
-          "overall": 77,
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF2",
+          "name": "César Montes",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 76,
           "isStar": false
         },
         {
@@ -92,39 +108,7 @@
           "name": "Israel Reyes",
           "team": "MEX",
           "pos": "DF",
-          "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "MEX-FW15",
-          "name": "Julián Quiñones",
-          "team": "MEX",
-          "pos": "FW",
-          "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "MEX-MF17",
-          "name": "Obed Vargas",
-          "team": "MEX",
-          "pos": "MF",
-          "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "MEX-MF18",
-          "name": "Gilberto Mora",
-          "team": "MEX",
-          "pos": "MF",
-          "overall": 76,
-          "isStar": false
-        },
-        {
-          "id": "MEX-FW20",
-          "name": "César Huerta",
-          "team": "MEX",
-          "pos": "FW",
-          "overall": 76,
+          "overall": 75,
           "isStar": false
         },
         {
@@ -136,51 +120,11 @@
           "isStar": false
         },
         {
-          "id": "MEX-FW8",
-          "name": "Raúl Jiménez",
-          "team": "MEX",
-          "pos": "FW",
-          "overall": 75,
-          "isStar": false
-        },
-        {
-          "id": "MEX-DF1",
-          "name": "Jorge Sánchez",
-          "team": "MEX",
-          "pos": "DF",
-          "overall": 74,
-          "isStar": false
-        },
-        {
-          "id": "MEX-MF7",
-          "name": "Álvaro Fidalgo",
-          "team": "MEX",
-          "pos": "MF",
-          "overall": 74,
-          "isStar": false
-        },
-        {
-          "id": "MEX-DF2",
-          "name": "César Montes",
-          "team": "MEX",
-          "pos": "DF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
           "id": "MEX-MF5",
           "name": "Érik Lira",
           "team": "MEX",
           "pos": "MF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
-          "id": "MEX-GK12",
-          "name": "Guillermo Ochoa",
-          "team": "MEX",
-          "pos": "GK",
-          "overall": 73,
+          "overall": 75,
           "isStar": false
         },
         {
@@ -188,22 +132,78 @@
           "name": "Johan Vásquez",
           "team": "MEX",
           "pos": "DF",
-          "overall": 72,
+          "overall": 75,
           "isStar": false
         },
         {
-          "id": "MEX-MF16",
-          "name": "Orbelín Pineda",
+          "id": "MEX-GK11",
+          "name": "Carlos Acevedo",
+          "team": "MEX",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW13",
+          "name": "Armando González",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "MEX-GK12",
+          "name": "Guillermo Ochoa",
+          "team": "MEX",
+          "pos": "GK",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW21",
+          "name": "Guillermo Martínez",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF18",
+          "name": "Gilberto Mora",
+          "team": "MEX",
+          "pos": "MF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-FW20",
+          "name": "César Huerta",
+          "team": "MEX",
+          "pos": "FW",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-DF1",
+          "name": "Jorge Sánchez",
+          "team": "MEX",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "MEX-MF25",
+          "name": "Brian Gutiérrez",
           "team": "MEX",
           "pos": "MF",
           "overall": 72,
           "isStar": false
         },
         {
-          "id": "MEX-DF22",
-          "name": "Jesús Gallardo",
+          "id": "MEX-MF17",
+          "name": "Obed Vargas",
           "team": "MEX",
-          "pos": "DF",
+          "pos": "MF",
           "overall": 72,
           "isStar": false
         },
@@ -876,7 +876,7 @@
           "name": "Alphonso Davies",
           "team": "CAN",
           "pos": "DF",
-          "overall": 87,
+          "overall": 83,
           "isStar": true
         },
         {
@@ -884,39 +884,15 @@
           "name": "Jonathan David",
           "team": "CAN",
           "pos": "FW",
-          "overall": 84,
+          "overall": 81,
           "isStar": true
         },
         {
-          "id": "CAN-FW11",
-          "name": "Tani Oluwaseyi",
+          "id": "CAN-DF1",
+          "name": "Alistair Johnston",
           "team": "CAN",
-          "pos": "FW",
-          "overall": 79,
-          "isStar": false
-        },
-        {
-          "id": "CAN-MF6",
-          "name": "Stephen Eustáquio",
-          "team": "CAN",
-          "pos": "MF",
-          "overall": 76,
-          "isStar": false
-        },
-        {
-          "id": "CAN-MF10",
-          "name": "Liam Millar",
-          "team": "CAN",
-          "pos": "MF",
-          "overall": 76,
-          "isStar": false
-        },
-        {
-          "id": "CAN-GK15",
-          "name": "Maxime Crépeau",
-          "team": "CAN",
-          "pos": "GK",
-          "overall": 76,
+          "pos": "DF",
+          "overall": 78,
           "isStar": false
         },
         {
@@ -924,14 +900,38 @@
           "name": "Tajon Buchanan",
           "team": "CAN",
           "pos": "MF",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CAN-FW23",
+          "name": "Promise David",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF6",
+          "name": "Stephen Eustáquio",
+          "team": "CAN",
+          "pos": "MF",
           "overall": 75,
           "isStar": false
         },
         {
-          "id": "CAN-MF25",
-          "name": "Jayden Nelson",
+          "id": "CAN-MF7",
+          "name": "Ismaël Koné",
           "team": "CAN",
           "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF14",
+          "name": "Moïse Bombito",
+          "team": "CAN",
+          "pos": "DF",
           "overall": 75,
           "isStar": false
         },
@@ -944,19 +944,27 @@
           "isStar": false
         },
         {
-          "id": "CAN-MF24",
-          "name": "Nathan Saliba",
+          "id": "CAN-DF12",
+          "name": "Derek Cornelius",
           "team": "CAN",
-          "pos": "MF",
+          "pos": "DF",
           "overall": 74,
           "isStar": false
         },
         {
-          "id": "CAN-DF1",
-          "name": "Alistair Johnston",
+          "id": "CAN-DF21",
+          "name": "Richie Laryea",
           "team": "CAN",
-          "pos": "DF",
+          "pos": "MF",
           "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF10",
+          "name": "Liam Millar",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 72,
           "isStar": false
         },
         {
@@ -964,23 +972,7 @@
           "name": "Alfie Jones",
           "team": "CAN",
           "pos": "DF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
-          "id": "CAN-DF4",
-          "name": "Joel Waterman",
-          "team": "CAN",
-          "pos": "DF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
-          "id": "CAN-DF12",
-          "name": "Derek Cornelius",
-          "team": "CAN",
-          "pos": "DF",
-          "overall": 73,
+          "overall": 72,
           "isStar": false
         },
         {
@@ -988,14 +980,6 @@
           "name": "Dayne St. Clair",
           "team": "CAN",
           "pos": "GK",
-          "overall": 72,
-          "isStar": false
-        },
-        {
-          "id": "CAN-MF7",
-          "name": "Ismaël Koné",
-          "team": "CAN",
-          "pos": "MF",
           "overall": 72,
           "isStar": false
         },
@@ -1008,27 +992,19 @@
           "isStar": false
         },
         {
-          "id": "CAN-FW23",
-          "name": "Promise David",
+          "id": "CAN-DF22",
+          "name": "Niko Sigur",
           "team": "CAN",
-          "pos": "FW",
+          "pos": "DF",
           "overall": 72,
           "isStar": false
         },
         {
-          "id": "CAN-MF5",
-          "name": "Mathieu Choinière",
+          "id": "CAN-FW11",
+          "name": "Tani Oluwaseyi",
           "team": "CAN",
-          "pos": "MF",
-          "overall": 70,
-          "isStar": false
-        },
-        {
-          "id": "CAN-GK17",
-          "name": "Owen Goodman",
-          "team": "CAN",
-          "pos": "GK",
-          "overall": 70,
+          "pos": "FW",
+          "overall": 71,
           "isStar": false
         },
         {
@@ -1036,23 +1012,47 @@
           "name": "Jonathan Osorio",
           "team": "CAN",
           "pos": "MF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF24",
+          "name": "Nathan Saliba",
+          "team": "CAN",
+          "pos": "MF",
           "overall": 70,
           "isStar": false
         },
         {
-          "id": "CAN-DF21",
-          "name": "Richie Laryea",
+          "id": "CAN-GK15",
+          "name": "Maxime Crépeau",
           "team": "CAN",
-          "pos": "DF",
-          "overall": 70,
-          "isStar": false
-        },
-        {
-          "id": "CAN-DF3",
-          "name": "Luc de Fougerolles",
-          "team": "CAN",
-          "pos": "DF",
+          "pos": "GK",
           "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF25",
+          "name": "Jayden Nelson",
+          "team": "CAN",
+          "pos": "FW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF4",
+          "name": "Joel Waterman",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "CAN-MF5",
+          "name": "Mathieu Choinière",
+          "team": "CAN",
+          "pos": "MF",
+          "overall": 67,
           "isStar": false
         },
         {
@@ -1060,23 +1060,23 @@
           "name": "Jacob Shaffelburg",
           "team": "CAN",
           "pos": "MF",
-          "overall": 69,
-          "isStar": false
-        },
-        {
-          "id": "CAN-DF14",
-          "name": "Moïse Bombito",
-          "team": "CAN",
-          "pos": "DF",
-          "overall": 68,
-          "isStar": false
-        },
-        {
-          "id": "CAN-DF22",
-          "name": "Niko Sigur",
-          "team": "CAN",
-          "pos": "DF",
           "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "CAN-GK17",
+          "name": "Owen Goodman",
+          "team": "CAN",
+          "pos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "CAN-DF3",
+          "name": "Luc de Fougerolles",
+          "team": "CAN",
+          "pos": "DF",
+          "overall": 66,
           "isStar": false
         }
       ]
@@ -2603,96 +2603,32 @@
           "id": "USA-MF9",
           "name": "Christian Pulisic",
           "team": "USA",
-          "pos": "MF",
-          "overall": 86,
+          "pos": "FW",
+          "overall": 85,
           "isStar": true
-        },
-        {
-          "id": "USA-MF7",
-          "name": "Weston McKennie",
-          "team": "USA",
-          "pos": "MF",
-          "overall": 82,
-          "isStar": true
-        },
-        {
-          "id": "USA-MF13",
-          "name": "Sebastian Berhalter",
-          "team": "USA",
-          "pos": "MF",
-          "overall": 82,
-          "isStar": false
-        },
-        {
-          "id": "USA-GK23",
-          "name": "Matt Freese",
-          "team": "USA",
-          "pos": "GK",
-          "overall": 81,
-          "isStar": false
-        },
-        {
-          "id": "USA-DF5",
-          "name": "Auston Trusty",
-          "team": "USA",
-          "pos": "DF",
-          "overall": 80,
-          "isStar": false
-        },
-        {
-          "id": "USA-MF25",
-          "name": "Alejandro Zendejas",
-          "team": "USA",
-          "pos": "MF",
-          "overall": 79,
-          "isStar": false
-        },
-        {
-          "id": "USA-GK0",
-          "name": "Matt Turner",
-          "team": "USA",
-          "pos": "GK",
-          "overall": 78,
-          "isStar": false
         },
         {
           "id": "USA-DF4",
           "name": "Antonee Robinson",
           "team": "USA",
           "pos": "DF",
-          "overall": 78,
+          "overall": 81,
           "isStar": false
         },
         {
-          "id": "USA-MF6",
-          "name": "Gio Reyna",
+          "id": "USA-MF7",
+          "name": "Weston McKennie",
           "team": "USA",
           "pos": "MF",
-          "overall": 78,
-          "isStar": false
+          "overall": 79,
+          "isStar": true
         },
         {
           "id": "USA-DF2",
           "name": "Chris Richards",
           "team": "USA",
           "pos": "DF",
-          "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "USA-DF11",
-          "name": "Miles Robinson",
-          "team": "USA",
-          "pos": "DF",
-          "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "USA-GK24",
-          "name": "Chris Brady",
-          "team": "USA",
-          "pos": "GK",
-          "overall": 77,
+          "overall": 79,
           "isStar": false
         },
         {
@@ -2700,23 +2636,39 @@
           "name": "Sergiño Dest",
           "team": "USA",
           "pos": "DF",
-          "overall": 76,
+          "overall": 79,
           "isStar": false
         },
         {
-          "id": "USA-DF12",
-          "name": "Tim Ream",
+          "id": "USA-MF16",
+          "name": "Malik Tillman",
           "team": "USA",
-          "pos": "DF",
-          "overall": 76,
+          "pos": "MF",
+          "overall": 79,
           "isStar": false
         },
         {
-          "id": "USA-DF15",
-          "name": "Alex Freeman",
+          "id": "USA-FW19",
+          "name": "Folarin Balogun",
           "team": "USA",
-          "pos": "DF",
-          "overall": 76,
+          "pos": "FW",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF3",
+          "name": "Tyler Adams",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF25",
+          "name": "Alejandro Zendejas",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 77,
           "isStar": false
         },
         {
@@ -2724,7 +2676,7 @@
           "name": "Tim Weah",
           "team": "USA",
           "pos": "MF",
-          "overall": 76,
+          "overall": 77,
           "isStar": false
         },
         {
@@ -2732,7 +2684,15 @@
           "name": "Ricardo Pepi",
           "team": "USA",
           "pos": "FW",
-          "overall": 75,
+          "overall": 76,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF10",
+          "name": "Brenden Aaronson",
+          "team": "USA",
+          "pos": "FW",
+          "overall": 76,
           "isStar": false
         },
         {
@@ -2744,26 +2704,26 @@
           "isStar": false
         },
         {
-          "id": "USA-MF10",
-          "name": "Brenden Aaronson",
+          "id": "USA-MF14",
+          "name": "Cristian Roldan",
           "team": "USA",
           "pos": "MF",
+          "overall": 75,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF5",
+          "name": "Auston Trusty",
+          "team": "USA",
+          "pos": "DF",
           "overall": 74,
           "isStar": false
         },
         {
-          "id": "USA-MF16",
-          "name": "Malik Tillman",
+          "id": "USA-GK0",
+          "name": "Matt Turner",
           "team": "USA",
-          "pos": "MF",
-          "overall": 74,
-          "isStar": false
-        },
-        {
-          "id": "USA-FW19",
-          "name": "Folarin Balogun",
-          "team": "USA",
-          "pos": "FW",
+          "pos": "GK",
           "overall": 74,
           "isStar": false
         },
@@ -2776,35 +2736,75 @@
           "isStar": false
         },
         {
-          "id": "USA-MF3",
-          "name": "Tyler Adams",
-          "team": "USA",
-          "pos": "MF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
-          "id": "USA-MF14",
-          "name": "Cristian Roldan",
-          "team": "USA",
-          "pos": "MF",
-          "overall": 73,
-          "isStar": false
-        },
-        {
           "id": "USA-FW18",
           "name": "Haji Wright",
           "team": "USA",
           "pos": "FW",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF6",
+          "name": "Gio Reyna",
+          "team": "USA",
+          "pos": "MF",
           "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF11",
+          "name": "Miles Robinson",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF15",
+          "name": "Alex Freeman",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 73,
+          "isStar": false
+        },
+        {
+          "id": "USA-DF12",
+          "name": "Tim Ream",
+          "team": "USA",
+          "pos": "DF",
+          "overall": 72,
           "isStar": false
         },
         {
           "id": "USA-DF17",
           "name": "Max Arfsten",
           "team": "USA",
-          "pos": "DF",
+          "pos": "MF",
           "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "USA-GK23",
+          "name": "Matt Freese",
+          "team": "USA",
+          "pos": "GK",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "USA-MF13",
+          "name": "Sebastian Berhalter",
+          "team": "USA",
+          "pos": "MF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "USA-GK24",
+          "name": "Chris Brady",
+          "team": "USA",
+          "pos": "GK",
+          "overall": 69,
           "isStar": false
         }
       ]

@@ -37,6 +37,17 @@ function expectedGoals(ratingFor, ratingAgainst, edge) {
   return clamp(1.35 + (ratingFor - ratingAgainst) / 18 + edge / 10, 0.15, 4.5);
 }
 
+// The opposing goalkeeper's own quality — not just their contribution to the averaged
+// Defense rating — measurably suppresses or inflates the chance a shot actually goes in.
+// 75 overall is neutral; a genuinely elite keeper (88-90+, Alisson/Courtois territory)
+// cuts the opponent's expected goals by up to ~12%, a weak one concedes ~12% more —
+// real football's "a great keeper single-handedly wins you points" effect, distinct from
+// the rest of the back line.
+const GK_MODIFIER_COEFF = 0.008;
+function gkModifier(gkOverall) {
+  return clamp(1 - (gkOverall - 75) * GK_MODIFIER_COEFF, 0.8, 1.2);
+}
+
 function pickWeighted(candidates, weightFn) {
   const weights = candidates.map((c) => Math.max(0.001, weightFn(c)));
   const total = weights.reduce((s, w) => s + w, 0);
@@ -53,21 +64,45 @@ function slotY(player, formation) {
   return slot ? slot.y : 50;
 }
 
-// Goal events: scorer likelihood peaks up front (low y) and scales with quality; assists
-// (present on ~75% of goals) come mainly from midfield-depth players.
-function generateGoalEvents(team, count) {
+// Individual quality weight for goal involvement, exponential rather than linear so a
+// genuine star (85-90+ overall) meaningfully outproduces a squad-depth player (60-65) —
+// real football's "a handful of players account for most of the output" pattern — instead
+// of everyone in a plausible slot having near-equal odds regardless of who they are.
+// 75 overall is the pivot (weight 1); ~4x spread between a 60 and a 90 overall player.
+const QUALITY_CURVE_BASE = 1.045;
+function qualityWeight(overall) {
+  return Math.pow(QUALITY_CURVE_BASE, overall - 75);
+}
+
+// Goal events: scorer likelihood peaks up front (low y) and scales with individual
+// quality; assists (present on ~75% of goals) come mainly from midfield-depth players,
+// also quality-weighted — a team's best creator sets up far more goals than a bench
+// player in a similar slot. A player already sent off by the goal's minute (per
+// dismissalMinutes, keyed by player id) can't be picked as scorer or assist — they're
+// off the pitch, so they can't be involved in a goal that happens afterward.
+function generateGoalEvents(team, count, dismissalMinutes = null, minuteRange = [1, 90]) {
   const events = [];
   const outfield = team.xi.filter((p) => p.pos !== 'GK');
-  const pool = outfield.length ? outfield : team.xi;
+  const fullPool = outfield.length ? outfield : team.xi;
+  const [minMinute, maxMinute] = minuteRange;
+  const span = maxMinute - minMinute + 1;
   for (let i = 0; i < count; i++) {
-    const scorer = pickWeighted(pool, (p) => (1 - slotY(p, team.formation) / 100) * (0.6 + p.overall / 200));
+    const minute = minMinute + Math.floor(Math.random() * span);
+    const activePool = dismissalMinutes
+      ? fullPool.filter((p) => {
+          const ejectMinute = dismissalMinutes.get(p.id);
+          return ejectMinute == null || minute < ejectMinute;
+        })
+      : fullPool;
+    const pool = activePool.length ? activePool : fullPool;
+    const scorer = pickWeighted(pool, (p) => (1 - slotY(p, team.formation) / 100) * qualityWeight(p.overall));
     let assist = null;
     const assistCandidates = pool.filter((p) => p !== scorer);
     if (assistCandidates.length && Math.random() < 0.75) {
-      assist = pickWeighted(assistCandidates, (p) => 1 - Math.abs(slotY(p, team.formation) - 45) / 60);
+      assist = pickWeighted(assistCandidates, (p) => (1 - Math.abs(slotY(p, team.formation) - 45) / 60) * qualityWeight(p.overall));
     }
     events.push({
-      minute: 1 + Math.floor(Math.random() * 90),
+      minute,
       type: 'goal',
       player: scorer.name,
       pos: scorer.pos,
@@ -113,16 +148,19 @@ function generateCardEvents(teamA, teamB) {
   const dismissals = [];
   const sentOff = new Set();
   const yellowCount = new Map();
+  const dismissalMinutesA = new Map();
+  const dismissalMinutesB = new Map();
 
   const sidePool = (team, side) => team.xi.filter((p) => p.pos !== 'GK').map((p) => ({ ...p, side }));
   const pool = [...sidePool(teamA, 'A'), ...sidePool(teamB, 'B')];
-  if (!pool.length) return { events, dismissals };
+  if (!pool.length) return { events, dismissals, dismissalMinutesA, dismissalMinutesB };
 
   const key = (p) => `${p.side}:${p.id}`;
   const eligible = (side) => pool.filter((p) => !sentOff.has(key(p)) && (!side || p.side === side));
 
   function eject(p, minute, reason) {
     sentOff.add(key(p));
+    (p.side === 'A' ? dismissalMinutesA : dismissalMinutesB).set(p.id, minute);
     events.push({ minute, type: 'red', player: p.name, pos: p.pos, side: p.side, reason });
     const affectedMinutes = REDCARD_BASE_MINUTES * (p.isCaptain ? CAPTAIN_REDCARD_MULTIPLIER : 1);
     dismissals.push({ side: p.side, player: p, moraleImpact: REDCARD_IMPACT_PCT * (affectedMinutes / 90) });
@@ -154,7 +192,7 @@ function generateCardEvents(teamA, teamB) {
     eject(p, 1 + Math.floor(Math.random() * 90), 'straight-red');
   }
 
-  return { events, dismissals };
+  return { events, dismissals, dismissalMinutesA, dismissalMinutesB };
 }
 
 // Match stats (possession, passes, shots, corners, fouls) are derived straight from the
@@ -211,33 +249,36 @@ function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events)
 // Extra time: two 15-minute periods (minutes 91-120), only reached in knockout matches
 // still level after 90'. Lower-scoring than normal time — legs are tired and sides play
 // more cautiously — modeled as roughly a third of a full match's expected goals.
-function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB) {
-  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * (30 / 90);
-  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * (30 / 90);
+function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, dismissalMinutesA, dismissalMinutesB, gkModA, gkModB) {
+  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB * (30 / 90);
+  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA * (30 / 90);
   const goalsA = clamp(poissonSample(etXgA), 0, 4);
   const goalsB = clamp(poissonSample(etXgB), 0, 4);
   const events = [
-    ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A', minute: 91 + Math.floor(Math.random() * 30) })),
-    ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B', minute: 91 + Math.floor(Math.random() * 30) }))
+    ...generateGoalEvents(teamA, goalsA, dismissalMinutesA, [91, 120]).map((e) => ({ ...e, side: 'A' })),
+    ...generateGoalEvents(teamB, goalsB, dismissalMinutesB, [91, 120]).map((e) => ({ ...e, side: 'B' }))
   ];
   return { goalsA, goalsB, events };
 }
 
 // Penalty shootout: proper kick-by-kick, not an instant coin flip. Each side's best
-// takers (by overall) go first; success chance is quality-weighted. Standard 5 rounds
-// each, with the real-football early-stop rule (stop once the trailing side can no
-// longer mathematically catch up in the remaining initial-round kicks), then sudden
-// death — one kick each per round — until someone is left standing.
-function orderedKickers(team) {
-  const outfield = team.xi.filter((p) => p.pos !== 'GK');
-  const pool = outfield.length ? outfield : team.xi;
+// takers (by overall) go first; success chance is quality-weighted by both the kicker's
+// own ability AND the opposing keeper's (the same gkModifier used for open play — a
+// shootout-saving goalkeeper is a real, recognizable thing). Standard 5 rounds each,
+// with the real-football early-stop rule (stop once the trailing side can no longer
+// mathematically catch up in the remaining initial-round kicks), then sudden death —
+// one kick each per round — until someone is left standing.
+function orderedKickers(team, dismissedIds = null) {
+  const outfield = team.xi.filter((p) => p.pos !== 'GK' && !(dismissedIds && dismissedIds.has(p.id)));
+  const fallback = team.xi.filter((p) => !(dismissedIds && dismissedIds.has(p.id)));
+  const pool = outfield.length ? outfield : (fallback.length ? fallback : team.xi);
   return pool.slice().sort((a, b) => b.overall - a.overall);
 }
 
-function simulatePenaltyShootout(teamA, teamB) {
-  const kickersA = orderedKickers(teamA);
-  const kickersB = orderedKickers(teamB);
-  const kickProb = (p) => clamp(0.62 + (p.overall - 75) / 200, 0.45, 0.9);
+function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedIdsB = null, gkModA = 1, gkModB = 1) {
+  const kickersA = orderedKickers(teamA, dismissedIdsA);
+  const kickersB = orderedKickers(teamB, dismissedIdsB);
+  const kickProb = (p, oppGkMod) => clamp((0.62 + (p.overall - 75) / 200) * oppGkMod, 0.35, 0.92);
 
   const kicks = [];
   let scoreA = 0;
@@ -245,12 +286,12 @@ function simulatePenaltyShootout(teamA, teamB) {
   let round = 1;
   while (true) {
     const kA = kickersA[(round - 1) % kickersA.length];
-    const scoredA = Math.random() < kickProb(kA);
+    const scoredA = Math.random() < kickProb(kA, gkModB);
     kicks.push({ side: 'A', player: kA.name, scored: scoredA, round });
     if (scoredA) scoreA += 1;
 
     const kB = kickersB[(round - 1) % kickersB.length];
-    const scoredB = Math.random() < kickProb(kB);
+    const scoredB = Math.random() < kickProb(kB, gkModA);
     kicks.push({ side: 'B', player: kB.name, scored: scoredB, round });
     if (scoredB) scoreB += 1;
 
@@ -288,15 +329,20 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   const edgeA = formationEdge(teamA.formation, teamB.formation);
   const edgeB = formationEdge(teamB.formation, teamA.formation);
 
-  const xgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA);
-  const xgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB);
+  const gkA = teamA.xi.find((p) => p.pos === 'GK');
+  const gkB = teamB.xi.find((p) => p.pos === 'GK');
+  const gkModA = gkModifier(gkA ? gkA.overall : 75);
+  const gkModB = gkModifier(gkB ? gkB.overall : 75);
+
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB, 0.1, 5);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA, 0.1, 5);
 
   let goalsA = clamp(poissonSample(xgA), 0, 9);
   let goalsB = clamp(poissonSample(xgB), 0, 9);
 
   const goalEvents = [
-    ...generateGoalEvents(teamA, goalsA).map((e) => ({ ...e, side: 'A' })),
-    ...generateGoalEvents(teamB, goalsB).map((e) => ({ ...e, side: 'B' }))
+    ...generateGoalEvents(teamA, goalsA, cardPlan.dismissalMinutesA).map((e) => ({ ...e, side: 'A' })),
+    ...generateGoalEvents(teamB, goalsB, cardPlan.dismissalMinutesB).map((e) => ({ ...e, side: 'B' }))
   ];
   const saveEvents = [
     ...generateSaveEvents(teamA, 'A', xgB, goalsB),
@@ -315,7 +361,7 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   // Knockout draws play extra time before penalties — never straight to a shootout.
   if (knockout && goalsA === goalsB) {
     wentToExtraTime = true;
-    const et = simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB);
+    const et = simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, cardPlan.dismissalMinutesA, cardPlan.dismissalMinutesB, gkModA, gkModB);
     etGoalsA = et.goalsA;
     etGoalsB = et.goalsB;
     goalsA += etGoalsA;
@@ -324,7 +370,9 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
 
     if (goalsA === goalsB) {
       wentToPenalties = true;
-      const shootout = simulatePenaltyShootout(teamA, teamB);
+      const dismissedIdsA = new Set(cardPlan.dismissalMinutesA.keys());
+      const dismissedIdsB = new Set(cardPlan.dismissalMinutesB.keys());
+      const shootout = simulatePenaltyShootout(teamA, teamB, dismissedIdsA, dismissedIdsB, gkModA, gkModB);
       penaltyWinner = shootout.penaltyWinner;
       penalties = shootout.penalties;
       penaltyKicks = shootout.kicks;
