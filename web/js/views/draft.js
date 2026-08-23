@@ -16,6 +16,7 @@ const DraftView = {
     let singlePlayer = false;
     let allReady = false;
     let iAmReady = false;
+    let lastRevealPayload = null;
 
     const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 };
     function sortPlayers(players, mode) {
@@ -33,17 +34,20 @@ const DraftView = {
       return arr;
     }
 
-    container.innerHTML = `
+    const layoutMode = localStorage.getItem('draftbox.draftLayout') || 'vertical';
+    const isHorizontal = layoutMode === 'horizontal';
+
+    const topbar = `
       <div class="card" id="timerCard" style="display:none;">
         <div class="timer-wrap">
           <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%;"></div></div>
           <div class="timer-label" id="timerLabel"></div>
         </div>
       </div>
-      <div class="card" id="revealCard">
-        <p class="muted center">Fetching the first random team...</p>
-      </div>
-      <div class="card">
+    `;
+
+    const squadCard = `
+      <div class="card draft-squad-card" id="squadCard">
         <div class="row" style="align-items:center;">
           <h3 style="margin:0;">👤 My Squad</h3>
           <span class="muted" style="text-align:right;">Players left in pool: <b id="poolCount">-</b></span>
@@ -51,9 +55,43 @@ const DraftView = {
         <p class="muted center" id="squadProgress"></p>
         <div id="squadPitch"></div>
       </div>
-      <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
-      <div id="waitingZone"></div>
     `;
+
+    const revealWrap = `
+      <div class="draft-main-col">
+        ${topbar}
+        <div class="card draft-reveal-card" id="revealCard">
+          <p class="muted center">Fetching the first random team...</p>
+        </div>
+        <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
+        <div id="waitingZone"></div>
+      </div>
+    `;
+
+    if (isHorizontal) {
+      container.innerHTML = `
+        <div class="draft-layout draft-layout-horizontal">
+          <div class="draft-left-col">
+            ${squadCard}
+          </div>
+          <div class="draft-right-col">
+            ${revealWrap}
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div class="draft-layout draft-layout-vertical">
+          ${topbar}
+          <div class="card" id="revealCard">
+            <p class="muted center">Fetching the first random team...</p>
+          </div>
+          ${squadCard}
+          <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
+          <div id="waitingZone"></div>
+        </div>
+      `;
+    }
 
     const timerCard = container.querySelector('#timerCard');
     const timerFill = container.querySelector('#timerFill');
@@ -155,6 +193,7 @@ const DraftView = {
         return;
       }
 
+      lastRevealPayload = payload;
       lastOpenSlots = payload.openSlots;
       lastPlayers = payload.players;
       const ratingsVisible = payload.players.some((p) => p.overall !== null);
@@ -273,7 +312,7 @@ const DraftView = {
         });
       });
       revealCard.querySelector('#btnCancelSlot').addEventListener('click', () => {
-        socket.emit('draft:reveal', { code });
+        if (lastRevealPayload) renderReveal(lastRevealPayload);
       });
     }
 

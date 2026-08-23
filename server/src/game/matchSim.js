@@ -48,6 +48,17 @@ function gkModifier(gkOverall) {
   return clamp(1 - (gkOverall - 75) * GK_MODIFIER_COEFF, 0.8, 1.2);
 }
 
+// A team's "emotional" state — momentum carried in from recent results, not raw quality.
+// tournamentEngine tracks each team's morale (-1..+1) across the whole tournament, updated
+// after every match (see updateMorale there) and stored on the team's persistent slot, so
+// it's simply whatever's on team.morale here. A confident side coming off good results
+// plays with a bit more conviction; a shaken one coming off a bad result underperforms its
+// paper quality — a real but modest swing, the same scale as Chemistry (Section 5).
+const MORALE_SWING = 0.05;
+function moraleModifier(morale) {
+  return 1 + clamp(morale || 0, -1, 1) * MORALE_SWING;
+}
+
 function pickWeighted(candidates, weightFn) {
   const weights = candidates.map((c) => Math.max(0.001, weightFn(c)));
   const total = weights.reduce((s, w) => s + w, 0);
@@ -74,12 +85,36 @@ function qualityWeight(overall) {
   return Math.pow(QUALITY_CURVE_BASE, overall - 75);
 }
 
+// Dismissal tracking needs to be resilient against squads whose player ids aren't
+// perfectly stable (e.g. legacy imports, manually-edited pools, or older rooms saved
+// before id normalization). For any dismissal lookup we check two keys: the player's
+// id (the primary, unique key) and a secondary "name + position" fingerprint so the
+// exact same real person can never be treated as active once they've been ordered
+// off. A player is considered ACTIVE (available for selection) at a given minute
+// only if BOTH lookups agree they have NOT been dismissed before that minute.
+function isPlayerDismissedAt(player, dismissalMap, minute) {
+  if (!dismissalMap) return false;
+  const byId = dismissalMap.get(player.id);
+  if (byId != null && minute >= byId) return true;
+  const fp = `${player.name}|${player.pos}`;
+  const byFp = dismissalMap.get(fp);
+  if (byFp != null && minute >= byFp) return true;
+  return false;
+}
+
+// Mirror the same two-key lookup used at dismissal-check time when we originally
+// build the dismissal map, so both sides (recording and checking) agree.
+function recordDismissal(dismissalMap, player, minute) {
+  dismissalMap.set(player.id, minute);
+  dismissalMap.set(`${player.name}|${player.pos}`, minute);
+}
+
 // Goal events: scorer likelihood peaks up front (low y) and scales with individual
 // quality; assists (present on ~75% of goals) come mainly from midfield-depth players,
 // also quality-weighted — a team's best creator sets up far more goals than a bench
 // player in a similar slot. A player already sent off by the goal's minute (per
-// dismissalMinutes, keyed by player id) can't be picked as scorer or assist — they're
-// off the pitch, so they can't be involved in a goal that happens afterward.
+// dismissalMinutes) can't be picked as scorer or assist — they're off the pitch,
+// so they can't be involved in a goal that happens afterward.
 function generateGoalEvents(team, count, dismissalMinutes = null, minuteRange = [1, 90]) {
   const events = [];
   const outfield = team.xi.filter((p) => p.pos !== 'GK');
@@ -88,12 +123,7 @@ function generateGoalEvents(team, count, dismissalMinutes = null, minuteRange = 
   const span = maxMinute - minMinute + 1;
   for (let i = 0; i < count; i++) {
     const minute = minMinute + Math.floor(Math.random() * span);
-    const activePool = dismissalMinutes
-      ? fullPool.filter((p) => {
-          const ejectMinute = dismissalMinutes.get(p.id);
-          return ejectMinute == null || minute < ejectMinute;
-        })
-      : fullPool;
+    const activePool = fullPool.filter((p) => !isPlayerDismissedAt(p, dismissalMinutes, minute));
     const pool = activePool.length ? activePool : fullPool;
     const scorer = pickWeighted(pool, (p) => (1 - slotY(p, team.formation) / 100) * qualityWeight(p.overall));
     let assist = null;
@@ -116,14 +146,28 @@ function generateGoalEvents(team, count, dismissalMinutes = null, minuteRange = 
 // didn't convert. xgFaced approximates shot volume/quality (roughly one shot on target
 // per 0.3 xG); goalsConceded of those became goals, the rest are saves. Purely flavor
 // for the tournament-wide "Most Saves" award — doesn't affect the scoreline.
-function generateSaveEvents(team, side, xgFaced, goalsConceded) {
+// If the keeper has been dismissed (rare, but possible via a straight red) they can
+// no longer make saves after that minute, so any saves sampled are capped to keep
+// events and stats consistent with the dismissal.
+function generateSaveEvents(team, side, xgFaced, goalsConceded, dismissalMinutes = null) {
   const gk = team.xi.find((p) => p.pos === 'GK');
   if (!gk) return [];
   const shotsOnTarget = Math.max(goalsConceded, Math.round(xgFaced / 0.3));
-  const saves = clamp(shotsOnTarget - goalsConceded, 0, 12);
+  let saves = clamp(shotsOnTarget - goalsConceded, 0, 12);
   const events = [];
+  const gkEjectedAt = dismissalMinutes ? dismissalMinutes.get(gk.id) ?? dismissalMinutes.get(`${gk.name}|${gk.pos}`) ?? null : null;
   for (let i = 0; i < saves; i++) {
-    events.push({ minute: 1 + Math.floor(Math.random() * 90), type: 'save', player: gk.name, pos: 'GK', side });
+    let minute = 1 + Math.floor(Math.random() * 90);
+    if (gkEjectedAt != null) {
+      if (minute >= gkEjectedAt) {
+        minute = 1 + Math.floor(Math.random() * Math.max(1, gkEjectedAt - 1));
+        if (minute >= gkEjectedAt) {
+          saves -= 1;
+          continue;
+        }
+      }
+    }
+    events.push({ minute, type: 'save', player: gk.name, pos: 'GK', side });
   }
   return events;
 }
@@ -155,12 +199,12 @@ function generateCardEvents(teamA, teamB) {
   const pool = [...sidePool(teamA, 'A'), ...sidePool(teamB, 'B')];
   if (!pool.length) return { events, dismissals, dismissalMinutesA, dismissalMinutesB };
 
-  const key = (p) => `${p.side}:${p.id}`;
+  const key = (p) => `${p.side}:${p.id}|${p.name}|${p.pos}`;
   const eligible = (side) => pool.filter((p) => !sentOff.has(key(p)) && (!side || p.side === side));
 
   function eject(p, minute, reason) {
     sentOff.add(key(p));
-    (p.side === 'A' ? dismissalMinutesA : dismissalMinutesB).set(p.id, minute);
+    recordDismissal(p.side === 'A' ? dismissalMinutesA : dismissalMinutesB, p, minute);
     events.push({ minute, type: 'red', player: p.name, pos: p.pos, side: p.side, reason });
     const affectedMinutes = REDCARD_BASE_MINUTES * (p.isCaptain ? CAPTAIN_REDCARD_MULTIPLIER : 1);
     dismissals.push({ side: p.side, player: p, moraleImpact: REDCARD_IMPACT_PCT * (affectedMinutes / 90) });
@@ -195,16 +239,45 @@ function generateCardEvents(teamA, teamB) {
   return { events, dismissals, dismissalMinutesA, dismissalMinutesB };
 }
 
-// Match stats (possession, passes, shots, corners, fouls) are derived straight from the
-// same Attack/Defense ratings used for xG — the better/more cohesive side tends to see
-// more of the ball, pass it more cleanly, and generate more shots/corners. Cards and
-// saves are exact tallies from the already-generated event list (final, including any
-// extra-time events). Narrative, like the event feed; doesn't feed back into the score.
-function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events) {
+// Possession is derived straight from the same Attack/Defense ratings used for xG — the
+// better/more cohesive side tends to see more of the ball. Computed early (before goals
+// are decided) because corners and fouls — and, through them, a real chunk of expected
+// goals — flow from it. See setPieceXgBonus below.
+function computePossession(ratingsA, ratingsB) {
   const qualityDiff = (ratingsA.attack + ratingsA.defense) - (ratingsB.attack + ratingsB.defense);
   const possessionA = Math.round(clamp(50 + qualityDiff * 0.6, 32, 68));
-  const possessionB = 100 - possessionA;
+  return { possessionA, possessionB: 100 - possessionA };
+}
 
+// Corners and fouls-won are set-piece opportunities, not just narrative color. Fouls
+// correlate loosely with chasing the game — the side seeing less of the ball tends to
+// commit a few more, handing the opponent a free kick.
+function computeSetPieces(possessionA, possessionB) {
+  const cornersTotal = 7 + Math.floor(Math.random() * 7); // 7-13
+  const cornersA = Math.round((cornersTotal * possessionA) / 100);
+  const cornersB = cornersTotal - cornersA;
+  const foulsA = Math.round(clamp(10 + (possessionB - possessionA) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
+  const foulsB = Math.round(clamp(10 + (possessionA - possessionB) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
+  return { cornersA, cornersB, foulsA, foulsB };
+}
+
+// Corners and fouls conceded by the opponent are real goalscoring opportunities in their
+// own right — a set piece routine or a dead-ball delivery converts independently of open
+// play quality. Modest per-instance bonuses (a team averaging ~6 corners and ~10 opponent
+// fouls picks up roughly +0.19 xG from set pieces alone) so a side that dominates corners
+// and draws a lot of fouls gets a real, visible nudge in the scoreline, not just a
+// cosmetic stat line.
+const CORNER_XG_BONUS = 0.018;
+const FOUL_XG_BONUS = 0.008;
+function setPieceXgBonus(myCorners, oppFouls) {
+  return myCorners * CORNER_XG_BONUS + oppFouls * FOUL_XG_BONUS;
+}
+
+// Shots, passes, cards and saves round out the stat line — shots/passes are narrative
+// approximations of the same quality gap that produced the scoreline; cards and saves are
+// exact tallies from the already-generated event list (final, including any extra-time
+// events), so the stat line and event feed always agree.
+function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB) {
   const avgA = (ratingsA.attack + ratingsA.defense) / 2;
   const avgB = (ratingsB.attack + ratingsB.defense) / 2;
   const passAccuracyA = Math.round(clamp(68 + (avgA - 75) * 0.7, 55, 94));
@@ -220,15 +293,6 @@ function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events)
   const shotsOnTargetB = Math.max(goalsB, Math.round(xgB / 0.3));
   const shotsA = Math.round(shotsOnTargetA / 0.42);
   const shotsB = Math.round(shotsOnTargetB / 0.42);
-
-  const cornersTotal = 7 + Math.floor(Math.random() * 7); // 7-13
-  const cornersA = Math.round((cornersTotal * possessionA) / 100);
-  const cornersB = cornersTotal - cornersA;
-
-  // Fouls correlate loosely with chasing the game — the side seeing less of the ball
-  // tends to commit a few more.
-  const foulsA = Math.round(clamp(10 + (possessionB - possessionA) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
-  const foulsB = Math.round(clamp(10 + (possessionA - possessionB) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
 
   const tally = (type, side) => events.filter((e) => e.type === type && e.side === side).length;
 
@@ -269,8 +333,14 @@ function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, dismi
 // mathematically catch up in the remaining initial-round kicks), then sudden death —
 // one kick each per round — until someone is left standing.
 function orderedKickers(team, dismissedIds = null) {
-  const outfield = team.xi.filter((p) => p.pos !== 'GK' && !(dismissedIds && dismissedIds.has(p.id)));
-  const fallback = team.xi.filter((p) => !(dismissedIds && dismissedIds.has(p.id)));
+  const isKickable = (p) => {
+    if (!dismissedIds) return true;
+    if (dismissedIds.has(p.id)) return false;
+    if (dismissedIds.has(`${p.name}|${p.pos}`)) return false;
+    return true;
+  };
+  const outfield = team.xi.filter((p) => p.pos !== 'GK' && isKickable(p));
+  const fallback = team.xi.filter(isKickable);
   const pool = outfield.length ? outfield : (fallback.length ? fallback : team.xi);
   return pool.slice().sort((a, b) => b.overall - a.overall);
 }
@@ -319,6 +389,13 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   ratingsB.attack *= chemB.multiplier;
   ratingsB.defense *= chemB.multiplier;
 
+  const moraleModA = moraleModifier(teamA.morale);
+  const moraleModB = moraleModifier(teamB.morale);
+  ratingsA.attack *= moraleModA;
+  ratingsA.defense *= moraleModA;
+  ratingsB.attack *= moraleModB;
+  ratingsB.defense *= moraleModB;
+
   const cardPlan = generateCardEvents(teamA, teamB);
   for (const d of cardPlan.dismissals) {
     const affected = d.side === 'A' ? ratingsA : ratingsB;
@@ -334,8 +411,13 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   const gkModA = gkModifier(gkA ? gkA.overall : 75);
   const gkModB = gkModifier(gkB ? gkB.overall : 75);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB, 0.1, 5);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA, 0.1, 5);
+  const { possessionA, possessionB } = computePossession(ratingsA, ratingsB);
+  const { cornersA, cornersB, foulsA, foulsB } = computeSetPieces(possessionA, possessionB);
+  const setPieceBonusA = setPieceXgBonus(cornersA, foulsB);
+  const setPieceBonusB = setPieceXgBonus(cornersB, foulsA);
+
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA, 0.1, 5);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB, 0.1, 5);
 
   let goalsA = clamp(poissonSample(xgA), 0, 9);
   let goalsB = clamp(poissonSample(xgB), 0, 9);
@@ -345,8 +427,8 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateGoalEvents(teamB, goalsB, cardPlan.dismissalMinutesB).map((e) => ({ ...e, side: 'B' }))
   ];
   const saveEvents = [
-    ...generateSaveEvents(teamA, 'A', xgB, goalsB),
-    ...generateSaveEvents(teamB, 'B', xgA, goalsA)
+    ...generateSaveEvents(teamA, 'A', xgB, goalsB, cardPlan.dismissalMinutesA),
+    ...generateSaveEvents(teamB, 'B', xgA, goalsA, cardPlan.dismissalMinutesB)
   ];
   let events = [...goalEvents, ...cardPlan.events, ...saveEvents];
 
@@ -380,7 +462,7 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   }
 
   events.sort((a, b) => a.minute - b.minute);
-  const stats = computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events);
+  const stats = computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB);
 
   return {
     goalsA, goalsB, xgA, xgB, stats, events,

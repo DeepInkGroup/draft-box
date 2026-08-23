@@ -1,4 +1,5 @@
 const http = require('http');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { Server } = require('socket.io');
@@ -10,6 +11,8 @@ const roomRoutes = require('./routes/rooms');
 const { registerSocketHandlers } = require('./sockets');
 const { ALL_TEAMS } = require('./data/teams');
 
+const WEB_DIR = path.join(__dirname, '..', '..', 'web');
+
 const app = express();
 app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins }));
 app.use(express.json());
@@ -20,6 +23,12 @@ app.get('/api/teams', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+
+app.use(express.static(WEB_DIR));
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/') || req.path.startsWith('/socket.io/')) return next();
+  res.sendFile(path.join(WEB_DIR, 'index.html'));
+});
 
 app.use((err, req, res, next) => {
   console.error(err);

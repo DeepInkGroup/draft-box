@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   tournament_length TEXT NOT NULL DEFAULT 'full',
   allowed_teams TEXT,
   rerolls_allowed INTEGER NOT NULL DEFAULT 0,
+  spoiler_mode INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -111,6 +112,9 @@ if (!columnExists('rooms', 'allowed_teams')) {
 }
 if (!columnExists('rooms', 'rerolls_allowed')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN rerolls_allowed INTEGER NOT NULL DEFAULT 0;`);
+}
+if (!columnExists('rooms', 'spoiler_mode')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN spoiler_mode INTEGER NOT NULL DEFAULT 0;`);
 }
 
 module.exports = db;

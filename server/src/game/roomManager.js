@@ -53,7 +53,7 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0 }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false }) {
   const code = uniqueCode();
   const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const length = normalizeTournamentLength(tournamentLength);
@@ -61,13 +61,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, status)
+       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -159,6 +159,7 @@ function loadRoomState(roomRow) {
     tournamentLength: normalizeTournamentLength(roomRow.tournament_length),
     allowedTeams: roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null,
     rerollsAllowed: normalizeRerolls(roomRow.rerolls_allowed),
+    spoilerMode: !!roomRow.spoiler_mode,
     members,
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
@@ -210,6 +211,7 @@ function lobbySnapshot(roomRow) {
   const allReady = members.length > 0 && members.every((m) => !!m.draft_complete && (!captainEnabled || !!m.captain_slot));
   return {
     code: roomRow.code,
+    spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,
     status: roomRow.status,
     creatorId: roomRow.creator_id,

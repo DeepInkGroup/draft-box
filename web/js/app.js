@@ -68,6 +68,11 @@ const App = (() => {
     TournamentView.render(appEl, code);
   }
 
+  function goMatchHistory() {
+    location.hash = 'history';
+    MatchHistoryView.render(appEl);
+  }
+
   function onAuthed(user, token) {
     sessionStorage.setItem('draftbox.token', token);
     state.user = user;
@@ -112,6 +117,21 @@ const App = (() => {
       document.getElementById('profileEmail').value = '...';
       const careerEl = document.getElementById('profileCareer');
       careerEl.innerHTML = '<p class="muted">Loading...</p>';
+      const layoutContainer = document.getElementById('profileDraftLayout');
+      if (layoutContainer) {
+        const savedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
+        ToggleGroup.render(layoutContainer, {
+          options: [
+            { value: 'vertical', title: 'Vertical (Default)', sub: 'Players list on top, squad pitch below' },
+            { value: 'horizontal', title: 'Side-by-Side', sub: 'Players list next to the squad pitch (left / right)' }
+          ],
+          selected: savedLayout,
+          onChange: (val) => {
+            localStorage.setItem('draftbox.draftLayout', val);
+            toast(`Draft layout set to ${val === 'vertical' ? 'Vertical' : 'Side-by-Side'}`);
+          }
+        });
+      }
       profileDialog.showModal();
       try {
         const { user } = await Api.me();
@@ -132,6 +152,10 @@ const App = (() => {
       }
     });
     document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());
+    document.getElementById('btnViewHistory').addEventListener('click', () => {
+      profileDialog.close();
+      goMatchHistory();
+    });
     document.getElementById('btnLogout').addEventListener('click', () => { profileDialog.close(); logout(); });
     document.getElementById('btnChangePassword').addEventListener('click', async () => {
       profileError.classList.add('hidden');
@@ -169,10 +193,11 @@ const App = (() => {
     if (view === 'lobby' && code) return goLobby(code);
     if (view === 'draft' && code) return goDraft(code);
     if (view === 'tournament' && code) return goTournament(code);
+    if (view === 'history') return goMatchHistory();
     goDashboard();
   }
 
-  return { state, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, ensureSocket, onSocket, toast };
+  return { state, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, ensureSocket, onSocket, toast };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());

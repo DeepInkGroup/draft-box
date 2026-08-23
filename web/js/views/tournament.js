@@ -55,8 +55,11 @@ const TournamentView = {
       `;
     }
 
+    // A human-controlled slot is shown as just the player's username — the team name
+    // underneath it doesn't add anything once a real person is playing it. Bot-controlled
+    // slots still show the nation's name, since there's no username to fall back to.
     function nameTag(name, isHuman, username) {
-      return `${name}${isHuman ? ` <span class="player-chip">${username}</span>` : ''}`;
+      return isHuman ? username : name;
     }
 
     function eventLine(e) {
@@ -394,12 +397,19 @@ const TournamentView = {
       return `<p class="muted tournament-summary-line">${line}</p>`;
     }
 
+    function awardTeamLabel(entry) {
+      if (!entry) return '';
+      const teamDisplay = entry.isHuman && entry.username ? entry.username : (entry.teamName || entry.teamCode || '');
+      if (!teamDisplay) return '';
+      return ` <span class="muted" style="font-size:0.78em;font-weight:500;opacity:0.8;">(${teamDisplay})</span>`;
+    }
+
     function tournamentAwardsHtml(awards, summary) {
       if (!awards) return '';
       const row = (label, entry, unit) => entry ? `
         <div class="award-row">
           <span class="award-label">${label}</span>
-          <span class="award-value">${entry.player}</span>
+          <span class="award-value">${entry.player}${awardTeamLabel(entry)}</span>
           <span class="muted">${entry.count} ${unit}</span>
         </div>
       ` : '';
@@ -413,7 +423,7 @@ const TournamentView = {
       const potmRow = potm ? `
         <div class="award-row">
           <span class="award-label">Player of the Tournament</span>
-          <span class="award-value">${potm.player}</span>
+          <span class="award-value">${potm.player}${awardTeamLabel(potm)}</span>
           <span class="muted">${potmDetail}</span>
         </div>
       ` : '';
@@ -429,6 +439,69 @@ const TournamentView = {
           <div class="myteam-header"><span>Tournament Awards</span></div>
           ${tournamentSummaryLine(summary)}
           ${body}
+        </div>
+      `;
+    }
+
+    function completedBracketHtml(rounds) {
+      if (!rounds || !rounds.length) return '';
+      return `
+        <div class="myteam-card bracket-recap-card">
+          <div class="myteam-header">
+            <span>Knockout Bracket Path</span>
+            <button class="btn btn-ghost btn-sm" id="btnToggleBracket">Show Full Bracket</button>
+          </div>
+          <div class="bracket-recap hidden" id="bracketRecap">
+            ${rounds.map((round) => `
+              <div class="bracket-round">
+                <h4>${round.label}</h4>
+                <div class="matchlog" style="max-height:none;">
+                  ${round.matches.map((m) => {
+                    const aWin = m.winnerCode && m.winnerCode === m.aCode;
+                    const bWin = m.winnerCode && m.winnerCode === m.bCode;
+                    return `
+                      <div class="match-row bracket-match-row">
+                        <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername)}</span></div>
+                        <div class="match-score-box">
+                          <span class="match-score-val">${m.result ? scoreText(m.result) : 'TBD'}</span>
+                        </div>
+                        <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername)}</span></div>
+                        <span></span>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function matchAnalysisRecapHtml(analyses) {
+      if (!analyses || !analyses.length) return '';
+      const outcomeLabel = { w: 'Win', d: 'Draw', l: 'Loss' };
+      return `
+        <div class="myteam-card engine-recap-card">
+          <div class="myteam-header">
+            <span>Engine Match Review</span>
+            <span class="badge">${analyses.length} match${analyses.length === 1 ? '' : 'es'}</span>
+          </div>
+          <p class="muted tournament-summary-line">A tactical summary generated from the same xG, stats, events and morale data the match engine used.</p>
+          <div class="engine-recap-list">
+            ${analyses.map((m) => `
+              <article class="engine-recap-match ${m.outcome === 'w' ? 'win' : m.outcome === 'l' ? 'loss' : 'draw'}">
+                <div class="engine-recap-topline">
+                  <span class="history-outcome ${m.outcome === 'w' ? 'win' : m.outcome === 'l' ? 'loss' : 'draw'}">${m.outcome.toUpperCase()}</span>
+                  <div class="engine-recap-meta">
+                    <b>${m.label} vs ${m.opponentName}</b>
+                    <span>${outcomeLabel[m.outcome] || 'Result'} &middot; ${m.score}</span>
+                  </div>
+                </div>
+                <p>${m.analysis}</p>
+              </article>
+            `).join('')}
+          </div>
         </div>
       `;
     }
@@ -487,7 +560,7 @@ const TournamentView = {
                   <tbody>
                     ${rows.map((r) => `
                       <tr class="${r.isHuman ? 'human' : ''} ${r.advanced ? '' : 'eliminated'}">
-                        <td>${r.name}${r.isHuman ? ` (${r.username})` : ''}</td>
+                        <td>${r.isHuman ? r.username : r.name}</td>
                         <td>${r.played}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gf - r.ga}</td><td><b>${r.pts}</b></td>
                       </tr>
                     `).join('')}
@@ -521,13 +594,25 @@ const TournamentView = {
             <p class="muted">${step.champion.isHuman ? `Won by ${step.champion.username}` : 'Won by a bot-controlled nation'}</p>
             <div class="row" style="margin-top:16px;justify-content:center;">
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
+              <button class="btn btn-ghost" id="btnViewHistoryFromChampion">My Match History</button>
               ${isCreator ? '<button class="btn btn-ghost" id="btnNewRoom">Start New Room</button>' : ''}
               ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
           ${myRecordCardHtml(step.myRecord)}
+          ${matchAnalysisRecapHtml(step.myMatchAnalyses)}
+          ${completedBracketHtml(step.completedBracket)}
           ${tournamentAwardsHtml(step.tournamentAwards, step.tournamentSummary)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
+        championZone.querySelector('#btnViewHistoryFromChampion').addEventListener('click', () => App.goMatchHistory());
+        const bracketBtn = championZone.querySelector('#btnToggleBracket');
+        const bracketRecap = championZone.querySelector('#bracketRecap');
+        if (bracketBtn && bracketRecap) {
+          bracketBtn.addEventListener('click', () => {
+            bracketRecap.classList.toggle('hidden');
+            bracketBtn.textContent = bracketRecap.classList.contains('hidden') ? 'Show Full Bracket' : 'Hide Full Bracket';
+          });
+        }
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
         const rematchBtn = championZone.querySelector('#btnRematch');

@@ -79,6 +79,13 @@ const DashboardView = {
     ];
   },
 
+  spoilerOptions() {
+    return [
+      { value: false, title: 'Off', sub: 'Spectators can keep watching' },
+      { value: true, title: 'On', sub: 'Remaining players advance together' }
+    ];
+  },
+
   // Renders an Off/On toggle for restricting which nations can be revealed during the
   // draft. The 48-team checkbox grid itself only loads and appears once the creator
   // opts in — in the default (Off) state nothing team-related is shown at all.
@@ -282,6 +289,8 @@ const DashboardView = {
         <div id="crTeams" style="margin-bottom:16px;"></div>
         <div class="field"><label>Rerolls (skip a revealed team)</label></div>
         <div id="crRerolls" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Spoiler Mode</label></div>
+        <div id="crSpoiler" style="margin-bottom:16px;"></div>
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -297,6 +306,7 @@ const DashboardView = {
     const crLength = ToggleGroup.render(container.querySelector('#crLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
     const crTeams = await this.renderTeamPicker(container.querySelector('#crTeams'));
     const crRerolls = ToggleGroup.render(container.querySelector('#crRerolls'), { options: this.rerollOptions(), selected: 0 });
+    const crSpoiler = ToggleGroup.render(container.querySelector('#crSpoiler'), { options: this.spoilerOptions(), selected: false });
 
     container.querySelector('#btnCreateRoom').addEventListener('click', async () => {
       if (crTeams.count > 0 && crTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
@@ -306,7 +316,7 @@ const DashboardView = {
         const room = await Api.createRoom({
           name, humanSlotsMax: slots, formation: crFormation.value, showOverall: crRatings.value,
           pickTimeMs: crTimer.value, captainEnabled: crCaptain.value, tournamentLength: crLength.value,
-          allowedTeams: crTeams.value, rerollsAllowed: crRerolls.value
+          allowedTeams: crTeams.value, rerollsAllowed: crRerolls.value, spoilerMode: crSpoiler.value
         });
         App.goLobby(room.code);
       } catch (e) { showErr(e); }

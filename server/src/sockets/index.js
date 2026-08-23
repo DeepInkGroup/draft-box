@@ -61,6 +61,23 @@ function maybeStartTournament(io, roomRow, roomState) {
   return true;
 }
 
+function activeSpoilerMembers(roomState) {
+  return Array.from(roomState.members.values()).filter((m) => !m.eliminated);
+}
+
+function allActiveMembersCaughtUp(roomState) {
+  const historyLength = tournamentEngine.historyLength(roomState);
+  return activeSpoilerMembers(roomState).every((m) => m.viewedStep >= historyLength);
+}
+
+function viewerMaySeeSpoilerStep(roomState, member, stepIndex) {
+  if (!member.eliminated || roomState.tournament.stage === 'done') return true;
+  const myCode = tournamentEngine.findMyCode(roomState.tournament, member.userId);
+  if (!myCode) return false;
+  const step = roomState.tournament.history[stepIndex];
+  return !!(step && Array.isArray(step.eliminatedCodes) && step.eliminatedCodes.includes(myCode));
+}
+
 // Shared by both the manual draft:pick handler and the auto-pick timeout, so a pick
 // always has the exact same persistence + broadcast side effects regardless of source.
 function applyPickSideEffects(io, code, roomState, userId, { player, slotCode, draftComplete }, auto) {
@@ -137,13 +154,15 @@ function registerSocketHandlers(io) {
             predictedTopAssist: prediction.topAssist
           };
         }
+        const historyLength = tournamentEngine.historyLength(state);
+        const visibleStepIndex = state.tournament.stage === 'done' && historyLength > 0 ? historyLength - 1 : viewedStep - 1;
         socket.emit('room:state', {
           stage: 'tournament',
           ...lobbySnapshot(roomRow),
-          myStep: viewedStep > 0 ? tournamentEngine.decorateStep(state, viewedStep - 1, socket.user.id) : null,
+          myStep: visibleStepIndex >= 0 ? tournamentEngine.decorateStep(state, visibleStepIndex, socket.user.id) : null,
           myLineup,
-          viewedStep,
-          historyLength: tournamentEngine.historyLength(state),
+          viewedStep: state.tournament.stage === 'done' ? historyLength : viewedStep,
+          historyLength,
           tournamentStage: state.tournament.stage
         });
       }
@@ -182,7 +201,8 @@ function registerSocketHandlers(io) {
         captainEnabled: !!roomRow.captain_enabled,
         tournamentLength: roomRow.tournament_length,
         allowedTeams,
-        rerollsAllowed: roomRow.rerolls_allowed
+        rerollsAllowed: roomRow.rerolls_allowed,
+        spoilerMode: !!roomRow.spoiler_mode
       });
       for (const m of members) {
         rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation);
@@ -286,11 +306,36 @@ function registerSocketHandlers(io) {
       const t = state.tournament;
 
       try {
-        if (member.viewedStep >= tournamentEngine.historyLength(state)) {
+        let currentHistoryLength = tournamentEngine.historyLength(state);
+        const spoilerMode = !!state.spoilerMode;
+
+        if (spoilerMode && member.eliminated && t.stage === 'done' && currentHistoryLength > 0) {
+          member.viewedStep = currentHistoryLength;
+          rm.persistViewedStep(roomRow.id, socket.user.id, member.viewedStep);
+          return socket.emit('tournament:step', {
+            step: tournamentEngine.decorateStep(state, currentHistoryLength - 1, socket.user.id),
+            viewedStep: member.viewedStep,
+            historyLength: currentHistoryLength,
+            stage: t.stage
+          });
+        }
+
+        if (spoilerMode && member.eliminated && currentHistoryLength > member.viewedStep && !viewerMaySeeSpoilerStep(state, member, member.viewedStep)) {
+          return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
+        }
+
+        if (member.viewedStep >= currentHistoryLength) {
           if (t.stage === 'done') {
             return socket.emit('error:message', { error: 'the tournament has already finished' });
           }
+          if (spoilerMode && member.eliminated) {
+            return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
+          }
+          if (spoilerMode && !allActiveMembersCaughtUp(state)) {
+            return socket.emit('error:message', { error: 'spoiler mode is on: wait for every remaining player to finish this stage' });
+          }
           tournamentEngine.simulateNextStep(state);
+          currentHistoryLength = tournamentEngine.historyLength(state);
 
           for (const m of state.members.values()) {
             if (m.eliminated) rm.markMemberEliminated(roomRow.id, m.userId);
@@ -303,7 +348,7 @@ function registerSocketHandlers(io) {
           }
           rm.persistTournamentSnapshot(state);
 
-          socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: tournamentEngine.historyLength(state) });
+          socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: currentHistoryLength });
         }
 
         member.viewedStep += 1;

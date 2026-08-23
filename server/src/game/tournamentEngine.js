@@ -2,6 +2,7 @@ const { ALL_TEAMS, getTeam } = require('../data/teams');
 const { bestXI, teamStrength } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
 const { FORMATIONS } = require('./formations');
+const { analyzeMatch, resultOutcome } = require('./matchAnalysis');
 
 const FORMATION_NAMES = Object.keys(FORMATIONS);
 function randomFormation() {
@@ -30,8 +31,37 @@ function chunk(arr, size) {
   return out;
 }
 
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
 // Total slots (human + bot) each shortened tournament length starts with.
 const LENGTH_SLOT_COUNT = { blitz: 32, quarter: 8 };
+
+// "Emotional" momentum: each team's morale (-1..+1) tracks its recent results across the
+// whole tournament and carries into its next match's ratings via matchSim's moraleModifier
+// — a side on a good run plays with a bit more conviction than its paper quality alone
+// would suggest, and one that just got beaten up looks shakier than its rating average.
+// A knockout draw settled on penalties still counts as a real result for morale (you won
+// or lost the match), even though the scoreline itself finished level.
+const MORALE_HISTORY_WEIGHT = 0.5; // how much of the previous value survives into the update
+function updateMorale(slot, myGoals, oppGoals, shootoutWon) {
+  if (!slot) return;
+  let resultScore;
+  if (shootoutWon != null) {
+    resultScore = shootoutWon ? 0.7 : -0.7;
+  } else if (myGoals > oppGoals) {
+    resultScore = 1;
+  } else if (myGoals < oppGoals) {
+    resultScore = -1;
+  } else {
+    resultScore = -0.1; // a draw is mildly deflating, not a neutral result
+  }
+  const marginBonus = clamp((myGoals - oppGoals) * 0.15, -0.5, 0.5);
+  const target = clamp(resultScore + marginBonus, -1, 1);
+  const prev = slot.morale || 0;
+  slot.morale = clamp(prev * MORALE_HISTORY_WEIGHT + target * (1 - MORALE_HISTORY_WEIGHT), -1, 1);
+}
 
 function startTournament(roomState) {
   const members = Array.from(roomState.members.values());
@@ -67,14 +97,15 @@ function startTournament(roomState) {
       xi,
       formation: member.formation,
       strength: avg(member.squad.map((p) => p.overall)),
-      eliminated: false
+      eliminated: false,
+      morale: 0
     });
   });
   botCodes.forEach((code) => {
     const team = getTeam(code);
     const botFormation = randomFormation();
     const xi = bestXI(team, botFormation);
-    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false });
+    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false, morale: 0 });
   });
 
   if (startingSlots) {
@@ -158,6 +189,8 @@ function applyGroupResult(t, aCode, bCode, sim) {
   } else {
     sa.d += 1; sb.d += 1; sa.pts += 1; sb.pts += 1;
   }
+  updateMorale(t.slotByCode[aCode], sim.goalsA, sim.goalsB);
+  updateMorale(t.slotByCode[bCode], sim.goalsB, sim.goalsA);
 }
 
 function rankGroup(t, label) {
@@ -184,15 +217,24 @@ function finalizeGroupsAndSeedR32(roomState) {
   const t = roomState.tournament;
   const top2 = [];
   const thirds = [];
+  const eliminatedCodes = [];
   for (const label of Object.keys(t.groups)) {
     const ranked = rankGroup(t, label);
     top2.push(ranked[0], ranked[1]);
     thirds.push(ranked[2]);
-    for (const s of ranked.slice(2)) markEliminated(roomState, s.code);
+    // 4th place is always out immediately. 3rd place's fate depends on the cross-group
+    // "best 8 thirds" comparison below, so it's deliberately NOT marked eliminated yet —
+    // marking it here (before that comparison) would wrongly strike through every 3rd-place
+    // team, including the 8 that actually go on to play in the Round of 32.
+    markEliminated(roomState, ranked[3].code);
+    eliminatedCodes.push(ranked[3].code);
   }
   thirds.sort((x, y) => (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (Math.random() - 0.5));
   const best8 = thirds.slice(0, 8);
-  for (const s of thirds.slice(8)) markEliminated(roomState, s.code);
+  for (const s of thirds.slice(8)) {
+    markEliminated(roomState, s.code);
+    eliminatedCodes.push(s.code);
+  }
 
   const advancing = shuffle([...top2, ...best8].map((s) => s.code));
   const matches = [];
@@ -201,6 +243,7 @@ function finalizeGroupsAndSeedR32(roomState) {
   }
   t.bracket = { r32: matches };
   t.stage = 'r32';
+  return eliminatedCodes;
 }
 
 function playKnockoutRound(roomState) {
@@ -211,12 +254,23 @@ function playKnockoutRound(roomState) {
     const a = t.slotByCode[m.aCode];
     const b = t.slotByCode[m.bCode];
     const sim = simulateMatch(a, b, { knockout: true });
+    // Captured before updateMorale mutates it below — the analysis for this match should
+    // reflect the confidence each side carried INTO it, not the result it just produced.
+    const moraleA = a.morale || 0;
+    const moraleB = b.morale || 0;
     m.result = sim;
     m.winnerCode = sim.goalsA > sim.goalsB || (sim.wentToPenalties && sim.penaltyWinner === 'A') ? a.code : b.code;
     const loserCode = m.winnerCode === a.code ? b.code : a.code;
     markEliminated(roomState, loserCode);
     winners.push(m.winnerCode);
-    t.matchLog.push({ stage: t.stage, aCode: a.code, bCode: b.code, ...sim, winnerCode: m.winnerCode });
+    t.matchLog.push({ stage: t.stage, aCode: a.code, bCode: b.code, moraleA, moraleB, ...sim, winnerCode: m.winnerCode });
+    if (sim.wentToPenalties) {
+      updateMorale(a, sim.goalsA, sim.goalsB, sim.penaltyWinner === 'A');
+      updateMorale(b, sim.goalsB, sim.goalsA, sim.penaltyWinner === 'B');
+    } else {
+      updateMorale(a, sim.goalsA, sim.goalsB);
+      updateMorale(b, sim.goalsB, sim.goalsA);
+    }
   }
 
   const order = { r32: 'r16', r16: 'qf', qf: 'sf', sf: 'final' };
@@ -254,15 +308,19 @@ function simulateNextStep(roomState) {
       const a = t.slotByCode[fx.aCode];
       const b = t.slotByCode[fx.bCode];
       const sim = simulateMatch(a, b, { knockout: false });
+      // Captured before applyGroupResult mutates morale for the NEXT match — the analysis
+      // shown for this match should reflect the confidence each side carried INTO it.
+      const moraleA = a.morale || 0;
+      const moraleB = b.morale || 0;
       applyGroupResult(t, fx.aCode, fx.bCode, sim);
-      const entry = { stage: 'group', group: fx.group, aCode: fx.aCode, bCode: fx.bCode, ...sim };
+      const entry = { stage: 'group', group: fx.group, aCode: fx.aCode, bCode: fx.bCode, moraleA, moraleB, ...sim };
       t.matchLog.push(entry);
       return entry;
     });
     t.groupMatchdaysPlayed += 1;
     const matchday = t.groupMatchdaysPlayed;
     const groupFinal = matchday === 3;
-    if (groupFinal) finalizeGroupsAndSeedR32(roomState);
+    const eliminatedCodes = groupFinal ? finalizeGroupsAndSeedR32(roomState) : [];
 
     const step = {
       index: t.history.length,
@@ -270,6 +328,7 @@ function simulateNextStep(roomState) {
       label: `Group Stage — Matchday ${matchday}`,
       matchday,
       matches: rawMatches,
+      eliminatedCodes,
       groupFinal
     };
     t.history.push(step);
@@ -283,6 +342,9 @@ function simulateNextStep(roomState) {
     label: KNOCKOUT_LABEL[finishedStage] || finishedStage,
     finishedStage,
     matches,
+    eliminatedCodes: matches
+      .map((m) => (m.winnerCode === m.aCode ? m.bCode : m.aCode))
+      .filter(Boolean),
     champion: t.stage === 'done'
   };
   t.history.push(step);
@@ -353,41 +415,94 @@ function computeTeamRecord(t, myCode) {
   };
 }
 
+function computeMyMatchAnalyses(t, myCode) {
+  if (!myCode || !t.slotByCode[myCode]) return [];
+  const displayName = (code) => {
+    const slot = t.slotByCode[code];
+    if (!slot) return code;
+    return slot.isHuman && slot.username ? slot.username : slot.name;
+  };
+
+  return t.matchLog
+    .filter((m) => m.aCode === myCode || m.bCode === myCode)
+    .map((m) => {
+      const mySide = m.aCode === myCode ? 'A' : 'B';
+      const oppCode = mySide === 'A' ? m.bCode : m.aCode;
+      const myGoals = mySide === 'A' ? m.goalsA : m.goalsB;
+      const oppGoals = mySide === 'A' ? m.goalsB : m.goalsA;
+      const outcome = resultOutcome(m, mySide);
+      return {
+        stage: m.stage,
+        label: m.stage === 'group' ? `Group ${m.group}` : (KNOCKOUT_LABEL[m.stage] || m.stage),
+        opponentName: displayName(oppCode),
+        score: `${myGoals} - ${oppGoals}`,
+        outcome,
+        analysis: analyzeMatch(m, mySide, displayName(myCode), displayName(oppCode))
+      };
+    });
+}
+
 // Tournament-wide awards, aggregated once the champion is decided from every match's
 // events (goals/assists/saves/cards) across the whole matchLog — every team, not just
 // the viewer's. Narrative only — none of this feeds back into any score or rating.
+//
+// IMPORTANT: stats are keyed by (teamCode + playerName) together, not by player name
+// alone. Two different slots in the tournament can draft a player of the same real
+// name (or the exact same real player can appear on multiple nations' squads in the
+// pool) — their runs must never be merged into one aggregate.
 function computeTournamentAwards(t) {
-  const goals = {};
-  const assists = {};
-  const saves = {};
-  const yellows = {};
-  const reds = {};
-  const teamOf = {};
+  const goals = new Map();     // key "teamCode|playerName" -> count
+  const assists = new Map();
+  const saves = new Map();
+  const yellows = new Map();
+  const reds = new Map();
+  const meta = new Map();      // key "teamCode|playerName" -> { player, teamCode, teamName, isHuman, username }
 
   for (const m of t.matchLog) {
     for (const e of m.events || []) {
       const teamCode = e.side === 'A' ? m.aCode : m.bCode;
-      if (!teamOf[e.player]) teamOf[e.player] = teamCode;
+      const slot = t.slotByCode[teamCode];
+      if (!slot) continue;
+      const involved = [[e.player, null]];
+      if (e.type === 'goal' && e.assistBy) involved.push([e.assistBy, null]);
+      for (const [pName] of involved) {
+        const key = `${teamCode}|${pName}`;
+        if (!meta.has(key)) {
+          meta.set(key, {
+            player: pName,
+            teamCode,
+            teamName: slot.name,
+            isHuman: !!slot.isHuman,
+            username: slot.username || null
+          });
+        }
+      }
+      const scorerKey = `${teamCode}|${e.player}`;
       if (e.type === 'goal') {
-        goals[e.player] = (goals[e.player] || 0) + 1;
-        if (e.assistBy) assists[e.assistBy] = (assists[e.assistBy] || 0) + 1;
+        goals.set(scorerKey, (goals.get(scorerKey) || 0) + 1);
+        if (e.assistBy) {
+          const aKey = `${teamCode}|${e.assistBy}`;
+          assists.set(aKey, (assists.get(aKey) || 0) + 1);
+        }
       } else if (e.type === 'save') {
-        saves[e.player] = (saves[e.player] || 0) + 1;
+        saves.set(scorerKey, (saves.get(scorerKey) || 0) + 1);
       } else if (e.type === 'yellow') {
-        yellows[e.player] = (yellows[e.player] || 0) + 1;
+        yellows.set(scorerKey, (yellows.get(scorerKey) || 0) + 1);
       } else if (e.type === 'red') {
-        reds[e.player] = (reds[e.player] || 0) + 1;
+        reds.set(scorerKey, (reds.get(scorerKey) || 0) + 1);
       }
     }
   }
 
-  const topOf = (map) => {
-    let bestName = null;
+  const topOf = (counterMap) => {
+    let bestKey = null;
     let bestCount = 0;
-    for (const [name, count] of Object.entries(map)) {
-      if (count > bestCount) { bestCount = count; bestName = name; }
+    for (const [key, count] of counterMap.entries()) {
+      if (count > bestCount) { bestCount = count; bestKey = key; }
     }
-    return bestName ? { player: bestName, count: bestCount } : null;
+    if (!bestKey) return null;
+    const m = meta.get(bestKey);
+    return { player: m.player, count: bestCount, teamCode: m.teamCode, teamName: m.teamName, isHuman: m.isHuman, username: m.username };
   };
 
   // Player of the Tournament: a holistic score across the player's whole tournament —
@@ -395,35 +510,48 @@ function computeTournamentAwards(t) {
   // count for less (so one busy goalkeeper doesn't automatically dominate a small
   // sample of matches), cards are a discipline penalty, and reaching the final with
   // the champion nation is a modest bonus for team success.
-  const allNames = new Set([
-    ...Object.keys(goals), ...Object.keys(assists), ...Object.keys(saves),
-    ...Object.keys(yellows), ...Object.keys(reds)
+  const allKeys = new Set([
+    ...goals.keys(), ...assists.keys(), ...saves.keys(),
+    ...yellows.keys(), ...reds.keys()
   ]);
-  let potmName = null;
+  let potmKey = null;
   let potmScore = -Infinity;
   let potmBreakdown = null;
-  for (const name of allNames) {
-    const g = goals[name] || 0;
-    const a = assists[name] || 0;
-    const s = saves[name] || 0;
-    const y = yellows[name] || 0;
-    const r = reds[name] || 0;
-    const isChampion = t.champion && teamOf[name] === t.champion;
+  for (const key of allKeys) {
+    const g = goals.get(key) || 0;
+    const a = assists.get(key) || 0;
+    const s = saves.get(key) || 0;
+    const y = yellows.get(key) || 0;
+    const r = reds.get(key) || 0;
+    const m = meta.get(key);
+    const isChampion = !!(t.champion && m && m.teamCode === t.champion);
     const score = g * 4 + a * 2.5 + s * 0.5 - y * 0.5 - r * 3 + (isChampion ? 3 : 0);
     if (score > potmScore) {
       potmScore = score;
-      potmName = name;
+      potmKey = key;
       potmBreakdown = { goals: g, assists: a, saves: s, isChampion };
     }
+  }
+
+  let playerOfTournament = null;
+  if (potmKey) {
+    const m = meta.get(potmKey);
+    playerOfTournament = {
+      player: m.player,
+      teamCode: m.teamCode,
+      teamName: m.teamName,
+      isHuman: m.isHuman,
+      username: m.username,
+      score: Math.round(potmScore * 10) / 10,
+      ...potmBreakdown
+    };
   }
 
   return {
     topScorer: topOf(goals),
     topAssist: topOf(assists),
     mostSaves: topOf(saves),
-    playerOfTournament: potmName
-      ? { player: potmName, score: Math.round(potmScore * 10) / 10, ...potmBreakdown }
-      : null
+    playerOfTournament
   };
 }
 
@@ -450,6 +578,28 @@ function computeTournamentSummary(t) {
   }
 
   return { totalMatches, totalGoals, avgGoalsPerMatch: Math.round(avgGoalsPerMatch * 100) / 100, biggest };
+}
+
+function completedBracket(t) {
+  const name = (code) => t.slotByCode[code].name;
+  const isHuman = (code) => t.slotByCode[code].isHuman;
+  const username = (code) => t.slotByCode[code].username || null;
+  const rounds = ['r32', 'r16', 'qf', 'sf', 'final'];
+  return rounds
+    .filter((stage) => Array.isArray(t.bracket[stage]))
+    .map((stage) => ({
+      stage,
+      label: KNOCKOUT_LABEL[stage] || stage,
+      matches: t.bracket[stage].map((m) => ({
+        ...m,
+        aName: name(m.aCode),
+        bName: name(m.bCode),
+        aHuman: isHuman(m.aCode),
+        bHuman: isHuman(m.bCode),
+        aUsername: username(m.aCode),
+        bUsername: username(m.bCode)
+      }))
+    }));
 }
 
 // team names, human/username tags, winner highlighting, and (only when relevant) the
@@ -510,8 +660,10 @@ function decorateStep(roomState, index, forUserId) {
 
   if (raw.champion) {
     decorated.myRecord = computeTeamRecord(t, myCode);
+    decorated.myMatchAnalyses = computeMyMatchAnalyses(t, myCode);
     decorated.tournamentAwards = computeTournamentAwards(t);
     decorated.tournamentSummary = computeTournamentSummary(t);
+    decorated.completedBracket = completedBracket(t);
   }
 
   return decorated;
@@ -522,4 +674,4 @@ function historyLength(roomState) {
   return t ? t.history.length : 0;
 }
 
-module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, computeTournamentAwards, computeTournamentSummary, findMyCode };
+module.exports = { startTournament, simulateNextStep, decorateStep, historyLength, computeTeamRecord, computeMyMatchAnalyses, computeTournamentAwards, computeTournamentSummary, completedBracket, findMyCode };

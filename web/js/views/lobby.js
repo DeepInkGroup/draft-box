@@ -22,6 +22,7 @@ const LobbyView = {
         <p class="muted">Share this code with your friends so they can join the room</p>
         <div class="code-display">${room.code}</div>
         <p class="muted">Human player capacity: <b id="lobbySlots"></b></p>
+        <p class="muted">Spoiler mode: <b>${room.spoilerMode ? 'On' : 'Off'}</b></p>
       </div>
       <div class="card">
         <h3>👥 Members Present</h3>

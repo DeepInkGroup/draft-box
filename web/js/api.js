@@ -30,6 +30,7 @@ const Api = (() => {
     changePassword: (currentPassword, newPassword) =>
       request('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
     careerStats: () => request('/api/auth/me/career'),
+    matchHistory: () => request('/api/auth/me/matches'),
     teams: () => request('/api/teams'),
 
     createRoom: (opts) => request('/api/rooms', { method: 'POST', body: opts }),

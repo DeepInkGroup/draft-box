@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const db = require('../db');
 const { signToken, requireAuth } = require('../middleware/auth');
 const { computeTeamRecord, findMyCode } = require('../game/tournamentEngine');
+const { analyzeMatch, resultOutcome } = require('../game/matchAnalysis');
 
 const router = express.Router();
 
@@ -107,6 +108,63 @@ router.get('/me/career', requireAuth, (req, res) => {
   }
 
   res.json({ tournaments, titles, w, d, l, gf, ga });
+});
+
+// Full match history: every match this user's team played in, across every finished
+// tournament, most recent tournament first — each match carries a generated performance
+// analysis (matchAnalysis.js) explaining why it went the way it did, so a player can look
+// back at their whole record, not just the headline W-D-L from /me/career.
+router.get('/me/matches', requireAuth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT r.code, r.name, r.created_at, r.tournament_state FROM rooms r
+    JOIN room_members rm ON rm.room_id = r.id
+    WHERE rm.user_id = ? AND r.status = 'finished' AND r.tournament_state IS NOT NULL
+    ORDER BY r.created_at DESC
+  `).all(req.user.id);
+
+  const tournaments = [];
+  for (const row of rows) {
+    let t;
+    try { t = JSON.parse(row.tournament_state); } catch { continue; }
+    if (!t || !t.slotByCode) continue;
+    const myCode = findMyCode(t, req.user.id);
+    if (!myCode || !t.slotByCode[myCode]) continue;
+    const myName = t.slotByCode[myCode].name;
+
+    const matches = [];
+    for (const m of t.matchLog) {
+      if (m.aCode !== myCode && m.bCode !== myCode) continue;
+      const mySide = m.aCode === myCode ? 'A' : 'B';
+      const oppCode = mySide === 'A' ? m.bCode : m.aCode;
+      const oppSlot = t.slotByCode[oppCode];
+      const oppName = oppSlot ? oppSlot.name : 'Unknown';
+      matches.push({
+        stage: m.stage,
+        group: m.group || null,
+        opponent: oppName,
+        opponentIsHuman: !!(oppSlot && oppSlot.isHuman),
+        myGoals: mySide === 'A' ? m.goalsA : m.goalsB,
+        oppGoals: mySide === 'A' ? m.goalsB : m.goalsA,
+        wentToExtraTime: !!m.wentToExtraTime,
+        wentToPenalties: !!m.wentToPenalties,
+        penalties: m.penalties || null,
+        outcome: resultOutcome(m, mySide),
+        analysis: analyzeMatch(m, mySide, myName, oppName)
+      });
+    }
+    if (!matches.length) continue;
+
+    tournaments.push({
+      roomCode: row.code,
+      roomName: row.name,
+      date: row.created_at,
+      countryName: myName,
+      champion: t.champion === myCode,
+      matches
+    });
+  }
+
+  res.json({ tournaments });
 });
 
 module.exports = router;
