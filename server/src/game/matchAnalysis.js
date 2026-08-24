@@ -171,10 +171,25 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppReds = events.filter((e) => e.type === 'red' && e.side === oppSide).length;
   const myYellows = events.filter((e) => e.type === 'yellow' && e.side === mySide).length;
   const oppYellows = events.filter((e) => e.type === 'yellow' && e.side === oppSide).length;
-
   const outcome = resultOutcome(m, mySide);
   const xgDiff = myXg - oppXg;
   const finishingDiff = myGoals - myXg;
+  const shotDiff = myStats.shots - oppStats.shots;
+  const sotDiff = myStats.shotsOnTarget - oppStats.shotsOnTarget;
+  const possDiff = myStats.possession - oppStats.possession;
+  const saveSwing = myStats.saves - oppStats.saves;
+  const disciplineSwing = (oppYellows + oppReds * 2) - (myYellows + myReds * 2);
+
+  const factors = [];
+  const addFactor = (label, value, detail, tone = 'neutral') => factors.push({ label, value, detail, tone });
+  addFactor('xG Balance', `${xgDiff >= 0 ? '+' : ''}${fmt1(xgDiff)}`, xgDiff >= 0.6 ? 'Created the better chance quality.' : xgDiff <= -0.6 ? 'Opponent produced the stronger chances.' : 'Chance quality was almost level.', xgDiff >= 0.4 ? 'good' : xgDiff <= -0.4 ? 'bad' : 'neutral');
+  addFactor('Finishing', `${finishingDiff >= 0 ? '+' : ''}${fmt1(finishingDiff)}`, finishingDiff >= 0.8 ? 'Finished well above expected output.' : finishingDiff <= -0.8 ? 'Chances were left on the table.' : 'Conversion tracked the chance quality.', finishingDiff >= 0.6 ? 'good' : finishingDiff <= -0.6 ? 'bad' : 'neutral');
+  addFactor('Shot Pressure', `${shotDiff >= 0 ? '+' : ''}${shotDiff}`, `${myStats.shots}-${oppStats.shots} shots, ${myStats.shotsOnTarget}-${oppStats.shotsOnTarget} on target.`, shotDiff >= 4 || sotDiff >= 2 ? 'good' : shotDiff <= -4 || sotDiff <= -2 ? 'bad' : 'neutral');
+  addFactor('Control', `${possDiff >= 0 ? '+' : ''}${possDiff}%`, `${myStats.possession}% possession and ${myStats.passAccuracy}% pass accuracy.`, possDiff >= 10 ? 'good' : possDiff <= -10 ? 'bad' : 'neutral');
+  addFactor('Keeper Impact', `${saveSwing >= 0 ? '+' : ''}${saveSwing}`, `${myStats.saves} saves for, ${oppStats.saves} against.`, saveSwing >= 2 ? 'good' : saveSwing <= -2 ? 'bad' : 'neutral');
+  if (myReds || oppReds || myYellows + oppYellows >= 5) addFactor('Discipline', `${disciplineSwing >= 0 ? '+' : ''}${disciplineSwing}`, `${myYellows}Y/${myReds}R vs ${oppYellows}Y/${oppReds}R.`, disciplineSwing > 0 ? 'good' : disciplineSwing < 0 ? 'bad' : 'neutral');
+  if (m.wentToPenalties) addFactor('Shootout', m.penaltyWinner === mySide ? 'Won' : 'Lost', `Penalty score ${m.penalties[mySide]}-${m.penalties[oppSide]}.`, m.penaltyWinner === mySide ? 'good' : 'bad');
+  else if (m.wentToExtraTime) addFactor('Extra Time', `${mySide === 'A' ? m.etGoalsA : m.etGoalsB}-${mySide === 'A' ? m.etGoalsB : m.etGoalsA}`, 'The knockout match needed 120 minutes.', outcome === 'w' ? 'good' : outcome === 'l' ? 'bad' : 'neutral');
 
   const parts = [
     headline(outcome, myGoals, oppGoals, myName, oppName, m),
@@ -182,11 +197,23 @@ function analyzeMatch(m, mySide, myName, oppName) {
     territorialStory(myStats, oppStats),
     disciplineStory(myReds, oppReds, myYellows, oppYellows),
     setPieceStory(myStats, oppStats),
-    moraleStory(myMorale, oppMorale),
-    verdict(outcome, xgDiff, finishingDiff)
+    moraleStory(myMorale, oppMorale)
   ].filter(Boolean);
+  const finalVerdict = verdict(outcome, xgDiff, finishingDiff);
 
-  return parts.join(' ');
+  return {
+    summary: parts.join(' '),
+    verdict: finalVerdict,
+    metrics: [
+      { label: 'xG', mine: fmt1(myXg), opponent: fmt1(oppXg) },
+      { label: 'Shots', mine: myStats.shots, opponent: oppStats.shots },
+      { label: 'On Target', mine: myStats.shotsOnTarget, opponent: oppStats.shotsOnTarget },
+      { label: 'Possession', mine: `${myStats.possession}%`, opponent: `${oppStats.possession}%` },
+      { label: 'Pass Acc.', mine: `${myStats.passAccuracy}%`, opponent: `${oppStats.passAccuracy}%` },
+      { label: 'Saves', mine: myStats.saves, opponent: oppStats.saves }
+    ],
+    factors
+  };
 }
 
 module.exports = { analyzeMatch, resultOutcome };

@@ -537,15 +537,25 @@ const TournamentView = {
     function matchAnalysisRecapHtml(analyses) {
       if (!analyses || !analyses.length) return '';
       const outcomeLabel = { w: 'Win', d: 'Draw', l: 'Loss' };
+      const toneIcon = { good: '+', bad: '-', neutral: '=' };
+      const analysisData = (m) => typeof m.analysis === 'string' ? { summary: m.analysis, verdict: '', metrics: [], factors: [] } : (m.analysis || { summary: '', verdict: '', metrics: [], factors: [] });
+      const metricGrid = (metrics) => metrics && metrics.length ? `<div class="engine-metric-grid">${metrics.map((x) => `
+        <div class="engine-metric"><span>${x.label}</span><b>${x.mine}</b><em>${x.opponent}</em></div>
+      `).join('')}</div>` : '';
+      const factorList = (factors) => factors && factors.length ? `<div class="engine-factor-list">${factors.slice(0, 6).map((f) => `
+        <div class="engine-factor ${f.tone || 'neutral'}"><span>${toneIcon[f.tone] || '='}</span><div><b>${f.label}: ${f.value}</b><small>${f.detail}</small></div></div>
+      `).join('')}</div>` : '';
       return `
         <div class="myteam-card engine-recap-card">
           <div class="myteam-header">
             <span>Engine Match Review</span>
-            <span class="badge">${analyses.length} match${analyses.length === 1 ? '' : 'es'}</span>
+            <span class="badge">Data model</span>
           </div>
-          <p class="muted tournament-summary-line">A tactical summary generated from the same xG, stats, events and morale data the match engine used.</p>
+          <p class="muted tournament-summary-line">A richer post-match model built from xG, shot pressure, possession, passing, saves, cards, extra time and penalties.</p>
           <div class="engine-recap-list">
-            ${analyses.map((m) => `
+            ${analyses.map((m) => {
+              const data = analysisData(m);
+              return `
               <article class="engine-recap-match ${m.outcome === 'w' ? 'win' : m.outcome === 'l' ? 'loss' : 'draw'}">
                 <div class="engine-recap-topline">
                   <span class="history-outcome ${m.outcome === 'w' ? 'win' : m.outcome === 'l' ? 'loss' : 'draw'}">${m.outcome.toUpperCase()}</span>
@@ -554,9 +564,12 @@ const TournamentView = {
                     <span>${outcomeLabel[m.outcome] || 'Result'} &middot; ${m.score}</span>
                   </div>
                 </div>
-                <p>${m.analysis}</p>
-              </article>
-            `).join('')}
+                ${metricGrid(data.metrics)}
+                ${factorList(data.factors)}
+                <p>${data.summary || ''}</p>
+                ${data.verdict ? `<div class="engine-verdict">${data.verdict}</div>` : ''}
+              </article>`;
+            }).join('')}
           </div>
         </div>
       `;

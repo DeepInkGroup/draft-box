@@ -34,6 +34,7 @@ const MatchHistoryView = {
     }
 
     function matchRow(m, ti, mi) {
+      const analysis = typeof m.analysis === 'string' ? m.analysis : (m.analysis && (m.analysis.summary || m.analysis.verdict)) ? [m.analysis.summary, m.analysis.verdict].filter(Boolean).join(' ') : '';
       const scoreText = m.wentToPenalties
         ? `${m.myGoals}-${m.oppGoals} (pens ${m.penalties.A}-${m.penalties.B})`
         : `${m.myGoals}-${m.oppGoals}${m.wentToExtraTime ? ' (AET)' : ''}`;
@@ -48,7 +49,7 @@ const MatchHistoryView = {
           <div class="match-team side-b"><span class="muted">${stageLabel}</span></div>
         </div>
         <div class="match-report hidden" id="hist-report-${ti}-${mi}">
-          <p class="history-analysis">${m.analysis}</p>
+          <p class="history-analysis">${analysis}</p>
         </div>
       `;
     }
