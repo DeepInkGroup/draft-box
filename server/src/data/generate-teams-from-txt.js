@@ -39,7 +39,53 @@ const TEAM_CODE_TO_NAME = {
 };
 
 function normalizeName(name) {
-  return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+  return name
+    .replace(/[Øø]/g, 'o')
+    .replace(/[Ææ]/g, 'ae')
+    .replace(/[Ðð]/g, 'd')
+    .replace(/[Þþ]/g, 'th')
+    .replace(/[Łł]/g, 'l')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z]/g, '');
+}
+
+const STAR_PLAYER_NAMES_BY_CODE = {
+  USA: ['Christian Pulisic'],
+  NOR: ['Erling Haaland', 'Martin Odegaard'],
+  COL: ['Luis Diaz'],
+  URU: ['Federico Valverde'],
+  ECU: ['Willian Pacho', 'Moises Caicedo'],
+  SWE: ['Alexander Isak', 'Viktor Gyokeres'],
+  CZE: ['Patrik Schick'],
+  SCO: ['Scott McTominay'],
+  KOR: ['SON Heungmin'],
+  ALG: ['Riyad Mahrez'],
+  EGY: ['MOHAMED SALAH'],
+  GHA: ['Antoine SEMENYO'],
+  MAR: ['Achraf HAKIMI'],
+  ARG: ['Lautaro MARTINEZ', 'Lionel MESSI', 'Julian ALVAREZ', 'Emiliano MARTINEZ'],
+  BRA: ['VINICIUS JUNIOR', 'RAPHINHA', 'GABRIEL MAGALHAES', 'ALISSON'],
+  AUT: ['Konrad LAIMER'],
+  BEL: ['Thibaut COURTOIS', 'Kevin DE BRUYNE', 'Youri TIELEMANS'],
+  CRO: ['Josko GVARDIOL', 'Luka MODRIC'],
+  ENG: ['Harry KANE', 'Jude BELLINGHAM', 'Declan RICE', 'Bukayo SAKA'],
+  FRA: ['Kylian MBAPPE', 'Ousmane DEMBELE', 'Michael OLISE', 'William SALIBA'],
+  GER: ['Joshua KIMMICH', 'Jamal MUSIALA', 'Florian WIRTZ', 'Jonathan TAH'],
+  NED: ['Virgil VAN DIJK', 'Frenkie DE JONG', 'Ryan GRAVENBERCH', 'Tijjani REIJNDERS'],
+  POR: ['VITINHA', 'BRUNO FERNANDES', 'NUNO MENDES', 'RUBEN DIAS'],
+  ESP: ['PEDRI', 'RODRI', 'Lamine YAMAL', 'David RAYA'],
+  SUI: ['Gregor KOBEL', 'Granit XHAKA'],
+  TUR: ['Hakan CALHANOGLU']
+};
+
+const STAR_PLAYER_KEYS_BY_CODE = Object.fromEntries(
+  Object.entries(STAR_PLAYER_NAMES_BY_CODE).map(([code, names]) => [code, new Set(names.map(normalizeName))])
+);
+
+function isStarPlayer(code, name) {
+  return !!(STAR_PLAYER_KEYS_BY_CODE[code] && STAR_PLAYER_KEYS_BY_CODE[code].has(normalizeName(name)));
 }
 
 function mapPositions(rawPositions) {
@@ -104,7 +150,7 @@ function buildTeam(code, txtPlayers) {
     pos: rp.pos,
     rawPos: rp.rawPos,
     overall: rp.overall,
-    isStar: rp.overall >= 85
+    isStar: isStarPlayer(code, rp.name)
   }));
 
   players.sort((a, b) => b.overall - a.overall);

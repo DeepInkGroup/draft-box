@@ -86,6 +86,32 @@ const App = (() => {
     goAuth();
   }
 
+  function renderProfileInsights(el, stats, layoutLabel) {
+    const totalMatches = stats.w + stats.d + stats.l;
+    const winRate = totalMatches > 0 ? Math.round((stats.w / totalMatches) * 100) : 0;
+    const goalDiff = stats.gf - stats.ga;
+    const goalsPerMatch = totalMatches > 0 ? (stats.gf / totalMatches).toFixed(1) : '0.0';
+    const coachNote = totalMatches === 0
+      ? 'No finished tournaments yet. Your first completed run will unlock form notes here.'
+      : winRate >= 60
+        ? 'Strong tournament form. Your teams are converting enough chances to stay ahead.'
+        : goalDiff < 0
+          ? 'Defensive balance is the next area to clean up. Check match summaries for recurring concessions.'
+          : 'Competitive record. A small upgrade in finishing can turn draws into wins.';
+    const nextTarget = stats.titles > 0
+      ? 'Defend the title and push your win rate higher.'
+      : stats.tournaments > 0
+        ? 'Reach your first final and convert one deep run into a title.'
+        : 'Finish one tournament to build your career baseline.';
+    el.innerHTML = `
+      <div class="profile-insight-card wide"><span>Coach Note</span><b>${coachNote}</b></div>
+      <div class="profile-insight-card"><span>Goal Diff</span><b>${goalDiff >= 0 ? '+' : ''}${goalDiff}</b></div>
+      <div class="profile-insight-card"><span>Goals / Match</span><b>${goalsPerMatch}</b></div>
+      <div class="profile-insight-card wide"><span>Next Target</span><b>${nextTarget}</b></div>
+      <div class="profile-insight-card wide"><span>Draft Setup</span><b>${layoutLabel}</b></div>
+    `;
+  }
+
   async function init() {
     homeBtn.addEventListener('click', () => goDashboard());
 
@@ -116,19 +142,23 @@ const App = (() => {
       document.getElementById('profileUsername').value = state.user ? state.user.username : '';
       document.getElementById('profileEmail').value = '...';
       const careerEl = document.getElementById('profileCareer');
+      const insightsEl = document.getElementById('profileInsights');
+      const labelByLayout = { vertical: 'Vertical', 'pitch-first': 'Pitch First', horizontal: 'Side-by-Side' };
       careerEl.innerHTML = '<p class="muted">Loading...</p>';
+      if (insightsEl) insightsEl.innerHTML = '';
       const layoutContainer = document.getElementById('profileDraftLayout');
       if (layoutContainer) {
         const savedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
         ToggleGroup.render(layoutContainer, {
           options: [
             { value: 'vertical', title: 'Vertical (Default)', sub: 'Players list on top, squad pitch below' },
+            { value: 'pitch-first', title: 'Pitch First', sub: 'Squad pitch first, then player list (best for mobile)' },
             { value: 'horizontal', title: 'Side-by-Side', sub: 'Players list next to the squad pitch (left / right)' }
           ],
           selected: savedLayout,
           onChange: (val) => {
             localStorage.setItem('draftbox.draftLayout', val);
-            toast(`Draft layout set to ${val === 'vertical' ? 'Vertical' : 'Side-by-Side'}`);
+            toast(`Draft layout set to ${labelByLayout[val] || val}`);
           }
         });
       }
@@ -139,6 +169,7 @@ const App = (() => {
       } catch { /* ignore — dialog still usable for password change / logout */ }
       try {
         const stats = await Api.careerStats();
+        const selectedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
         const winRate = stats.w + stats.d + stats.l > 0 ? Math.round((stats.w / (stats.w + stats.d + stats.l)) * 100) : 0;
         careerEl.innerHTML = `
           <div class="career-stat"><span class="career-value">${stats.tournaments}</span><span class="career-label">Tournaments</span></div>
@@ -147,8 +178,10 @@ const App = (() => {
           <div class="career-stat"><span class="career-value">${stats.gf}-${stats.ga}</span><span class="career-label">Goals For-Against</span></div>
           <div class="career-stat" style="grid-column: 1 / -1;"><span class="career-value">${winRate}%</span><span class="career-label">Win Rate</span></div>
         `;
+        if (insightsEl) renderProfileInsights(insightsEl, stats, labelByLayout[selectedLayout] || selectedLayout);
       } catch {
         careerEl.innerHTML = '<p class="muted">Career stats unavailable right now.</p>';
+        if (insightsEl) insightsEl.innerHTML = '<div class="profile-insight-card wide"><span>Coach Note</span><b>Career insights unavailable right now.</b></div>';
       }
     });
     document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());

@@ -256,7 +256,7 @@
           "pos": "FW",
           "rawPos": "ST, LW, CAM",
           "overall": 84,
-          "isStar": false
+          "isStar": true
         },
         {
           "id": "KOR-DF4",
@@ -1986,7 +1986,7 @@
           "pos": "DF",
           "rawPos": "CB",
           "overall": 87,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "BRA-DF7",
@@ -1995,7 +1995,7 @@
           "pos": "DF",
           "rawPos": "CB",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "BRA-MF13",
@@ -2004,7 +2004,7 @@
           "pos": "MF",
           "rawPos": "CM, CDM",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "BRA-GK2",
@@ -3922,7 +3922,7 @@
           "pos": "DF",
           "rawPos": "CB",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "GER-GK1",
@@ -6826,7 +6826,7 @@
           "pos": "GK",
           "rawPos": "GK",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-MF4",
@@ -6835,7 +6835,7 @@
           "pos": "MF",
           "rawPos": "LM, LB, CAM, LW",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-DF6",
@@ -6844,7 +6844,7 @@
           "pos": "DF",
           "rawPos": "RB, RM, CM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-DF10",
@@ -6853,7 +6853,7 @@
           "pos": "DF",
           "rawPos": "LB, CM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-MF12",
@@ -6862,7 +6862,7 @@
           "pos": "MF",
           "rawPos": "CM, CDM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-MF16",
@@ -6871,7 +6871,7 @@
           "pos": "MF",
           "rawPos": "CDM, CM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-FW21",
@@ -6880,7 +6880,7 @@
           "pos": "FW",
           "rawPos": "LW, LM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ESP-GK2",
@@ -7794,7 +7794,7 @@
           "pos": "GK",
           "rawPos": "GK",
           "overall": 87,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-DF5",
@@ -7803,7 +7803,7 @@
           "pos": "DF",
           "rawPos": "CB",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-DF6",
@@ -7812,7 +7812,7 @@
           "pos": "DF",
           "rawPos": "RB, RM",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-FW24",
@@ -7821,7 +7821,7 @@
           "pos": "FW",
           "rawPos": "RW, LW, CM, RM",
           "overall": 86,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-MF15",
@@ -7830,7 +7830,7 @@
           "pos": "MF",
           "rawPos": "CM, CAM, CDM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-FW20",
@@ -7839,7 +7839,7 @@
           "pos": "FW",
           "rawPos": "ST",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "FRA-DF7",
@@ -8762,7 +8762,7 @@
           "pos": "MF",
           "rawPos": "CM, CDM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ARG-MF18",
@@ -8771,7 +8771,7 @@
           "pos": "MF",
           "rawPos": "CM, CDM, CAM",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ARG-MF12",
@@ -8968,7 +8968,7 @@
           "pos": "MF",
           "rawPos": "RM, RW",
           "overall": 84,
-          "isStar": false
+          "isStar": true
         },
         {
           "id": "ALG-DF8",
@@ -9210,7 +9210,7 @@
           "pos": "DF",
           "rawPos": "RB, CDM, LB, RM",
           "overall": 84,
-          "isStar": false
+          "isStar": true
         },
         {
           "id": "AUT-MF13",
@@ -9721,7 +9721,7 @@
           "pos": "MF",
           "rawPos": "CM, CDM",
           "overall": 88,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "POR-DF4",
@@ -9739,7 +9739,7 @@
           "pos": "MF",
           "rawPos": "CDM, CM, CB",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "POR-FW18",
@@ -9748,7 +9748,7 @@
           "pos": "FW",
           "rawPos": "ST",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "POR-GK0",
@@ -10698,7 +10698,7 @@
           "pos": "GK",
           "rawPos": "GK",
           "overall": 85,
-          "isStar": true
+          "isStar": false
         },
         {
           "id": "ENG-DF3",
@@ -11146,7 +11146,7 @@
           "pos": "FW",
           "rawPos": "RW, LW, RM",
           "overall": 84,
-          "isStar": false
+          "isStar": true
         },
         {
           "id": "GHA-FW22",

@@ -101,6 +101,15 @@
             <p class="muted">Loading...</p>
           </div>
           <button id="btnViewHistory" class="btn btn-ghost btn-block" style="margin-top:10px;">View Match History</button>
+          <div id="profileInsights" class="profile-insights"></div>
+          <div class="profile-ideas">
+            <div class="profile-idea-head">Profile Ideas</div>
+            <div class="profile-idea-list">
+              <div><b>Coach Note</b><span>Quick read on your current form.</span></div>
+              <div><b>Next Target</b><span>A simple goal based on your record.</span></div>
+              <div><b>Draft Setup</b><span>Your selected layout is surfaced here.</span></div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="dialog-actions" style="justify-content: space-between; margin-top: 18px;">
@@ -127,12 +136,13 @@
           <li><b>Tournament Length</b> — Off (full 48-team group stage), <b>Blitz</b> (skip straight to the Round of 32), or <b>Top 8</b> (skip straight to the Quarter-Finals, 1/4). Every human is guaranteed a spot in a shortened bracket; bots are randomly trimmed to fill the rest.</li>
           <li><b>Restrict Draft Teams (optional)</b> — the creator can limit which nations are eligible to be revealed during the draft to a hand-picked list of at least 4 teams, grouped by confederation for easy browsing. Leave it empty for the default: all 48 teams eligible.</li>
           <li><b>Rerolls</b> — Off, 1, 2, or 3 per drafter. A reroll skips the currently revealed team for a brand new one without picking from it — that skipped team still counts as seen and won't come back around later.</li>
-          <li><b>Spoiler Mode</b> — multiplayer-only. If enabled, remaining players must advance stage by stage together. Once your team is eliminated, later results stay hidden until the tournament finishes.</li>
+          <li><b>Spoiler Mode</b> - multiplayer-only. If enabled, real players advance stage by stage together. Each player marks the current stage as ready; once every required player is checked in, the next round unlocks. If your team is eliminated, later results stay hidden until the tournament is fully finished, even if no human teams remain alive.</li>
         </ul>
         <p class="muted">Once every member finishes drafting (multiplayer rooms), the tournament doesn't start automatically — the room creator confirms it with a "Start Tournament" button, so nobody gets pulled into the World Cup mid-draft. Singleplayer starts immediately since there's nobody else to wait for.</p>
 
         <h3>The Draft</h3>
         <p>Each round a random real 2026 World Cup team is revealed with its actual squad — every player in the game is a real 2026 squad member, no fictional players anywhere. A team is never revealed to you twice — every eligible nation shows up at most once over the course of your draft. Pick one available player — a position already full for you, or a player someone else in the room already grabbed, is greyed out. All 1,248 real players sit in one pool shared by the whole room, so a player you want can be sniped before your next reveal. If a room restricts draft teams, only that list is eligible — otherwise every eligible nation reveals independently to each drafter, so two people revealed the same country at once simply pick from that team's available squad separately, exactly like any other reveal. If a slot's position group has more than one open slot (say two open center-back spots), you choose exactly which one your pick fills. Use the sort icons above the player grid to reorder it by rating, position, or shuffle it randomly.</p>
+        <p class="muted">Your Profile controls the Draft screen layout. <b>Pitch First</b> puts your squad map above the player list, which is the recommended mobile setup; Vertical and Side-by-Side remain available for laptop play.</p>
 
         <h3>Formations</h3>
         <p>16 formations to choose from (4-3-3, 4-4-2, 5-2-3, 3-2-4-1, 4-2-4, and more), each an explicit named layout — not just position counts — so you always know exactly which slot (LB vs RB, which CB, etc.) a pick will fill.</p>
@@ -141,7 +151,8 @@
         <p>Every match — bot vs bot, human vs bot, human vs human — comes from the same engine:</p>
         <ul>
           <li><b>Attack / Defense ratings</b> — a weighted average of your 11 players' overalls, weighted by how advanced or deep their slot sits.</li>
-          <li><b>Chemistry</b> — a 0.94-1.06 multiplier from three factors: Linkage (do neighboring players share a real source nation), Balance (consistent squad quality), and Leadership (real star players). Bot squads are one real nation, so they always have perfect Linkage — a deliberate trade-off against human "all-star" squads built from many countries.</li>
+          <li><b>Chemistry</b> - a 0.94-1.06 multiplier from three factors: Linkage (do neighboring players share a real source nation), Balance (consistent squad quality), and Leadership (selected Game Changer players marked with a star). Bot squads are one real nation, so they always have perfect Linkage - a deliberate trade-off against human "all-star" squads built from many countries.</li>
+          <li><b>Human vs AI Boost</b> - human-controlled teams play at 1.4x Attack and Defense only when facing an AI team. Human vs human and AI vs AI matches stay neutral.</li>
           <li><b>Formation Edge</b> — attacking shape vs. the opponent's defensive shape, plus a width mismatch bonus.</li>
           <li><b>Captain Bonus</b> — a designated captain's overall is boosted before all of the above.</li>
           <li><b>Red Card Morale Hit</b> — a player sent off rattles their own team for a short spell afterward, regardless of that player's individual quality: a temporary Attack + Defense reduction. Losing the captain hits harder — the affected spell runs 1.8x longer.</li>
@@ -158,7 +169,7 @@
         <p>If your team is knocked out, you're not removed from the room — you become a spectator for the rest of that World Cup, right through to the champion.</p>
 
         <h3>Tournament Awards</h3>
-        <p>Once a champion is crowned, the results screen tallies the whole tournament — every match, every team — into four awards: Top Scorer, Top Assists, Most Saves (goalkeepers), and Player of the Tournament (a composite of goals, assists, and saves). You can also expand the full knockout bracket path to review every elimination round and result. Purely narrative, like the match event reports — they don't feed back into any score.</p>
+        <p>Once a champion is crowned, the results screen tallies the whole tournament - every match, every team - into four awards: Top Scorer, Top Assists, Most Saves (goalkeepers), and Player of the Tournament (a composite of goals, assists, and saves). You can also expand the full knockout bracket path to review every elimination round and result, and each played match can include a short engine-written summary explaining the main reasons behind the win or loss. Purely narrative, like the match event reports - they don't feed back into any score.</p>
 
         <h3>Data</h3>
         <p class="muted">All 48 qualified nations and every player are real 2026 World Cup squad members (sourced from official squad lists). Overall ratings are gameplay values, not an official license.</p>

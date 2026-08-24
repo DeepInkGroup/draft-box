@@ -55,8 +55,15 @@ function gkModifier(gkOverall) {
 // plays with a bit more conviction; a shaken one coming off a bad result underperforms its
 // paper quality — a real but modest swing, the same scale as Chemistry (Section 5).
 const MORALE_SWING = 0.05;
+const HUMAN_VS_AI_POWER_MULTIPLIER = 1.4;
 function moraleModifier(morale) {
   return 1 + clamp(morale || 0, -1, 1) * MORALE_SWING;
+}
+
+function applyHumanVsAiBoost(ratings, ownTeam, opponentTeam) {
+  if (!ownTeam.isHuman || opponentTeam.isHuman) return;
+  ratings.attack *= HUMAN_VS_AI_POWER_MULTIPLIER;
+  ratings.defense *= HUMAN_VS_AI_POWER_MULTIPLIER;
 }
 
 function pickWeighted(candidates, weightFn) {
@@ -395,6 +402,9 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   ratingsA.defense *= moraleModA;
   ratingsB.attack *= moraleModB;
   ratingsB.defense *= moraleModB;
+
+  applyHumanVsAiBoost(ratingsA, teamA, teamB);
+  applyHumanVsAiBoost(ratingsB, teamB, teamA);
 
   const cardPlan = generateCardEvents(teamA, teamB);
   for (const d of cardPlan.dismissals) {

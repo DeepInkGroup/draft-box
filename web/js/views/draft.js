@@ -36,6 +36,7 @@ const DraftView = {
 
     const layoutMode = localStorage.getItem('draftbox.draftLayout') || 'vertical';
     const isHorizontal = layoutMode === 'horizontal';
+    const isPitchFirst = layoutMode === 'pitch-first';
 
     const topbar = `
       <div class="card" id="timerCard" style="display:none;">
@@ -77,6 +78,18 @@ const DraftView = {
           <div class="draft-right-col">
             ${revealWrap}
           </div>
+        </div>
+      `;
+    } else if (isPitchFirst) {
+      container.innerHTML = `
+        <div class="draft-layout draft-layout-pitch-first">
+          ${topbar}
+          ${squadCard}
+          <div class="card" id="revealCard">
+            <p class="muted center">Fetching the first random team...</p>
+          </div>
+          <div id="ratingsCardZone" style="display:none;margin-bottom:16px;"></div>
+          <div id="waitingZone"></div>
         </div>
       `;
     } else {
