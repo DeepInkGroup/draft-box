@@ -61,13 +61,68 @@ function maybeStartTournament(io, roomRow, roomState) {
   return true;
 }
 
-function activeSpoilerMembers(roomState) {
-  return Array.from(roomState.members.values()).filter((m) => !m.eliminated);
+function spoilerGateMembers(roomState) {
+  return Array.from(roomState.members.values());
 }
 
-function allActiveMembersCaughtUp(roomState) {
-  const historyLength = tournamentEngine.historyLength(roomState);
-  return activeSpoilerMembers(roomState).every((m) => m.viewedStep >= historyLength);
+function ensureAdvanceReady(roomState) {
+  const t = roomState.tournament;
+  const step = tournamentEngine.historyLength(roomState);
+  if (!t.advanceReady || t.advanceReady.step !== step || !Array.isArray(t.advanceReady.userIds)) {
+    t.advanceReady = { step, userIds: [] };
+  }
+  t.advanceReady.userIds = [...new Set(t.advanceReady.userIds.map((id) => Number(id)).filter(Boolean))];
+  return t.advanceReady;
+}
+
+function advanceReadySnapshot(roomState) {
+  const ready = ensureAdvanceReady(roomState);
+  const readyIds = new Set(ready.userIds);
+  const members = spoilerGateMembers(roomState).map((m) => ({
+    userId: m.userId,
+    username: m.username,
+    eliminated: !!m.eliminated,
+    ready: readyIds.has(Number(m.userId))
+  }));
+  return {
+    spoilerMode: !!roomState.spoilerMode,
+    step: ready.step,
+    allReady: members.length > 0 && members.every((m) => m.ready),
+    members
+  };
+}
+
+function broadcastAdvanceReady(io, code, roomState) {
+  io.to(channelName(code)).emit('tournament:advanceReady', advanceReadySnapshot(roomState));
+}
+
+function allSpoilerGateMembersReady(roomState) {
+  return advanceReadySnapshot(roomState).allReady;
+}
+
+function persistSimulatedTournamentStep(io, socket, code, roomRow, roomState) {
+  const t = roomState.tournament;
+  tournamentEngine.simulateNextStep(roomState);
+  const currentHistoryLength = tournamentEngine.historyLength(roomState);
+
+  if (roomState.spoilerMode) {
+    t.advanceReady = { step: currentHistoryLength, userIds: [] };
+  }
+
+  for (const m of roomState.members.values()) {
+    if (m.eliminated) rm.markMemberEliminated(roomRow.id, m.userId);
+  }
+  if (t.stage !== 'group' && roomRow.status === 'group_stage') {
+    rm.setRoomStatus(roomRow.id, 'knockout');
+  }
+  if (t.stage === 'done') {
+    rm.setRoomStatus(roomRow.id, 'finished');
+  }
+  rm.persistTournamentSnapshot(roomState);
+
+  socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: currentHistoryLength });
+  if (roomState.spoilerMode) broadcastAdvanceReady(io, code, roomState);
+  return currentHistoryLength;
 }
 
 function viewerMaySeeSpoilerStep(roomState, member, stepIndex) {
@@ -163,7 +218,8 @@ function registerSocketHandlers(io) {
           myLineup,
           viewedStep: state.tournament.stage === 'done' ? historyLength : viewedStep,
           historyLength,
-          tournamentStage: state.tournament.stage
+          tournamentStage: state.tournament.stage,
+          advanceReady: state.spoilerMode ? advanceReadySnapshot(state) : null
         });
       }
 
@@ -309,6 +365,8 @@ function registerSocketHandlers(io) {
         let currentHistoryLength = tournamentEngine.historyLength(state);
         const spoilerMode = !!state.spoilerMode;
 
+        if (spoilerMode) ensureAdvanceReady(state);
+
         if (spoilerMode && member.eliminated && t.stage === 'done' && currentHistoryLength > 0) {
           member.viewedStep = currentHistoryLength;
           rm.persistViewedStep(roomRow.id, socket.user.id, member.viewedStep);
@@ -321,6 +379,13 @@ function registerSocketHandlers(io) {
         }
 
         if (spoilerMode && member.eliminated && currentHistoryLength > member.viewedStep && !viewerMaySeeSpoilerStep(state, member, member.viewedStep)) {
+          const ready = ensureAdvanceReady(state);
+          if (!ready.userIds.includes(Number(member.userId))) ready.userIds.push(Number(member.userId));
+          rm.persistTournamentSnapshot(state);
+          broadcastAdvanceReady(io, code, state);
+          if (allSpoilerGateMembersReady(state) && t.stage !== 'done') {
+            persistSimulatedTournamentStep(io, socket, code, roomRow, state);
+          }
           return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
         }
 
@@ -328,27 +393,20 @@ function registerSocketHandlers(io) {
           if (t.stage === 'done') {
             return socket.emit('error:message', { error: 'the tournament has already finished' });
           }
-          if (spoilerMode && member.eliminated) {
-            return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
-          }
-          if (spoilerMode && !allActiveMembersCaughtUp(state)) {
-            return socket.emit('error:message', { error: 'spoiler mode is on: wait for every remaining player to finish this stage' });
-          }
-          tournamentEngine.simulateNextStep(state);
-          currentHistoryLength = tournamentEngine.historyLength(state);
 
-          for (const m of state.members.values()) {
-            if (m.eliminated) rm.markMemberEliminated(roomRow.id, m.userId);
+          if (spoilerMode) {
+            const ready = ensureAdvanceReady(state);
+            if (!ready.userIds.includes(Number(member.userId))) ready.userIds.push(Number(member.userId));
+            rm.persistTournamentSnapshot(state);
+            broadcastAdvanceReady(io, code, state);
+            if (!allSpoilerGateMembersReady(state)) return;
           }
-          if (t.stage !== 'group' && roomRow.status === 'group_stage') {
-            rm.setRoomStatus(roomRow.id, 'knockout');
-          }
-          if (t.stage === 'done') {
-            rm.setRoomStatus(roomRow.id, 'finished');
-          }
-          rm.persistTournamentSnapshot(state);
 
-          socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: currentHistoryLength });
+          currentHistoryLength = persistSimulatedTournamentStep(io, socket, code, roomRow, state);
+        }
+
+        if (spoilerMode && member.eliminated && currentHistoryLength > member.viewedStep && !viewerMaySeeSpoilerStep(state, member, member.viewedStep)) {
+          return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
         }
 
         member.viewedStep += 1;

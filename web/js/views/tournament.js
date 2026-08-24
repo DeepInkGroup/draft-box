@@ -12,6 +12,7 @@ const TournamentView = {
     let isCreator = false;
     let lineupRevealShown = false;
     let myCode = null;
+    let advanceReady = null;
 
     container.innerHTML = `
       <div id="championZone"></div>
@@ -21,6 +22,7 @@ const TournamentView = {
       <div class="card center" id="continueZone">
         <button class="btn btn-primary" id="btnContinue">▶ Continue</button>
         <p class="muted" id="newPing" style="display:none;margin-top:8px;">🔔 New results are ready</p>
+        <div class="advance-ready-panel" id="advanceReadyPanel" style="display:none;"></div>
       </div>
     `;
 
@@ -31,6 +33,7 @@ const TournamentView = {
     const continueZone = container.querySelector('#continueZone');
     const btnContinue = container.querySelector('#btnContinue');
     const newPing = container.querySelector('#newPing');
+    const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
 
     function scoreText(m) {
       let s = `${m.goalsA} - ${m.goalsB}`;
@@ -161,6 +164,23 @@ const TournamentView = {
       `;
     }
 
+    function renderAdvanceReady() {
+      if (!advanceReady || !advanceReady.spoilerMode || tournamentStage === 'done') {
+        advanceReadyPanel.style.display = 'none';
+        advanceReadyPanel.innerHTML = '';
+        return;
+      }
+      const members = advanceReady.members || [];
+      const readyCount = members.filter((m) => m.ready).length;
+      advanceReadyPanel.style.display = 'block';
+      advanceReadyPanel.innerHTML = [
+        '<div class="advance-ready-head"><span>Ready for next stage</span><span class="muted">' + readyCount + '/' + members.length + '</span></div>',
+        '<div class="advance-ready-list">',
+        members.map((m) => '<div class="advance-ready-row ' + (m.ready ? 'ready' : '') + '"><span class="advance-ready-check">' + (m.ready ? '✓' : '') + '</span><span class="advance-ready-name">' + m.username + '</span>' + (m.eliminated ? '<span class="advance-ready-badge">Out</span>' : '') + '</div>').join(''),
+        '</div>'
+      ].join('');
+    }
+
     function renderButton() {
       newPing.style.display = newResultsPing ? 'block' : 'none';
       if (tournamentStage === 'done' && viewedStep >= historyLength) {
@@ -173,8 +193,10 @@ const TournamentView = {
       } else if (historyLength > viewedStep) {
         btnContinue.textContent = '▶ See Next Results (Ready)';
       } else {
-        btnContinue.textContent = '▶ Simulate Next Stage';
+        const me = advanceReady && (advanceReady.members || []).find((m) => m.userId === App.state.user.id);
+        btnContinue.textContent = me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
       }
+      renderAdvanceReady();
     }
 
     function countCardsSoFar(timeline, cursor) {
@@ -648,6 +670,7 @@ const TournamentView = {
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
+      advanceReady = s.advanceReady || null;
       isCreator = s.creatorId === App.state.user.id;
       if (s.myLineup) myCode = s.myLineup.code;
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
@@ -674,6 +697,11 @@ const TournamentView = {
         newResultsPing = true;
         renderButton();
       }
+    });
+
+    App.onSocket('tournament:advanceReady', (payload) => {
+      advanceReady = payload;
+      renderButton();
     });
 
     App.onSocket('tournament:started', () => {
