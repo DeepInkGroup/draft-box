@@ -92,6 +92,7 @@ function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pi
     id: p.id,
     name: p.name,
     pos: p.pos,
+    rawPos: p.rawPos || p.pos,
     overall: hideOverall ? null : p.overall,
     isStar: p.isStar,
     available: pool.has(p.id) && wantedPositions.has(p.pos)
@@ -129,7 +130,7 @@ function pickPlayer(roomState, userId, playerId, slotCode) {
   if (member.slots[slotCode]) throw new Error('that slot is already filled');
 
   roomState.pool.delete(playerId);
-  const entry = { id: player.id, name: player.name, pos: player.pos, overall: player.overall, team: team.code, slotCode, isStar: !!player.isStar };
+  const entry = { id: player.id, name: player.name, pos: player.pos, rawPos: player.rawPos || player.pos, overall: player.overall, team: team.code, slotCode, isStar: !!player.isStar };
   member.slots[slotCode] = entry;
   member.squad.push(entry);
   member.currentReveal = null;

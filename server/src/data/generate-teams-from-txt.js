@@ -137,7 +137,7 @@ for (const [name, players] of teamsMap.entries()) {
 const STARS = {
   BRA: [['Vinícius Júnior', 'FW', 92], ['Endrick', 'FW', 84], ['Alisson', 'GK', 89]],
   FRA: [['Kylian Mbappé', 'FW', 94], ['Ousmane Dembélé', 'FW', 89], ['Aurélien Tchouaméni', 'MF', 87], ['Mike Maignan', 'GK', 88]],
-  ARG: [['Lionel Messi', 'FW', 90], ['Julián Alvarez', 'FW', 88], ['Enzo Fernández', 'MF', 87], ['Emiliano Martínez', 'GK', 88]],
+  ARG: [],
   ENG: [['Jude Bellingham', 'MF', 91], ['Bukayo Saka', 'FW', 89], ['Jordan Pickford', 'GK', 85]],
   ESP: [['Lamine Yamal', 'FW', 91], ['Pedri', 'MF', 89], ['Rodri', 'MF', 90], ['Unai Simón', 'GK', 85]],
   POR: [['Cristiano Ronaldo', 'FW', 86], ['Bruno Fernandes', 'MF', 88], ['Rúben Dias', 'DF', 88], ['Diogo Costa', 'GK', 87]],
@@ -214,6 +214,7 @@ function buildTeam(code, txtPlayers, teamStars) {
       name: rp.name,
       team: code,
       pos: rp.pos,
+      rawPos: rp.rawPos,
       overall,
       isStar
     };

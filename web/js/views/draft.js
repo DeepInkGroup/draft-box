@@ -242,7 +242,7 @@ const DraftView = {
       grid.innerHTML = players.map((p) => `
         <div class="player-card ${p.available ? '' : 'unavailable'}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
           <div class="pname">${p.isStar ? '<span class="star">★</span> ' : ''}${p.name}</div>
-          <div class="pmeta"><span>${POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>
+          <div class="pmeta"><span>${p.rawPos || POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>
         </div>
       `).join('');
 

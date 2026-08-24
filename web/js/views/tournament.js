@@ -64,11 +64,28 @@ const TournamentView = {
 
     function eventLine(e) {
       const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
-      const side = e.side === 'A' ? '←' : '→';
       let text = `${icon} ${e.minute}' ${e.player}`;
       if (e.type === 'goal' && e.assistBy) text += ` <span class="muted">(assist: ${e.assistBy})</span>`;
       if (e.type === 'red') text += e.reason === 'second-yellow' ? ` <span class="muted">(2nd yellow)</span>` : ` <span class="muted">(straight red)</span>`;
-      return `<div class="report-line">${side} ${text}</div>`;
+      return `<div class="report-line">${text}</div>`;
+    }
+
+    function teamEventsHtml(m) {
+      const visibleEvents = (m.events || []).filter((e) => e.type !== 'save');
+      const bySide = {
+        A: visibleEvents.filter((e) => e.side === 'A'),
+        B: visibleEvents.filter((e) => e.side === 'B')
+      };
+      const column = (side, teamName) => `
+        <div class="team-event-col">
+          <div class="team-event-title">${teamName}</div>
+          <div class="team-event-list">
+            ${bySide[side].length ? bySide[side].map(eventLine).join('') : '<p class="muted">No notable events.</p>'}
+          </div>
+        </div>
+      `;
+      if (!visibleEvents.length) return '<p class="muted" style="margin:6px 0;">No notable events.</p>';
+      return `<div class="team-events-grid">${column('A', nameTag(m.aName, m.aHuman, m.aUsername))}${column('B', nameTag(m.bName, m.bHuman, m.bUsername))}</div>`;
     }
 
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
@@ -219,12 +236,11 @@ const TournamentView = {
 
       function otherMatchBody(idx) {
         const om = step.matches[idx];
-        const evs = (om.events || []).filter((e) => e.type !== 'save');
         return `
           <div class="live-final-score">${nameTag(om.aName, om.aHuman, om.aUsername)} <b>${scoreText(om)}</b> ${nameTag(om.bName, om.bHuman, om.bUsername)}</div>
           ${matchStatsHtml(finalMatchStats(om))}
           ${penaltyShootoutHtml(om)}
-          <div class="live-feed">${evs.length ? evs.map(eventLine).join('') : '<p class="muted">No notable events.</p>'}</div>
+          ${teamEventsHtml(om)}
         `;
       }
 
@@ -525,7 +541,6 @@ const TournamentView = {
       const chevronIcon = '<svg class="match-expand-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
 
       const matchesHtml = step.matches.map((m, idx) => {
-        const visibleEvents = (m.events || []).filter((e) => e.type !== 'save');
         const aWin = m.winnerCode && m.winnerCode === m.aCode;
         const bWin = m.winnerCode && m.winnerCode === m.bCode;
         return `
@@ -542,7 +557,7 @@ const TournamentView = {
         <div class="match-report hidden" id="report-${idx}">
           ${matchStatsHtml(finalMatchStats(m))}
           ${penaltyShootoutHtml(m)}
-          ${visibleEvents.length ? visibleEvents.map(eventLine).join('') : '<p class="muted" style="margin:6px 0;">No notable events.</p>'}
+          ${teamEventsHtml(m)}
         </div>
       `;
       }).join('');

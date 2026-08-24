@@ -7784,44 +7784,31 @@
       "baseOverall": 91,
       "players": [
         {
-          "id": "ARG-MF20",
-          "name": "Lionel MESSI",
+          "id": "ARG-FW25",
+          "name": "Lautaro MARTINEZ",
           "team": "ARG",
-          "pos": "MF",
-          "overall": 90,
-          "isStar": true
-        },
-        {
-          "id": "ARG-GK2",
-          "name": "Emiliano MARTINEZ",
-          "team": "ARG",
-          "pos": "GK",
+          "pos": "FW",
           "overall": 88,
-          "isStar": true
+          "isStar": true,
+          "rawPos": "ST"
         },
         {
           "id": "ARG-FW19",
           "name": "Julian ALVAREZ",
           "team": "ARG",
           "pos": "FW",
-          "overall": 88,
-          "isStar": true
+          "overall": 86,
+          "isStar": true,
+          "rawPos": "ST, CAM"
         },
         {
-          "id": "ARG-FW25",
-          "name": "Lautaro MARTINEZ",
-          "team": "ARG",
-          "pos": "FW",
-          "overall": 88,
-          "isStar": false
-        },
-        {
-          "id": "ARG-MF18",
-          "name": "Enzo FERNANDEZ",
+          "id": "ARG-MF20",
+          "name": "Lionel MESSI",
           "team": "ARG",
           "pos": "MF",
-          "overall": 87,
-          "isStar": true
+          "overall": 86,
+          "isStar": true,
+          "rawPos": "CAM, ST, RW"
         },
         {
           "id": "ARG-MF17",
@@ -7829,15 +7816,26 @@
           "team": "ARG",
           "pos": "MF",
           "overall": 85,
-          "isStar": false
+          "isStar": true,
+          "rawPos": "CM, CDM"
         },
         {
-          "id": "ARG-MF12",
-          "name": "Rodrigo DE PAUL",
+          "id": "ARG-GK2",
+          "name": "Emiliano MARTINEZ",
+          "team": "ARG",
+          "pos": "GK",
+          "overall": 85,
+          "isStar": true,
+          "rawPos": "GK"
+        },
+        {
+          "id": "ARG-MF18",
+          "name": "Enzo FERNANDEZ",
           "team": "ARG",
           "pos": "MF",
-          "overall": 83,
-          "isStar": false
+          "overall": 85,
+          "isStar": true,
+          "rawPos": "CM, CDM, CAM"
         },
         {
           "id": "ARG-MF15",
@@ -7845,7 +7843,17 @@
           "team": "ARG",
           "pos": "MF",
           "overall": 83,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CM, CDM"
+        },
+        {
+          "id": "ARG-MF12",
+          "name": "Rodrigo DE PAUL",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 83,
+          "isStar": false,
+          "rawPos": "CM, CDM, RM, CAM"
         },
         {
           "id": "ARG-DF7",
@@ -7853,7 +7861,8 @@
           "team": "ARG",
           "pos": "DF",
           "overall": 82,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CB"
         },
         {
           "id": "ARG-MF23",
@@ -7861,7 +7870,8 @@
           "team": "ARG",
           "pos": "MF",
           "overall": 82,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CAM, RM, ST, CM"
         },
         {
           "id": "ARG-GK1",
@@ -7869,31 +7879,8 @@
           "team": "ARG",
           "pos": "GK",
           "overall": 81,
-          "isStar": false
-        },
-        {
-          "id": "ARG-DF3",
-          "name": "Marcos SENESI",
-          "team": "ARG",
-          "pos": "DF",
-          "overall": 81,
-          "isStar": false
-        },
-        {
-          "id": "ARG-DF6",
-          "name": "Lisandro MARTINEZ",
-          "team": "ARG",
-          "pos": "DF",
-          "overall": 81,
-          "isStar": false
-        },
-        {
-          "id": "ARG-MF11",
-          "name": "Leandro PAREDES",
-          "team": "ARG",
-          "pos": "MF",
-          "overall": 81,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "GK"
         },
         {
           "id": "ARG-MF14",
@@ -7901,7 +7888,35 @@
           "team": "ARG",
           "pos": "MF",
           "overall": 81,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CAM, CM"
+        },
+        {
+          "id": "ARG-MF11",
+          "name": "Leandro PAREDES",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 81,
+          "isStar": false,
+          "rawPos": "CM, CDM"
+        },
+        {
+          "id": "ARG-DF6",
+          "name": "Lisandro MARTINEZ",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false,
+          "rawPos": "CB"
+        },
+        {
+          "id": "ARG-DF3",
+          "name": "Marcos SENESI",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 81,
+          "isStar": false,
+          "rawPos": "CB"
         },
         {
           "id": "ARG-GK0",
@@ -7909,7 +7924,8 @@
           "team": "ARG",
           "pos": "GK",
           "overall": 80,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "GK"
         },
         {
           "id": "ARG-DF8",
@@ -7917,7 +7933,8 @@
           "team": "ARG",
           "pos": "DF",
           "overall": 80,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CB"
         },
         {
           "id": "ARG-DF9",
@@ -7925,15 +7942,8 @@
           "team": "ARG",
           "pos": "DF",
           "overall": 79,
-          "isStar": false
-        },
-        {
-          "id": "ARG-MF16",
-          "name": "Nico GONZALEZ",
-          "team": "ARG",
-          "pos": "MF",
-          "overall": 79,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CB, LB"
         },
         {
           "id": "ARG-FW24",
@@ -7941,7 +7951,17 @@
           "team": "ARG",
           "pos": "FW",
           "overall": 79,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "ST"
+        },
+        {
+          "id": "ARG-MF16",
+          "name": "Nico GONZALEZ",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 79,
+          "isStar": false,
+          "rawPos": "LM, RM, CAM, LW"
         },
         {
           "id": "ARG-DF4",
@@ -7949,15 +7969,8 @@
           "team": "ARG",
           "pos": "DF",
           "overall": 78,
-          "isStar": false
-        },
-        {
-          "id": "ARG-MF13",
-          "name": "Valentin BARCO",
-          "team": "ARG",
-          "pos": "MF",
-          "overall": 78,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "LB, CM"
         },
         {
           "id": "ARG-MF21",
@@ -7965,7 +7978,17 @@
           "team": "ARG",
           "pos": "MF",
           "overall": 78,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "CAM, LM, LW, CM"
+        },
+        {
+          "id": "ARG-MF13",
+          "name": "Valentin BARCO",
+          "team": "ARG",
+          "pos": "MF",
+          "overall": 78,
+          "isStar": false,
+          "rawPos": "CM, CDM, CAM"
         },
         {
           "id": "ARG-DF10",
@@ -7973,15 +7996,8 @@
           "team": "ARG",
           "pos": "DF",
           "overall": 77,
-          "isStar": false
-        },
-        {
-          "id": "ARG-DF5",
-          "name": "Gonzalo MONTIEL",
-          "team": "ARG",
-          "pos": "DF",
-          "overall": 76,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "RB, CDM"
         },
         {
           "id": "ARG-FW22",
@@ -7989,7 +8005,17 @@
           "team": "ARG",
           "pos": "FW",
           "overall": 76,
-          "isStar": false
+          "isStar": false,
+          "rawPos": "ST"
+        },
+        {
+          "id": "ARG-DF5",
+          "name": "Gonzalo MONTIEL",
+          "team": "ARG",
+          "pos": "DF",
+          "overall": 76,
+          "isStar": false,
+          "rawPos": "RB, RM"
         }
       ]
     },

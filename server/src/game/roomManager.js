@@ -117,7 +117,7 @@ function loadRoomState(roomRow) {
     const squad = [];
     for (const d of drafted) {
       const src = getPlayer(d.player_id);
-      const entry = { id: d.player_id, name: d.player_name, pos: d.pos, overall: d.overall, team: d.source_team, slotCode: d.slot_code, isStar: !!(src && src.isStar) };
+      const entry = { id: d.player_id, name: d.player_name, pos: d.pos, rawPos: src && src.rawPos ? src.rawPos : d.pos, overall: d.overall, team: d.source_team, slotCode: d.slot_code, isStar: !!(src && src.isStar) };
       if (d.slot_code) slots[d.slot_code] = entry;
       squad.push(entry);
     }
