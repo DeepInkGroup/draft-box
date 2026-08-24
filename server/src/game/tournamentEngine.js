@@ -456,6 +456,7 @@ function computeTournamentAwards(t) {
   const saves = new Map();
   const yellows = new Map();
   const reds = new Map();
+  const knockoutGoals = new Map();
   const meta = new Map();      // key "teamCode|playerName" -> { player, teamCode, teamName, isHuman, username }
 
   for (const m of t.matchLog) {
@@ -480,6 +481,7 @@ function computeTournamentAwards(t) {
       const scorerKey = `${teamCode}|${e.player}`;
       if (e.type === 'goal') {
         goals.set(scorerKey, (goals.get(scorerKey) || 0) + 1);
+        if (m.stage !== 'group') knockoutGoals.set(scorerKey, (knockoutGoals.get(scorerKey) || 0) + 1);
         if (e.assistBy) {
           const aKey = `${teamCode}|${e.assistBy}`;
           assists.set(aKey, (assists.get(aKey) || 0) + 1);
@@ -511,7 +513,7 @@ function computeTournamentAwards(t) {
   // sample of matches), cards are a discipline penalty, and reaching the final with
   // the champion nation is a modest bonus for team success.
   const allKeys = new Set([
-    ...goals.keys(), ...assists.keys(), ...saves.keys(),
+    ...goals.keys(), ...assists.keys(), ...saves.keys(), ...knockoutGoals.keys(),
     ...yellows.keys(), ...reds.keys()
   ]);
   let potmKey = null;
@@ -547,10 +549,18 @@ function computeTournamentAwards(t) {
     };
   }
 
+  const discipline = new Map();
+  for (const key of allKeys) {
+    const cardScore = (yellows.get(key) || 0) + (reds.get(key) || 0) * 2;
+    if (cardScore > 0) discipline.set(key, cardScore);
+  }
+
   return {
     topScorer: topOf(goals),
     topAssist: topOf(assists),
     mostSaves: topOf(saves),
+    knockoutHero: topOf(knockoutGoals),
+    mostBooked: topOf(discipline),
     playerOfTournament
   };
 }

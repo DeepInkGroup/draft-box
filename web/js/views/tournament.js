@@ -444,40 +444,69 @@ const TournamentView = {
 
     function tournamentAwardsHtml(awards, summary) {
       if (!awards) return '';
-      const row = (label, entry, unit) => entry ? `
-        <div class="award-row">
-          <span class="award-label">${label}</span>
-          <span class="award-value">${entry.player}${awardTeamLabel(entry)}</span>
-          <span class="muted">${entry.count} ${unit}</span>
-        </div>
-      ` : '';
+      const detailText = (entry, unit) => entry ? `${entry.count} ${unit}` : '';
       const potm = awards.playerOfTournament;
       const potmDetail = potm ? [
         potm.goals ? `${potm.goals} goal${potm.goals === 1 ? '' : 's'}` : null,
         potm.assists ? `${potm.assists} assist${potm.assists === 1 ? '' : 's'}` : null,
         potm.saves ? `${potm.saves} save${potm.saves === 1 ? '' : 's'}` : null,
-        potm.isChampion ? 'champion' : null
-      ].filter(Boolean).join(', ') : '';
-      const potmRow = potm ? `
-        <div class="award-row">
-          <span class="award-label">Player of the Tournament</span>
-          <span class="award-value">${potm.player}${awardTeamLabel(potm)}</span>
-          <span class="muted">${potmDetail}</span>
-        </div>
+        potm.isChampion ? 'champion bonus' : null
+      ].filter(Boolean).join(' · ') : '';
+      const card = (label, entry, detail, tone = '') => entry ? `
+        <article class="award-card ${tone}">
+          <span class="award-kicker">${label}</span>
+          <b>${entry.player}</b>
+          <span class="award-meta">${awardTeamLabel(entry)}</span>
+          <span class="award-pill">${detail}</span>
+        </article>
       ` : '';
+      const pulse = [];
+      if (summary && summary.totalMatches) {
+        pulse.push(['Matches', summary.totalMatches]);
+        pulse.push(['Goals', summary.totalGoals]);
+        pulse.push(['Avg Goals', summary.avgGoalsPerMatch]);
+        if (summary.biggest && summary.biggest.margin > 0) {
+          const b = summary.biggest;
+          const winnerFirst = b.goalsA >= b.goalsB;
+          pulse.push(['Biggest Win', `${winnerFirst ? b.aName : b.bName} ${Math.max(b.goalsA, b.goalsB)}-${Math.min(b.goalsA, b.goalsB)}`]);
+        }
+      }
       const body = [
-        row('Top Scorer', awards.topScorer, 'goals'),
-        row('Top Assists', awards.topAssist, 'assists'),
-        row('Most Saves', awards.mostSaves, 'saves'),
-        potmRow
+        card('Golden Ball', potm, potmDetail || `${potm ? potm.score : ''} engine score`, 'primary'),
+        card('Golden Boot', awards.topScorer, detailText(awards.topScorer, 'goals')),
+        card('Creator Award', awards.topAssist, detailText(awards.topAssist, 'assists')),
+        card('Golden Glove', awards.mostSaves, detailText(awards.mostSaves, 'saves')),
+        card('Knockout Hero', awards.knockoutHero, detailText(awards.knockoutHero, 'KO goals')),
+        card('Heat Check', awards.mostBooked, detailText(awards.mostBooked, 'card pts'))
       ].join('');
-      if (!body.trim()) return '';
+      if (!body.trim() && !pulse.length) return '';
       return `
-        <div class="myteam-card">
-          <div class="myteam-header"><span>Tournament Awards</span></div>
-          ${tournamentSummaryLine(summary)}
-          ${body}
+        <div class="myteam-card awards-card">
+          <div class="myteam-header"><span>Tournament Awards</span><span class="badge">Engine recap</span></div>
+          ${pulse.length ? `<div class="award-pulse-grid">${pulse.map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>` : ''}
+          <div class="awards-grid">${body}</div>
         </div>
+      `;
+    }
+
+    function bracketScoreHtml(m) {
+      if (!m.result) return '<span class="bracket-node-score">TBD</span>';
+      const extras = [
+        m.result.wentToExtraTime ? 'AET' : null,
+        m.result.wentToPenalties && m.result.penalties ? `pens ${m.result.penalties.A}-${m.result.penalties.B}` : null
+      ].filter(Boolean).join(' · ');
+      return `<span class="bracket-node-score">${scoreText(m.result)}</span>${extras ? `<span class="bracket-node-extra">${extras}</span>` : ''}`;
+    }
+
+    function bracketNodeHtml(m, isTerminal) {
+      const aWin = m.winnerCode && m.winnerCode === m.aCode;
+      const bWin = m.winnerCode && m.winnerCode === m.bCode;
+      return `
+        <article class="bracket-node ${isTerminal ? 'terminal' : ''}">
+          <div class="bracket-node-team ${aWin ? 'winner' : ''}"><span>${nameTag(m.aName, m.aHuman, m.aUsername)}</span><b>${m.result ? m.result.goalsA : '-'}</b></div>
+          <div class="bracket-node-mid">${bracketScoreHtml(m)}</div>
+          <div class="bracket-node-team ${bWin ? 'winner' : ''}"><span>${nameTag(m.bName, m.bHuman, m.bUsername)}</span><b>${m.result ? m.result.goalsB : '-'}</b></div>
+        </article>
       `;
     }
 
@@ -486,31 +515,20 @@ const TournamentView = {
       return `
         <div class="myteam-card bracket-recap-card">
           <div class="myteam-header">
-            <span>Knockout Bracket Path</span>
+            <span>Knockout Bracket Chart</span>
             <button class="btn btn-ghost btn-sm" id="btnToggleBracket">Show Full Bracket</button>
           </div>
           <div class="bracket-recap hidden" id="bracketRecap">
-            ${rounds.map((round) => `
-              <div class="bracket-round">
-                <h4>${round.label}</h4>
-                <div class="matchlog" style="max-height:none;">
-                  ${round.matches.map((m) => {
-                    const aWin = m.winnerCode && m.winnerCode === m.aCode;
-                    const bWin = m.winnerCode && m.winnerCode === m.bCode;
-                    return `
-                      <div class="match-row bracket-match-row">
-                        <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername)}</span></div>
-                        <div class="match-score-box">
-                          <span class="match-score-val">${m.result ? scoreText(m.result) : 'TBD'}</span>
-                        </div>
-                        <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername)}</span></div>
-                        <span></span>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            `).join('')}
+            <div class="bracket-chart ${rounds.length < 5 ? 'compact' : ''}" style="--round-count:${rounds.length};">
+              ${rounds.map((round, idx) => `
+                <section class="bracket-chart-round stage-${round.stage || idx}">
+                  <h4>${round.label}</h4>
+                  <div class="bracket-stack">
+                    ${round.matches.map((m) => bracketNodeHtml(m, idx === rounds.length - 1)).join('')}
+                  </div>
+                </section>
+              `).join('')}
+            </div>
           </div>
         </div>
       `;
