@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "gen:data": "node src/data/generate-teams.js"
+    "gen:data": "node src/data/generate-teams-from-txt.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

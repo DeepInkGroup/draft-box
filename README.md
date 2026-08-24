@@ -28,7 +28,7 @@ Requires **Node.js ≥ 22.5** (uses the built-in `node:sqlite` module — no nat
 cd server
 cp .env.example .env      # edit JWT_SECRET etc.
 npm install
-npm run gen:data          # (re)generates server/src/data/teams2026.json
+npm run gen:data          # (re)generates server/src/data/teams2026.json from server/src/data/player-database.txt
 npm start                 # listens on :4321 by default
 ```
 
@@ -51,4 +51,4 @@ This builds and runs the backend on port `4321` with a persisted SQLite volume. 
 
 ## Data disclaimer
 
-The 48-team list matches the real 2026 World Cup field, and all 1,248 players are real members of each nation's actual 26-man squad (9 teams have one generated filler player each, only where needed for squad depth). Overall ratings are fictional gameplay values, not an official/licensed rating dataset. See [RULES.md §9](RULES.md#9-about-the-player-data-important) for the full breakdown.
+The 48-team list matches the real 2026 World Cup field, and all 1,248 players are real members of each nation's actual 26-man squad. Overall ratings come from the final bundled player database for gameplay use, not an official/licensed rating dataset. See [RULES.md §9](RULES.md#9-about-the-player-data-important) for the full breakdown.

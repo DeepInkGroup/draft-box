@@ -117,8 +117,8 @@ The list of 48 teams matches the real, official field of nations qualified for t
 
 What's *not* official:
 
-- **Overall ratings are fictional**, made up for gameplay — no public, licensed rating dataset exists for these squads, so every player's overall is generated (with a hand-picked, higher overall for a few dozen widely recognized stars per major team).
+- **Overall ratings come from the bundled player database**, tuned for gameplay and not from an official/licensed rating dataset.
 
 Every single one of the 1,248 players in the game is a real 2026 World Cup squad member — no fictional or generated players exist anywhere in the dataset. A handful of teams have real squads slightly shallower in one position group than the most demanding formations call for (e.g. 3-2-4-1's 6 midfielders); rather than inventing a player to pad it out, the draft simply won't reveal that team to a drafter who still needs that position (there are 47 other teams to draw from), and a bot fielding that formation with that nation falls back to reusing its weakest already-selected player in the extra slot instead of fabricating one.
 
-This is intentional: the goal of the game is an exciting draft-and-simulation experience built on real players, without claiming to be an officially licensed EA/FIFA ratings product. If you want, this data layer (`server/src/data/teams2026.json`, generated from `server/src/data/wc2026_real_squads.json`) can be swapped out for a different or more precise ratings source.
+This is intentional: the goal of the game is an exciting draft-and-simulation experience built on real players, without claiming to be an officially licensed EA/FIFA ratings product. If you want, this data layer (`server/src/data/teams2026.json`, generated from `server/src/data/player-database.txt`) can be swapped out for a different or more precise ratings source.

@@ -7,8 +7,8 @@ RUN npm install --omit=dev --no-audit --no-fund
 
 COPY src ./src
 
-# regenerate the (fictional/approximate) World Cup dataset at build time
-RUN node src/data/generate-teams.js
+# regenerate the final player database at build time
+RUN node src/data/generate-teams-from-txt.js
 
 ENV NODE_ENV=production
 ENV PORT=4321
