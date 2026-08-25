@@ -565,7 +565,7 @@ const TournamentView = {
                   </div>
                 </section>
                 <div class="bracket-wing bracket-wing-right">
-                  ${sideRounds.slice().reverse().map((x, revIdx) => roundSection(x.round, x.rightMatches, sideRounds.length - 1 - revIdx, 'side-right')).join('')}
+                  ${sideRounds.map((x, idx) => roundSection(x.round, x.rightMatches, idx, 'side-right')).join('')}
                 </div>
               ` : rounds.map((round, idx) => roundSection(round, round.matches, idx, idx === rounds.length - 1 ? 'terminal-round' : '', idx === rounds.length - 1)).join('')}
             </div>
