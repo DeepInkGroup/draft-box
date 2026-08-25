@@ -17,7 +17,7 @@ const DashboardView = {
   renderModeSelect(container) {
     container.innerHTML = `
       <div class="card center">
-        <h2>World Cup 2026</h2>
+        <h2>Draft Box</h2>
         <p class="muted">Currently the only active mode. Club league mode is coming soon.</p>
       </div>
       <div class="mode-grid">

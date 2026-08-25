@@ -34,11 +34,29 @@ Each player picks their own formation when creating/joining a room. The formatio
 | 4-3-3 | 1 | 4 | 3 | 3 |
 | 4-4-2 | 1 | 4 | 4 | 2 |
 | 4-2-3-1 | 1 | 4 | 5 | 1 |
+| 4-5-1 | 1 | 4 | 5 | 1 |
+| 3-4-3 | 1 | 3 | 4 | 3 |
 | 3-5-2 | 1 | 3 | 5 | 2 |
+| 5-4-1 | 1 | 5 | 4 | 1 |
+| 4-1-2-1-2 | 1 | 4 | 4 | 2 |
+| 4-4-1-1 | 1 | 4 | 4 | 2 |
 | 5-3-2 | 1 | 5 | 3 | 2 |
+| 3-4-1-2 | 1 | 3 | 5 | 2 |
+| 4-2-2-2 | 1 | 4 | 4 | 2 |
+| 5-2-3 | 1 | 5 | 2 | 3 |
+| 5-3-1-1 | 1 | 5 | 3 | 2 |
+| 3-2-4-1 | 1 | 3 | 6 | 1 |
+| 4-2-4 | 1 | 4 | 2 | 4 |
+| 3-3-2-2 | 1 | 3 | 5 | 2 |
 | 4-1-4-1 | 1 | 4 | 5 | 1 |
+| 5-2-2-1 | 1 | 5 | 4 | 1 |
+| 3-5-1-1 | 1 | 3 | 5 | 2 |
+| 2-5-2-1 | 1 | 2 | 7 | 1 |
+| 3-3-1-3 | 1 | 3 | 4 | 3 |
+| 4-3-2-1 | 1 | 4 | 5 | 1 |
+| 4-3-1-2 | 1 | 4 | 4 | 2 |
 
-The total is always 11 players. The formation only sets how many you need from each position group; within a group (say, all 4 defenders) it's up to you which players you take.
+The total is always 11 players. Each formation is an explicit pitch map with named slots such as LB, RB, CB1, CM2, CAM, LW, or ST2. The draft still enforces the broader position groups (GK / DF / MF / FW), while the final lineup screen lets you move or swap players only inside the same group so the chosen shape stays intact.
 
 ---
 
@@ -57,7 +75,7 @@ A player in the currently revealed team stays greyed out (unclickable) if:
 - **Someone else in the room already took that exact player before you did.**
 
 ### A shared pool — real competition over players
-All 1,008 World Cup players (48 teams × 21 players) sit in one **pool shared by every member of the room**. The moment someone drafts a player, that player becomes unavailable to everyone else in the room too. Because drafting happens **simultaneously and independently** (not turn-based), it's entirely possible that right while you're deciding on a star player, someone else in the room grabs them — and the next time that same team is revealed to you, that player is gone. This is intentional: **decisiveness and speed** are part of the strategy.
+All 1,248 World Cup players (48 teams × 26 players) sit in one **pool shared by every member of the room**. The moment someone drafts a player, that player becomes unavailable to everyone else in the room too. Because drafting happens **simultaneously and independently** (not turn-based), it's entirely possible that right while you're deciding on a star player, someone else in the room grabs them — and the next time that same team is revealed to you, that player is gone. This is intentional: **decisiveness and speed** are part of the strategy.
 
 ### Skipping
 If you don't like any of the pickable players on the revealed team, you can hit "Skip & show next team" without picking, and a new random team appears. There's no limit on how many times you can skip.
