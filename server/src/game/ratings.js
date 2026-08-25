@@ -160,7 +160,8 @@ function computeSquadCard(squad, formation) {
     defence: avg(byGroup.DF),
     gk: avg(byGroup.GK),
     chemistry: Math.round(chem.chemistry * 100),
-    starPower: Math.round((Math.min(3, stars) / 3) * 100)
+    starPower: stars,
+    starPowerPct: Math.round((Math.min(3, stars) / 3) * 100)
   };
 }
 

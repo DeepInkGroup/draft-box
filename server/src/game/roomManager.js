@@ -47,7 +47,7 @@ function uniqueCode() {
 const activeRooms = new Map();
 
 // 0 is a sentinel meaning "No Limit" — no auto-pick countdown at all.
-const ALLOWED_PICK_TIMES_MS = [10000, 20000, 30000, 45000, 60000, 0];
+const ALLOWED_PICK_TIMES_MS = [10000, 20000, 30000, 45000, 0];
 
 function normalizePickTime(ms) {
   const n = Number(ms);

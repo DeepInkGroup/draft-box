@@ -217,7 +217,6 @@ const DashboardView = {
       { value: 20000, title: '20s', sub: 'Default' },
       { value: 30000, title: '30s', sub: 'Relaxed' },
       { value: 45000, title: '45s', sub: 'Leisurely' },
-      { value: 60000, title: '60s', sub: 'Chill' },
       { value: 0, title: 'No Limit', sub: 'Take your time' }
     ];
   },

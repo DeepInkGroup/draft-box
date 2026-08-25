@@ -23,6 +23,16 @@ const TACTICAL_STYLES = {
     key: 'counter', label: 'Counter Attack', attack: 1.06, defense: 1.01, possession: -5, passAccuracy: -2, foulBias: 0,
     tempo: 1.08, risk: 1.08, press: 0.82, control: 0.78, transition: 1.26, setPiece: 1.06, starMoment: 1.05,
     description: 'Absorbs pressure and turns transitions into high-value chances.'
+  },
+  wingplay: {
+    key: 'wingplay', label: 'Wing Play', attack: 1.04, defense: 0.99, possession: 1, passAccuracy: -1, foulBias: 1,
+    tempo: 1.07, risk: 1.07, press: 0.96, control: 0.94, transition: 1.12, setPiece: 1.14, starMoment: 1.04,
+    description: 'Uses width, crossing and set pieces to create chances, with some central-control risk.'
+  },
+  compact: {
+    key: 'compact', label: 'Compact Midfield', attack: 0.98, defense: 1.05, possession: 3, passAccuracy: 2, foulBias: -1,
+    tempo: 0.9, risk: 0.78, press: 0.94, control: 1.12, transition: 0.86, setPiece: 0.98, starMoment: 0.99,
+    description: 'Narrows the pitch, protects the middle and improves control, but creates fewer fast breaks.'
   }
 };
 
@@ -33,6 +43,8 @@ const MATCHUP_EDGE = {
   gegenpress: { possession: 0.08, counter: -0.07, defensive: 0.03 },
   possession: { defensive: 0.06, counter: -0.04, gegenpress: -0.08 },
   counter: { gegenpress: 0.08, possession: 0.05, defensive: -0.06 },
+  wingplay: { defensive: 0.04, compact: 0.05, possession: -0.03, gegenpress: -0.02 },
+  compact: { gegenpress: 0.05, counter: 0.04, wingplay: -0.05, possession: -0.02 },
   balanced: { defensive: 0.01, gegenpress: 0.01, possession: 0.01, counter: 0.01 }
 };
 

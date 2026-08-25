@@ -24,11 +24,13 @@ const DraftView = {
     let autoDraftRequested = false;
 
     const TACTICAL_STYLES = [
-      { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'More defensive resistance, less attacking risk.' },
-      { key: 'balanced', label: 'Balanced', meta: 'Safe default', desc: 'Stable against every style with no major weakness.' },
-      { key: 'gegenpress', label: 'Gegenpress', meta: 'High press', desc: 'More pressure and chances, but higher foul risk.' },
-      { key: 'possession', label: 'Possession', meta: 'Control', desc: 'Better passing, possession and territorial control.' },
-      { key: 'counter', label: 'Counter Attack', meta: 'Transitions', desc: 'Dangerous breaks against aggressive opponents.' }
+      { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'Pros: stronger defensive resistance, lower match chaos. Cons: less attacking volume and weaker control vs possession.' },
+      { key: 'balanced', label: 'Balanced', meta: 'Safe default', desc: 'Pros: no hard counter, steady ratings. Cons: smaller tactical edge and fewer explosive swings.' },
+      { key: 'gegenpress', label: 'Gegenpress', meta: 'High press', desc: 'Pros: more pressure, turnovers and late star moments. Cons: higher foul/card risk and vulnerable to counters.' },
+      { key: 'possession', label: 'Possession', meta: 'Control', desc: 'Pros: better passing, territory and tempo control. Cons: lower transition threat and weak vs heavy pressing.' },
+      { key: 'counter', label: 'Counter Attack', meta: 'Transitions', desc: 'Pros: high-value breaks vs aggressive teams. Cons: lower possession and struggles against deep blocks.' },
+      { key: 'wingplay', label: 'Wing Play', meta: 'Width', desc: 'Pros: wide attacks, crosses and set-piece pressure. Cons: less central control and some counter exposure.' },
+      { key: 'compact', label: 'Compact Midfield', meta: 'Narrow control', desc: 'Pros: protects the middle, slows high press and counters. Cons: fewer fast breaks and weaker vs wide attacks.' }
     ];
 
     const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 };
@@ -362,7 +364,7 @@ const DraftView = {
     function renderTacticalStylePicker() {
       revealCard.innerHTML = `
         <div class='reveal-team'>Choose Tactical Style</div>
-        <div class='reveal-sub'>This affects chemistry, possession, fouls and tactical matchup edge before every match.</div>
+        <div class='reveal-sub'>Each style changes attack, defence, tempo, possession, fouls, star moments and matchup edge before every match.</div>
         <div class='tactical-style-grid' id='tacticalStyleGrid'>
           ${TACTICAL_STYLES.map((s) => `
             <button type='button' class='tactical-style-card ${s.key === myTacticalStyle ? 'selected' : ''}' data-style='${s.key}'>
