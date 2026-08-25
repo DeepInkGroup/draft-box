@@ -316,18 +316,52 @@ function registerSocketHandlers(io) {
       }
     });
 
-    socket.on('draft:setFormation', ({ code, formation }) => {
+    socket.on('draft:setFormation', () => {
+      socket.emit('error:message', { error: 'formation is locked after the draft starts; move or swap players inside the same position group instead' });
+    });
+
+    socket.on('draft:autoComplete', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
       if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      if (!roomRow.single_player) return socket.emit('error:message', { error: 'experimental auto draft is only available in single player' });
       const state = rm.loadRoomState(roomRow);
       const member = state.members.get(socket.user.id);
       try {
         if (!member) throw new Error('not a member of this room');
         clearPickTimer(member);
-        const result = draftEngine.changeFormation(member, formation);
-        rm.persistDraftFormation(roomRow.id, socket.user.id, member, result.moved);
-        socket.emit('draft:formationSet', { formation: member.formation, ...myDraftView(member, state.showOverall) });
-        io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(rm.getRoomRow(roomRow.id)));
+        let guard = 0;
+        while (!draftEngine.isDraftComplete(member) && guard < 40) {
+          if (!member.currentReveal) {
+            const reveal = draftEngine.revealForMember(state, socket.user.id);
+            if (reveal.done) break;
+            if (reveal.exhausted) throw new Error('auto draft could not find a suitable player for the remaining slots');
+          }
+          const result = draftEngine.autoPickForMember(state, socket.user.id);
+          if (!result) throw new Error('auto draft could not pick from the current reveal');
+          applyPickSideEffects(io, roomRow.code, state, socket.user.id, result, true);
+          guard += 1;
+        }
+        if (!draftEngine.isDraftComplete(member)) throw new Error('auto draft did not complete the XI');
+
+        if (roomRow.captain_enabled && !member.captainSlot) {
+          const captain = member.squad.slice().sort((a, b) => (b.overall || 0) - (a.overall || 0))[0];
+          if (captain) {
+            member.captainSlot = captain.slotCode;
+            rm.persistCaptain(roomRow.id, socket.user.id, member.captainSlot);
+            socket.emit('draft:captainSet', { slotCode: member.captainSlot, ...myDraftView(member, state.showOverall) });
+          }
+        }
+
+        if (!member.tacticalStyleLocked) {
+          member.tacticalStyle = normalizeStyle(member.tacticalStyle || 'balanced');
+          member.tacticalStyleLocked = true;
+          rm.persistTacticalStyle(roomRow.id, socket.user.id, member.tacticalStyle);
+          socket.emit('draft:tacticalStyleSet', { tacticalStyle: member.tacticalStyle, ...myDraftView(member, state.showOverall) });
+        }
+
+        const freshRoomRow = rm.getRoomRow(roomRow.id);
+        const started = maybeStartTournament(io, freshRoomRow, state);
+        if (!started) io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }

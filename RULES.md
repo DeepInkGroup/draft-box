@@ -65,10 +65,10 @@ If you don't like any of the pickable players on the revealed team, you can hit 
 ### Final squad
 Every member drafts exactly **11 starting players** (no substitutes). This 11-man squad is exactly what plays for that user throughout the entire World Cup.
 
-### Formation changes and final lineup moves
-During the draft, you may change formation as long as every player already drafted still fits the new formation's position-group counts. For example, if you already drafted four defenders, you cannot switch into a shape with only three defender slots. When a valid change is made, drafted players are reflowed into compatible slots and your next reveal is recalculated.
+### Formation lock and final lineup moves
+Your formation is chosen before the draft starts. Once the draft screen opens, the shape is locked: a 4-3-3 cannot become a 3-4-4, 4-4-2, or any other shape mid-draft. This keeps the draft fair and prevents players from escaping position-group commitments after seeing the random teams.
 
-After all 11 slots are filled, you can still rearrange the XI before locking tactical style: select a filled pitch slot, then choose another slot in the same position group to move or swap the players. This lets you fix the final shape without changing the squad itself.
+You can still rearrange the XI before locking tactical style: select a filled pitch slot, then choose another slot in the same position group to move or swap the players. For example, defenders can swap with defenders and midfielders with midfielders, but the formation's slot counts never change. This lets you polish the final lineup without changing the squad shape itself.
 
 ### Tactical style lock
 Once the XI is complete, each drafter locks one tactical style: Defensive, Balanced, Gegenpress, Possession, or Counter Attack. The tournament starts only after every drafter has finished this lock step.
@@ -114,6 +114,8 @@ If the team you represent (whether in the group stage or the knockout stage) get
 ## 7. Single Player Mode
 
 In Single Player mode, you're the only human in the room, and bots run the other 47 countries. Every rule about drafting, formations, the World Cup, and match simulation described above applies exactly the same — you just don't wait for anyone else, and the World Cup begins the moment your own draft is complete.
+
+Single Player also includes an experimental **Auto Draft** option. When enabled before starting, the engine reveals eligible teams, picks the strongest available XI for your locked formation, chooses the highest-rated captain when captains are enabled, locks a balanced tactical style if needed, and then starts the tournament automatically.
 
 ---
 

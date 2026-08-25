@@ -21,6 +21,7 @@ const DraftView = {
     let tacticalStyleLocked = false;
     let moveFromSlot = null;
     let currentSlotsMap = {};
+    let autoDraftRequested = false;
 
     const TACTICAL_STYLES = [
       { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'More defensive resistance, less attacking risk.' },
@@ -67,10 +68,8 @@ const DraftView = {
         </div>
         <p class="muted center" id="squadProgress"></p>
         <div class="draft-lineup-tools">
-          <label for="draftFormationSelect">Formation</label>
-          <select id="draftFormationSelect">
-            ${FORMATION_NAMES.map((f) => `<option value="${f}">${f}</option>`).join('')}
-          </select>
+          <label>Locked Formation</label>
+          <b class="draft-formation-badge" id="draftFormationBadge">${myFormation}</b>
           <span id="lineupMoveHint">Tap a filled slot to rearrange your XI.</span>
         </div>
         <div id="squadPitch"></div>
@@ -134,7 +133,7 @@ const DraftView = {
     const poolCount = container.querySelector('#poolCount');
     const waitingZone = container.querySelector('#waitingZone');
     const ratingsCardZone = container.querySelector('#ratingsCardZone');
-    const formationSelect = container.querySelector('#draftFormationSelect');
+    const formationBadge = container.querySelector('#draftFormationBadge');
     const lineupMoveHint = container.querySelector('#lineupMoveHint');
 
     function slotGroup(slotCode) {
@@ -143,7 +142,7 @@ const DraftView = {
     }
 
     function setFormationControl() {
-      if (formationSelect) formationSelect.value = myFormation;
+      if (formationBadge) formationBadge.textContent = myFormation;
     }
 
     // Multiplayer rooms wait for the room creator's explicit confirmation once everyone
@@ -440,7 +439,12 @@ const DraftView = {
       if (s.myDraft) {
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
-        if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
+        const autoKey = `draftbox.autoDraft.${code}`;
+        if (singlePlayer && !s.myDraft.draftComplete && sessionStorage.getItem(autoKey) === '1' && !autoDraftRequested) {
+          autoDraftRequested = true;
+          revealCard.innerHTML = '<p class="muted center">Experimental auto draft is selecting your XI...</p>';
+          socket.emit('draft:autoComplete', { code });
+        } else if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
         else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot, s.myDraft.tacticalStyle, s.myDraft.tacticalStyleLocked, s.myDraft.ratingsCard);
       }
     });
@@ -452,27 +456,6 @@ const DraftView = {
 
     App.onSocket('draft:reveal', renderReveal);
 
-    if (formationSelect) {
-      formationSelect.addEventListener('change', () => {
-        const formation = formationSelect.value;
-        if (formation === myFormation) return;
-        moveFromSlot = null;
-        formationSelect.disabled = true;
-        socket.emit('draft:setFormation', { code, formation });
-        setTimeout(() => { formationSelect.disabled = false; }, 500);
-      });
-    }
-
-    App.onSocket('draft:formationSet', (payload) => {
-      myFormation = payload.formation || myFormation;
-      tacticalStyleLocked = !!payload.tacticalStyleLocked;
-      moveFromSlot = null;
-      if (formationSelect) formationSelect.disabled = false;
-      renderSquadPitch(payload.slots);
-      renderRatingsCard(payload.ratingsCard);
-      if (!payload.draftComplete) socket.emit('draft:reveal', { code });
-      else handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
-    });
 
     App.onSocket('draft:lineupChanged', (payload) => {
       moveFromSlot = null;
@@ -484,9 +467,9 @@ const DraftView = {
     App.onSocket('draft:picked', (payload) => {
       if (payload.userId !== App.state.user.id) return;
       renderSquadPitch(payload.slots);
-      if (payload.auto) App.toast(`⏱ Time's up — auto-picked ${payload.player.name} (${POS_LABEL[payload.player.pos]})`, false);
+      if (payload.auto && !autoDraftRequested) App.toast(`Time is up - auto-picked ${payload.player.name} (${POS_LABEL[payload.player.pos]})`, false);
       if (!payload.draftComplete) {
-        socket.emit('draft:reveal', { code });
+        if (!autoDraftRequested) socket.emit('draft:reveal', { code });
       } else {
         handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
       }
@@ -510,7 +493,7 @@ const DraftView = {
       poolCount.textContent = u.poolRemaining;
     });
 
-    App.onSocket('tournament:started', () => { stopTimer(); App.goTournament(code); });
+    App.onSocket('tournament:started', () => { sessionStorage.removeItem(`draftbox.autoDraft.${code}`); stopTimer(); App.goTournament(code); });
 
     App.onSocket('error:message', (e) => App.toast(e.error, true));
   }

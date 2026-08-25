@@ -79,6 +79,13 @@ const DashboardView = {
     ];
   },
 
+  autoDraftOptions() {
+    return [
+      { value: false, title: 'Off', sub: 'Draft manually' },
+      { value: true, title: 'Auto', sub: 'Experimental instant XI' }
+    ];
+  },
+
   spoilerOptions() {
     return [
       { value: false, title: 'Off', sub: 'Spectators can keep watching' },
@@ -234,6 +241,8 @@ const DashboardView = {
         <div id="spTeams" style="margin-bottom:16px;"></div>
         <div class="field"><label>Rerolls (skip a revealed team)</label></div>
         <div id="spRerolls" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Experimental Auto Draft</label></div>
+        <div id="spAutoDraft" style="margin-bottom:16px;"></div>
         <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -249,6 +258,7 @@ const DashboardView = {
     const spLength = ToggleGroup.render(container.querySelector('#spLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
     const spTeams = await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
+    const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
       if (spTeams.count > 0 && spTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
@@ -258,6 +268,8 @@ const DashboardView = {
           captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value,
           rerollsAllowed: spRerolls.value
         });
+        if (spAutoDraft.value) sessionStorage.setItem(`draftbox.autoDraft.${room.code}`, '1');
+        else sessionStorage.removeItem(`draftbox.autoDraft.${room.code}`);
         App.goDraft(room.code);
       } catch (e) { showErr(e); }
     });
