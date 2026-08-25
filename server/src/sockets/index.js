@@ -201,13 +201,14 @@ function registerSocketHandlers(io) {
         let myLineup = null;
         if (mySlot) {
           const odds = computeChampionshipOdds(state.tournament.slotByCode);
-          const prediction = predictKeyPlayers(mySlot.xi, mySlot.formation);
+          const prediction = predictKeyPlayers(mySlot.xi, mySlot.formation, mySlot.tacticalStyle);
           myLineup = {
             code: mySlot.code,
             formation: mySlot.formation,
             xi: mySlot.xi,
             countryName: mySlot.name,
             championshipChance: odds[mySlot.code],
+            prediction,
             predictedTopScorer: prediction.topScorer,
             predictedTopAssist: prediction.topAssist
           };
@@ -310,6 +311,38 @@ function registerSocketHandlers(io) {
         if (member) clearPickTimer(member);
         const result = draftEngine.pickPlayer(state, socket.user.id, playerId, slotCode);
         applyPickSideEffects(io, roomRow.code, state, socket.user.id, result, false);
+      } catch (e) {
+        socket.emit('error:message', { error: e.message });
+      }
+    });
+
+    socket.on('draft:setFormation', ({ code, formation }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      try {
+        if (!member) throw new Error('not a member of this room');
+        clearPickTimer(member);
+        const result = draftEngine.changeFormation(member, formation);
+        rm.persistDraftFormation(roomRow.id, socket.user.id, member, result.moved);
+        socket.emit('draft:formationSet', { formation: member.formation, ...myDraftView(member, state.showOverall) });
+        io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(rm.getRoomRow(roomRow.id)));
+      } catch (e) {
+        socket.emit('error:message', { error: e.message });
+      }
+    });
+
+    socket.on('draft:moveSlot', ({ code, fromSlotCode, toSlotCode }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      try {
+        if (!member) throw new Error('not a member of this room');
+        const result = draftEngine.movePlayerSlot(member, fromSlotCode, toSlotCode);
+        rm.persistSlotMoves(roomRow.id, socket.user.id, member, result.moved);
+        socket.emit('draft:lineupChanged', { ...myDraftView(member, state.showOverall) });
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }

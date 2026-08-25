@@ -19,6 +19,8 @@ const DraftView = {
     let lastRevealPayload = null;
     let myTacticalStyle = 'balanced';
     let tacticalStyleLocked = false;
+    let moveFromSlot = null;
+    let currentSlotsMap = {};
 
     const TACTICAL_STYLES = [
       { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'More defensive resistance, less attacking risk.' },
@@ -64,6 +66,13 @@ const DraftView = {
           <span class="muted" style="text-align:right;">Players left in pool: <b id="poolCount">-</b></span>
         </div>
         <p class="muted center" id="squadProgress"></p>
+        <div class="draft-lineup-tools">
+          <label for="draftFormationSelect">Formation</label>
+          <select id="draftFormationSelect">
+            ${FORMATION_NAMES.map((f) => `<option value="${f}">${f}</option>`).join('')}
+          </select>
+          <span id="lineupMoveHint">Tap a filled slot to rearrange your XI.</span>
+        </div>
         <div id="squadPitch"></div>
       </div>
     `;
@@ -125,6 +134,17 @@ const DraftView = {
     const poolCount = container.querySelector('#poolCount');
     const waitingZone = container.querySelector('#waitingZone');
     const ratingsCardZone = container.querySelector('#ratingsCardZone');
+    const formationSelect = container.querySelector('#draftFormationSelect');
+    const lineupMoveHint = container.querySelector('#lineupMoveHint');
+
+    function slotGroup(slotCode) {
+      const slot = getSlots(myFormation).find((s) => s.code === slotCode);
+      return slot ? slot.group : null;
+    }
+
+    function setFormationControl() {
+      if (formationSelect) formationSelect.value = myFormation;
+    }
 
     // Multiplayer rooms wait for the room creator's explicit confirmation once everyone
     // is ready, instead of yanking every player into the tournament the instant the last
@@ -186,28 +206,64 @@ const DraftView = {
     }
 
     function renderSquadPitch(slotsMap) {
+      currentSlotsMap = slotsMap || {};
+      setFormationControl();
       const slotDefs = getSlots(myFormation);
       const filledCount = Object.values(slotsMap || {}).filter(Boolean).length;
       squadProgress.textContent = `${filledCount} / 11 positions filled`;
+      if (lineupMoveHint) {
+        lineupMoveHint.textContent = moveFromSlot
+          ? `Move ${currentSlotsMap[moveFromSlot] ? currentSlotsMap[moveFromSlot].name : 'player'} to another ${slotGroup(moveFromSlot)} slot.`
+          : 'Tap a filled slot to rearrange your XI.';
+      }
       Pitch.render(squadPitch, slotDefs, (slot) => {
         const occupant = slotsMap && slotsMap[slot.code];
+        const moving = moveFromSlot === slot.code;
+        const targetable = moveFromSlot && moveFromSlot !== slot.code && slot.group === slotGroup(moveFromSlot);
         if (occupant) {
           return {
-            className: `filled ${roleClass(slot.group)}`,
+            className: `filled ${roleClass(slot.group)} clickable ${moving ? 'moving' : ''} ${targetable ? 'move-target' : ''}`,
             text: slot.short,
             title: `${occupant.name} (${slot.label})`,
-            nameLabel: occupant.name.split(' ').slice(-1)[0]
+            nameLabel: occupant.name.split(' ').slice(-1)[0],
+            onClick: () => handleSlotMoveClick(slot.code)
           };
         }
-        return { text: slot.short, title: slot.label };
+        return {
+          className: targetable ? 'clickable move-target empty-target' : '',
+          text: slot.short,
+          title: slot.label,
+          onClick: targetable ? () => handleSlotMoveClick(slot.code) : null
+        };
       });
+    }
+
+    function handleSlotMoveClick(slotCode) {
+      if (!currentSlotsMap) return;
+      if (!moveFromSlot) {
+        if (!currentSlotsMap[slotCode]) return;
+        moveFromSlot = slotCode;
+        renderSquadPitch(currentSlotsMap);
+        return;
+      }
+      if (moveFromSlot === slotCode) {
+        moveFromSlot = null;
+        renderSquadPitch(currentSlotsMap);
+        return;
+      }
+      if (slotGroup(moveFromSlot) !== slotGroup(slotCode)) {
+        App.toast('Players can only move inside the same position group', true);
+        return;
+      }
+      const fromSlotCode = moveFromSlot;
+      moveFromSlot = null;
+      socket.emit('draft:moveSlot', { code, fromSlotCode, toSlotCode: slotCode });
     }
 
     function renderReveal(payload) {
       if (payload.done) {
         stopTimer();
-        revealCard.innerHTML = '';
-        waitingMsg.style.display = 'block';
+        revealCard.innerHTML = '<p class="muted center">Your XI is complete. Rearrange the pitch if needed, then lock your tactical style.</p>';
         return;
       }
       if (payload.exhausted) {
@@ -395,6 +451,35 @@ const DraftView = {
     });
 
     App.onSocket('draft:reveal', renderReveal);
+
+    if (formationSelect) {
+      formationSelect.addEventListener('change', () => {
+        const formation = formationSelect.value;
+        if (formation === myFormation) return;
+        moveFromSlot = null;
+        formationSelect.disabled = true;
+        socket.emit('draft:setFormation', { code, formation });
+        setTimeout(() => { formationSelect.disabled = false; }, 500);
+      });
+    }
+
+    App.onSocket('draft:formationSet', (payload) => {
+      myFormation = payload.formation || myFormation;
+      tacticalStyleLocked = !!payload.tacticalStyleLocked;
+      moveFromSlot = null;
+      if (formationSelect) formationSelect.disabled = false;
+      renderSquadPitch(payload.slots);
+      renderRatingsCard(payload.ratingsCard);
+      if (!payload.draftComplete) socket.emit('draft:reveal', { code });
+      else handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
+    });
+
+    App.onSocket('draft:lineupChanged', (payload) => {
+      moveFromSlot = null;
+      renderSquadPitch(payload.slots);
+      renderRatingsCard(payload.ratingsCard);
+      if (payload.draftComplete) handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
+    });
 
     App.onSocket('draft:picked', (payload) => {
       if (payload.userId !== App.state.user.id) return;

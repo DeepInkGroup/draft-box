@@ -65,6 +65,13 @@ If you don't like any of the pickable players on the revealed team, you can hit 
 ### Final squad
 Every member drafts exactly **11 starting players** (no substitutes). This 11-man squad is exactly what plays for that user throughout the entire World Cup.
 
+### Formation changes and final lineup moves
+During the draft, you may change formation as long as every player already drafted still fits the new formation's position-group counts. For example, if you already drafted four defenders, you cannot switch into a shape with only three defender slots. When a valid change is made, drafted players are reflowed into compatible slots and your next reveal is recalculated.
+
+After all 11 slots are filled, you can still rearrange the XI before locking tactical style: select a filled pitch slot, then choose another slot in the same position group to move or swap the players. This lets you fix the final shape without changing the squad itself.
+
+### Tactical style lock
+Once the XI is complete, each drafter locks one tactical style: Defensive, Balanced, Gegenpress, Possession, or Counter Attack. The tournament starts only after every drafter has finished this lock step.
 ---
 
 ## 5. The 2026 World Cup — the Real Format
@@ -83,12 +90,17 @@ Round of 32 (32 teams) → Round of 16 (16) → Quarter-finals (8) → Semi-fina
 Pairings in each round are random. If a knockout match ends level, a **penalty shootout** decides the winner.
 
 ### Match result simulation
-The outcome of every match (bot vs. bot, human vs. bot, or human vs. human) is decided by a simple statistical model:
-- Each team's strength = the average overall rating of its 11 players.
-- Based on the strength difference between the two teams, an "expected goals" value is computed for each.
-- The actual number of goals for each team is sampled from a Poisson distribution around that number — so there's always an element of luck; the weaker team can still win, just less often.
-- In knockout rounds, a draw goes to penalties; the shootout winner is mostly luck-based, with a slight edge for the stronger team.
+The outcome of every match (bot vs. bot, human vs. bot, or human vs. human) is decided by a statistical model:
+- Each team's base Attack and Defense come from weighted player overalls. Advanced slots weigh more for Attack, deeper slots weigh more for Defense, and elite players use a stronger quality curve so 85-91 rated players matter more in goals, assists, saves and penalties.
+- Chemistry then adjusts the team through correct position fit, balanced defense/midfield/attack structure, linkage, Game Changer leadership and out-of-position penalties.
+- Tactical Style applies engine modifiers: Attack, Defense, Tempo, Risk, Press, Control, Transition, Set Pieces and Star Moment. Attack/Defense multiply the core ratings; Tempo/Risk/Transition alter shot and counter volume; Control/Press shape possession, pass accuracy and territory; Risk also raises foul/card volatility.
+- Style matchups add small edges. Counter Attack can punish heavy pressure, Possession can slow chaotic games, Defensive can absorb risk, Gegenpress can create late pressure, and Balanced avoids large weaknesses.
+- Human teams receive a 1.2x Attack and Defense boost only against AI opponents. Human vs human and AI vs AI matches are neutral.
+- Based on the resulting expected goals, actual goals are sampled from a Poisson distribution, so better teams win more often but never automatically.
+- In knockout rounds, a draw goes to extra time and then penalties; player quality, keeper quality, star moments and pressure influence the shootout edge.
 
+### Predict Chance and pre-tournament projections
+The lineup reveal predicts title chance from the same inputs the match engine uses: weighted player overall, chemistry, tactical style, Game Changer threat, formation fit and the relative strength of the full 48-team field. It also highlights likely goal focus, creator focus and pressure player using the same role/quality weights that live match events use.
 Any member of the room can hit "Simulate Next Stage" to advance the game engine (e.g. the next matchday of the group stage, or an entire knockout round); results are shown live to everyone in the room at once.
 
 ---

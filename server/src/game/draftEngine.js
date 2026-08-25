@@ -1,5 +1,5 @@
 const { ALL_TEAMS, getTeam } = require('../data/teams');
-const { getSlots, POSITION_GROUPS } = require('./formations');
+const { getSlots, isValidFormation, POSITION_GROUPS } = require('./formations');
 
 const MAX_REROLL_ATTEMPTS = 300;
 const DEFAULT_PICK_TIME_MS = 20000;
@@ -20,6 +20,84 @@ function slotsRemaining(member) {
 
 function isDraftComplete(member) {
   return openSlots(member).length === 0;
+}
+
+function emptySlotsForFormation(formation) {
+  const slots = {};
+  for (const s of getSlots(formation)) slots[s.code] = null;
+  return slots;
+}
+
+function groupCountsForFormation(formation) {
+  const counts = { GK: 0, DF: 0, MF: 0, FW: 0 };
+  for (const s of getSlots(formation)) counts[s.group] += 1;
+  return counts;
+}
+
+function changeFormation(member, formation) {
+  if (!member) throw new Error('not a member of this room');
+  if (!isValidFormation(formation)) throw new Error('invalid formation');
+  if (member.formation === formation) return { changed: false, moved: [] };
+
+  const currentCounts = { GK: 0, DF: 0, MF: 0, FW: 0 };
+  for (const p of member.squad) currentCounts[p.pos] += 1;
+  const nextCounts = groupCountsForFormation(formation);
+  for (const group of POSITION_GROUPS) {
+    if (currentCounts[group] > nextCounts[group]) {
+      throw new Error(`this formation has only ${nextCounts[group]} ${group} slot(s), but you already drafted ${currentCounts[group]}`);
+    }
+  }
+
+  const oldCaptainPlayer = member.captainSlot ? member.slots[member.captainSlot] : null;
+  const nextSlots = emptySlotsForFormation(formation);
+  const buckets = { GK: [], DF: [], MF: [], FW: [] };
+  for (const s of getSlots(formation)) buckets[s.group].push(s.code);
+
+  const moved = [];
+  for (const p of member.squad) {
+    const nextCode = buckets[p.pos].shift();
+    const oldCode = p.slotCode;
+    p.slotCode = nextCode;
+    nextSlots[nextCode] = p;
+    moved.push({ playerId: p.id, fromSlotCode: oldCode, toSlotCode: nextCode });
+  }
+
+  member.formation = formation;
+  member.slots = nextSlots;
+  member.currentReveal = null;
+  member.pickDeadline = null;
+  member.draftComplete = isDraftComplete(member);
+  member.tacticalStyleLocked = false;
+  member.captainSlot = oldCaptainPlayer ? (member.squad.find((p) => p.id === oldCaptainPlayer.id) || {}).slotCode || null : null;
+  return { changed: true, moved };
+}
+
+function movePlayerSlot(member, fromSlotCode, toSlotCode) {
+  if (!member) throw new Error('not a member of this room');
+  if (!fromSlotCode || !toSlotCode || fromSlotCode === toSlotCode) return { moved: [] };
+  const slotDefs = getSlots(member.formation);
+  const fromDef = slotDefs.find((s) => s.code === fromSlotCode);
+  const toDef = slotDefs.find((s) => s.code === toSlotCode);
+  if (!fromDef || !toDef) throw new Error('invalid lineup slot');
+  if (fromDef.group !== toDef.group) throw new Error('players can only move inside the same position group');
+  const source = member.slots[fromSlotCode];
+  if (!source) throw new Error('source slot is empty');
+  const target = member.slots[toSlotCode] || null;
+
+  member.slots[toSlotCode] = source;
+  source.slotCode = toSlotCode;
+  member.slots[fromSlotCode] = target;
+  if (target) target.slotCode = fromSlotCode;
+
+  if (member.captainSlot === fromSlotCode) member.captainSlot = toSlotCode;
+  else if (member.captainSlot === toSlotCode && target) member.captainSlot = fromSlotCode;
+
+  return {
+    moved: [
+      { playerId: source.id, fromSlotCode, toSlotCode },
+      target ? { playerId: target.id, fromSlotCode: toSlotCode, toSlotCode: fromSlotCode } : null
+    ].filter(Boolean)
+  };
 }
 
 // Finds a random real team that still has at least one player this member can use
@@ -173,5 +251,7 @@ module.exports = {
   openSlots,
   openSlotsForGroup,
   isDraftComplete,
+  changeFormation,
+  movePlayerSlot,
   DEFAULT_PICK_TIME_MS
 };

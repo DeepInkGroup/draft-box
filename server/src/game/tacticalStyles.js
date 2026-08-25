@@ -1,22 +1,27 @@
 const TACTICAL_STYLES = {
   defensive: {
     key: 'defensive', label: 'Defensive', attack: 0.94, defense: 1.08, possession: -4, passAccuracy: -1, foulBias: 1,
+    tempo: 0.88, risk: 0.72, press: 0.72, control: 0.82, transition: 0.92, setPiece: 1.04, starMoment: 0.96,
     description: 'Deep block, lower risk, stronger defensive resistance.'
   },
   balanced: {
     key: 'balanced', label: 'Balanced', attack: 1, defense: 1, possession: 0, passAccuracy: 0, foulBias: 0,
+    tempo: 1, risk: 1, press: 1, control: 1, transition: 1, setPiece: 1, starMoment: 1,
     description: 'No major weakness, adapts reasonably into any matchup.'
   },
   gegenpress: {
     key: 'gegenpress', label: 'Gegenpress', attack: 1.07, defense: 0.97, possession: 2, passAccuracy: -2, foulBias: 3,
+    tempo: 1.15, risk: 1.18, press: 1.24, control: 0.92, transition: 1.1, setPiece: 0.98, starMoment: 1.08,
     description: 'High press, more shots and chaos, higher card/foul risk.'
   },
   possession: {
     key: 'possession', label: 'Possession', attack: 1.01, defense: 1.03, possession: 6, passAccuracy: 5, foulBias: -1,
+    tempo: 0.94, risk: 0.84, press: 0.9, control: 1.22, transition: 0.9, setPiece: 1.02, starMoment: 1.03,
     description: 'Controls territory, improves passing and reduces volatility.'
   },
   counter: {
     key: 'counter', label: 'Counter Attack', attack: 1.06, defense: 1.01, possession: -5, passAccuracy: -2, foulBias: 0,
+    tempo: 1.08, risk: 1.08, press: 0.82, control: 0.78, transition: 1.26, setPiece: 1.06, starMoment: 1.05,
     description: 'Absorbs pressure and turns transitions into high-value chances.'
   }
 };

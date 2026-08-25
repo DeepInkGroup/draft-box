@@ -369,18 +369,33 @@ const TournamentView = {
       const avgOverall = Math.round(lineup.xi.reduce((s, p) => s + p.overall, 0) / lineup.xi.length);
       const chancePct = lineup.championshipChance * 100;
       const chanceText = chancePct >= 0.1 ? `${chancePct.toFixed(1)}%` : '<0.1%';
+      const prediction = lineup.prediction || {};
+      const predictionIdeas = Array.isArray(prediction.ideas) ? prediction.ideas : [];
+      const predictionCards = [
+        ['Engine power', prediction.enginePower || '-'],
+        ['Average OVR', prediction.avgOverall || avgOverall],
+        ['Chemistry', prediction.chemistryPct != null ? `${prediction.chemistryPct}%` : '-'],
+        ['Star threat', prediction.starThreatPct != null ? `${prediction.starThreatPct}%` : '-'],
+        ['Tactical style', prediction.tacticalStyleLabel || 'Balanced'],
+        ['Risk profile', prediction.riskLabel || 'Controlled']
+      ];
 
       stepCard.innerHTML = `
         <h3 class="center">You're representing ${lineup.countryName}!</h3>
         <p class="muted center">${lineup.formation} &middot; OVR ${avgOverall}</p>
         <div id="lineupPitch"></div>
         <div class="lineup-predictions">
-          <div class="lineup-prediction-stat">
+          <div class="lineup-prediction-stat wide">
             <span class="lineup-prediction-value">${chanceText}</span>
             <span class="muted">predicted title chance</span>
           </div>
-          ${lineup.predictedTopScorer ? `<div class="lineup-prediction-line">⚽ Predicted top scorer: <b>${lineup.predictedTopScorer}</b></div>` : ''}
-          ${lineup.predictedTopAssist ? `<div class="lineup-prediction-line">🎯 Predicted top assists: <b>${lineup.predictedTopAssist}</b></div>` : ''}
+          ${predictionCards.map(([label, value]) => `<div class="lineup-prediction-card"><span>${label}</span><b>${value}</b></div>`).join('')}
+          <div class="lineup-prediction-card wide trio">
+            ${prediction.topScorer ? `<div><span>Goal focus</span><b>${prediction.topScorer}</b></div>` : ''}
+            ${prediction.topAssist ? `<div><span>Creator focus</span><b>${prediction.topAssist}</b></div>` : ''}
+            ${prediction.pressurePlayer ? `<div><span>Pressure player</span><b>${prediction.pressurePlayer}</b></div>` : ''}
+          </div>
+          ${predictionIdeas.length ? `<div class="lineup-prediction-ideas wide">${predictionIdeas.map((idea) => `<span>${idea}</span>`).join('')}</div>` : ''}
         </div>
         <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">Enter the World Cup</button>
       `;

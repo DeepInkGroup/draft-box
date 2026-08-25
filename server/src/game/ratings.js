@@ -1,4 +1,5 @@
 const { getSlots, getAdjacentPairs } = require('./formations');
+const { TACTICAL_STYLES, normalizeStyle } = require('./tacticalStyles');
 
 // Every slot gets a continuous attack/defense weight from its pitch depth (y):
 // y=0 (the opponent's goal line) is pure attack, y=100 (own goal/GK) is pure defense.
@@ -145,10 +146,20 @@ function computeSquadCard(squad, formation) {
 // A single "power" number per team, combining the same Attack/Defense ratings and
 // Chemistry multiplier the match engine actually simulates with — so the odds below are
 // a genuine reflection of the engine, not a separate guess.
-function computePower(xi, formation) {
+function computePower(xi, formation, tacticalStyle = 'balanced') {
   const ratings = computeTeamRatings(xi, formation);
   const chem = computeChemistry(xi, formation);
-  return ((ratings.attack + ratings.defense) / 2) * chem.multiplier;
+  const style = TACTICAL_STYLES[normalizeStyle(tacticalStyle)] || TACTICAL_STYLES.balanced;
+  const stylePower = (
+    style.attack * 0.34 +
+    style.defense * 0.34 +
+    style.control * 0.08 +
+    style.transition * 0.08 +
+    style.press * 0.06 +
+    style.setPiece * 0.05 +
+    style.starMoment * 0.05
+  );
+  return ((ratings.attack + ratings.defense) / 2) * chem.multiplier * stylePower;
 }
 
 // Rough championship-odds estimate across the whole 48-team field: each team's power is
@@ -159,7 +170,7 @@ function computePower(xi, formation) {
 const ODDS_EXPONENT = 12;
 function computeChampionshipOdds(slotByCode) {
   const codes = Object.keys(slotByCode);
-  const powers = codes.map((c) => computePower(slotByCode[c].xi, slotByCode[c].formation));
+  const powers = codes.map((c) => computePower(slotByCode[c].xi, slotByCode[c].formation, slotByCode[c].tacticalStyle));
   const weighted = powers.map((p) => Math.pow(Math.max(1, p), ODDS_EXPONENT));
   const total = weighted.reduce((s, w) => s + w, 0) || 1;
   const odds = {};
@@ -170,25 +181,57 @@ function computeChampionshipOdds(slotByCode) {
 // Predicts which of an XI's own players is most likely to end up its top scorer/assist
 // provider, using the exact same attack/support weighting matchSim uses to pick real
 // goal/assist events — so the prediction and the simulation agree with each other.
-function predictKeyPlayers(xi, formation) {
+function predictKeyPlayers(xi, formation, tacticalStyle = 'balanced') {
   const slotByCode = new Map(getSlots(formation).map((s) => [s.code, s]));
   let bestScorer = null;
   let bestScorerScore = -1;
   let bestAssist = null;
   let bestAssistScore = -1;
+  let bestPressure = null;
+  let bestPressureScore = -1;
+  const styleKey = normalizeStyle(tacticalStyle);
+  const style = TACTICAL_STYLES[styleKey] || TACTICAL_STYLES.balanced;
+  const ratings = computeTeamRatings(xi, formation);
+  const chem = computeChemistry(xi, formation);
+  const power = computePower(xi, formation, styleKey);
+  const avgOverall = xi.length ? xi.reduce((s, p) => s + p.overall, 0) / xi.length : 0;
+  const starCount = xi.filter((p) => p.isStar).length;
 
   for (const p of xi) {
     const slot = slotByCode.get(p.slotCode);
     const y = slot ? slot.y : 50;
-    const atkScore = (1 - y / 100) * p.overall;
-    const assistScore = (1 - Math.abs(y - 45) / 60) * p.overall;
+    const quality = Math.pow(1.06, p.overall - 75);
+    const atkScore = (1 - y / 100) * p.overall * quality * (style.tempo * 0.35 + style.risk * 0.35 + style.transition * 0.3);
+    const assistScore = (1 - Math.abs(y - 45) / 60) * p.overall * quality * (style.control * 0.45 + style.press * 0.2 + style.transition * 0.35);
+    const pressureScore = p.overall * quality * (p.isStar ? 1.2 : 1) * (style.press * 0.4 + style.control * 0.25 + style.starMoment * 0.35);
     if (atkScore > bestScorerScore) { bestScorerScore = atkScore; bestScorer = p; }
     if (assistScore > bestAssistScore) { bestAssistScore = assistScore; bestAssist = p; }
+    if (pressureScore > bestPressureScore) { bestPressureScore = pressureScore; bestPressure = p; }
   }
+
+  const riskScore = Math.round((style.risk * 0.45 + style.press * 0.35 + Math.max(0, 1 - chem.chemistry) * 0.2) * 100);
+  const riskLabel = riskScore >= 116 ? 'High variance' : riskScore >= 101 ? 'Medium risk' : 'Controlled';
+  const ideas = [];
+  if (chem.chemistry < 0.58) ideas.push('Improve chemistry: keep more players in their natural line and avoid overloaded position groups.');
+  if (starCount === 0) ideas.push('No Game Changer: protect shape and win through chemistry, set pieces and matchups.');
+  if (ratings.attack < ratings.defense - 4) ideas.push('Attack needs support: a higher line or creator-heavy style can raise shot volume.');
+  if (ratings.defense < ratings.attack - 4) ideas.push('Defense is the weak point: Defensive or Possession can reduce opponent xG.');
+  if (styleKey === 'gegenpress') ideas.push('Gegenpress adds pressure and late chaos, but card/foul risk is higher.');
+  if (styleKey === 'counter') ideas.push('Counter Attack is strongest when the opponent presses or controls the ball.');
+  if (!ideas.length) ideas.push('Balanced profile: your biggest edge is player quality plus stable chemistry.');
 
   return {
     topScorer: bestScorer ? bestScorer.name : null,
-    topAssist: bestAssist ? bestAssist.name : null
+    topAssist: bestAssist ? bestAssist.name : null,
+    pressurePlayer: bestPressure ? bestPressure.name : null,
+    enginePower: Math.round(power),
+    avgOverall: Math.round(avgOverall),
+    chemistryPct: Math.round(chem.chemistry * 100),
+    starThreatPct: Math.round(Math.min(1, starCount / 4) * 100),
+    tacticalStyle: styleKey,
+    tacticalStyleLabel: style.label,
+    riskLabel,
+    ideas: ideas.slice(0, 3)
   };
 }
 

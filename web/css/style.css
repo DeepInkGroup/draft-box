@@ -231,6 +231,14 @@ a { color: var(--accent-strong); }
   background: var(--accent-soft); border-color: var(--accent-strong); color: var(--accent-strong);
 }
 .pitch-dot.clickable:hover { box-shadow: 0 0 0 3px #fff; }
+.pitch-dot.moving { box-shadow: 0 0 0 3px var(--accent-strong), 0 0 18px rgba(146,118,255,.7); transform: translate(-50%, -50%) scale(1.08); }
+.pitch-dot.move-target { border-style: dashed; box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
+.pitch-dot.empty-target { background: rgba(146,118,255,.22); border-color: var(--accent-strong); color: var(--accent-ink); }
+
+.draft-lineup-tools { display: grid; grid-template-columns: auto minmax(116px, 170px) minmax(180px, 1fr); gap: 8px 10px; align-items: center; margin: 10px 0 12px; }
+.draft-lineup-tools label { color: var(--muted); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.draft-lineup-tools select { width: 100%; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); }
+.draft-lineup-tools span { color: var(--muted); font-size: .78rem; line-height: 1.35; }
 
 /* Role colors: Attack=red, Midfield=green, Defence=blue, GK=yellow — consistent
    everywhere a filled pitch dot represents an actual player. */
@@ -587,10 +595,18 @@ a { color: var(--accent-strong); }
 .engine-verdict { margin-top: 10px; border-top: 1px dashed var(--border-soft); padding-top: 9px; color: var(--accent-strong); font-weight: 800; font-size: .82rem; line-height: 1.45; }
 
 /* --- Lineup reveal predictions --- */
-.lineup-predictions { text-align: center; margin: 18px 0 4px; }
-.lineup-prediction-stat { margin-bottom: 10px; }
+.lineup-predictions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; margin: 18px 0 4px; }
+.lineup-prediction-stat, .lineup-prediction-card, .lineup-prediction-ideas { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.025); padding: 10px; }
+.lineup-prediction-stat.wide, .lineup-prediction-card.wide, .lineup-prediction-ideas.wide { grid-column: 1 / -1; }
 .lineup-prediction-value { display: block; font-size: 2rem; font-weight: 800; color: var(--accent-strong); line-height: 1; }
 .lineup-prediction-line { font-size: .85rem; color: var(--ink); margin-top: 4px; }
+.lineup-prediction-card span { display: block; color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.lineup-prediction-card b { display: block; margin-top: 3px; font-size: .9rem; color: var(--ink); overflow-wrap: anywhere; }
+.lineup-prediction-card.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.lineup-prediction-card.trio div { border-right: 1px solid var(--border-soft); padding-right: 8px; }
+.lineup-prediction-card.trio div:last-child { border-right: 0; padding-right: 0; }
+.lineup-prediction-ideas { display: grid; gap: 6px; text-align: left; }
+.lineup-prediction-ideas span { color: var(--muted); font-size: .78rem; line-height: 1.4; }
 
 .error-text { color: var(--danger); font-size: .85rem; margin-top: 6px; }
 
@@ -847,6 +863,12 @@ a { color: var(--accent-strong); }
   .team-events-grid { grid-template-columns: 1fr; gap: 8px; }
   .myteam-header { gap: 10px; flex-wrap: wrap; }
   .myteam-players { grid-template-columns: 1fr; }
+  .draft-lineup-tools { grid-template-columns: 1fr; text-align: left; }
+  .draft-lineup-tools span { font-size: .74rem; }
+  .lineup-predictions { grid-template-columns: 1fr 1fr; }
+  .lineup-prediction-card.trio { grid-template-columns: 1fr; text-align: left; }
+  .lineup-prediction-card.trio div { border-right: 0; border-bottom: 1px solid var(--border-soft); padding: 0 0 7px; }
+  .lineup-prediction-card.trio div:last-child { border-bottom: 0; padding-bottom: 0; }
   .bracket-chart { grid-template-columns: repeat(var(--round-count), minmax(188px, 1fr)); gap: 20px; }
   .bracket-chart.split { grid-template-columns: minmax(720px, 1fr) minmax(204px, .55fr) minmax(720px, 1fr); gap: 18px; }
   .bracket-wing { grid-template-columns: repeat(var(--side-round-count), minmax(170px, 1fr)); gap: 18px; }
