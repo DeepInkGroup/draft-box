@@ -199,23 +199,32 @@ function persistTacticalStyle(roomId, userId, tacticalStyle) {
   db.prepare('UPDATE room_members SET tactical_style = ?, tactical_style_locked = 1 WHERE room_id = ? AND user_id = ?').run(style, roomId, userId);
 }
 
+function runTransaction(work) {
+  db.exec('BEGIN');
+  try {
+    work();
+    db.exec('COMMIT');
+  } catch (err) {
+    db.exec('ROLLBACK');
+    throw err;
+  }
+}
+
 function persistDraftFormation(roomId, userId, member, moved) {
-  const tx = db.transaction(() => {
+  runTransaction(() => {
     db.prepare('UPDATE room_members SET formation = ?, draft_complete = ?, captain_slot = ?, tactical_style_locked = 0 WHERE room_id = ? AND user_id = ?')
       .run(member.formation, member.draftComplete ? 1 : 0, member.captainSlot || null, roomId, userId);
     const stmt = db.prepare('UPDATE drafted_players SET slot_code = ? WHERE room_id = ? AND user_id = ? AND player_id = ?');
     for (const m of moved || []) stmt.run(m.toSlotCode, roomId, userId, m.playerId);
   });
-  tx();
 }
 
 function persistSlotMoves(roomId, userId, member, moved) {
-  const tx = db.transaction(() => {
+  runTransaction(() => {
     const stmt = db.prepare('UPDATE drafted_players SET slot_code = ? WHERE room_id = ? AND user_id = ? AND player_id = ?');
     for (const m of moved || []) stmt.run(m.toSlotCode, roomId, userId, m.playerId);
     db.prepare('UPDATE room_members SET captain_slot = ? WHERE room_id = ? AND user_id = ?').run(member.captainSlot || null, roomId, userId);
   });
-  tx();
 }
 
 function setRoomStatus(roomId, status) {
