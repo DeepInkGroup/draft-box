@@ -1,5 +1,6 @@
 const { computeTeamRatings, computeChemistry } = require('./ratings');
 const { getProfile, getSlots } = require('./formations');
+const { TACTICAL_STYLES, normalizeStyle, matchupEdge } = require('./tacticalStyles');
 
 // Simulates a match from each side's Attack/Defense ratings (player quality, weighted by
 // slot depth) plus a formation "edge" term (attacking shape vs. the opponent's defensive
@@ -34,7 +35,7 @@ function formationEdge(formationX, formationY) {
 }
 
 function expectedGoals(ratingFor, ratingAgainst, edge) {
-  return clamp(1.35 + (ratingFor - ratingAgainst) / 18 + edge / 10, 0.15, 4.5);
+  return clamp(1.35 + (ratingFor - ratingAgainst) / 15 + edge / 10, 0.15, 4.8);
 }
 
 // The opposing goalkeeper's own quality — not just their contribution to the averaged
@@ -43,7 +44,7 @@ function expectedGoals(ratingFor, ratingAgainst, edge) {
 // cuts the opponent's expected goals by up to ~12%, a weak one concedes ~12% more —
 // real football's "a great keeper single-handedly wins you points" effect, distinct from
 // the rest of the back line.
-const GK_MODIFIER_COEFF = 0.008;
+const GK_MODIFIER_COEFF = 0.01;
 function gkModifier(gkOverall) {
   return clamp(1 - (gkOverall - 75) * GK_MODIFIER_COEFF, 0.8, 1.2);
 }
@@ -55,7 +56,7 @@ function gkModifier(gkOverall) {
 // plays with a bit more conviction; a shaken one coming off a bad result underperforms its
 // paper quality — a real but modest swing, the same scale as Chemistry (Section 5).
 const MORALE_SWING = 0.05;
-const HUMAN_VS_AI_POWER_MULTIPLIER = 1.4;
+const HUMAN_VS_AI_POWER_MULTIPLIER = 1.2;
 function moraleModifier(morale) {
   return 1 + clamp(morale || 0, -1, 1) * MORALE_SWING;
 }
@@ -87,9 +88,50 @@ function slotY(player, formation) {
 // real football's "a handful of players account for most of the output" pattern — instead
 // of everyone in a plausible slot having near-equal odds regardless of who they are.
 // 75 overall is the pivot (weight 1); ~4x spread between a 60 and a 90 overall player.
-const QUALITY_CURVE_BASE = 1.045;
+const QUALITY_CURVE_BASE = 1.06;
 function qualityWeight(overall) {
   return Math.pow(QUALITY_CURVE_BASE, overall - 75);
+}
+
+function tacticalPlan(ownStyle, oppStyle) {
+  const key = normalizeStyle(ownStyle);
+  const style = TACTICAL_STYLES[key] || TACTICAL_STYLES.balanced;
+  const edge = matchupEdge(key, oppStyle);
+  return { key, label: style.label, description: style.description, edge, mods: style };
+}
+
+function applyTacticalStyle(ratings, plan) {
+  ratings.attack *= plan.mods.attack * (1 + plan.edge);
+  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.55);
+}
+
+function starCandidates(team, dismissalMinutes = null, minute = 80) {
+  return team.xi.filter((p) => p.isStar && !isPlayerDismissedAt(p, dismissalMinutes, minute));
+}
+
+function maybeStarMoment(team, side, context, dismissalMinutes, minuteRange, phase) {
+  const candidates = starCandidates(team, dismissalMinutes, minuteRange[0]);
+  if (!candidates.length) return null;
+  const best = candidates.reduce((top, p) => !top || p.overall > top.overall ? p : top, null);
+  const stage = context.stage || 'group';
+  let chance = phase === 'extra' ? 0.08 : 0.045;
+  if (context.knockout) chance += 0.025;
+  if (stage === 'final') chance += 0.045;
+  chance += clamp((best.overall - 84) * 0.012, 0, 0.08);
+  if (Math.random() >= chance) return null;
+  const player = pickWeighted(candidates, (p) => qualityWeight(p.overall) * (p.overall >= 85 ? 1.25 : 1));
+  const minute = minuteRange[0] + Math.floor(Math.random() * (minuteRange[1] - minuteRange[0] + 1));
+  const boost = phase === 'extra' ? 0.18 + Math.random() * 0.28 : 0.22 + Math.random() * 0.34;
+  return {
+    minute,
+    type: 'star',
+    side,
+    player: player.name,
+    pos: player.pos,
+    boost: Math.round(boost * 100) / 100,
+    phase,
+    effect: phase === 'extra' ? 'created an extra-time game-changing chance' : 'created a late game-changing chance'
+  };
 }
 
 // Dismissal tracking needs to be resilient against squads whose player ids aren't
@@ -250,21 +292,22 @@ function generateCardEvents(teamA, teamB) {
 // better/more cohesive side tends to see more of the ball. Computed early (before goals
 // are decided) because corners and fouls — and, through them, a real chunk of expected
 // goals — flow from it. See setPieceXgBonus below.
-function computePossession(ratingsA, ratingsB) {
+function computePossession(ratingsA, ratingsB, styleA, styleB) {
   const qualityDiff = (ratingsA.attack + ratingsA.defense) - (ratingsB.attack + ratingsB.defense);
-  const possessionA = Math.round(clamp(50 + qualityDiff * 0.6, 32, 68));
+  const styleSwing = (styleA.mods.possession - styleB.mods.possession) + (styleA.edge - styleB.edge) * 18;
+  const possessionA = Math.round(clamp(50 + qualityDiff * 0.6 + styleSwing, 28, 72));
   return { possessionA, possessionB: 100 - possessionA };
 }
 
 // Corners and fouls-won are set-piece opportunities, not just narrative color. Fouls
 // correlate loosely with chasing the game — the side seeing less of the ball tends to
 // commit a few more, handing the opponent a free kick.
-function computeSetPieces(possessionA, possessionB) {
+function computeSetPieces(possessionA, possessionB, styleA, styleB) {
   const cornersTotal = 7 + Math.floor(Math.random() * 7); // 7-13
   const cornersA = Math.round((cornersTotal * possessionA) / 100);
   const cornersB = cornersTotal - cornersA;
-  const foulsA = Math.round(clamp(10 + (possessionB - possessionA) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
-  const foulsB = Math.round(clamp(10 + (possessionA - possessionB) * 0.08 + (Math.random() - 0.5) * 4, 4, 20));
+  const foulsA = Math.round(clamp(10 + styleA.mods.foulBias + (possessionB - possessionA) * 0.08 + (Math.random() - 0.5) * 4, 4, 23));
+  const foulsB = Math.round(clamp(10 + styleB.mods.foulBias + (possessionA - possessionB) * 0.08 + (Math.random() - 0.5) * 4, 4, 23));
   return { cornersA, cornersB, foulsA, foulsB };
 }
 
@@ -284,11 +327,11 @@ function setPieceXgBonus(myCorners, oppFouls) {
 // approximations of the same quality gap that produced the scoreline; cards and saves are
 // exact tallies from the already-generated event list (final, including any extra-time
 // events), so the stat line and event feed always agree.
-function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB) {
+function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB, styleA, styleB) {
   const avgA = (ratingsA.attack + ratingsA.defense) / 2;
   const avgB = (ratingsB.attack + ratingsB.defense) / 2;
-  const passAccuracyA = Math.round(clamp(68 + (avgA - 75) * 0.7, 55, 94));
-  const passAccuracyB = Math.round(clamp(68 + (avgB - 75) * 0.7, 55, 94));
+  const passAccuracyA = Math.round(clamp(68 + (avgA - 75) * 0.7 + styleA.mods.passAccuracy, 55, 94));
+  const passAccuracyB = Math.round(clamp(68 + (avgB - 75) * 0.7 + styleB.mods.passAccuracy, 55, 94));
 
   const totalPasses = 780 + Math.round((Math.random() - 0.5) * 120);
   const passesA = Math.round((totalPasses * possessionA) / 100);
@@ -320,16 +363,19 @@ function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events,
 // Extra time: two 15-minute periods (minutes 91-120), only reached in knockout matches
 // still level after 90'. Lower-scoring than normal time — legs are tired and sides play
 // more cautiously — modeled as roughly a third of a full match's expected goals.
-function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, dismissalMinutesA, dismissalMinutesB, gkModA, gkModB) {
-  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB * (30 / 90);
-  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA * (30 / 90);
+function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, dismissalMinutesA, dismissalMinutesB, gkModA, gkModB, context) {
+  const starA = maybeStarMoment(teamA, 'A', context, dismissalMinutesA, [100, 120], 'extra');
+  const starB = maybeStarMoment(teamB, 'B', context, dismissalMinutesB, [100, 120], 'extra');
+  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB * (30 / 90) + (starA ? starA.boost : 0);
+  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA * (30 / 90) + (starB ? starB.boost : 0);
   const goalsA = clamp(poissonSample(etXgA), 0, 4);
   const goalsB = clamp(poissonSample(etXgB), 0, 4);
   const events = [
     ...generateGoalEvents(teamA, goalsA, dismissalMinutesA, [91, 120]).map((e) => ({ ...e, side: 'A' })),
-    ...generateGoalEvents(teamB, goalsB, dismissalMinutesB, [91, 120]).map((e) => ({ ...e, side: 'B' }))
+    ...generateGoalEvents(teamB, goalsB, dismissalMinutesB, [91, 120]).map((e) => ({ ...e, side: 'B' })),
+    ...[starA, starB].filter(Boolean)
   ];
-  return { goalsA, goalsB, events };
+  return { goalsA, goalsB, events, starMoments: [starA, starB].filter(Boolean) };
 }
 
 // Penalty shootout: proper kick-by-kick, not an instant coin flip. Each side's best
@@ -352,10 +398,13 @@ function orderedKickers(team, dismissedIds = null) {
   return pool.slice().sort((a, b) => b.overall - a.overall);
 }
 
-function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedIdsB = null, gkModA = 1, gkModB = 1) {
+function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedIdsB = null, gkModA = 1, gkModB = 1, context = {}) {
   const kickersA = orderedKickers(teamA, dismissedIdsA);
   const kickersB = orderedKickers(teamB, dismissedIdsB);
-  const kickProb = (p, oppGkMod) => clamp((0.62 + (p.overall - 75) / 200) * oppGkMod, 0.35, 0.92);
+  const kickProb = (p, oppGkMod, round) => {
+    const starBoost = p.isStar ? (round > 5 || context.stage === 'final' ? 0.05 : 0.03) : 0;
+    return clamp((0.62 + (p.overall - 75) / 180 + starBoost) * oppGkMod, 0.35, 0.94);
+  };
 
   const kicks = [];
   let scoreA = 0;
@@ -363,12 +412,12 @@ function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedId
   let round = 1;
   while (true) {
     const kA = kickersA[(round - 1) % kickersA.length];
-    const scoredA = Math.random() < kickProb(kA, gkModB);
+    const scoredA = Math.random() < kickProb(kA, gkModB, round);
     kicks.push({ side: 'A', player: kA.name, scored: scoredA, round });
     if (scoredA) scoreA += 1;
 
     const kB = kickersB[(round - 1) % kickersB.length];
-    const scoredB = Math.random() < kickProb(kB, gkModA);
+    const scoredB = Math.random() < kickProb(kB, gkModA, round);
     kicks.push({ side: 'B', player: kB.name, scored: scoredB, round });
     if (scoredB) scoreB += 1;
 
@@ -386,7 +435,7 @@ function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedId
   return { kicks, penaltyWinner: scoreA > scoreB ? 'A' : 'B', penalties: { A: scoreA, B: scoreB } };
 }
 
-function simulateMatch(teamA, teamB, { knockout = false } = {}) {
+function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {}) {
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
   const chemA = computeChemistry(teamA.xi, teamA.formation);
@@ -406,6 +455,11 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   applyHumanVsAiBoost(ratingsA, teamA, teamB);
   applyHumanVsAiBoost(ratingsB, teamB, teamA);
 
+  const tacticalA = tacticalPlan(teamA.tacticalStyle, teamB.tacticalStyle);
+  const tacticalB = tacticalPlan(teamB.tacticalStyle, teamA.tacticalStyle);
+  applyTacticalStyle(ratingsA, tacticalA);
+  applyTacticalStyle(ratingsB, tacticalB);
+
   const cardPlan = generateCardEvents(teamA, teamB);
   for (const d of cardPlan.dismissals) {
     const affected = d.side === 'A' ? ratingsA : ratingsB;
@@ -421,13 +475,18 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   const gkModA = gkModifier(gkA ? gkA.overall : 75);
   const gkModB = gkModifier(gkB ? gkB.overall : 75);
 
-  const { possessionA, possessionB } = computePossession(ratingsA, ratingsB);
-  const { cornersA, cornersB, foulsA, foulsB } = computeSetPieces(possessionA, possessionB);
+  const { possessionA, possessionB } = computePossession(ratingsA, ratingsB, tacticalA, tacticalB);
+  const { cornersA, cornersB, foulsA, foulsB } = computeSetPieces(possessionA, possessionB, tacticalA, tacticalB);
   const setPieceBonusA = setPieceXgBonus(cornersA, foulsB);
   const setPieceBonusB = setPieceXgBonus(cornersB, foulsA);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA, 0.1, 5);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB, 0.1, 5);
+  const context = { knockout, stage };
+  const lateStarA = maybeStarMoment(teamA, 'A', context, cardPlan.dismissalMinutesA, [80, 90], 'late');
+  const lateStarB = maybeStarMoment(teamB, 'B', context, cardPlan.dismissalMinutesB, [80, 90], 'late');
+  let starMoments = [lateStarA, lateStarB].filter(Boolean);
+
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + (lateStarA ? lateStarA.boost : 0), 0.1, 5.4);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + (lateStarB ? lateStarB.boost : 0), 0.1, 5.4);
 
   let goalsA = clamp(poissonSample(xgA), 0, 9);
   let goalsB = clamp(poissonSample(xgB), 0, 9);
@@ -440,7 +499,7 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
     ...generateSaveEvents(teamA, 'A', xgB, goalsB, cardPlan.dismissalMinutesA),
     ...generateSaveEvents(teamB, 'B', xgA, goalsA, cardPlan.dismissalMinutesB)
   ];
-  let events = [...goalEvents, ...cardPlan.events, ...saveEvents];
+  let events = [...goalEvents, ...cardPlan.events, ...saveEvents, ...starMoments];
 
   let wentToExtraTime = false;
   let etGoalsA = 0;
@@ -453,18 +512,19 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   // Knockout draws play extra time before penalties — never straight to a shootout.
   if (knockout && goalsA === goalsB) {
     wentToExtraTime = true;
-    const et = simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, cardPlan.dismissalMinutesA, cardPlan.dismissalMinutesB, gkModA, gkModB);
+    const et = simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, cardPlan.dismissalMinutesA, cardPlan.dismissalMinutesB, gkModA, gkModB, context);
     etGoalsA = et.goalsA;
     etGoalsB = et.goalsB;
     goalsA += etGoalsA;
     goalsB += etGoalsB;
     events = [...events, ...et.events];
+    starMoments = [...starMoments, ...(et.starMoments || [])];
 
     if (goalsA === goalsB) {
       wentToPenalties = true;
       const dismissedIdsA = new Set(cardPlan.dismissalMinutesA.keys());
       const dismissedIdsB = new Set(cardPlan.dismissalMinutesB.keys());
-      const shootout = simulatePenaltyShootout(teamA, teamB, dismissedIdsA, dismissedIdsB, gkModA, gkModB);
+      const shootout = simulatePenaltyShootout(teamA, teamB, dismissedIdsA, dismissedIdsB, gkModA, gkModB, context);
       penaltyWinner = shootout.penaltyWinner;
       penalties = shootout.penalties;
       penaltyKicks = shootout.kicks;
@@ -472,10 +532,13 @@ function simulateMatch(teamA, teamB, { knockout = false } = {}) {
   }
 
   events.sort((a, b) => a.minute - b.minute);
-  const stats = computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB);
+  const stats = computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events, possessionA, possessionB, cornersA, cornersB, foulsA, foulsB, tacticalA, tacticalB);
 
   return {
     goalsA, goalsB, xgA, xgB, stats, events,
+    tactical: { A: tacticalA, B: tacticalB },
+    chemistry: { A: chemA, B: chemB },
+    starMoments,
     wentToExtraTime, etGoalsA, etGoalsB,
     wentToPenalties, penaltyWinner, penalties, penaltyKicks
   };

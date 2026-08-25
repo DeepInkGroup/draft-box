@@ -66,11 +66,12 @@ const TournamentView = {
     }
 
     function eventLine(e) {
-      const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
+      const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : e.type === 'star' ? 'STAR' : '🟥';
       let text = `${icon} ${e.minute}' ${e.player}`;
       if (e.type === 'goal' && e.assistBy) text += ` <span class="muted">(assist: ${e.assistBy})</span>`;
+      if (e.type === 'star' && e.effect) text += ` <span class="muted">(${e.effect}, +${e.boost} xG)</span>`;
       if (e.type === 'red') text += e.reason === 'second-yellow' ? ` <span class="muted">(2nd yellow)</span>` : ` <span class="muted">(straight red)</span>`;
-      return `<div class="report-line">${text}</div>`;
+      return `<div class="report-line ${e.type === 'star' ? 'star' : ''}">${text}</div>`;
     }
 
     function teamEventsHtml(m) {
@@ -272,10 +273,10 @@ const TournamentView = {
         feedEl.innerHTML = '';
         for (let i = cursor - 1; i >= 0; i--) {
           const e = myTimeline[i];
-          const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : '🟥';
+          const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : e.type === 'star' ? 'STAR' : '🟥';
           const line = document.createElement('div');
-          line.className = 'live-feed-line';
-          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player}${e.assistBy ? ` <span class="muted">(assist: ${e.assistBy})</span>` : ''}`;
+          line.className = `live-feed-line ${e.type === 'star' ? 'star' : ''}`;
+          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player}${e.assistBy ? ` <span class="muted">(assist: ${e.assistBy})</span>` : ''}${e.type === 'star' && e.effect ? ` <span class="muted">(${e.effect})</span>` : ''}`;
           feedEl.appendChild(line);
         }
       }
@@ -512,6 +513,24 @@ const TournamentView = {
 
     function completedBracketHtml(rounds) {
       if (!rounds || !rounds.length) return '';
+      const finalRound = rounds[rounds.length - 1];
+      const sideRounds = rounds.slice(0, -1).map((round) => {
+        const splitAt = Math.ceil(round.matches.length / 2);
+        return {
+          round,
+          leftMatches: round.matches.slice(0, splitAt),
+          rightMatches: round.matches.slice(splitAt)
+        };
+      });
+      const isSplitBracket = rounds.length >= 5;
+      const roundSection = (round, matches, idx, sideClass = '', isTerminal = false) => `
+        <section class="bracket-chart-round ${sideClass} stage-${round.stage || idx}">
+          <h4>${round.label}</h4>
+          <div class="bracket-stack">
+            ${matches.map((m) => bracketNodeHtml(m, isTerminal)).join('')}
+          </div>
+        </section>
+      `;
       return `
         <div class="myteam-card bracket-recap-card">
           <div class="myteam-header">
@@ -519,15 +538,21 @@ const TournamentView = {
             <button class="btn btn-ghost btn-sm" id="btnToggleBracket">Show Full Bracket</button>
           </div>
           <div class="bracket-recap hidden" id="bracketRecap">
-            <div class="bracket-chart ${rounds.length < 5 ? 'compact' : ''}" style="--round-count:${rounds.length};">
-              ${rounds.map((round, idx) => `
-                <section class="bracket-chart-round stage-${round.stage || idx}">
-                  <h4>${round.label}</h4>
+            <div class="bracket-chart ${isSplitBracket ? 'split' : 'compact'}" style="--side-round-count:${sideRounds.length};--round-count:${rounds.length};">
+              ${isSplitBracket ? `
+                <div class="bracket-wing bracket-wing-left">
+                  ${sideRounds.map((x, idx) => roundSection(x.round, x.leftMatches, idx, 'side-left')).join('')}
+                </div>
+                <section class="bracket-chart-round bracket-final-center stage-${finalRound.stage || 'final'}">
+                  <h4>${finalRound.label}</h4>
                   <div class="bracket-stack">
-                    ${round.matches.map((m) => bracketNodeHtml(m, idx === rounds.length - 1)).join('')}
+                    ${finalRound.matches.map((m) => bracketNodeHtml(m, true)).join('')}
                   </div>
                 </section>
-              `).join('')}
+                <div class="bracket-wing bracket-wing-right">
+                  ${sideRounds.slice().reverse().map((x, revIdx) => roundSection(x.round, x.rightMatches, sideRounds.length - 1 - revIdx, 'side-right')).join('')}
+                </div>
+              ` : rounds.map((round, idx) => roundSection(round, round.matches, idx, idx === rounds.length - 1 ? 'terminal-round' : '', idx === rounds.length - 1)).join('')}
             </div>
           </div>
         </div>
@@ -551,7 +576,7 @@ const TournamentView = {
             <span>Engine Match Review</span>
             <span class="badge">Data model</span>
           </div>
-          <p class="muted tournament-summary-line">A richer post-match model built from xG, shot pressure, possession, passing, saves, cards, extra time and penalties.</p>
+          <p class="muted tournament-summary-line">A richer post-match model built from xG, player quality, chemistry, tactical style, star moments, shot pressure, possession, saves, cards, extra time and penalties.</p>
           <div class="engine-recap-list">
             ${analyses.map((m) => {
               const data = analysisData(m);
@@ -655,11 +680,13 @@ const TournamentView = {
       });
 
       if (step.champion) {
+        const championTitle = step.champion.isHuman ? step.champion.username : step.champion.name;
+        const championSub = step.champion.isHuman ? step.champion.name : 'Bot-controlled nation';
         championZone.innerHTML = `
           <div class="champion-banner">
             <div class="champion-label">World Cup Champion</div>
-            <h2>${step.champion.name}</h2>
-            <p class="muted">${step.champion.isHuman ? `Won by ${step.champion.username}` : 'Won by a bot-controlled nation'}</p>
+            <h2>${championTitle}</h2>
+            <p class="champion-team-name">${championSub}</p>
             <div class="row" style="margin-top:16px;justify-content:center;">
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
               <button class="btn btn-ghost" id="btnViewHistoryFromChampion">My Match History</button>

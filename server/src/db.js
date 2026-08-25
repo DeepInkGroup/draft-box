@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS room_members (
   eliminated INTEGER NOT NULL DEFAULT 0,
   viewed_step INTEGER NOT NULL DEFAULT 0,
   captain_slot TEXT,
+  tactical_style TEXT NOT NULL DEFAULT 'balanced',
+  tactical_style_locked INTEGER NOT NULL DEFAULT 0,
   joined_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(room_id, user_id),
   FOREIGN KEY (room_id) REFERENCES rooms(id),
@@ -100,6 +102,12 @@ if (!columnExists('rooms', 'captain_enabled')) {
 }
 if (!columnExists('room_members', 'captain_slot')) {
   db.exec(`ALTER TABLE room_members ADD COLUMN captain_slot TEXT;`);
+}
+if (!columnExists('room_members', 'tactical_style')) {
+  db.exec(`ALTER TABLE room_members ADD COLUMN tactical_style TEXT NOT NULL DEFAULT 'balanced';`);
+}
+if (!columnExists('room_members', 'tactical_style_locked')) {
+  db.exec(`ALTER TABLE room_members ADD COLUMN tactical_style_locked INTEGER NOT NULL DEFAULT 0;`);
 }
 if (!columnExists('rooms', 'blitz_mode')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN blitz_mode INTEGER NOT NULL DEFAULT 0;`);

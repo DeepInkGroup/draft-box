@@ -65,6 +65,8 @@ function clamp01(n) {
 // Note: bot squads are entirely one real national team, so Linkage is always 1 for them —
 // a deliberate trade-off against human "all-star" squads assembled from many countries.
 function computeChemistry(xi, formation) {
+  const slots = getSlots(formation);
+  const slotByCode = new Map(slots.map((s) => [s.code, s]));
   const pairs = getAdjacentPairs(formation);
   const bySlot = new Map(xi.map((p) => [p.slotCode, p]));
 
@@ -85,10 +87,33 @@ function computeChemistry(xi, formation) {
   const stars = xi.filter((p) => p.isStar).length;
   const leadership = Math.min(1, stars / 3);
 
-  const chemistry = (linkage + balance + leadership) / 3;
-  const multiplier = 0.94 + chemistry * 0.12;
+  let matchedSlots = 0;
+  let outOfPosition = 0;
+  const expected = { GK: 0, DF: 0, MF: 0, FW: 0 };
+  const actual = { GK: 0, DF: 0, MF: 0, FW: 0 };
+  for (const s of slots) expected[s.group] += 1;
+  for (const p of xi) {
+    const slot = slotByCode.get(p.slotCode);
+    if (actual[p.pos] != null) actual[p.pos] += 1;
+    if (slot && slot.group === p.pos) matchedSlots += 1;
+    else outOfPosition += 1;
+  }
+  const positionFit = xi.length ? matchedSlots / xi.length : 0;
+  const lineError = Object.keys(expected).reduce((sum, group) => sum + Math.abs((actual[group] || 0) - expected[group]), 0);
+  const lineBalance = clamp01(1 - lineError / Math.max(1, xi.length * 1.25));
+  const outPenalty = clamp01(outOfPosition / Math.max(1, xi.length));
 
-  return { linkage, balance, leadership, chemistry, multiplier };
+  const chemistry = clamp01(
+    linkage * 0.22 +
+    balance * 0.18 +
+    leadership * 0.18 +
+    positionFit * 0.24 +
+    lineBalance * 0.18 -
+    outPenalty * 0.16
+  );
+  const multiplier = 0.91 + chemistry * 0.18;
+
+  return { linkage, balance, leadership, positionFit, lineBalance, outOfPosition, chemistry, multiplier };
 }
 
 // A 6-stat squad summary card for the draft-complete screen: the classic

@@ -1,6 +1,7 @@
 const db = require('../db');
 const { allPlayerIds, getPlayer, ALL_TEAMS } = require('../data/teams');
 const { isValidFormation, getSlots } = require('./formations');
+const { normalizeStyle } = require('./tacticalStyles');
 
 const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
 const ALLOWED_REROLLS = [0, 1, 2, 3];
@@ -131,6 +132,8 @@ function loadRoomState(roomRow) {
       eliminated: !!row.eliminated,
       viewedStep: row.viewed_step || 0,
       captainSlot: row.captain_slot || null,
+      tacticalStyle: normalizeStyle(row.tactical_style),
+      tacticalStyleLocked: !!row.tactical_style_locked,
       currentReveal: null,
       lastRevealedTeam: null,
       pickDeadline: null,
@@ -191,6 +194,11 @@ function persistCaptain(roomId, userId, slotCode) {
   db.prepare('UPDATE room_members SET captain_slot = ? WHERE room_id = ? AND user_id = ?').run(slotCode, roomId, userId);
 }
 
+function persistTacticalStyle(roomId, userId, tacticalStyle) {
+  const style = normalizeStyle(tacticalStyle);
+  db.prepare('UPDATE room_members SET tactical_style = ?, tactical_style_locked = 1 WHERE room_id = ? AND user_id = ?').run(style, roomId, userId);
+}
+
 function setRoomStatus(roomId, status) {
   db.prepare('UPDATE rooms SET status = ? WHERE id = ?').run(status, roomId);
 }
@@ -208,7 +216,7 @@ function allMembersDraftComplete(roomState) {
 function lobbySnapshot(roomRow) {
   const members = getMembers(roomRow.id);
   const captainEnabled = !!roomRow.captain_enabled;
-  const allReady = members.length > 0 && members.every((m) => !!m.draft_complete && (!captainEnabled || !!m.captain_slot));
+  const allReady = members.length > 0 && members.every((m) => !!m.draft_complete && !!m.tactical_style_locked && (!captainEnabled || !!m.captain_slot));
   return {
     code: roomRow.code,
     spoilerMode: !!roomRow.spoiler_mode,
@@ -232,7 +240,9 @@ function lobbySnapshot(roomRow) {
       formation: m.formation,
       draftComplete: !!m.draft_complete,
       eliminated: !!m.eliminated,
-      captainSlot: m.captain_slot || null
+      captainSlot: m.captain_slot || null,
+      tacticalStyle: normalizeStyle(m.tactical_style),
+      tacticalStyleLocked: !!m.tactical_style_locked
     }))
   };
 }
@@ -250,6 +260,7 @@ module.exports = {
   markMemberEliminated,
   persistViewedStep,
   persistCaptain,
+  persistTacticalStyle,
   setRoomStatus,
   persistTournamentSnapshot,
   allMembersDraftComplete,

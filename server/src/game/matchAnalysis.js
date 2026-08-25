@@ -143,6 +143,36 @@ function moraleStory(myMorale, oppMorale) {
   return sentences.join(' ');
 }
 
+function chemistryStory(myChem, oppChem) {
+  if (!myChem || !oppChem) return '';
+  const diff = myChem.multiplier - oppChem.multiplier;
+  const detail = `Chemistry multiplier ${fmt1(myChem.multiplier * 100)} vs ${fmt1(oppChem.multiplier * 100)}, with ${myChem.outOfPosition || 0} out-of-position pick${(myChem.outOfPosition || 0) === 1 ? '' : 's'}.`;
+  if (diff >= 0.025) return `The XI fit together better than the opponent: ${detail}`;
+  if (diff <= -0.025) return `Chemistry worked against this side: ${detail}`;
+  return '';
+}
+
+function tacticalStory(myTac, oppTac) {
+  if (!myTac || !oppTac) return '';
+  const edge = myTac.edge || 0;
+  if (edge >= 0.04) return `${myTac.label} had a clear tactical answer to ${oppTac.label}, adding value to both chance creation and defensive resistance.`;
+  if (edge <= -0.04) return `${myTac.label} was an awkward matchup into ${oppTac.label}, so the tactical layer tilted away from this side.`;
+  return `Tactically this was close: ${myTac.label} against ${oppTac.label} did not create a major matchup swing.`;
+}
+
+function starStory(starEvents, mySide, oppSide) {
+  const mine = starEvents.filter((e) => e.side === mySide);
+  const opp = starEvents.filter((e) => e.side === oppSide);
+  const sentences = [];
+  if (mine.length) {
+    sentences.push(`${mine.map((e) => e.player).join(', ')} produced a Star Moment, adding late clutch chance quality when the match was at its most fragile.`);
+  }
+  if (opp.length) {
+    sentences.push(`The opponent also had clutch star influence through ${opp.map((e) => e.player).join(', ')}.`);
+  }
+  return sentences.join(' ');
+}
+
 function verdict(outcome, xgDiff, finishingDiff) {
   if (outcome === 'w') {
     if (xgDiff < 0) return `Overall: a win that owes as much to clinical finishing and a bit of fortune as to control of the match — the kind of result that doesn't always repeat.`;
@@ -166,7 +196,12 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppStats = mySide === 'A' ? m.stats.B : m.stats.A;
   const myMorale = mySide === 'A' ? (m.moraleA || 0) : (m.moraleB || 0);
   const oppMorale = mySide === 'A' ? (m.moraleB || 0) : (m.moraleA || 0);
+  const myChem = mySide === 'A' ? (m.chemistry && m.chemistry.A) : (m.chemistry && m.chemistry.B);
+  const oppChem = mySide === 'A' ? (m.chemistry && m.chemistry.B) : (m.chemistry && m.chemistry.A);
+  const myTac = mySide === 'A' ? (m.tactical && m.tactical.A) : (m.tactical && m.tactical.B);
+  const oppTac = mySide === 'A' ? (m.tactical && m.tactical.B) : (m.tactical && m.tactical.A);
   const events = m.events || [];
+  const starEvents = m.starMoments || events.filter((e) => e.type === 'star');
   const myReds = events.filter((e) => e.type === 'red' && e.side === mySide).length;
   const oppReds = events.filter((e) => e.type === 'red' && e.side === oppSide).length;
   const myYellows = events.filter((e) => e.type === 'yellow' && e.side === mySide).length;
@@ -187,6 +222,18 @@ function analyzeMatch(m, mySide, myName, oppName) {
   addFactor('Shot Pressure', `${shotDiff >= 0 ? '+' : ''}${shotDiff}`, `${myStats.shots}-${oppStats.shots} shots, ${myStats.shotsOnTarget}-${oppStats.shotsOnTarget} on target.`, shotDiff >= 4 || sotDiff >= 2 ? 'good' : shotDiff <= -4 || sotDiff <= -2 ? 'bad' : 'neutral');
   addFactor('Control', `${possDiff >= 0 ? '+' : ''}${possDiff}%`, `${myStats.possession}% possession and ${myStats.passAccuracy}% pass accuracy.`, possDiff >= 10 ? 'good' : possDiff <= -10 ? 'bad' : 'neutral');
   addFactor('Keeper Impact', `${saveSwing >= 0 ? '+' : ''}${saveSwing}`, `${myStats.saves} saves for, ${oppStats.saves} against.`, saveSwing >= 2 ? 'good' : saveSwing <= -2 ? 'bad' : 'neutral');
+  if (myChem && oppChem) {
+    const chemDiff = myChem.multiplier - oppChem.multiplier;
+    addFactor('Chemistry', `${chemDiff >= 0 ? '+' : ''}${fmt1(chemDiff * 100)}%`, `Fit ${Math.round((myChem.positionFit || 0) * 100)}%, line balance ${Math.round((myChem.lineBalance || 0) * 100)}%, OOP ${myChem.outOfPosition || 0}.`, chemDiff >= 0.015 ? 'good' : chemDiff <= -0.015 ? 'bad' : 'neutral');
+  }
+  if (myTac && oppTac) {
+    addFactor('Tactical Style', myTac.label, `${myTac.label} vs ${oppTac.label}; matchup edge ${myTac.edge >= 0 ? '+' : ''}${fmt1(myTac.edge * 100)}%.`, myTac.edge >= 0.035 ? 'good' : myTac.edge <= -0.035 ? 'bad' : 'neutral');
+  }
+  if (starEvents.length) {
+    const myStars = starEvents.filter((e) => e.side === mySide);
+    const oppStars = starEvents.filter((e) => e.side === oppSide);
+    addFactor('Star Moments', `${myStars.length}-${oppStars.length}`, myStars.length ? `${myStars.map((e) => e.player).join(', ')} created clutch xG.` : 'Opponent stars created the clutch swing.', myStars.length > oppStars.length ? 'good' : myStars.length < oppStars.length ? 'bad' : 'neutral');
+  }
   if (myReds || oppReds || myYellows + oppYellows >= 5) addFactor('Discipline', `${disciplineSwing >= 0 ? '+' : ''}${disciplineSwing}`, `${myYellows}Y/${myReds}R vs ${oppYellows}Y/${oppReds}R.`, disciplineSwing > 0 ? 'good' : disciplineSwing < 0 ? 'bad' : 'neutral');
   if (m.wentToPenalties) addFactor('Shootout', m.penaltyWinner === mySide ? 'Won' : 'Lost', `Penalty score ${m.penalties[mySide]}-${m.penalties[oppSide]}.`, m.penaltyWinner === mySide ? 'good' : 'bad');
   else if (m.wentToExtraTime) addFactor('Extra Time', `${mySide === 'A' ? m.etGoalsA : m.etGoalsB}-${mySide === 'A' ? m.etGoalsB : m.etGoalsA}`, 'The knockout match needed 120 minutes.', outcome === 'w' ? 'good' : outcome === 'l' ? 'bad' : 'neutral');
@@ -197,7 +244,10 @@ function analyzeMatch(m, mySide, myName, oppName) {
     territorialStory(myStats, oppStats),
     disciplineStory(myReds, oppReds, myYellows, oppYellows),
     setPieceStory(myStats, oppStats),
-    moraleStory(myMorale, oppMorale)
+    moraleStory(myMorale, oppMorale),
+    chemistryStory(myChem, oppChem),
+    tacticalStory(myTac, oppTac),
+    starStory(starEvents, mySide, oppSide)
   ].filter(Boolean);
   const finalVerdict = verdict(outcome, xgDiff, finishingDiff);
 
@@ -210,6 +260,8 @@ function analyzeMatch(m, mySide, myName, oppName) {
       { label: 'On Target', mine: myStats.shotsOnTarget, opponent: oppStats.shotsOnTarget },
       { label: 'Possession', mine: `${myStats.possession}%`, opponent: `${oppStats.possession}%` },
       { label: 'Pass Acc.', mine: `${myStats.passAccuracy}%`, opponent: `${oppStats.passAccuracy}%` },
+      { label: 'Chemistry', mine: myChem ? `${fmt1(myChem.multiplier * 100)}%` : '-', opponent: oppChem ? `${fmt1(oppChem.multiplier * 100)}%` : '-' },
+      { label: 'Style', mine: myTac ? myTac.label : '-', opponent: oppTac ? oppTac.label : '-' },
       { label: 'Saves', mine: myStats.saves, opponent: oppStats.saves }
     ],
     factors

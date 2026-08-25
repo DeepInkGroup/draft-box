@@ -3,6 +3,7 @@ const { bestXI, teamStrength } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
 const { FORMATIONS } = require('./formations');
 const { analyzeMatch, resultOutcome } = require('./matchAnalysis');
+const { normalizeStyle, randomStyle } = require('./tacticalStyles');
 
 const FORMATION_NAMES = Object.keys(FORMATIONS);
 function randomFormation() {
@@ -96,6 +97,7 @@ function startTournament(roomState) {
       username: member.username,
       xi,
       formation: member.formation,
+      tacticalStyle: normalizeStyle(member.tacticalStyle),
       strength: avg(member.squad.map((p) => p.overall)),
       eliminated: false,
       morale: 0
@@ -105,7 +107,7 @@ function startTournament(roomState) {
     const team = getTeam(code);
     const botFormation = randomFormation();
     const xi = bestXI(team, botFormation);
-    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, strength: teamStrength(xi), eliminated: false, morale: 0 });
+    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, tacticalStyle: randomStyle(), strength: teamStrength(xi), eliminated: false, morale: 0 });
   });
 
   if (startingSlots) {
@@ -200,6 +202,39 @@ function rankGroup(t, label) {
     .sort((x, y) => (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (Math.random() - 0.5));
 }
 
+// One block of four teams feeds one Round-of-16 slot. Separating same-group teams by
+// block prevents a group winner and runner-up from meeting again in R32 or R16.
+function seedRoundOf32(top2, best8) {
+  const seeds = [
+    ...shuffle(top2.filter((s) => s.rank === 1)),
+    ...shuffle(top2.filter((s) => s.rank === 2)),
+    ...shuffle(best8)
+  ];
+  const blocks = Array.from({ length: 8 }, () => []);
+
+  const solve = (seedIndex) => {
+    if (seedIndex >= seeds.length) return blocks.every((block) => block.length === 4);
+    const seed = seeds[seedIndex];
+    const blockOrder = shuffle(blocks.map((_, idx) => idx))
+      .sort((a, b) => blocks[a].length - blocks[b].length);
+
+    for (const blockIndex of blockOrder) {
+      const block = blocks[blockIndex];
+      if (block.length >= 4 || block.some((s) => s.group === seed.group)) continue;
+      block.push(seed);
+      if (solve(seedIndex + 1)) return true;
+      block.pop();
+    }
+    return false;
+  };
+
+  if (!solve(0)) throw new Error('could not seed knockout bracket without early same-group rematches');
+
+  return blocks
+    .flatMap((block) => shuffle(block))
+    .map((s) => s.code);
+}
+
 // Marks a slot (human OR bot) as eliminated so group-final/bracket displays are accurate
 // for everyone. Only human slots also flip the member's own "eliminated" (spectator) flag.
 function markEliminated(roomState, code) {
@@ -218,17 +253,17 @@ function finalizeGroupsAndSeedR32(roomState) {
   const top2 = [];
   const thirds = [];
   const eliminatedCodes = [];
-  for (const label of Object.keys(t.groups)) {
+  Object.keys(t.groups).forEach((label, groupIndex) => {
     const ranked = rankGroup(t, label);
-    top2.push(ranked[0], ranked[1]);
-    thirds.push(ranked[2]);
+    top2.push({ ...ranked[0], rank: 1, groupIndex }, { ...ranked[1], rank: 2, groupIndex });
+    thirds.push({ ...ranked[2], rank: 3, groupIndex });
     // 4th place is always out immediately. 3rd place's fate depends on the cross-group
     // "best 8 thirds" comparison below, so it's deliberately NOT marked eliminated yet —
     // marking it here (before that comparison) would wrongly strike through every 3rd-place
     // team, including the 8 that actually go on to play in the Round of 32.
     markEliminated(roomState, ranked[3].code);
     eliminatedCodes.push(ranked[3].code);
-  }
+  });
   thirds.sort((x, y) => (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (Math.random() - 0.5));
   const best8 = thirds.slice(0, 8);
   for (const s of thirds.slice(8)) {
@@ -236,7 +271,7 @@ function finalizeGroupsAndSeedR32(roomState) {
     eliminatedCodes.push(s.code);
   }
 
-  const advancing = shuffle([...top2, ...best8].map((s) => s.code));
+  const advancing = seedRoundOf32(top2, best8);
   const matches = [];
   for (let i = 0; i < advancing.length; i += 2) {
     matches.push({ aCode: advancing[i], bCode: advancing[i + 1], result: null, winnerCode: null });
@@ -253,7 +288,7 @@ function playKnockoutRound(roomState) {
   for (const m of matches) {
     const a = t.slotByCode[m.aCode];
     const b = t.slotByCode[m.bCode];
-    const sim = simulateMatch(a, b, { knockout: true });
+    const sim = simulateMatch(a, b, { knockout: true, stage: t.stage });
     // Captured before updateMorale mutates it below — the analysis for this match should
     // reflect the confidence each side carried INTO it, not the result it just produced.
     const moraleA = a.morale || 0;
@@ -307,7 +342,7 @@ function simulateNextStep(roomState) {
     const rawMatches = md.map((fx) => {
       const a = t.slotByCode[fx.aCode];
       const b = t.slotByCode[fx.bCode];
-      const sim = simulateMatch(a, b, { knockout: false });
+      const sim = simulateMatch(a, b, { knockout: false, stage: 'group' });
       // Captured before applyGroupResult mutates morale for the NEXT match — the analysis
       // shown for this match should reflect the confidence each side carried INTO it.
       const moraleA = a.morale || 0;
@@ -408,6 +443,7 @@ function computeTeamRecord(t, myCode) {
     code: myCode,
     countryName: slot.name,
     formation: slot.formation,
+    tacticalStyle: slot.tacticalStyle || 'balanced',
     eliminated: slot.eliminated,
     w, d, l, gf, ga,
     topScorer, topGoals,

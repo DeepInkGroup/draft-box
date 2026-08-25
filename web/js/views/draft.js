@@ -17,6 +17,16 @@ const DraftView = {
     let allReady = false;
     let iAmReady = false;
     let lastRevealPayload = null;
+    let myTacticalStyle = 'balanced';
+    let tacticalStyleLocked = false;
+
+    const TACTICAL_STYLES = [
+      { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'More defensive resistance, less attacking risk.' },
+      { key: 'balanced', label: 'Balanced', meta: 'Safe default', desc: 'Stable against every style with no major weakness.' },
+      { key: 'gegenpress', label: 'Gegenpress', meta: 'High press', desc: 'More pressure and chances, but higher foul risk.' },
+      { key: 'possession', label: 'Possession', meta: 'Control', desc: 'Better passing, possession and territorial control.' },
+      { key: 'counter', label: 'Counter Attack', meta: 'Transitions', desc: 'Dangerous breaks against aggressive opponents.' }
+    ];
 
     const POS_ORDER = { GK: 0, DF: 1, MF: 2, FW: 3 };
     function sortPlayers(players, mode) {
@@ -276,17 +286,50 @@ const DraftView = {
       });
     }
 
-    function handleDraftComplete(slotsMap, captainSlot, ratingsCard) {
+    function handleDraftComplete(slotsMap, captainSlot, tacticalStyle, locked, ratingsCard) {
       stopTimer();
       renderRatingsCard(ratingsCard);
+      myTacticalStyle = tacticalStyle || myTacticalStyle;
+      tacticalStyleLocked = !!locked;
       if (captainEnabled && !captainSlot) {
         iAmReady = false;
         renderCaptainPicker(slotsMap, captainSlot);
+      } else if (!tacticalStyleLocked) {
+        iAmReady = false;
+        renderTacticalStylePicker();
       } else {
         iAmReady = true;
         revealCard.innerHTML = '';
         renderWaitingZone();
       }
+    }
+
+    function renderTacticalStylePicker() {
+      revealCard.innerHTML = `
+        <div class='reveal-team'>Choose Tactical Style</div>
+        <div class='reveal-sub'>This affects chemistry, possession, fouls and tactical matchup edge before every match.</div>
+        <div class='tactical-style-grid' id='tacticalStyleGrid'>
+          ${TACTICAL_STYLES.map((s) => `
+            <button type='button' class='tactical-style-card ${s.key === myTacticalStyle ? 'selected' : ''}' data-style='${s.key}'>
+              <span>${s.meta}</span>
+              <b>${s.label}</b>
+              <small>${s.desc}</small>
+            </button>
+          `).join('')}
+        </div>
+        <button class='btn btn-primary btn-block' id='btnLockTacticalStyle'>Lock Tactical Style</button>
+      `;
+      revealCard.querySelectorAll('.tactical-style-card').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          myTacticalStyle = btn.dataset.style;
+          revealCard.querySelectorAll('.tactical-style-card').forEach((b) => b.classList.toggle('selected', b === btn));
+        });
+      });
+      revealCard.querySelector('#btnLockTacticalStyle').addEventListener('click', (e) => {
+        e.target.disabled = true;
+        e.target.textContent = 'Locking...';
+        socket.emit('draft:setTacticalStyle', { code, tacticalStyle: myTacticalStyle });
+      });
     }
 
     function renderCaptainPicker(slotsMap, currentCaptainSlot) {
@@ -332,6 +375,8 @@ const DraftView = {
     App.onSocket('room:state', (s) => {
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
+      if (me && me.tacticalStyle) myTacticalStyle = me.tacticalStyle;
+      tacticalStyleLocked = !!(me && me.tacticalStyleLocked);
       captainEnabled = !!s.captainEnabled;
       isCreator = s.creatorId === App.state.user.id;
       singlePlayer = !!s.singlePlayer;
@@ -340,7 +385,7 @@ const DraftView = {
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
         if (!s.myDraft.draftComplete) socket.emit('draft:reveal', { code });
-        else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot, s.myDraft.ratingsCard);
+        else handleDraftComplete(s.myDraft.slots, s.myDraft.captainSlot, s.myDraft.tacticalStyle, s.myDraft.tacticalStyleLocked, s.myDraft.ratingsCard);
       }
     });
 
@@ -358,11 +403,18 @@ const DraftView = {
       if (!payload.draftComplete) {
         socket.emit('draft:reveal', { code });
       } else {
-        handleDraftComplete(payload.slots, payload.captainSlot, payload.ratingsCard);
+        handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
       }
     });
 
     App.onSocket('draft:captainSet', (payload) => {
+      renderRatingsCard(payload.ratingsCard);
+      handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
+    });
+
+    App.onSocket('draft:tacticalStyleSet', (payload) => {
+      myTacticalStyle = payload.tacticalStyle || myTacticalStyle;
+      tacticalStyleLocked = true;
       renderRatingsCard(payload.ratingsCard);
       revealCard.innerHTML = '';
       iAmReady = true;

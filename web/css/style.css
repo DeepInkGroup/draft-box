@@ -352,6 +352,14 @@ a { color: var(--accent-strong); }
   display: grid; grid-template-columns: repeat(var(--round-count), minmax(210px, 1fr)); gap: 34px;
   align-items: start; overflow-x: auto; padding: 10px 8px 18px; scrollbar-width: thin;
 }
+.bracket-chart.split {
+  grid-template-columns: minmax(840px, 1fr) minmax(230px, .6fr) minmax(840px, 1fr);
+  gap: 28px; align-items: center; padding: 10px 10px 22px;
+}
+.bracket-wing { display: grid; grid-template-columns: repeat(var(--side-round-count), minmax(198px, 1fr)); gap: 30px; align-items: start; }
+.bracket-wing-left { direction: ltr; }
+.bracket-wing-right { direction: rtl; }
+.bracket-wing-right .bracket-chart-round, .bracket-wing-right .bracket-node, .bracket-wing-right h4 { direction: ltr; }
 .bracket-chart-round { position: relative; min-width: 0; }
 .bracket-chart-round h4 {
   position: sticky; left: 0; z-index: 1; margin: 0 0 12px; padding: 6px 10px; border: 1px solid var(--border-soft);
@@ -363,6 +371,10 @@ a { color: var(--accent-strong); }
 .bracket-chart-round.stage-qf .bracket-stack { padding-top: 98px; gap: 112px; }
 .bracket-chart-round.stage-sf .bracket-stack { padding-top: 238px; gap: 248px; }
 .bracket-chart-round.stage-final .bracket-stack { padding-top: 518px; }
+.bracket-chart.split .bracket-chart-round.stage-r16 .bracket-stack { padding-top: 42px; gap: 54px; }
+.bracket-chart.split .bracket-chart-round.stage-qf .bracket-stack { padding-top: 136px; gap: 170px; }
+.bracket-chart.split .bracket-chart-round.stage-sf .bracket-stack { padding-top: 330px; gap: 0; }
+.bracket-chart.split .bracket-final-center .bracket-stack { padding-top: 0; gap: 0; }
 .bracket-chart.compact .bracket-chart-round.stage-qf .bracket-stack,
 .bracket-chart.compact .bracket-chart-round.stage-sf .bracket-stack,
 .bracket-chart.compact .bracket-chart-round.stage-final .bracket-stack { padding-top: 0; gap: 22px; }
@@ -378,6 +390,11 @@ a { color: var(--accent-strong); }
   content: ''; position: absolute; top: calc(50% - 4px); right: -36px; width: 8px; height: 8px; border-radius: 50%;
   background: var(--surface); border: 2px solid rgba(148,163,184,.45); z-index: 1;
 }
+.bracket-wing-right .bracket-node:not(.terminal)::after { right: auto; left: -34px; }
+.bracket-wing-right .bracket-node:not(.terminal)::before { right: auto; left: -36px; }
+.bracket-final-center { align-self: center; }
+.bracket-final-center h4 { margin-left: auto; margin-right: auto; border-color: rgba(234,179,8,.45); color: #facc15; }
+.bracket-final-center .bracket-node { min-height: 122px; }
 .bracket-node.terminal { border-color: rgba(234,179,8,.5); background: linear-gradient(180deg, rgba(234,179,8,.12), rgba(255,255,255,.02)); }
 .bracket-node-team { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; font-size: .8rem; }
 .bracket-node-team span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -426,6 +443,13 @@ a { color: var(--accent-strong); }
   border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); background: var(--surface); font-size: .82rem;
 }
 .report-line { padding: 3px 0; }
+.report-line.star, .live-feed-line.star {
+  border-radius: 7px;
+  border: 1px solid rgba(234, 179, 8, .28);
+  background: rgba(234, 179, 8, .08);
+  color: var(--accent-strong);
+  padding-inline: 8px;
+}
 
 .team-events-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
 .team-event-col {
@@ -443,6 +467,7 @@ a { color: var(--accent-strong); }
   font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
 }
 .champion-banner h2 { margin: 6px 0 4px; font-size: 1.7rem; color: var(--accent-strong); }
+.champion-team-name { margin: 0; color: var(--muted); font-size: .82rem; font-weight: 700; }
 
 .matchlog { max-height: 220px; overflow-y: auto; font-size: .82rem; }
 
@@ -453,6 +478,18 @@ a { color: var(--accent-strong); }
 }
 .live-feed { max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
 .live-feed-line { padding: 5px 8px; border-bottom: 1px dashed var(--border-soft); font-size: .85rem; }
+
+.tactical-style-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+.tactical-style-card {
+  appearance: none; border: 1px solid var(--border); border-radius: var(--radius-sm);
+  background: var(--surface-2); color: var(--ink); padding: 10px 9px; text-align: left; cursor: pointer;
+  display: grid; gap: 4px; min-height: 112px; transition: border-color .12s, background .12s, transform .12s;
+}
+.tactical-style-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.tactical-style-card.selected { border-color: var(--accent-strong); background: rgba(234, 179, 8, .09); box-shadow: inset 0 0 0 1px rgba(234,179,8,.18); }
+.tactical-style-card span { color: var(--accent-strong); font-size: .68rem; font-weight: 900; }
+.tactical-style-card b { font-size: .84rem; }
+.tactical-style-card small { color: var(--muted); font-size: .68rem; line-height: 1.3; }
 
 .pen-shootout {
   border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px;
@@ -585,6 +622,10 @@ a { color: var(--accent-strong); }
 .rulebook-body p { font-size: .88rem; line-height: 1.55; margin: 0 0 8px; }
 .rulebook-body ul { margin: 0 0 10px; padding-inline-start: 20px; font-size: .88rem; line-height: 1.55; }
 .rulebook-body li { margin-bottom: 4px; }
+.rulebook-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.rulebook-highlights div { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.025); padding: 10px; }
+.rulebook-highlights b { display: block; color: var(--accent-strong); font-size: .82rem; margin-bottom: 4px; }
+.rulebook-highlights span { display: block; color: var(--muted); font-size: .74rem; line-height: 1.35; }
 
 .profile-columns { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(420px, 1.15fr); gap: 14px; align-items: start; }
 .profile-col { border: 1px solid var(--border-soft); border-radius: var(--radius-sm); background: rgba(255,255,255,.018); padding: 12px; }
@@ -594,7 +635,9 @@ a { color: var(--accent-strong); }
 #profileDialog .toggle-option .toggle-title { margin-bottom: 2px; font-size: .82rem; }
 #profileDialog .toggle-option .toggle-sub { font-size: .68rem; line-height: 1.25; }
 @media (max-width: 560px) {
+  .tactical-style-grid { grid-template-columns: 1fr; }
   .profile-columns { grid-template-columns: 1fr; }
+  .rulebook-highlights { grid-template-columns: 1fr; }
 }
 
 .rulebook-pdf-link {
@@ -805,13 +848,20 @@ a { color: var(--accent-strong); }
   .myteam-header { gap: 10px; flex-wrap: wrap; }
   .myteam-players { grid-template-columns: 1fr; }
   .bracket-chart { grid-template-columns: repeat(var(--round-count), minmax(188px, 1fr)); gap: 20px; }
+  .bracket-chart.split { grid-template-columns: minmax(720px, 1fr) minmax(204px, .55fr) minmax(720px, 1fr); gap: 18px; }
+  .bracket-wing { grid-template-columns: repeat(var(--side-round-count), minmax(170px, 1fr)); gap: 18px; }
   .bracket-node:not(.terminal)::after { right: -20px; width: 20px; }
   .bracket-node:not(.terminal)::before { right: -23px; }
+  .bracket-wing-right .bracket-node:not(.terminal)::after { left: -20px; right: auto; }
+  .bracket-wing-right .bracket-node:not(.terminal)::before { left: -23px; right: auto; }
   .engine-metric-grid, .engine-factor-list { grid-template-columns: 1fr 1fr; }
   .bracket-chart-round.stage-r16 .bracket-stack,
   .bracket-chart-round.stage-qf .bracket-stack,
   .bracket-chart-round.stage-sf .bracket-stack,
   .bracket-chart-round.stage-final .bracket-stack { padding-top: 0; gap: 12px; }
+  .bracket-chart.split .bracket-chart-round.stage-r16 .bracket-stack { padding-top: 28px; gap: 38px; }
+  .bracket-chart.split .bracket-chart-round.stage-qf .bracket-stack { padding-top: 92px; gap: 112px; }
+  .bracket-chart.split .bracket-chart-round.stage-sf .bracket-stack { padding-top: 230px; }
   .award-pulse-grid, .awards-grid { grid-template-columns: 1fr 1fr; }
   .site-footer { padding: 12px 16px; gap: 10px; flex-wrap: wrap; }
 }

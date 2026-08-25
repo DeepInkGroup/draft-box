@@ -3,6 +3,7 @@ const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
+const { normalizeStyle } = require('../game/tacticalStyles');
 const { lobbySnapshot } = rm;
 
 function channelName(code) {
@@ -23,6 +24,8 @@ function myDraftView(member, showOverall) {
     openSlots: draftEngine.openSlots(member),
     draftComplete: member.draftComplete,
     captainSlot: member.captainSlot,
+    tacticalStyle: normalizeStyle(member.tacticalStyle),
+    tacticalStyleLocked: !!member.tacticalStyleLocked,
     ratingsCard
   };
 }
@@ -30,7 +33,7 @@ function myDraftView(member, showOverall) {
 // A member is fully ready to enter the tournament once their draft is complete AND,
 // if the room has captains enabled, they've chosen one.
 function memberReady(member, captainEnabled) {
-  return member.draftComplete && (!captainEnabled || !!member.captainSlot);
+  return member.draftComplete && !!member.tacticalStyleLocked && (!captainEnabled || !!member.captainSlot);
 }
 
 function clearPickTimer(member) {
@@ -325,6 +328,24 @@ function registerSocketHandlers(io) {
       member.captainSlot = slotCode;
       rm.persistCaptain(roomRow.id, socket.user.id, slotCode);
       socket.emit('draft:captainSet', { slotCode, ...myDraftView(member, state.showOverall) });
+
+      const freshRoomRow = rm.getRoomRow(roomRow.id);
+      const started = maybeStartTournament(io, freshRoomRow, state);
+      if (!started) io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
+    });
+
+    socket.on('draft:setTacticalStyle', ({ code, tacticalStyle }) => {
+      const roomRow = rm.getRoomByCode(code);
+      if (!roomRow || roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'draft is not active for this room' });
+      const state = rm.loadRoomState(roomRow);
+      const member = state.members.get(socket.user.id);
+      if (!member) return socket.emit('error:message', { error: 'not a member of this room' });
+      if (!member.draftComplete) return socket.emit('error:message', { error: 'finish drafting your squad before choosing a tactical style' });
+
+      member.tacticalStyle = normalizeStyle(tacticalStyle);
+      member.tacticalStyleLocked = true;
+      rm.persistTacticalStyle(roomRow.id, socket.user.id, member.tacticalStyle);
+      socket.emit('draft:tacticalStyleSet', { tacticalStyle: member.tacticalStyle, ...myDraftView(member, state.showOverall) });
 
       const freshRoomRow = rm.getRoomRow(roomRow.id);
       const started = maybeStartTournament(io, freshRoomRow, state);
