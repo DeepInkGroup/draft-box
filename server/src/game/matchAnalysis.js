@@ -200,6 +200,8 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppChem = mySide === 'A' ? (m.chemistry && m.chemistry.B) : (m.chemistry && m.chemistry.A);
   const myTac = mySide === 'A' ? (m.tactical && m.tactical.A) : (m.tactical && m.tactical.B);
   const oppTac = mySide === 'A' ? (m.tactical && m.tactical.B) : (m.tactical && m.tactical.A);
+  const myInfluence = mySide === 'A' ? (m.influence && m.influence.A) : (m.influence && m.influence.B);
+  const oppInfluence = mySide === 'A' ? (m.influence && m.influence.B) : (m.influence && m.influence.A);
   const events = m.events || [];
   const starEvents = m.starMoments || events.filter((e) => e.type === 'star');
   const myReds = events.filter((e) => e.type === 'red' && e.side === mySide).length;
@@ -228,6 +230,12 @@ function analyzeMatch(m, mySide, myName, oppName) {
   }
   if (myTac && oppTac) {
     addFactor('Tactical Style', myTac.label, `${myTac.label} vs ${oppTac.label}; matchup edge ${myTac.edge >= 0 ? '+' : ''}${fmt1(myTac.edge * 100)}%.`, myTac.edge >= 0.035 ? 'good' : myTac.edge <= -0.035 ? 'bad' : 'neutral');
+  }
+  if (myInfluence && oppInfluence) {
+    const creatorDiff = myInfluence.supportFocus - oppInfluence.supportFocus;
+    const attackDiff = myInfluence.attackFocus - oppInfluence.attackFocus;
+    const detail = `Creator ${Math.round(myInfluence.supportFocus)} vs ${Math.round(oppInfluence.supportFocus)}, finisher ${Math.round(myInfluence.attackFocus)} vs ${Math.round(oppInfluence.attackFocus)}, shield ${Math.round(myInfluence.shieldFocus)}.`;
+    addFactor('Player Influence', `${attackDiff >= 0 ? '+' : ''}${fmt1(attackDiff)}`, detail, creatorDiff >= 4 || attackDiff >= 4 ? 'good' : creatorDiff <= -4 || attackDiff <= -4 ? 'bad' : 'neutral');
   }
   if (starEvents.length) {
     const myStars = starEvents.filter((e) => e.side === mySide);
@@ -262,6 +270,7 @@ function analyzeMatch(m, mySide, myName, oppName) {
       { label: 'Pass Acc.', mine: `${myStats.passAccuracy}%`, opponent: `${oppStats.passAccuracy}%` },
       { label: 'Chemistry', mine: myChem ? `${fmt1(myChem.multiplier * 100)}%` : '-', opponent: oppChem ? `${fmt1(oppChem.multiplier * 100)}%` : '-' },
       { label: 'Style', mine: myTac ? myTac.label : '-', opponent: oppTac ? oppTac.label : '-' },
+      { label: 'Influence', mine: myInfluence ? Math.round((myInfluence.attackFocus + myInfluence.supportFocus) / 2) : '-', opponent: oppInfluence ? Math.round((oppInfluence.attackFocus + oppInfluence.supportFocus) / 2) : '-' },
       { label: 'Saves', mine: myStats.saves, opponent: oppStats.saves }
     ],
     factors

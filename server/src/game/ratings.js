@@ -7,6 +7,23 @@ function slotWeights(y) {
   return { attack: 1 - y / 100, defense: y / 100 };
 }
 
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
+function qualityWeight(overall) {
+  return Math.pow(1.055, (overall || 75) - 75);
+}
+
+function slotInfluence(slot) {
+  const y = slot ? slot.y : 50;
+  return {
+    attack: Math.pow(clamp(1 - y / 100, 0.08, 0.95), 1.12),
+    defense: Math.pow(clamp(y / 100, 0.08, 0.95), 1.08),
+    creation: clamp(1 - Math.abs(y - 42) / 62, 0.1, 1)
+  };
+}
+
 const CAPTAIN_BONUS = 6;
 
 // Weighted-average team ratings from an 11-player XI (each needs .overall and .slotCode)
@@ -28,16 +45,20 @@ function computeTeamRatings(xi, formation) {
     const slot = slotByCode.get(p.slotCode);
     const y = slot ? slot.y : 50;
     const w = slotWeights(y);
+    const influence = slotInfluence(slot);
     const overall = p.isCaptain ? Math.min(99, p.overall + CAPTAIN_BONUS) : p.overall;
-    atkNum += overall * w.attack;
-    atkDen += w.attack;
-    defNum += overall * w.defense;
-    defDen += w.defense;
+    const q = qualityWeight(overall) * (p.isStar ? 1.035 : 1);
+    const atkWeight = w.attack * (0.7 + influence.creation * 0.18 + influence.attack * 0.22) * q;
+    const defWeight = w.defense * (0.76 + influence.defense * 0.24) * q;
+    atkNum += overall * atkWeight;
+    atkDen += atkWeight;
+    defNum += overall * defWeight;
+    defDen += defWeight;
     overallSum += overall;
     if (p.isStar) stars += 1;
   }
 
-  const starBonus = Math.min(3, stars) * 1.5;
+  const starBonus = Math.min(4, stars) * 1.35;
   const n = xi.length || 1;
 
   return {
@@ -196,14 +217,16 @@ function predictKeyPlayers(xi, formation, tacticalStyle = 'balanced') {
   const power = computePower(xi, formation, styleKey);
   const avgOverall = xi.length ? xi.reduce((s, p) => s + p.overall, 0) / xi.length : 0;
   const starCount = xi.filter((p) => p.isStar).length;
+  const bestOverall = xi.length ? Math.max(...xi.map((p) => p.overall || 0)) : 0;
 
   for (const p of xi) {
     const slot = slotByCode.get(p.slotCode);
     const y = slot ? slot.y : 50;
-    const quality = Math.pow(1.06, p.overall - 75);
-    const atkScore = (1 - y / 100) * p.overall * quality * (style.tempo * 0.35 + style.risk * 0.35 + style.transition * 0.3);
-    const assistScore = (1 - Math.abs(y - 45) / 60) * p.overall * quality * (style.control * 0.45 + style.press * 0.2 + style.transition * 0.35);
-    const pressureScore = p.overall * quality * (p.isStar ? 1.2 : 1) * (style.press * 0.4 + style.control * 0.25 + style.starMoment * 0.35);
+    const quality = qualityWeight(p.overall) * (p.isStar ? 1.08 : 1);
+    const influence = slotInfluence(slot);
+    const atkScore = influence.attack * p.overall * quality * (style.tempo * 0.34 + style.risk * 0.26 + style.transition * 0.4);
+    const assistScore = influence.creation * p.overall * quality * (style.control * 0.48 + style.press * 0.18 + style.transition * 0.34);
+    const pressureScore = p.overall * quality * (p.isStar ? 1.18 : 1) * (influence.creation * 0.35 + influence.defense * 0.25 + style.press * 0.22 + style.starMoment * 0.18);
     if (atkScore > bestScorerScore) { bestScorerScore = atkScore; bestScorer = p; }
     if (assistScore > bestAssistScore) { bestAssistScore = assistScore; bestAssist = p; }
     if (pressureScore > bestPressureScore) { bestPressureScore = pressureScore; bestPressure = p; }
@@ -214,6 +237,7 @@ function predictKeyPlayers(xi, formation, tacticalStyle = 'balanced') {
   const ideas = [];
   if (chem.chemistry < 0.58) ideas.push('Improve chemistry: keep more players in their natural line and avoid overloaded position groups.');
   if (starCount === 0) ideas.push('No Game Changer: protect shape and win through chemistry, set pieces and matchups.');
+  if (bestOverall >= 86) ideas.push('Elite player impact: put your best overall player in a high-touch slot to raise xG and late-match threat.');
   if (ratings.attack < ratings.defense - 4) ideas.push('Attack needs support: a higher line or creator-heavy style can raise shot volume.');
   if (ratings.defense < ratings.attack - 4) ideas.push('Defense is the weak point: Defensive or Possession can reduce opponent xG.');
   if (styleKey === 'gegenpress') ideas.push('Gegenpress adds pressure and late chaos, but card/foul risk is higher.');

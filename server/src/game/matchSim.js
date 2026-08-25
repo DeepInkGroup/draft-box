@@ -93,6 +93,64 @@ function qualityWeight(overall) {
   return Math.pow(QUALITY_CURVE_BASE, overall - 75);
 }
 
+function slotRole(slot) {
+  if (!slot) return { attack: 0.5, support: 0.5, shield: 0.5, save: 0 };
+  const attack = clamp(1 - slot.y / 100, 0.05, 0.95);
+  const support = clamp(1 - Math.abs(slot.y - 45) / 55, 0.1, 1);
+  const shield = clamp(slot.y / 100, 0.05, 0.95);
+  const save = slot.group === 'GK' ? 1 : 0;
+  return { attack, support, shield, save };
+}
+
+function influenceProfile(team, tactical) {
+  const slots = new Map(getSlots(team.formation).map((s) => [s.code, s]));
+  let attack = 0;
+  let support = 0;
+  let shield = 0;
+  let attackDen = 0;
+  let supportDen = 0;
+  let shieldDen = 0;
+  let keeper = 75;
+  let starClutch = 0;
+
+  for (const p of team.xi) {
+    const role = slotRole(slots.get(p.slotCode));
+    const q = qualityWeight(p.overall);
+    attack += p.overall * q * role.attack;
+    support += p.overall * q * role.support;
+    shield += p.overall * q * role.shield;
+    attackDen += q * role.attack;
+    supportDen += q * role.support;
+    shieldDen += q * role.shield;
+    if (p.pos === 'GK') keeper = p.overall;
+    if (p.isStar) starClutch += Math.max(0, p.overall - 82) * q;
+  }
+
+  const n = Math.max(1, team.xi.length);
+  const attackFocus = attack / Math.max(1, attackDen);
+  const supportFocus = support / Math.max(1, supportDen);
+  const shieldFocus = shield / Math.max(1, shieldDen);
+  const tacticalStress = Math.max(0, tactical.mods.risk - 1) * 0.55 + Math.max(0, tactical.mods.press - 1) * 0.45;
+  const staminaDrag = clamp(tacticalStress * (1 - clamp((supportFocus - 68) / 20, 0, 1)) * 0.08, 0, 0.08);
+
+  return {
+    attackFocus,
+    supportFocus,
+    shieldFocus,
+    keeper,
+    starClutch: clamp(starClutch / (n * 10), 0, 0.12),
+    staminaDrag
+  };
+}
+
+function influenceXgBonus(own, opp, ownTactical, oppTactical, possession) {
+  const creatorLift = clamp((own.supportFocus - 75) / 120, -0.08, 0.16) * ownTactical.mods.control;
+  const finisherLift = clamp((own.attackFocus - 75) / 105, -0.08, 0.18) * (ownTactical.mods.tempo * 0.45 + ownTactical.mods.transition * 0.35 + ownTactical.mods.risk * 0.2);
+  const shieldTax = clamp((opp.shieldFocus - 75) / 110, -0.12, 0.14) * oppTactical.mods.defense;
+  const territory = clamp((possession - 50) / 260, -0.08, 0.08);
+  return clamp(creatorLift + finisherLift + own.starClutch + territory - shieldTax - own.staminaDrag, -0.22, 0.34);
+}
+
 function tacticalPlan(ownStyle, oppStyle) {
   const key = normalizeStyle(ownStyle);
   const style = TACTICAL_STYLES[key] || TACTICAL_STYLES.balanced;
@@ -182,11 +240,11 @@ function generateGoalEvents(team, count, dismissalMinutes = null, minuteRange = 
     const minute = minMinute + Math.floor(Math.random() * span);
     const activePool = fullPool.filter((p) => !isPlayerDismissedAt(p, dismissalMinutes, minute));
     const pool = activePool.length ? activePool : fullPool;
-    const scorer = pickWeighted(pool, (p) => (1 - slotY(p, team.formation) / 100) * qualityWeight(p.overall));
+    const scorer = pickWeighted(pool, (p) => Math.pow(Math.max(0.08, 1 - slotY(p, team.formation) / 100), 1.25) * qualityWeight(p.overall) * (p.isStar ? 1.08 : 1));
     let assist = null;
     const assistCandidates = pool.filter((p) => p !== scorer);
     if (assistCandidates.length && Math.random() < 0.75) {
-      assist = pickWeighted(assistCandidates, (p) => (1 - Math.abs(slotY(p, team.formation) - 45) / 60) * qualityWeight(p.overall));
+      assist = pickWeighted(assistCandidates, (p) => Math.max(0.1, 1 - Math.abs(slotY(p, team.formation) - 45) / 60) * qualityWeight(p.overall) * (p.isStar ? 1.05 : 1));
     }
     events.push({
       minute,
@@ -501,14 +559,18 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
   const setPieceBonusB = setPieceXgBonus(cornersB, foulsA, tacticalB);
   const transitionBonusA = transitionXgBonus(tacticalA, tacticalB, possessionA);
   const transitionBonusB = transitionXgBonus(tacticalB, tacticalA, possessionB);
+  const influenceA = influenceProfile(teamA, tacticalA);
+  const influenceB = influenceProfile(teamB, tacticalB);
+  const playerBonusA = influenceXgBonus(influenceA, influenceB, tacticalA, tacticalB, possessionA);
+  const playerBonusB = influenceXgBonus(influenceB, influenceA, tacticalB, tacticalA, possessionB);
 
   const context = { knockout, stage };
   const lateStarA = maybeStarMoment(teamA, 'A', context, cardPlan.dismissalMinutesA, [80, 90], 'late', tacticalA);
   const lateStarB = maybeStarMoment(teamB, 'B', context, cardPlan.dismissalMinutesB, [80, 90], 'late', tacticalB);
   let starMoments = [lateStarA, lateStarB].filter(Boolean);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + transitionBonusA + (lateStarA ? lateStarA.boost : 0), 0.1, 5.4);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + transitionBonusB + (lateStarB ? lateStarB.boost : 0), 0.1, 5.4);
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.1, 5.6);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.1, 5.6);
 
   let goalsA = clamp(poissonSample(xgA), 0, 9);
   let goalsB = clamp(poissonSample(xgB), 0, 9);
@@ -560,6 +622,7 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
     goalsA, goalsB, xgA, xgB, stats, events,
     tactical: { A: tacticalA, B: tacticalB },
     chemistry: { A: chemA, B: chemB },
+    influence: { A: influenceA, B: influenceB },
     starMoments,
     wentToExtraTime, etGoalsA, etGoalsB,
     wentToPenalties, penaltyWinner, penalties, penaltyKicks

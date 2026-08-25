@@ -13,6 +13,8 @@ function channelName(code) {
 // showOverall respects the room's "Show Ratings" setting: in blind-mode rooms we don't
 // send a ratings breakdown either, since that would leak exactly what the mode hides.
 function myDraftView(member, showOverall) {
+  // Normalizes legacy/stale slot maps before any client snapshot reads member.slots.
+  draftEngine.openSlots(member);
   let ratingsCard = null;
   if (member.draftComplete && showOverall) {
     const taggedSquad = member.squad.map((p) => ({ ...p, isCaptain: !!member.captainSlot && p.slotCode === member.captainSlot }));

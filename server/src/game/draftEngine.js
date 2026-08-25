@@ -5,6 +5,7 @@ const MAX_REROLL_ATTEMPTS = 300;
 const DEFAULT_PICK_TIME_MS = 20000;
 
 function openSlots(member) {
+  normalizeMemberSlots(member);
   return getSlots(member.formation).filter((s) => !member.slots[s.code]);
 }
 
@@ -26,6 +27,30 @@ function emptySlotsForFormation(formation) {
   const slots = {};
   for (const s of getSlots(formation)) slots[s.code] = null;
   return slots;
+}
+
+function normalizeMemberSlots(member) {
+  if (!member) return;
+  const validCodes = new Set(getSlots(member.formation).map((slot) => slot.code));
+  const nextSlots = emptySlotsForFormation(member.formation);
+  const byId = new Map((member.squad || []).filter(Boolean).map((player) => [player.id, player]));
+
+  for (const [slotCode, occupant] of Object.entries(member.slots || {})) {
+    if (!validCodes.has(slotCode) || !occupant) continue;
+    const player = byId.get(occupant.id) || occupant;
+    if (nextSlots[slotCode] && nextSlots[slotCode].id !== player.id) continue;
+    player.slotCode = slotCode;
+    nextSlots[slotCode] = player;
+  }
+
+  for (const player of member.squad || []) {
+    if (!player || !validCodes.has(player.slotCode)) continue;
+    if (nextSlots[player.slotCode] && nextSlots[player.slotCode].id !== player.id) continue;
+    nextSlots[player.slotCode] = player;
+  }
+
+  member.slots = nextSlots;
+  if (member.captainSlot && !member.slots[member.captainSlot]) member.captainSlot = null;
 }
 
 function groupCountsForFormation(formation) {
@@ -74,6 +99,7 @@ function changeFormation(member, formation) {
 
 function movePlayerSlot(member, fromSlotCode, toSlotCode) {
   if (!member) throw new Error('not a member of this room');
+  normalizeMemberSlots(member);
   if (!fromSlotCode || !toSlotCode || fromSlotCode === toSlotCode) return { moved: [] };
   const slotDefs = getSlots(member.formation);
   const fromDef = slotDefs.find((s) => s.code === fromSlotCode);
@@ -88,6 +114,11 @@ function movePlayerSlot(member, fromSlotCode, toSlotCode) {
   source.slotCode = toSlotCode;
   member.slots[fromSlotCode] = target;
   if (target) target.slotCode = fromSlotCode;
+
+  for (const player of member.squad || []) {
+    if (player.id === source.id) player.slotCode = toSlotCode;
+    else if (target && player.id === target.id) player.slotCode = fromSlotCode;
+  }
 
   if (member.captainSlot === fromSlotCode) member.captainSlot = toSlotCode;
   else if (member.captainSlot === toSlotCode && target) member.captainSlot = fromSlotCode;
