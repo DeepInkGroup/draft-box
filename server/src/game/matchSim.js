@@ -35,7 +35,12 @@ function formationEdge(formationX, formationY) {
 }
 
 function expectedGoals(ratingFor, ratingAgainst, edge) {
-  return clamp(1.35 + (ratingFor - ratingAgainst) / 15 + edge / 10, 0.15, 4.8);
+  const diff = clamp(ratingFor - ratingAgainst, -28, 28);
+  const attackTier = clamp((ratingFor - 76) / 55, -0.12, 0.28);
+  const defensiveResistance = clamp((ratingAgainst - 76) / 70, -0.08, 0.22);
+  const matchupShape = clamp(edge * 0.035, -0.18, 0.18);
+  const qualitySwing = diff * 0.022;
+  return clamp(1.05 + qualitySwing + attackTier + matchupShape - defensiveResistance, 0.28, 2.65);
 }
 
 // The opposing goalkeeper's own quality — not just their contribution to the averaged
@@ -63,8 +68,9 @@ function moraleModifier(morale) {
 
 function applyHumanVsAiBoost(ratings, ownTeam, opponentTeam) {
   if (!ownTeam.isHuman || opponentTeam.isHuman) return;
-  ratings.attack *= HUMAN_VS_AI_POWER_MULTIPLIER;
-  ratings.defense *= HUMAN_VS_AI_POWER_MULTIPLIER;
+  const compressedBoost = 1 + (HUMAN_VS_AI_POWER_MULTIPLIER - 1) * 0.45;
+  ratings.attack *= compressedBoost;
+  ratings.defense *= compressedBoost;
 }
 
 function pickWeighted(candidates, weightFn) {
@@ -144,11 +150,11 @@ function influenceProfile(team, tactical) {
 }
 
 function influenceXgBonus(own, opp, ownTactical, oppTactical, possession) {
-  const creatorLift = clamp((own.supportFocus - 75) / 120, -0.08, 0.16) * ownTactical.mods.control;
-  const finisherLift = clamp((own.attackFocus - 75) / 105, -0.08, 0.18) * (ownTactical.mods.tempo * 0.45 + ownTactical.mods.transition * 0.35 + ownTactical.mods.risk * 0.2);
-  const shieldTax = clamp((opp.shieldFocus - 75) / 110, -0.12, 0.14) * oppTactical.mods.defense;
-  const territory = clamp((possession - 50) / 260, -0.08, 0.08);
-  return clamp(creatorLift + finisherLift + own.starClutch + territory - shieldTax - own.staminaDrag, -0.22, 0.34);
+  const creatorLift = clamp((own.supportFocus - 75) / 180, -0.05, 0.1) * ownTactical.mods.control;
+  const finisherLift = clamp((own.attackFocus - 75) / 170, -0.05, 0.11) * (ownTactical.mods.tempo * 0.45 + ownTactical.mods.transition * 0.35 + ownTactical.mods.risk * 0.2);
+  const shieldTax = clamp((opp.shieldFocus - 75) / 165, -0.08, 0.1) * oppTactical.mods.defense;
+  const territory = clamp((possession - 50) / 360, -0.055, 0.055);
+  return clamp(creatorLift + finisherLift + own.starClutch * 0.55 + territory - shieldTax - own.staminaDrag, -0.16, 0.22);
 }
 
 function tacticalPlan(ownStyle, oppStyle) {
@@ -187,7 +193,7 @@ function maybeStarMoment(team, side, context, dismissalMinutes, minuteRange, pha
   if (Math.random() >= chance) return null;
   const player = pickWeighted(candidates, (p) => qualityWeight(p.overall) * (p.overall >= 85 ? 1.25 : 1));
   const minute = minuteRange[0] + Math.floor(Math.random() * (minuteRange[1] - minuteRange[0] + 1));
-  const boost = phase === 'extra' ? 0.18 + Math.random() * 0.28 : 0.22 + Math.random() * 0.34;
+  const boost = phase === 'extra' ? 0.08 + Math.random() * 0.16 : 0.1 + Math.random() * 0.2;
   return {
     minute,
     type: 'star',
@@ -388,17 +394,17 @@ function computeSetPieces(possessionA, possessionB, styleA, styleB) {
 // fouls picks up roughly +0.19 xG from set pieces alone) so a side that dominates corners
 // and draws a lot of fouls gets a real, visible nudge in the scoreline, not just a
 // cosmetic stat line.
-const CORNER_XG_BONUS = 0.018;
-const FOUL_XG_BONUS = 0.008;
+const CORNER_XG_BONUS = 0.011;
+const FOUL_XG_BONUS = 0.0045;
 function setPieceXgBonus(myCorners, oppFouls, style) {
   return (myCorners * CORNER_XG_BONUS + oppFouls * FOUL_XG_BONUS) * style.mods.setPiece;
 }
 
 function transitionXgBonus(myStyle, oppStyle, possession) {
-  const transitionEdge = (myStyle.mods.transition - 1) * 0.22;
-  const pressTrap = Math.max(0, oppStyle.mods.press - 1) * Math.max(0, 50 - possession) * 0.004;
-  const riskSpace = Math.max(0, oppStyle.mods.risk - 1) * myStyle.mods.transition * 0.08;
-  return clamp(transitionEdge + pressTrap + riskSpace, -0.05, 0.18);
+  const transitionEdge = (myStyle.mods.transition - 1) * 0.13;
+  const pressTrap = Math.max(0, oppStyle.mods.press - 1) * Math.max(0, 50 - possession) * 0.0025;
+  const riskSpace = Math.max(0, oppStyle.mods.risk - 1) * myStyle.mods.transition * 0.045;
+  return clamp(transitionEdge + pressTrap + riskSpace, -0.04, 0.12);
 }
 
 // Shots, passes, cards and saves round out the stat line — shots/passes are narrative
@@ -415,12 +421,13 @@ function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events,
   const passesA = Math.round((totalPasses * possessionA) / 100);
   const passesB = totalPasses - passesA;
 
-  // Shots on target reuse the same ~0.3-xG-per-shot approximation as save events;
-  // total shots assume roughly 42% land on target, a typical real-football rate.
-  const shotsOnTargetA = Math.max(goalsA, Math.round(xgA / 0.3));
-  const shotsOnTargetB = Math.max(goalsB, Math.round(xgB / 0.3));
-  const shotsA = Math.round((shotsOnTargetA / 0.42) * (styleA.mods.tempo * 0.45 + styleA.mods.risk * 0.3 + styleA.mods.transition * 0.25));
-  const shotsB = Math.round((shotsOnTargetB / 0.42) * (styleB.mods.tempo * 0.45 + styleB.mods.risk * 0.3 + styleB.mods.transition * 0.25));
+  // Around one shot on target per 0.36 xG keeps scorelines and stat lines in a
+  // football-like band; high-tempo styles add attempts without turning every chance
+  // into a clear shot on target.
+  const shotsOnTargetA = Math.max(goalsA, Math.round(xgA / 0.36));
+  const shotsOnTargetB = Math.max(goalsB, Math.round(xgB / 0.36));
+  const shotsA = Math.round((shotsOnTargetA / 0.38) * (styleA.mods.tempo * 0.45 + styleA.mods.risk * 0.22 + styleA.mods.transition * 0.18 + styleA.mods.control * 0.15));
+  const shotsB = Math.round((shotsOnTargetB / 0.38) * (styleB.mods.tempo * 0.45 + styleB.mods.risk * 0.22 + styleB.mods.transition * 0.18 + styleB.mods.control * 0.15));
 
   const tally = (type, side) => events.filter((e) => e.type === type && e.side === side).length;
 
@@ -444,8 +451,8 @@ function computeMatchStats(ratingsA, ratingsB, xgA, xgB, goalsA, goalsB, events,
 function simulateExtraTime(ratingsA, ratingsB, edgeA, edgeB, teamA, teamB, dismissalMinutesA, dismissalMinutesB, gkModA, gkModB, context, tacticalA, tacticalB) {
   const starA = maybeStarMoment(teamA, 'A', context, dismissalMinutesA, [100, 120], 'extra', tacticalA);
   const starB = maybeStarMoment(teamB, 'B', context, dismissalMinutesB, [100, 120], 'extra', tacticalB);
-  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB * (30 / 90) + transitionXgBonus(tacticalA, tacticalB, 50) * 0.45 + (starA ? starA.boost : 0);
-  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA * (30 / 90) + transitionXgBonus(tacticalB, tacticalA, 50) * 0.45 + (starB ? starB.boost : 0);
+  const etXgA = expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB * 0.28 + transitionXgBonus(tacticalA, tacticalB, 50) * 0.3 + (starA ? starA.boost : 0);
+  const etXgB = expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA * 0.28 + transitionXgBonus(tacticalB, tacticalA, 50) * 0.3 + (starB ? starB.boost : 0);
   const goalsA = clamp(poissonSample(etXgA), 0, 4);
   const goalsB = clamp(poissonSample(etXgB), 0, 4);
   const events = [
@@ -569,11 +576,11 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
   const lateStarB = maybeStarMoment(teamB, 'B', context, cardPlan.dismissalMinutesB, [80, 90], 'late', tacticalB);
   let starMoments = [lateStarA, lateStarB].filter(Boolean);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.1, 5.6);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.1, 5.6);
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.18, 3.25);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.18, 3.25);
 
-  let goalsA = clamp(poissonSample(xgA), 0, 9);
-  let goalsB = clamp(poissonSample(xgB), 0, 9);
+  let goalsA = clamp(poissonSample(xgA), 0, 7);
+  let goalsB = clamp(poissonSample(xgB), 0, 7);
 
   const goalEvents = [
     ...generateGoalEvents(teamA, goalsA, cardPlan.dismissalMinutesA).map((e) => ({ ...e, side: 'A' })),
