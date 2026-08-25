@@ -91,6 +91,17 @@ const App = (() => {
     const winRate = totalMatches > 0 ? Math.round((stats.w / totalMatches) * 100) : 0;
     const goalDiff = stats.gf - stats.ga;
     const goalsPerMatch = totalMatches > 0 ? (stats.gf / totalMatches).toFixed(1) : '0.0';
+    const goalsAgainstPerMatch = totalMatches > 0 ? (stats.ga / totalMatches).toFixed(1) : '0.0';
+    const formLabel = totalMatches === 0 ? 'Unranked' : winRate >= 65 ? 'Title Contender' : winRate >= 45 ? 'Knockout Threat' : 'Rebuild Mode';
+    const profileStyle = totalMatches === 0
+      ? 'Play one tournament to unlock a style read.'
+      : goalDiff >= 6
+        ? 'Front-foot manager: your sides create separation over a full run.'
+        : Number(goalsAgainstPerMatch) <= 1.1
+          ? 'Compact manager: defensive control is carrying your results.'
+          : Number(goalsPerMatch) >= 1.8
+            ? 'High-event manager: strong attack, but game control still matters.'
+            : 'Fine-margin manager: improve chance quality before chasing risk.';
     const coachNote = totalMatches === 0
       ? 'No finished tournaments yet. Your first completed run will unlock form notes here.'
       : winRate >= 60
@@ -107,8 +118,11 @@ const App = (() => {
       <div class="profile-insight-card wide"><span>Coach Note</span><b>${coachNote}</b></div>
       <div class="profile-insight-card"><span>Goal Diff</span><b>${goalDiff >= 0 ? '+' : ''}${goalDiff}</b></div>
       <div class="profile-insight-card"><span>Goals / Match</span><b>${goalsPerMatch}</b></div>
+      <div class="profile-insight-card"><span>Conceded / Match</span><b>${goalsAgainstPerMatch}</b></div>
+      <div class="profile-insight-card"><span>Form Label</span><b>${formLabel}</b></div>
       <div class="profile-insight-card wide"><span>Next Target</span><b>${nextTarget}</b></div>
       <div class="profile-insight-card wide"><span>Draft Setup</span><b>${layoutLabel}</b></div>
+      <div class="profile-insight-card wide"><span>Manager Read</span><b>${profileStyle}</b></div>
     `;
   }
 
