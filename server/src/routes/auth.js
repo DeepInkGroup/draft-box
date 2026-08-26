@@ -9,6 +9,40 @@ const router = express.Router();
 
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
+function makeFriendCode() {
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const digits = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  return `${letter}${digits}`;
+}
+
+function uniqueFriendCode() {
+  for (let i = 0; i < 100; i++) {
+    const code = makeFriendCode();
+    const existing = db.prepare('SELECT id FROM users WHERE friend_code = ?').get(code);
+    if (!existing) return code;
+  }
+  throw new Error('could not generate a unique friend code');
+}
+
+function friendshipPair(a, b) {
+  const one = Number(a);
+  const two = Number(b);
+  return one < two ? [one, two] : [two, one];
+}
+
+function mapFriendRow(row, myId) {
+  const friendId = row.requester_id === myId ? row.addressee_id : row.requester_id;
+  const friendUsername = row.requester_id === myId ? row.addressee_username : row.requester_username;
+  const friendCode = row.requester_id === myId ? row.addressee_code : row.requester_code;
+  return {
+    id: row.id,
+    status: row.status,
+    direction: row.requested_by === myId ? 'outgoing' : 'incoming',
+    friend: { id: friendId, username: friendUsername, friendCode },
+    createdAt: row.created_at
+  };
+}
+
 router.post('/register', (req, res) => {
   const { username, email, password } = req.body || {};
   if (!username || !email || !password) {
@@ -25,11 +59,12 @@ router.post('/register', (req, res) => {
   if (existing) return res.status(409).json({ error: 'username or email already taken' });
 
   const hash = bcrypt.hashSync(password, 10);
+  const friendCode = uniqueFriendCode();
   const info = db
-    .prepare('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)')
-    .run(username, email, hash);
+    .prepare('INSERT INTO users (username, email, friend_code, password_hash) VALUES (?, ?, ?, ?)')
+    .run(username, email, friendCode, hash);
 
-  const user = { id: Number(info.lastInsertRowid), username };
+  const user = { id: Number(info.lastInsertRowid), username, friendCode };
   const token = signToken(user);
   res.status(201).json({ token, user });
 });
@@ -43,15 +78,62 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'invalid credentials' });
   }
 
-  const user = { id: row.id, username: row.username };
+  const user = { id: row.id, username: row.username, friendCode: row.friend_code };
   const token = signToken(user);
   res.json({ token, user });
 });
 
 router.get('/me', requireAuth, (req, res) => {
-  const row = db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?').get(req.user.id);
+  const row = db.prepare('SELECT id, username, email, friend_code AS friendCode, created_at FROM users WHERE id = ?').get(req.user.id);
   if (!row) return res.status(404).json({ error: 'not found' });
   res.json({ user: row });
+});
+
+router.get('/friends', requireAuth, (req, res) => {
+  const rows = db.prepare(`
+    SELECT f.*, ru.username AS requester_username, ru.friend_code AS requester_code,
+           au.username AS addressee_username, au.friend_code AS addressee_code
+    FROM friendships f
+    JOIN users ru ON ru.id = f.requester_id
+    JOIN users au ON au.id = f.addressee_id
+    WHERE f.requester_id = ? OR f.addressee_id = ?
+    ORDER BY f.status = 'pending' DESC, f.updated_at DESC, f.created_at DESC
+  `).all(req.user.id, req.user.id);
+  res.json({ friends: rows.map((row) => mapFriendRow(row, req.user.id)) });
+});
+
+router.post('/friends/request', requireAuth, (req, res) => {
+  const friendCode = String((req.body && req.body.friendCode) || '').trim().toUpperCase();
+  if (!/^[A-Z][0-9]{4}$/.test(friendCode)) return res.status(400).json({ error: 'friend id must look like E3202' });
+
+  const target = db.prepare('SELECT id, username, friend_code FROM users WHERE friend_code = ?').get(friendCode);
+  if (!target) return res.status(404).json({ error: 'friend id not found' });
+  if (target.id === req.user.id) return res.status(400).json({ error: 'you cannot add yourself' });
+
+  const [requesterId, addresseeId] = friendshipPair(req.user.id, target.id);
+  const existing = db.prepare('SELECT * FROM friendships WHERE requester_id = ? AND addressee_id = ?').get(requesterId, addresseeId);
+  if (existing) {
+    if (existing.status === 'accepted') return res.json({ ok: true, status: 'accepted' });
+    return res.status(409).json({ error: 'friend request already pending' });
+  }
+
+  db.prepare('INSERT INTO friendships (requester_id, addressee_id, requested_by, status) VALUES (?, ?, ?, ?)').run(requesterId, addresseeId, req.user.id, 'pending');
+  res.status(201).json({ ok: true, status: 'pending' });
+});
+
+router.post('/friends/respond', requireAuth, (req, res) => {
+  const id = Number(req.body && req.body.id);
+  const action = String((req.body && req.body.action) || '').toLowerCase();
+  if (!id || !['accept', 'reject'].includes(action)) return res.status(400).json({ error: 'id and action are required' });
+
+  const row = db.prepare('SELECT * FROM friendships WHERE id = ?').get(id);
+  if (!row || (row.requester_id !== req.user.id && row.addressee_id !== req.user.id)) return res.status(404).json({ error: 'friend request not found' });
+  if (row.status !== 'pending') return res.status(400).json({ error: 'request is not pending' });
+  if (row.requested_by === req.user.id) return res.status(403).json({ error: 'wait for the other player to respond' });
+
+  if (action === 'reject') db.prepare('DELETE FROM friendships WHERE id = ?').run(id);
+  else db.prepare("UPDATE friendships SET status = 'accepted', updated_at = datetime('now') WHERE id = ?").run(id);
+  res.json({ ok: true });
 });
 
 router.post('/change-password', requireAuth, (req, res) => {

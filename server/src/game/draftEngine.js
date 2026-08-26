@@ -1,5 +1,5 @@
 const { ALL_TEAMS, getTeam } = require('../data/teams');
-const { getSlots, isValidFormation, POSITION_GROUPS } = require('./formations');
+const { getSlots, isValidFormation, POSITION_GROUPS, playerFitsSlot } = require('./formations');
 
 const MAX_REROLL_ATTEMPTS = 300;
 const DEFAULT_PICK_TIME_MS = 20000;
@@ -11,6 +11,10 @@ function openSlots(member) {
 
 function openSlotsForGroup(member, group) {
   return openSlots(member).filter((s) => s.group === group);
+}
+
+function openSlotsForPlayer(member, player) {
+  return openSlots(member).filter((s) => playerFitsSlot(player, s));
 }
 
 function slotsRemaining(member) {
@@ -105,10 +109,11 @@ function movePlayerSlot(member, fromSlotCode, toSlotCode) {
   const fromDef = slotDefs.find((s) => s.code === fromSlotCode);
   const toDef = slotDefs.find((s) => s.code === toSlotCode);
   if (!fromDef || !toDef) throw new Error('invalid lineup slot');
-  if (fromDef.group !== toDef.group) throw new Error('players can only move inside the same position group');
   const source = member.slots[fromSlotCode];
   if (!source) throw new Error('source slot is empty');
   const target = member.slots[toSlotCode] || null;
+  if (!playerFitsSlot(source, toDef)) throw new Error(`${source.name} cannot play ${toDef.short || toDef.code}`);
+  if (target && !playerFitsSlot(target, fromDef)) throw new Error(`${target.name} cannot play ${fromDef.short || fromDef.code}`);
 
   member.slots[toSlotCode] = source;
   source.slotCode = toSlotCode;
@@ -140,7 +145,7 @@ function revealForMember(roomState, userId) {
   if (!member) throw new Error('not a member of this room');
   if (isDraftComplete(member)) return { done: true };
 
-  const wantedPositions = new Set(openSlots(member).map((s) => s.group));
+  const availableSlots = openSlots(member);
   const teamPool = roomState.allowedTeams
     ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
     : ALL_TEAMS;
@@ -156,10 +161,10 @@ function revealForMember(roomState, userId) {
     member.lastRevealedTeam = team.code;
     member.currentReveal = team.code;
     member.pickDeadline = pickTimeMs > 0 ? Date.now() + pickTimeMs : null;
-    return buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs, roomState);
+    return buildRevealPayload(team, pool, availableSlots, hideOverall, member, pickTimeMs, roomState);
   };
 
-  const canSupply = (team) => team.players.some((p) => pool.has(p.id) && wantedPositions.has(p.pos));
+  const canSupply = (team) => team.players.some((p) => pool.has(p.id) && availableSlots.some((slot) => playerFitsSlot(p, slot)));
 
   for (let i = 0; i < MAX_REROLL_ATTEMPTS && candidates.length; i++) {
     const team = candidates[Math.floor(Math.random() * candidates.length)];
@@ -196,7 +201,7 @@ function rerollForMember(roomState, userId) {
   return revealForMember(roomState, userId);
 }
 
-function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pickTimeMs, roomState) {
+function buildRevealPayload(team, pool, availableSlots, hideOverall, member, pickTimeMs, roomState) {
   let players = team.players.map((p) => ({
     id: p.id,
     name: p.name,
@@ -204,7 +209,7 @@ function buildRevealPayload(team, pool, wantedPositions, hideOverall, member, pi
     rawPos: p.rawPos || p.pos,
     overall: hideOverall ? null : p.overall,
     isStar: p.isStar,
-    available: pool.has(p.id) && wantedPositions.has(p.pos)
+    available: pool.has(p.id) && availableSlots.some((slot) => playerFitsSlot(p, slot))
   }));
   players = hideOverall
     ? players.slice().sort((a, b) => a.name.localeCompare(b.name))
@@ -235,7 +240,7 @@ function pickPlayer(roomState, userId, playerId, slotCode) {
 
   const slotDef = getSlots(member.formation).find((s) => s.code === slotCode);
   if (!slotDef) throw new Error('invalid slot');
-  if (slotDef.group !== player.pos) throw new Error(`this slot needs a ${slotDef.group}, not a ${player.pos}`);
+  if (!playerFitsSlot(player, slotDef)) throw new Error(`this player cannot play ${slotDef.short || slotDef.code}`);
   if (member.slots[slotCode]) throw new Error('that slot is already filled');
 
   roomState.pool.delete(playerId);
@@ -260,14 +265,14 @@ function autoPickForMember(roomState, userId) {
   const team = getTeam(member.currentReveal);
   if (!team) return null;
 
-  const wantedPositions = new Set(openSlots(member).map((s) => s.group));
+  const availableSlots = openSlots(member);
   const candidates = team.players
-    .filter((p) => roomState.pool.has(p.id) && wantedPositions.has(p.pos))
+    .filter((p) => roomState.pool.has(p.id) && availableSlots.some((slot) => playerFitsSlot(p, slot)))
     .sort((a, b) => b.overall - a.overall);
   if (!candidates.length) return null;
 
   const chosen = candidates[0];
-  const slot = openSlotsForGroup(member, chosen.pos)[0];
+  const slot = openSlotsForPlayer(member, chosen)[0];
   if (!slot) return null;
 
   return pickPlayer(roomState, userId, chosen.id, slot.code);
@@ -281,6 +286,7 @@ module.exports = {
   slotsRemaining,
   openSlots,
   openSlotsForGroup,
+  openSlotsForPlayer,
   isDraftComplete,
   changeFormation,
   movePlayerSlot,

@@ -29,6 +29,9 @@ const Api = (() => {
     me: () => request('/api/auth/me'),
     changePassword: (currentPassword, newPassword) =>
       request('/api/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
+    friends: () => request('/api/auth/friends'),
+    addFriend: (friendCode) => request('/api/auth/friends/request', { method: 'POST', body: { friendCode } }),
+    respondFriend: (id, action) => request('/api/auth/friends/respond', { method: 'POST', body: { id, action } }),
     careerStats: () => request('/api/auth/me/career'),
     matchHistory: () => request('/api/auth/me/matches'),
     teams: () => request('/api/teams'),

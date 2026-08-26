@@ -43,8 +43,8 @@ const LobbyView = {
     function renderMembers(snap) {
       slotsEl.textContent = `${snap.members.length} / ${snap.humanSlotsMax}`;
       memberList.innerHTML = snap.members.map((m) => `
-        <li>
-          <span>${m.username}${m.userId === App.state.user.id ? ' (you)' : ''}</span>
+        <li class="${m.userId === snap.creatorId ? 'member-leader' : ''}">
+          <span class="member-name">${m.userId === snap.creatorId ? '<span class="leader-star">*</span>' : ''}${m.username}${m.userId === App.state.user.id ? ' (you)' : ''}${m.userId === snap.creatorId ? '<span class="leader-badge">Leader</span>' : ''}</span>
           <span class="badge">${m.formation}</span>
         </li>
       `).join('');

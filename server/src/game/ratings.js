@@ -1,4 +1,4 @@
-const { getSlots, getAdjacentPairs } = require('./formations');
+const { getSlots, getAdjacentPairs, playerFitsSlot } = require('./formations');
 const { TACTICAL_STYLES, normalizeStyle } = require('./tacticalStyles');
 
 // Every slot gets a continuous attack/defense weight from its pitch depth (y):
@@ -117,7 +117,7 @@ function computeChemistry(xi, formation) {
   for (const p of xi) {
     const slot = slotByCode.get(p.slotCode);
     if (actual[p.pos] != null) actual[p.pos] += 1;
-    if (slot && slot.group === p.pos) matchedSlots += 1;
+    if (slot && playerFitsSlot(p, slot)) matchedSlots += 1;
     else outOfPosition += 1;
   }
   const positionFit = xi.length ? matchedSlots / xi.length : 0;

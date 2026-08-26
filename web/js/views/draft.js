@@ -143,6 +143,20 @@ const DraftView = {
       return slot ? slot.group : null;
     }
 
+    const SLOT_COMPATIBILITY = {
+      GK: ['GK'], CB: ['CB'], LB: ['LB'], RB: ['RB'], LWB: ['LWB', 'LB', 'LM'], RWB: ['RWB', 'RB', 'RM'],
+      CDM: ['CDM'], CM: ['CM'], CAM: ['CAM'], LAM: ['LAM', 'CAM', 'LM', 'LW'], RAM: ['RAM', 'CAM', 'RM', 'RW'],
+      LM: ['LM', 'LW', 'LWB'], RM: ['RM', 'RW', 'RWB'], LW: ['LW', 'LM'], RW: ['RW', 'RM'], SS: ['SS', 'CF', 'ST', 'CAM'], ST: ['ST', 'CF']
+    };
+    const GROUP_POSITION_FALLBACKS = { GK: ['GK'], DF: ['CB', 'LB', 'RB', 'LWB', 'RWB'], MF: ['CDM', 'CM', 'CAM', 'LM', 'RM', 'LAM', 'RAM'], FW: ['ST', 'CF', 'SS', 'LW', 'RW'] };
+    function positionCodes(rawPos, group) {
+      return String(rawPos || group || '').split(/[,/|]/).map((v) => v.trim().toUpperCase().replace(/[^A-Z]/g, '')).filter(Boolean).flatMap((v) => GROUP_POSITION_FALLBACKS[v] || [v]);
+    }
+    function playerFitsSlot(player, slot) {
+      const allowed = SLOT_COMPATIBILITY[(slot.short || slot.code || '').toUpperCase()] || [(slot.short || slot.code || '').toUpperCase()];
+      return positionCodes(player.rawPos, player.pos).some((p) => allowed.includes(p));
+    }
+
     function setFormationControl() {
       if (formationBadge) formationBadge.textContent = myFormation;
     }
@@ -214,13 +228,16 @@ const DraftView = {
       squadProgress.textContent = `${filledCount} / 11 positions filled`;
       if (lineupMoveHint) {
         lineupMoveHint.textContent = moveFromSlot
-          ? `Move ${currentSlotsMap[moveFromSlot] ? currentSlotsMap[moveFromSlot].name : 'player'} to another ${slotGroup(moveFromSlot)} slot.`
+          ? `Move ${currentSlotsMap[moveFromSlot] ? currentSlotsMap[moveFromSlot].name : 'player'} to a valid natural slot.`
           : 'Tap a filled slot to rearrange your XI.';
       }
       Pitch.render(squadPitch, slotDefs, (slot) => {
         const occupant = slotsMap && slotsMap[slot.code];
         const moving = moveFromSlot === slot.code;
-        const targetable = moveFromSlot && moveFromSlot !== slot.code && slot.group === slotGroup(moveFromSlot);
+        const movingPlayer = moveFromSlot ? currentSlotsMap[moveFromSlot] : null;
+        const swapTarget = occupant || null;
+        const fromSlotDef = moveFromSlot ? slotDefs.find((s) => s.code === moveFromSlot) : null;
+        const targetable = moveFromSlot && moveFromSlot !== slot.code && movingPlayer && playerFitsSlot(movingPlayer, slot) && (!swapTarget || playerFitsSlot(swapTarget, fromSlotDef));
         if (occupant) {
           return {
             className: `filled ${roleClass(slot.group)} clickable ${moving ? 'moving' : ''} ${targetable ? 'move-target' : ''}`,
@@ -252,8 +269,13 @@ const DraftView = {
         renderSquadPitch(currentSlotsMap);
         return;
       }
-      if (slotGroup(moveFromSlot) !== slotGroup(slotCode)) {
-        App.toast('Players can only move inside the same position group', true);
+      const slotDefs = getSlots(myFormation);
+      const fromDef = slotDefs.find((s) => s.code === moveFromSlot);
+      const toDef = slotDefs.find((s) => s.code === slotCode);
+      const source = currentSlotsMap[moveFromSlot];
+      const target = currentSlotsMap[slotCode];
+      if (!source || !toDef || !playerFitsSlot(source, toDef) || (target && !playerFitsSlot(target, fromDef))) {
+        App.toast('This swap does not fit the players natural positions', true);
         return;
       }
       const fromSlotCode = moveFromSlot;
@@ -330,9 +352,9 @@ const DraftView = {
         card.addEventListener('click', () => {
           if (card.classList.contains('unavailable')) return;
           const playerId = card.dataset.id;
-          const pos = card.dataset.pos;
+          const player = lastPlayers.find((p) => p.id === playerId);
           const playerName = card.dataset.name;
-          const candidateSlots = lastOpenSlots.filter((s) => s.group === pos);
+          const candidateSlots = lastOpenSlots.filter((s) => playerFitsSlot(player || {}, s));
           if (candidateSlots.length <= 1) {
             const slotCode = candidateSlots[0] ? candidateSlots[0].code : null;
             socket.emit('draft:pick', { code, playerId, slotCode });

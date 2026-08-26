@@ -17,8 +17,23 @@ CREATE TABLE IF NOT EXISTS users (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
+  friend_code TEXT UNIQUE,
   password_hash TEXT NOT NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS friendships (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  requester_id INTEGER NOT NULL,
+  addressee_id INTEGER NOT NULL,
+  requested_by INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(requester_id, addressee_id),
+  FOREIGN KEY (requester_id) REFERENCES users(id),
+  FOREIGN KEY (addressee_id) REFERENCES users(id),
+  FOREIGN KEY (requested_by) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS rooms (
@@ -124,5 +139,33 @@ if (!columnExists('rooms', 'rerolls_allowed')) {
 if (!columnExists('rooms', 'spoiler_mode')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN spoiler_mode INTEGER NOT NULL DEFAULT 0;`);
 }
+if (!columnExists('users', 'friend_code')) {
+  db.exec(`ALTER TABLE users ADD COLUMN friend_code TEXT;`);
+}
+if (!columnExists('friendships', 'requested_by')) {
+  db.exec(`ALTER TABLE friendships ADD COLUMN requested_by INTEGER NOT NULL DEFAULT 0;`);
+}
+
+function makeFriendCode() {
+  const letter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+  const digits = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  return `${letter}${digits}`;
+}
+
+function uniqueFriendCode() {
+  for (let i = 0; i < 100; i++) {
+    const code = makeFriendCode();
+    const existing = db.prepare('SELECT id FROM users WHERE friend_code = ?').get(code);
+    if (!existing) return code;
+  }
+  throw new Error('could not generate a unique friend code');
+}
+
+const usersWithoutFriendCode = db.prepare('SELECT id FROM users WHERE friend_code IS NULL OR friend_code = ?').all('');
+const setFriendCode = db.prepare('UPDATE users SET friend_code = ? WHERE id = ?');
+for (const user of usersWithoutFriendCode) setFriendCode.run(uniqueFriendCode(), user.id);
+
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_friend_code ON users(friend_code);`);
+db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_friendships_pair ON friendships(requester_id, addressee_id);`);
 
 module.exports = db;

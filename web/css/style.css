@@ -158,6 +158,10 @@ a { color: var(--accent-strong); }
   padding: 11px 4px; border-bottom: 1px solid var(--border-soft);
 }
 .member-list li:last-child { border-bottom: none; }
+.member-list li.member-leader { background: rgba(250, 204, 21, .06); border-radius: var(--radius-sm); padding-inline: 10px; }
+.member-name { display: inline-flex; align-items: center; gap: 7px; min-width: 0; flex-wrap: wrap; }
+.leader-star { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: rgba(250, 204, 21, .18); color: #facc15; border: 1px solid rgba(250, 204, 21, .45); font-weight: 900; }
+.leader-badge { display: inline-flex; align-items: center; border: 1px solid rgba(250, 204, 21, .45); color: #facc15; background: rgba(250, 204, 21, .10); border-radius: 999px; padding: 2px 7px; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .03em; }
 .badge {
   display: inline-block; padding: 3px 10px; border-radius: 999px;
   background: var(--surface-2); border: 1px solid var(--border); font-size: .75rem; color: var(--muted);
@@ -688,10 +692,25 @@ a { color: var(--accent-strong); }
 #profileDialog .toggle-option { padding: 8px; }
 #profileDialog .toggle-option .toggle-title { margin-bottom: 2px; font-size: .82rem; }
 #profileDialog .toggle-option .toggle-sub { font-size: .68rem; line-height: 1.25; }
+.friend-card { border: 1px solid var(--border); border-radius: var(--radius-sm); background: linear-gradient(135deg, rgba(45,212,191,.08), rgba(250,204,21,.06)); padding: 10px; margin: 4px 0 10px; }
+.friend-card div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.friend-card span { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
+.friend-card b { font-size: 1.35rem; color: var(--ink); letter-spacing: .08em; }
+.friend-card p { margin: 5px 0 0; color: var(--muted); font-size: .76rem; }
+.friend-add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+#friendCodeInput { text-transform: uppercase; letter-spacing: .08em; }
+.friend-list { display: grid; gap: 6px; margin-bottom: 10px; max-height: 128px; overflow-y: auto; padding-right: 2px; }
+.friend-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid var(--border-soft); background: rgba(255,255,255,.018); border-radius: var(--radius-sm); padding: 7px 8px; }
+.friend-row b { display: block; font-size: .82rem; }
+.friend-row span { display: block; color: var(--muted); font-size: .68rem; }
+.friend-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; flex-wrap: wrap; }
 @media (max-width: 560px) {
   .tactical-style-grid { grid-template-columns: 1fr; }
   .profile-columns { grid-template-columns: 1fr; }
   .rulebook-highlights { grid-template-columns: 1fr; }
+  .friend-add-row { grid-template-columns: 1fr; }
+  .friend-row { align-items: flex-start; flex-direction: column; }
+  .friend-actions { justify-content: flex-start; }
 }
 
 .rulebook-pdf-link {

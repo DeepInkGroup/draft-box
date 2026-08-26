@@ -423,6 +423,61 @@ function slotGroup(formation, slotCode) {
   return slot ? slot.group : null;
 }
 
+const GROUP_POSITION_FALLBACKS = {
+  GK: ['GK'],
+  DF: ['CB', 'LB', 'RB', 'LWB', 'RWB'],
+  MF: ['CDM', 'CM', 'CAM', 'LM', 'RM', 'LAM', 'RAM'],
+  FW: ['ST', 'CF', 'SS', 'LW', 'RW']
+};
+
+const SLOT_COMPATIBILITY = {
+  GK: ['GK'],
+  CB: ['CB'],
+  LB: ['LB'],
+  RB: ['RB'],
+  LWB: ['LWB', 'LB', 'LM'],
+  RWB: ['RWB', 'RB', 'RM'],
+  CDM: ['CDM'],
+  CM: ['CM'],
+  CAM: ['CAM'],
+  LAM: ['LAM', 'CAM', 'LM', 'LW'],
+  RAM: ['RAM', 'CAM', 'RM', 'RW'],
+  LM: ['LM', 'LW', 'LWB'],
+  RM: ['RM', 'RW', 'RWB'],
+  LW: ['LW', 'LM'],
+  RW: ['RW', 'RM'],
+  SS: ['SS', 'CF', 'ST', 'CAM'],
+  ST: ['ST', 'CF']
+};
+
+function normalizePositionCode(value) {
+  return String(value || '')
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z]/g, '');
+}
+
+function playerPositionCodes(player) {
+  const raw = String((player && (player.rawPos || player.position || player.positions)) || (player && player.pos) || '');
+  const codes = raw
+    .split(/[,/|]/)
+    .map(normalizePositionCode)
+    .filter(Boolean)
+    .flatMap((code) => GROUP_POSITION_FALLBACKS[code] || [code]);
+  return [...new Set(codes)];
+}
+
+function slotAcceptsPosition(slot, positionCode) {
+  if (!slot || !positionCode) return false;
+  const needed = normalizePositionCode(slot.short || slot.code);
+  const accepted = SLOT_COMPATIBILITY[needed] || [needed];
+  return accepted.includes(normalizePositionCode(positionCode));
+}
+
+function playerFitsSlot(player, slot) {
+  return playerPositionCodes(player).some((code) => slotAcceptsPosition(slot, code));
+}
+
 // A formation's tactical "shape", derived purely from its slot layout (no hardcoded
 // per-formation tuning) — used by the match engine to give formations real
 // strengths/weaknesses against each other. See RULES.md / the rulebook PDF for the
@@ -494,6 +549,9 @@ module.exports = {
   slotsFor,
   isValidSlotCode,
   slotGroup,
+  playerPositionCodes,
+  slotAcceptsPosition,
+  playerFitsSlot,
   getProfile,
   getAdjacentPairs
 };

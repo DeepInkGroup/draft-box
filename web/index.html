@@ -77,6 +77,19 @@
             <label>Email</label>
             <input id="profileEmail" type="text" disabled />
           </div>
+          <div class="friend-card">
+            <div>
+              <span>Your Friend ID</span>
+              <b id="profileFriendCode">-----</b>
+            </div>
+            <p>Share this ID so other players can add you.</p>
+          </div>
+          <h4>Friends</h4>
+          <div class="friend-add-row">
+            <input id="friendCodeInput" type="text" maxlength="5" placeholder="E3202" />
+            <button id="btnAddFriend" class="btn btn-primary btn-sm">Add Friend</button>
+          </div>
+          <div id="profileFriends" class="friend-list"><p class="muted">Loading friends...</p></div>
           <h4>Appearance</h4>
           <div class="field">
             <label>Draft Layout</label>

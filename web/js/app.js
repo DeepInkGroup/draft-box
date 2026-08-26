@@ -126,6 +126,36 @@ const App = (() => {
     `;
   }
 
+  function renderFriends(el, friends) {
+    if (!friends || !friends.length) {
+      el.innerHTML = '<p class="muted">No friends yet. Add a player by Friend ID.</p>';
+      return;
+    }
+    el.innerHTML = friends.map((item) => {
+      const incoming = item.status === 'pending' && item.direction === 'incoming';
+      return `
+        <div class="friend-row">
+          <div><b>${item.friend.username}</b><span>${item.friend.friendCode}</span></div>
+          <div class="friend-actions">
+            <span class="badge ${item.status === 'accepted' ? 'ok' : ''}">${item.status === 'accepted' ? 'Friend' : item.direction === 'incoming' ? 'Request' : 'Pending'}</span>
+            ${incoming ? `<button class="btn btn-ghost btn-sm" data-friend-action="accept" data-friend-id="${item.id}">Accept</button><button class="btn btn-ghost btn-sm" data-friend-action="reject" data-friend-id="${item.id}">Reject</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function loadProfileFriends() {
+    const listEl = document.getElementById('profileFriends');
+    if (!listEl) return;
+    try {
+      const data = await Api.friends();
+      renderFriends(listEl, data.friends || []);
+    } catch (e) {
+      listEl.innerHTML = `<p class="error-text">${e.message}</p>`;
+    }
+  }
+
   async function init() {
     homeBtn.addEventListener('click', () => goDashboard());
 
@@ -155,6 +185,8 @@ const App = (() => {
       document.getElementById('profileNewPassword').value = '';
       document.getElementById('profileUsername').value = state.user ? state.user.username : '';
       document.getElementById('profileEmail').value = '...';
+      document.getElementById('profileFriendCode').textContent = state.user && state.user.friendCode ? state.user.friendCode : '-----';
+      document.getElementById('friendCodeInput').value = '';
       const careerEl = document.getElementById('profileCareer');
       const insightsEl = document.getElementById('profileInsights');
       const labelByLayout = { vertical: 'Vertical', 'pitch-first': 'Pitch First', horizontal: 'Side-by-Side' };
@@ -180,7 +212,10 @@ const App = (() => {
       try {
         const { user } = await Api.me();
         document.getElementById('profileEmail').value = user.email;
+        document.getElementById('profileFriendCode').textContent = user.friendCode || '-----';
+        state.user = { ...state.user, ...user };
       } catch { /* ignore — dialog still usable for password change / logout */ }
+      loadProfileFriends();
       try {
         const stats = await Api.careerStats();
         const selectedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
@@ -204,6 +239,32 @@ const App = (() => {
       goMatchHistory();
     });
     document.getElementById('btnLogout').addEventListener('click', () => { profileDialog.close(); logout(); });
+    document.getElementById('btnAddFriend').addEventListener('click', async () => {
+      profileError.classList.add('hidden');
+      const input = document.getElementById('friendCodeInput');
+      const friendCode = input.value.trim().toUpperCase();
+      try {
+        await Api.addFriend(friendCode);
+        input.value = '';
+        toast('Friend request sent');
+        loadProfileFriends();
+      } catch (e) {
+        profileError.textContent = e.message;
+        profileError.classList.remove('hidden');
+      }
+    });
+    document.getElementById('profileFriends').addEventListener('click', async (e) => {
+      const btn = e.target.closest('[data-friend-action]');
+      if (!btn) return;
+      profileError.classList.add('hidden');
+      try {
+        await Api.respondFriend(Number(btn.dataset.friendId), btn.dataset.friendAction);
+        loadProfileFriends();
+      } catch (err) {
+        profileError.textContent = err.message;
+        profileError.classList.remove('hidden');
+      }
+    });
     document.getElementById('btnChangePassword').addEventListener('click', async () => {
       profileError.classList.add('hidden');
       const currentPassword = document.getElementById('profileCurrentPassword').value;
