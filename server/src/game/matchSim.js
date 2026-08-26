@@ -29,8 +29,8 @@ function clamp(n, lo, hi) {
 function formationEdge(formationX, formationY) {
   const px = getProfile(formationX);
   const py = getProfile(formationY);
-  const shapeEdge = (px.atkShape - py.defShape) * 0.4;
-  const widthEdge = (px.width - py.width) * 0.06;
+  const shapeEdge = (px.atkShape - py.defShape) * 0.43;
+  const widthEdge = (px.width - py.width) * 0.065;
   return clamp(shapeEdge + widthEdge, -6, 6);
 }
 
@@ -39,7 +39,7 @@ function expectedGoals(ratingFor, ratingAgainst, edge) {
   const attackTier = clamp((ratingFor - 76) / 55, -0.12, 0.28);
   const defensiveResistance = clamp((ratingAgainst - 76) / 70, -0.08, 0.22);
   const matchupShape = clamp(edge * 0.035, -0.18, 0.18);
-  const qualitySwing = diff * 0.022;
+  const qualitySwing = diff * 0.024;
   return clamp(1.05 + qualitySwing + attackTier + matchupShape - defensiveResistance, 0.28, 2.65);
 }
 
@@ -61,9 +61,25 @@ function gkModifier(gkOverall) {
 // plays with a bit more conviction; a shaken one coming off a bad result underperforms its
 // paper quality — a real but modest swing, the same scale as Chemistry (Section 5).
 const MORALE_SWING = 0.05;
+const PRESSURE_SWING = 0.06;
 const HUMAN_VS_AI_POWER_MULTIPLIER = 1.2;
 function moraleModifier(morale) {
   return 1 + clamp(morale || 0, -1, 1) * MORALE_SWING;
+}
+
+function pressureModifier(pressure, plan) {
+  const level = clamp(pressure && pressure.level ? pressure.level : 0, 0, 1);
+  if (!level) return { level: 0, label: 'Normal', reason: '', attack: 1, defense: 1, volatility: 0 };
+  const urgency = clamp(plan.mods.tempo * 0.32 + plan.mods.press * 0.26 + plan.mods.risk * 0.22 + plan.mods.transition * 0.2, 0.72, 1.28);
+  const composure = clamp(plan.mods.control * 0.42 + plan.mods.defense * 0.36 + (2 - plan.mods.risk) * 0.22, 0.72, 1.22);
+  return {
+    level,
+    label: pressure.label || 'Pressure Match',
+    reason: pressure.reason || '',
+    attack: 1 + level * PRESSURE_SWING * urgency,
+    defense: 1 + level * PRESSURE_SWING * 0.58 * composure,
+    volatility: level * 0.035 * plan.mods.risk
+  };
 }
 
 function applyHumanVsAiBoost(ratings, ownTeam, opponentTeam) {
@@ -165,14 +181,14 @@ function tacticalPlan(ownStyle, oppStyle) {
 }
 
 function applyTacticalStyle(ratings, plan) {
-  const tempoAtk = 1 + (plan.mods.tempo - 1) * 0.045;
-  const riskAtk = 1 + (plan.mods.risk - 1) * 0.035;
-  const transitionAtk = 1 + (plan.mods.transition - 1) * 0.035;
-  const controlDef = 1 + (plan.mods.control - 1) * 0.03;
-  const pressDef = 1 + (plan.mods.press - 1) * 0.025;
-  const riskDef = 1 - Math.max(0, plan.mods.risk - 1) * 0.045;
+  const tempoAtk = 1 + (plan.mods.tempo - 1) * 0.05;
+  const riskAtk = 1 + (plan.mods.risk - 1) * 0.04;
+  const transitionAtk = 1 + (plan.mods.transition - 1) * 0.04;
+  const controlDef = 1 + (plan.mods.control - 1) * 0.035;
+  const pressDef = 1 + (plan.mods.press - 1) * 0.03;
+  const riskDef = 1 - Math.max(0, plan.mods.risk - 1) * 0.05;
   ratings.attack *= plan.mods.attack * (1 + plan.edge) * tempoAtk * riskAtk * transitionAtk;
-  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.55) * controlDef * pressDef * riskDef;
+  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.6) * controlDef * pressDef * riskDef;
 }
 
 function starCandidates(team, dismissalMinutes = null, minute = 80) {
@@ -520,7 +536,7 @@ function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedId
   return { kicks, penaltyWinner: scoreA > scoreB ? 'A' : 'B', penalties: { A: scoreA, B: scoreB } };
 }
 
-function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {}) {
+function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', moraleContext = null } = {}) {
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
   const chemA = computeChemistry(teamA.xi, teamA.formation);
@@ -545,6 +561,13 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
   applyTacticalStyle(ratingsA, tacticalA);
   applyTacticalStyle(ratingsB, tacticalB);
 
+  const pressureA = pressureModifier(moraleContext && moraleContext.A, tacticalA);
+  const pressureB = pressureModifier(moraleContext && moraleContext.B, tacticalB);
+  ratingsA.attack *= pressureA.attack;
+  ratingsA.defense *= pressureA.defense;
+  ratingsB.attack *= pressureB.attack;
+  ratingsB.defense *= pressureB.defense;
+
   const cardPlan = generateCardEvents(teamA, teamB);
   for (const d of cardPlan.dismissals) {
     const affected = d.side === 'A' ? ratingsA : ratingsB;
@@ -564,8 +587,8 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
   const { cornersA, cornersB, foulsA, foulsB } = computeSetPieces(possessionA, possessionB, tacticalA, tacticalB);
   const setPieceBonusA = setPieceXgBonus(cornersA, foulsB, tacticalA);
   const setPieceBonusB = setPieceXgBonus(cornersB, foulsA, tacticalB);
-  const transitionBonusA = transitionXgBonus(tacticalA, tacticalB, possessionA);
-  const transitionBonusB = transitionXgBonus(tacticalB, tacticalA, possessionB);
+  const transitionBonusA = transitionXgBonus(tacticalA, tacticalB, possessionA) + pressureA.volatility;
+  const transitionBonusB = transitionXgBonus(tacticalB, tacticalA, possessionB) + pressureB.volatility;
   const influenceA = influenceProfile(teamA, tacticalA);
   const influenceB = influenceProfile(teamB, tacticalB);
   const playerBonusA = influenceXgBonus(influenceA, influenceB, tacticalA, tacticalB, possessionA);
@@ -628,6 +651,7 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group' } = {})
   return {
     goalsA, goalsB, xgA, xgB, stats, events,
     tactical: { A: tacticalA, B: tacticalB },
+    moralePressure: { A: pressureA, B: pressureB },
     chemistry: { A: chemA, B: chemB },
     influence: { A: influenceA, B: influenceB },
     starMoments,

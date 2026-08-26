@@ -12,7 +12,7 @@ function clamp(n, lo, hi) {
 }
 
 function qualityWeight(overall) {
-  return Math.pow(1.055, (overall || 75) - 75);
+  return Math.pow(1.06, (overall || 75) - 75);
 }
 
 function slotInfluence(slot) {
@@ -47,7 +47,7 @@ function computeTeamRatings(xi, formation) {
     const w = slotWeights(y);
     const influence = slotInfluence(slot);
     const overall = p.isCaptain ? Math.min(99, p.overall + CAPTAIN_BONUS) : p.overall;
-    const q = qualityWeight(overall) * (p.isStar ? 1.035 : 1);
+    const q = qualityWeight(overall) * (p.isStar ? 1.045 : 1);
     const atkWeight = w.attack * (0.7 + influence.creation * 0.18 + influence.attack * 0.22) * q;
     const defWeight = w.defense * (0.76 + influence.defense * 0.24) * q;
     atkNum += overall * atkWeight;
@@ -58,7 +58,7 @@ function computeTeamRatings(xi, formation) {
     if (p.isStar) stars += 1;
   }
 
-  const starBonus = Math.min(4, stars) * 1.35;
+  const starBonus = Math.min(4, stars) * 1.45;
   const n = xi.length || 1;
 
   return {
@@ -223,7 +223,7 @@ function predictKeyPlayers(xi, formation, tacticalStyle = 'balanced') {
   for (const p of xi) {
     const slot = slotByCode.get(p.slotCode);
     const y = slot ? slot.y : 50;
-    const quality = qualityWeight(p.overall) * (p.isStar ? 1.08 : 1);
+    const quality = qualityWeight(p.overall) * (p.isStar ? 1.1 : 1);
     const influence = slotInfluence(slot);
     const atkScore = influence.attack * p.overall * quality * (style.tempo * 0.34 + style.risk * 0.26 + style.transition * 0.4);
     const assistScore = influence.creation * p.overall * quality * (style.control * 0.48 + style.press * 0.18 + style.transition * 0.34);

@@ -202,6 +202,36 @@ function rankGroup(t, label) {
     .sort((x, y) => (y.pts - x.pts) || ((y.gf - y.ga) - (x.gf - x.ga)) || (y.gf - x.gf) || (Math.random() - 0.5));
 }
 
+
+function ordinal(n) {
+  const suffix = n === 1 ? 'st' : n === 2 ? 'nd' : n === 3 ? 'rd' : 'th';
+  return `${n}${suffix}`;
+}
+function qualificationPressure(t, group, code) {
+  const ranked = rankGroup(t, group);
+  const row = ranked.find((r) => r.code === code);
+  if (!row) return null;
+  const rank = ranked.findIndex((r) => r.code === code) + 1;
+  const gd = row.gf - row.ga;
+  const top2Pts = ranked[1] ? ranked[1].pts : 0;
+  const thirdPts = ranked[2] ? ranked[2].pts : 0;
+
+  if (rank >= 4 || row.pts <= 1) {
+    return { level: 1, label: 'Must-win', reason: `Sits ${ordinal(rank)} on ${row.pts} pts before the final group match; only a win gives a realistic qualification route.` };
+  }
+  if (rank === 3) {
+    const level = row.pts >= top2Pts ? 0.8 : 0.92;
+    return { level, label: 'Qualification push', reason: `Sits 3rd on ${row.pts} pts and needs the final match to reach the automatic places or protect a best-third route.` };
+  }
+  if (rank === 2) {
+    const level = thirdPts >= row.pts - 1 ? 0.72 : 0.48;
+    return { level, label: 'Protect qualification', reason: `Sits 2nd on ${row.pts} pts with ${gd >= 0 ? '+' : ''}${gd} GD; a result is still needed to avoid being dragged back.` };
+  }
+  if (rank === 1 && row.pts < 6) {
+    return { level: 0.42, label: 'Seal top spot', reason: `Leads the group on ${row.pts} pts but has not fully secured first place yet.` };
+  }
+  return { level: 0.18, label: 'Control the group', reason: `Starts the final group match from a strong position and can manage the game with less pressure.` };
+}
 // One block of four teams feeds one Round-of-16 slot. Separating same-group teams by
 // block prevents a group winner and runner-up from meeting again in R32 or R16.
 function seedRoundOf32(top2, best8) {
@@ -342,7 +372,12 @@ function simulateNextStep(roomState) {
     const rawMatches = md.map((fx) => {
       const a = t.slotByCode[fx.aCode];
       const b = t.slotByCode[fx.bCode];
-      const sim = simulateMatch(a, b, { knockout: false, stage: 'group' });
+      const groupFinalPressure = mdIdx === 2;
+      const moraleContext = groupFinalPressure ? {
+        A: qualificationPressure(t, fx.group, fx.aCode),
+        B: qualificationPressure(t, fx.group, fx.bCode)
+      } : null;
+      const sim = simulateMatch(a, b, { knockout: false, stage: 'group', moraleContext });
       // Captured before applyGroupResult mutates morale for the NEXT match — the analysis
       // shown for this match should reflect the confidence each side carried INTO it.
       const moraleA = a.morale || 0;

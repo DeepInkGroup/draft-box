@@ -143,6 +143,15 @@ function moraleStory(myMorale, oppMorale) {
   return sentences.join(' ');
 }
 
+
+function pressureStory(myPressure, oppPressure) {
+  if (!myPressure || !myPressure.level) return '';
+  const level = Math.round(myPressure.level * 100);
+  const sentences = [`Morale Dynamic mattered here: ${myPressure.label} pressure (${level}%) pushed this side's urgency before kickoff.`];
+  if (myPressure.reason) sentences.push(myPressure.reason);
+  if (oppPressure && oppPressure.level > myPressure.level + 0.2) sentences.push(`The opponent carried even heavier qualification pressure, which raised the match intensity on both sides.`);
+  return sentences.join(' ');
+}
 function chemistryStory(myChem, oppChem) {
   if (!myChem || !oppChem) return '';
   const diff = myChem.multiplier - oppChem.multiplier;
@@ -202,6 +211,8 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppTac = mySide === 'A' ? (m.tactical && m.tactical.B) : (m.tactical && m.tactical.A);
   const myInfluence = mySide === 'A' ? (m.influence && m.influence.A) : (m.influence && m.influence.B);
   const oppInfluence = mySide === 'A' ? (m.influence && m.influence.B) : (m.influence && m.influence.A);
+  const myPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.A) : (m.moralePressure && m.moralePressure.B);
+  const oppPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.B) : (m.moralePressure && m.moralePressure.A);
   const events = m.events || [];
   const starEvents = m.starMoments || events.filter((e) => e.type === 'star');
   const myReds = events.filter((e) => e.type === 'red' && e.side === mySide).length;
@@ -230,6 +241,11 @@ function analyzeMatch(m, mySide, myName, oppName) {
   }
   if (myTac && oppTac) {
     addFactor('Tactical Style', myTac.label, `${myTac.label} vs ${oppTac.label}; matchup edge ${myTac.edge >= 0 ? '+' : ''}${fmt1(myTac.edge * 100)}%.`, myTac.edge >= 0.035 ? 'good' : myTac.edge <= -0.035 ? 'bad' : 'neutral');
+  }
+  if (myPressure && myPressure.level > 0) {
+    const pressureDiff = myPressure.level - ((oppPressure && oppPressure.level) || 0);
+    const pressureDetail = `${myPressure.label}${myPressure.reason ? ` - ${myPressure.reason}` : ''}`;
+    addFactor('Morale Dynamic', `${Math.round(myPressure.level * 100)}%`, pressureDetail, pressureDiff >= 0.2 ? 'good' : pressureDiff <= -0.2 ? 'bad' : 'neutral');
   }
   if (myInfluence && oppInfluence) {
     const creatorDiff = myInfluence.supportFocus - oppInfluence.supportFocus;
