@@ -22,6 +22,8 @@ const DraftView = {
     let moveFromSlot = null;
     let currentSlotsMap = {};
     let autoDraftRequested = false;
+    let sharedDraftMode = false;
+    let sharedDraft = null;
 
     const TACTICAL_STYLES = [
       { key: 'defensive', label: 'Defensive', meta: 'Deep block', desc: 'Pros: stronger defensive resistance, lower match chaos. Cons: less attacking volume and weaker control vs possession.' },
@@ -298,21 +300,33 @@ const DraftView = {
       lastRevealPayload = payload;
       lastOpenSlots = payload.openSlots;
       lastPlayers = payload.players;
+      sharedDraft = payload.sharedDraft || sharedDraft;
       const ratingsVisible = payload.players.some((p) => p.overall !== null);
       if (sortMode === 'rating' && !ratingsVisible) sortMode = 'position';
       startTimer(payload.deadline, payload.pickTimeMs);
 
       const rerollsAllowed = payload.rerollsAllowed || 0;
       const rerollsRemaining = payload.rerollsRemaining || 0;
+      const isMySharedTurn = !sharedDraftMode || !sharedDraft || sharedDraft.isMyTurn;
+      const sharedStatus = sharedDraftMode && sharedDraft ? `
+        <div class="shared-draft-panel">
+          <div><span>Shared Team Draft · pick ${Number(sharedDraft.teamPickCount || 0) + 1}</span><b>${sharedDraft.currentTeam ? sharedDraft.currentTeam.name : payload.team.name}</b></div>
+          <p>${sharedDraft.isMyTurn ? 'Your turn: pick one player from this team.' : `Waiting for ${sharedDraft.turnUsername || 'the next player'} to pick from this team.`}</p>
+          <div class="shared-draft-order">
+            ${(sharedDraft.members || []).map((m) => `<span class="${m.turn ? 'active' : ''} ${m.draftComplete ? 'done' : ''}">${m.username} (${m.picks}/11)</span>`).join('')}
+          </div>
+        </div>
+      ` : '';
 
       revealCard.innerHTML = `
         <div class="reveal-team">${payload.team.name}</div>
-        <div class="reveal-sub">${payload.deadline == null ? 'Pick one player from this team for your squad — no time limit, take your time' : 'Pick one player from this team for your squad — no skipping, the clock is running'}</div>
+        <div class="reveal-sub">${sharedDraftMode ? (isMySharedTurn ? 'Pick one player, then the turn passes to the next player.' : 'Same team is visible for everyone; wait until your turn unlocks picks.') : (payload.deadline == null ? 'Pick one player from this team for your squad — no time limit, take your time' : 'Pick one player from this team for your squad — no skipping, the clock is running')}</div>
+        ${sharedStatus}
         <div class="sort-toolbar" id="sortToolbar">
           ${ratingsVisible ? `<button type="button" class="sort-btn" data-mode="rating" title="Sort by rating"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9 12 2"/></svg></button>` : ''}
           <button type="button" class="sort-btn" data-mode="position" title="Sort by position"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
           <button type="button" class="sort-btn" data-mode="random" title="Random order"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></button>
-          ${rerollsAllowed > 0 ? `<button type="button" class="sort-btn reroll-btn" id="btnReroll" title="Skip this team (${rerollsRemaining} reroll${rerollsRemaining === 1 ? '' : 's'} left)" ${rerollsRemaining <= 0 ? 'disabled' : ''}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span class="reroll-count">${rerollsRemaining}</span></button>` : ''}
+          ${!sharedDraftMode && rerollsAllowed > 0 ? `<button type="button" class="sort-btn reroll-btn" id="btnReroll" title="Skip this team (${rerollsRemaining} reroll${rerollsRemaining === 1 ? '' : 's'} left)" ${rerollsRemaining <= 0 ? 'disabled' : ''}><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg><span class="reroll-count">${rerollsRemaining}</span></button>` : ''}
         </div>
         <div class="player-grid" id="playerGrid"></div>
       `;
@@ -341,8 +355,9 @@ const DraftView = {
       const grid = revealCard.querySelector('#playerGrid');
       if (!grid) return;
       const players = sortPlayers(lastPlayers, sortMode);
+      const lockedByTurn = sharedDraftMode && sharedDraft && !sharedDraft.isMyTurn;
       grid.innerHTML = players.map((p) => `
-        <div class="player-card ${p.available ? '' : 'unavailable'}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
+        <div class="player-card ${p.available && !lockedByTurn ? '' : 'unavailable'}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
           <div class="pname">${p.isStar ? '<span class="star">★</span> ' : ''}${p.name}</div>
           <div class="pmeta"><span>${p.rawPos || POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>
         </div>
@@ -350,7 +365,7 @@ const DraftView = {
 
       grid.querySelectorAll('.player-card').forEach((card) => {
         card.addEventListener('click', () => {
-          if (card.classList.contains('unavailable')) return;
+          if (card.classList.contains('unavailable') || (sharedDraftMode && sharedDraft && !sharedDraft.isMyTurn)) return;
           const playerId = card.dataset.id;
           const player = lastPlayers.find((p) => p.id === playerId);
           const playerName = card.dataset.name;
@@ -459,6 +474,7 @@ const DraftView = {
       captainEnabled = !!s.captainEnabled;
       isCreator = s.creatorId === App.state.user.id;
       singlePlayer = !!s.singlePlayer;
+      sharedDraftMode = !!s.sharedDraftMode;
       allReady = !!s.allReady;
       if (s.myDraft) {
         renderSquadPitch(s.myDraft.slots);
@@ -479,6 +495,10 @@ const DraftView = {
     });
 
     App.onSocket('draft:reveal', renderReveal);
+
+    App.onSocket('draft:sharedStateChanged', () => {
+      if (!iAmReady) socket.emit('draft:reveal', { code });
+    });
 
 
     App.onSocket('draft:lineupChanged', (payload) => {

@@ -138,6 +138,13 @@ function viewerMaySeeSpoilerStep(roomState, member, stepIndex) {
   return !!(step && Array.isArray(step.eliminatedCodes) && step.eliminatedCodes.includes(myCode));
 }
 
+function broadcastSharedDraftState(io, code, roomState) {
+  if (!roomState.sharedDraftMode) return;
+  io.to(channelName(code)).emit('draft:sharedStateChanged', {
+    sharedDraft: draftEngine.sharedDraftSnapshot(roomState, null)
+  });
+}
+
 // Shared by both the manual draft:pick handler and the auto-pick timeout, so a pick
 // always has the exact same persistence + broadcast side effects regardless of source.
 function applyPickSideEffects(io, code, roomState, userId, { player, slotCode, draftComplete }, auto) {
@@ -148,6 +155,12 @@ function applyPickSideEffects(io, code, roomState, userId, { player, slotCode, d
   io.to(channelName(code)).emit('draft:picked', { userId, player, slotCode, auto: !!auto, ...myDraftView(member, roomState.showOverall) });
   io.to(channelName(code)).emit('draft:poolUpdate', { playerId: player.id, poolRemaining: roomState.pool.size });
 
+  if (roomState.sharedDraftMode) {
+    broadcastSharedDraftState(io, code, roomState);
+    const turnUserId = roomState.sharedDraft && roomState.sharedDraft.turnUserId;
+    if (turnUserId) scheduleAutoPick(io, code, roomState, turnUserId);
+  }
+
   const freshRoomRow = rm.getRoomRow(roomState.roomId);
   const started = maybeStartTournament(io, freshRoomRow, roomState);
   if (!started) io.to(channelName(code)).emit('room:memberUpdate', lobbySnapshot(freshRoomRow));
@@ -157,6 +170,11 @@ function scheduleAutoPick(io, code, roomState, userId) {
   const member = roomState.members.get(userId);
   if (!member) return;
   clearPickTimer(member);
+  if (roomState.sharedDraftMode && roomState.sharedDraft && Number(roomState.sharedDraft.turnUserId) !== Number(userId)) return;
+  if (roomState.sharedDraftMode) {
+    try { draftEngine.revealForMember(roomState, userId); }
+    catch { return; }
+  }
   // "No Limit" rooms (pickTimeMs === 0) never auto-pick — the drafter can take as long as they want.
   if (roomState.pickTimeMs === 0) return;
   // small grace buffer over the client-visible deadline to absorb network/render latency
@@ -264,7 +282,8 @@ function registerSocketHandlers(io) {
         tournamentLength: roomRow.tournament_length,
         allowedTeams,
         rerollsAllowed: roomRow.rerolls_allowed,
-        spoilerMode: !!roomRow.spoiler_mode
+        spoilerMode: !!roomRow.spoiler_mode,
+        sharedDraftMode: !!roomRow.shared_draft_mode
       });
       for (const m of members) {
         rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation);
@@ -280,7 +299,10 @@ function registerSocketHandlers(io) {
       try {
         const payload = draftEngine.revealForMember(state, socket.user.id);
         socket.emit('draft:reveal', payload);
-        if (!payload.done && !payload.exhausted) scheduleAutoPick(io, roomRow.code, state, socket.user.id);
+        if (!payload.done && !payload.exhausted) {
+          const turnUserId = state.sharedDraftMode && state.sharedDraft ? state.sharedDraft.turnUserId : socket.user.id;
+          scheduleAutoPick(io, roomRow.code, state, turnUserId);
+        }
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
@@ -295,6 +317,7 @@ function registerSocketHandlers(io) {
       const state = rm.loadRoomState(roomRow);
       const member = state.members.get(socket.user.id);
       try {
+        if (state.sharedDraftMode) throw new Error('rerolls are disabled in shared draft rooms');
         if (member) clearPickTimer(member);
         const payload = draftEngine.rerollForMember(state, socket.user.id);
         socket.emit('draft:reveal', payload);

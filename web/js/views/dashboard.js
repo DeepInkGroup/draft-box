@@ -221,6 +221,13 @@ const DashboardView = {
     ];
   },
 
+  sharedDraftOptions() {
+    return [
+      { value: false, title: 'Solo Reveal', sub: 'Each player gets private random teams' },
+      { value: true, title: 'Team Snake', sub: 'One shared team, players pick one by one' }
+    ];
+  },
+
   async renderSingleplayer(container) {
     container.innerHTML = `
       ${this.backButton()}
@@ -302,6 +309,8 @@ const DashboardView = {
         <div id="crRerolls" style="margin-bottom:16px;"></div>
         <div class="field"><label>Spoiler Mode</label></div>
         <div id="crSpoiler" style="margin-bottom:16px;"></div>
+        <div class="field"><label>Shared Team Draft</label></div>
+        <div id="crSharedDraft" style="margin-bottom:16px;"></div>
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -318,6 +327,7 @@ const DashboardView = {
     const crTeams = await this.renderTeamPicker(container.querySelector('#crTeams'));
     const crRerolls = ToggleGroup.render(container.querySelector('#crRerolls'), { options: this.rerollOptions(), selected: 0 });
     const crSpoiler = ToggleGroup.render(container.querySelector('#crSpoiler'), { options: this.spoilerOptions(), selected: false });
+    const crSharedDraft = ToggleGroup.render(container.querySelector('#crSharedDraft'), { options: this.sharedDraftOptions(), selected: false });
 
     container.querySelector('#btnCreateRoom').addEventListener('click', async () => {
       if (crTeams.count > 0 && crTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
@@ -327,7 +337,8 @@ const DashboardView = {
         const room = await Api.createRoom({
           name, humanSlotsMax: slots, formation: crFormation.value, showOverall: crRatings.value,
           pickTimeMs: crTimer.value, captainEnabled: crCaptain.value, tournamentLength: crLength.value,
-          allowedTeams: crTeams.value, rerollsAllowed: crRerolls.value, spoilerMode: crSpoiler.value
+          allowedTeams: crTeams.value, rerollsAllowed: crSharedDraft.value ? 0 : crRerolls.value,
+          spoilerMode: crSpoiler.value, sharedDraftMode: crSharedDraft.value
         });
         App.goLobby(room.code);
       } catch (e) { showErr(e); }

@@ -141,6 +141,8 @@ function movePlayerSlot(member, fromSlotCode, toSlotCode) {
 // A team is never revealed twice to the same member — member.seenTeams accumulates every
 // team ever shown to them, whether they picked from it or rerolled away from it.
 function revealForMember(roomState, userId) {
+  if (roomState.sharedDraftMode) return revealSharedDraftForMember(roomState, userId);
+
   const member = roomState.members.get(userId);
   if (!member) throw new Error('not a member of this room');
   if (isDraftComplete(member)) return { done: true };
@@ -183,6 +185,133 @@ function revealForMember(roomState, userId) {
   }
 
   return { done: false, exhausted: true };
+}
+
+function sharedDraftMemberOrder(roomState) {
+  const members = Array.from(roomState.members.values());
+  return members.filter((m) => !isDraftComplete(m));
+}
+
+function randomItem(items) {
+  if (!items.length) return null;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function rotateAfter(members, userId) {
+  if (!members.length) return [];
+  const idx = members.findIndex((m) => Number(m.userId) === Number(userId));
+  if (idx < 0) return members;
+  return members.slice(idx + 1).concat(members.slice(0, idx + 1));
+}
+
+function sharedTeamCanSupplyMember(roomState, team, member) {
+  if (!team || !member || isDraftComplete(member)) return false;
+  const slots = openSlots(member);
+  return team.players.some((p) => roomState.pool.has(p.id) && slots.some((slot) => playerFitsSlot(p, slot)));
+}
+
+function ensureSharedDraftState(roomState) {
+  if (!roomState.sharedDraft) {
+    roomState.sharedDraft = { currentTeam: null, seenTeams: [], turnUserId: null, round: 1, teamPickUserIds: [] };
+  }
+  const state = roomState.sharedDraft;
+  if (!Array.isArray(state.teamPickUserIds)) state.teamPickUserIds = [];
+  const active = sharedDraftMemberOrder(roomState);
+  if (!active.length) {
+    state.turnUserId = null;
+    state.currentTeam = null;
+    state.teamPickUserIds = [];
+    return state;
+  }
+  if (!active.some((m) => m.userId === state.turnUserId)) state.turnUserId = active[0].userId;
+  const turnMember = active.find((m) => m.userId === state.turnUserId) || active[0];
+  const teamPool = roomState.allowedTeams
+    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
+    : ALL_TEAMS;
+  const current = state.currentTeam ? getTeam(state.currentTeam) : null;
+  const alreadyPickedThisTeam = new Set(state.teamPickUserIds.map((id) => Number(id)));
+  if (current && !alreadyPickedThisTeam.has(Number(turnMember.userId)) && sharedTeamCanSupplyMember(roomState, current, turnMember)) return state;
+
+  const seen = new Set(state.seenTeams || []);
+  const unseenPickable = teamPool.filter((t) => !seen.has(t.code) && sharedTeamCanSupplyMember(roomState, t, turnMember));
+  const fallbackPickable = teamPool.filter((t) => sharedTeamCanSupplyMember(roomState, t, turnMember));
+  const pickable = randomItem(unseenPickable) || randomItem(fallbackPickable);
+  if (!pickable) return state;
+  if (!seen.has(pickable.code)) state.seenTeams = [...(state.seenTeams || []), pickable.code];
+  state.currentTeam = pickable.code;
+  state.teamPickUserIds = [];
+  state.round = Number(state.round || 1) + (current && current.code !== pickable.code ? 1 : 0);
+  return state;
+}
+
+function advanceSharedDraftTurn(roomState, currentUserId) {
+  if (!roomState.sharedDraftMode) return;
+  const state = ensureSharedDraftState(roomState);
+  if (!state.teamPickUserIds.some((id) => Number(id) === Number(currentUserId))) {
+    state.teamPickUserIds.push(Number(currentUserId));
+  }
+  const active = sharedDraftMemberOrder(roomState);
+  if (!active.length) {
+    state.turnUserId = null;
+    state.currentTeam = null;
+    state.teamPickUserIds = [];
+    return;
+  }
+  const team = state.currentTeam ? getTeam(state.currentTeam) : null;
+  const picked = new Set(state.teamPickUserIds.map((id) => Number(id)));
+  const remainingForTeam = rotateAfter(active, currentUserId)
+    .filter((m) => !picked.has(Number(m.userId)) && sharedTeamCanSupplyMember(roomState, team, m));
+
+  if (team && remainingForTeam.length) {
+    state.turnUserId = remainingForTeam[0].userId;
+    return;
+  }
+
+  state.currentTeam = null;
+  state.teamPickUserIds = [];
+  state.turnUserId = rotateAfter(active, currentUserId)[0].userId;
+  ensureSharedDraftState(roomState);
+}
+
+function sharedDraftSnapshot(roomState, userId) {
+  const state = ensureSharedDraftState(roomState);
+  const active = sharedDraftMemberOrder(roomState);
+  const turnMember = active.find((m) => m.userId === state.turnUserId) || null;
+  return {
+    enabled: !!roomState.sharedDraftMode,
+    currentTeam: state.currentTeam ? { code: state.currentTeam, name: getTeam(state.currentTeam)?.name || state.currentTeam } : null,
+    turnUserId: state.turnUserId,
+    turnUsername: turnMember ? turnMember.username : null,
+    isMyTurn: Number(state.turnUserId) === Number(userId),
+    round: state.round || 1,
+    teamPickCount: Array.isArray(state.teamPickUserIds) ? state.teamPickUserIds.length : 0,
+    members: Array.from(roomState.members.values()).map((m) => ({
+      userId: m.userId,
+      username: m.username,
+      draftComplete: isDraftComplete(m),
+      picks: (m.squad || []).length,
+      turn: Number(state.turnUserId) === Number(m.userId)
+    }))
+  };
+}
+
+function revealSharedDraftForMember(roomState, userId) {
+  const member = roomState.members.get(userId);
+  if (!member) throw new Error('not a member of this room');
+  if (isDraftComplete(member)) return { done: true, sharedDraft: sharedDraftSnapshot(roomState, userId) };
+
+  const shared = ensureSharedDraftState(roomState);
+  const team = shared.currentTeam ? getTeam(shared.currentTeam) : null;
+  if (!team) return { done: false, exhausted: true, sharedDraft: sharedDraftSnapshot(roomState, userId) };
+  const hideOverall = !roomState.showOverall;
+  const pickTimeMs = roomState.pickTimeMs != null ? roomState.pickTimeMs : DEFAULT_PICK_TIME_MS;
+  member.currentReveal = team.code;
+  member.lastRevealedTeam = team.code;
+  member.pickDeadline = Number(shared.turnUserId) === Number(userId) && pickTimeMs > 0 ? Date.now() + pickTimeMs : null;
+  return {
+    ...buildRevealPayload(team, roomState.pool, openSlots(member), hideOverall, member, pickTimeMs, roomState),
+    sharedDraft: sharedDraftSnapshot(roomState, userId)
+  };
 }
 
 // Consumes one of the member's rerolls (if any remain) and immediately reveals a fresh
@@ -232,6 +361,11 @@ function buildRevealPayload(team, pool, availableSlots, hideOverall, member, pic
 function pickPlayer(roomState, userId, playerId, slotCode) {
   const member = roomState.members.get(userId);
   if (!member) throw new Error('not a member of this room');
+  if (roomState.sharedDraftMode) {
+    ensureSharedDraftState(roomState);
+    if (Number(roomState.sharedDraft.turnUserId) !== Number(userId)) throw new Error('wait for your turn to pick');
+    member.currentReveal = roomState.sharedDraft.currentTeam;
+  }
   if (!roomState.pool.has(playerId)) throw new Error('player already taken');
 
   const team = getTeam(member.currentReveal);
@@ -253,6 +387,8 @@ function pickPlayer(roomState, userId, playerId, slotCode) {
   const draftComplete = isDraftComplete(member);
   member.draftComplete = draftComplete;
 
+  advanceSharedDraftTurn(roomState, userId);
+
   return { player: { ...player, sourceTeam: team.code, slotCode }, slotCode, draftComplete };
 }
 
@@ -260,7 +396,9 @@ function pickPlayer(roomState, userId, playerId, slotCode) {
 // player from the currently revealed team into the first open slot that fits.
 function autoPickForMember(roomState, userId) {
   const member = roomState.members.get(userId);
-  if (!member || !member.currentReveal) return null;
+  if (!member) return null;
+  if (roomState.sharedDraftMode && !member.currentReveal) revealSharedDraftForMember(roomState, userId);
+  if (!member.currentReveal) return null;
 
   const team = getTeam(member.currentReveal);
   if (!team) return null;
@@ -278,11 +416,19 @@ function autoPickForMember(roomState, userId) {
   return pickPlayer(roomState, userId, chosen.id, slot.code);
 }
 
+function autoPickSharedTurn(roomState) {
+  if (!roomState.sharedDraftMode) return null;
+  const shared = ensureSharedDraftState(roomState);
+  return shared.turnUserId ? autoPickForMember(roomState, shared.turnUserId) : null;
+}
+
 module.exports = {
   revealForMember,
   rerollForMember,
   pickPlayer,
   autoPickForMember,
+  autoPickSharedTurn,
+  sharedDraftSnapshot,
   slotsRemaining,
   openSlots,
   openSlotsForGroup,

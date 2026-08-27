@@ -18,12 +18,13 @@ function serializeRoom(roomRow) {
 }
 
 router.post('/', (req, res) => {
-  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed, spoilerMode } = req.body || {};
+  const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed, spoilerMode, sharedDraftMode } = req.body || {};
   try {
     const room = rm.createRoom({
       name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
       showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled,
-      tournamentLength, allowedTeams, rerollsAllowed, spoilerMode: !!spoilerMode
+      tournamentLength, allowedTeams, rerollsAllowed, spoilerMode: !!spoilerMode,
+      sharedDraftMode: !!sharedDraftMode
     });
     rm.joinRoom(room, req.user, req.body?.formation);
     res.status(201).json(serializeRoom(room));

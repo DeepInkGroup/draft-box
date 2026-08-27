@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS rooms (
   allowed_teams TEXT,
   rerolls_allowed INTEGER NOT NULL DEFAULT 0,
   spoiler_mode INTEGER NOT NULL DEFAULT 0,
+  shared_draft_mode INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'lobby',
   tournament_state TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -138,6 +139,9 @@ if (!columnExists('rooms', 'rerolls_allowed')) {
 }
 if (!columnExists('rooms', 'spoiler_mode')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN spoiler_mode INTEGER NOT NULL DEFAULT 0;`);
+}
+if (!columnExists('rooms', 'shared_draft_mode')) {
+  db.exec(`ALTER TABLE rooms ADD COLUMN shared_draft_mode INTEGER NOT NULL DEFAULT 0;`);
 }
 if (!columnExists('users', 'friend_code')) {
   db.exec(`ALTER TABLE users ADD COLUMN friend_code TEXT;`);
