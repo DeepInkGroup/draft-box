@@ -1,14 +1,8 @@
 const { ALL_TEAMS, getTeam } = require('../data/teams');
-const { bestXI, teamStrength } = require('./botEngine');
+const { bestBotSetup, teamStrength, prepareBotForMatch } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
-const { FORMATIONS } = require('./formations');
 const { analyzeMatch, resultOutcome } = require('./matchAnalysis');
-const { normalizeStyle, randomStyle } = require('./tacticalStyles');
-
-const FORMATION_NAMES = Object.keys(FORMATIONS);
-function randomFormation() {
-  return FORMATION_NAMES[Math.floor(Math.random() * FORMATION_NAMES.length)];
-}
+const { normalizeStyle } = require('./tacticalStyles');
 
 const GROUP_LABELS = 'ABCDEFGHIJKL'.split('');
 const KNOCKOUT_LABEL = { r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter-Finals', sf: 'Semi-Finals', final: 'Final' };
@@ -105,9 +99,8 @@ function startTournament(roomState) {
   });
   botCodes.forEach((code) => {
     const team = getTeam(code);
-    const botFormation = randomFormation();
-    const xi = bestXI(team, botFormation);
-    slots.push({ code, name: team.name, isHuman: false, userId: null, xi, formation: botFormation, tacticalStyle: randomStyle(), strength: teamStrength(xi), eliminated: false, morale: 0 });
+    const setup = bestBotSetup(team);
+    slots.push({ code, name: team.name, isHuman: false, userId: null, xi: setup.xi, formation: setup.formation, tacticalStyle: setup.tacticalStyle, strength: teamStrength(setup.xi), eliminated: false, morale: 0 });
   });
 
   if (startingSlots) {
@@ -318,6 +311,8 @@ function playKnockoutRound(roomState) {
   for (const m of matches) {
     const a = t.slotByCode[m.aCode];
     const b = t.slotByCode[m.bCode];
+    prepareBotForMatch(a, b);
+    prepareBotForMatch(b, a);
     const sim = simulateMatch(a, b, { knockout: true, stage: t.stage });
     // Captured before updateMorale mutates it below — the analysis for this match should
     // reflect the confidence each side carried INTO it, not the result it just produced.
@@ -372,6 +367,8 @@ function simulateNextStep(roomState) {
     const rawMatches = md.map((fx) => {
       const a = t.slotByCode[fx.aCode];
       const b = t.slotByCode[fx.bCode];
+      prepareBotForMatch(a, b);
+      prepareBotForMatch(b, a);
       const groupFinalPressure = mdIdx === 2;
       const moraleContext = groupFinalPressure ? {
         A: qualificationPressure(t, fx.group, fx.aCode),

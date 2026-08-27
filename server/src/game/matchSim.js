@@ -34,12 +34,12 @@ function formationEdge(formationX, formationY) {
   return clamp(shapeEdge + widthEdge, -6, 6);
 }
 
-function expectedGoals(ratingFor, ratingAgainst, edge) {
+function expectedGoals(ratingFor, ratingAgainst, edge, signal = 1) {
   const diff = clamp(ratingFor - ratingAgainst, -28, 28);
   const attackTier = clamp((ratingFor - 76) / 55, -0.12, 0.28);
   const defensiveResistance = clamp((ratingAgainst - 76) / 70, -0.08, 0.22);
-  const matchupShape = clamp(edge * 0.035, -0.18, 0.18);
-  const qualitySwing = diff * 0.024;
+  const matchupShape = clamp(edge * 0.035 * signal, -0.2, 0.2);
+  const qualitySwing = diff * 0.024 * signal;
   return clamp(1.05 + qualitySwing + attackTier + matchupShape - defensiveResistance, 0.28, 2.65);
 }
 
@@ -165,12 +165,12 @@ function influenceProfile(team, tactical) {
   };
 }
 
-function influenceXgBonus(own, opp, ownTactical, oppTactical, possession) {
+function influenceXgBonus(own, opp, ownTactical, oppTactical, possession, signal = 1) {
   const creatorLift = clamp((own.supportFocus - 75) / 180, -0.05, 0.1) * ownTactical.mods.control;
   const finisherLift = clamp((own.attackFocus - 75) / 170, -0.05, 0.11) * (ownTactical.mods.tempo * 0.45 + ownTactical.mods.transition * 0.35 + ownTactical.mods.risk * 0.2);
   const shieldTax = clamp((opp.shieldFocus - 75) / 165, -0.08, 0.1) * oppTactical.mods.defense;
   const territory = clamp((possession - 50) / 360, -0.055, 0.055);
-  return clamp(creatorLift + finisherLift + own.starClutch * 0.55 + territory - shieldTax - own.staminaDrag, -0.16, 0.22);
+  return clamp((creatorLift + finisherLift + own.starClutch * 0.55 + territory - shieldTax - own.staminaDrag) * signal, -0.18, 0.25);
 }
 
 function tacticalPlan(ownStyle, oppStyle) {
@@ -180,15 +180,15 @@ function tacticalPlan(ownStyle, oppStyle) {
   return { key, label: style.label, description: style.description, edge, mods: style };
 }
 
-function applyTacticalStyle(ratings, plan) {
+function applyTacticalStyle(ratings, plan, signal = 1) {
   const tempoAtk = 1 + (plan.mods.tempo - 1) * 0.05;
   const riskAtk = 1 + (plan.mods.risk - 1) * 0.04;
   const transitionAtk = 1 + (plan.mods.transition - 1) * 0.04;
   const controlDef = 1 + (plan.mods.control - 1) * 0.035;
   const pressDef = 1 + (plan.mods.press - 1) * 0.03;
   const riskDef = 1 - Math.max(0, plan.mods.risk - 1) * 0.05;
-  ratings.attack *= plan.mods.attack * (1 + plan.edge) * tempoAtk * riskAtk * transitionAtk;
-  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.6) * controlDef * pressDef * riskDef;
+  ratings.attack *= plan.mods.attack * (1 + plan.edge * signal) * tempoAtk * riskAtk * transitionAtk;
+  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.6 * signal) * controlDef * pressDef * riskDef;
 }
 
 function starCandidates(team, dismissalMinutes = null, minute = 80) {
@@ -537,6 +537,8 @@ function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedId
 }
 
 function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', moraleContext = null } = {}) {
+  const aiVsAi = !teamA.isHuman && !teamB.isHuman;
+  const engineSignal = aiVsAi ? 1.16 : 1;
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
   const chemA = computeChemistry(teamA.xi, teamA.formation);
@@ -558,8 +560,8 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
 
   const tacticalA = tacticalPlan(teamA.tacticalStyle, teamB.tacticalStyle);
   const tacticalB = tacticalPlan(teamB.tacticalStyle, teamA.tacticalStyle);
-  applyTacticalStyle(ratingsA, tacticalA);
-  applyTacticalStyle(ratingsB, tacticalB);
+  applyTacticalStyle(ratingsA, tacticalA, engineSignal);
+  applyTacticalStyle(ratingsB, tacticalB, engineSignal);
 
   const pressureA = pressureModifier(moraleContext && moraleContext.A, tacticalA);
   const pressureB = pressureModifier(moraleContext && moraleContext.B, tacticalB);
@@ -591,16 +593,16 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   const transitionBonusB = transitionXgBonus(tacticalB, tacticalA, possessionB) + pressureB.volatility;
   const influenceA = influenceProfile(teamA, tacticalA);
   const influenceB = influenceProfile(teamB, tacticalB);
-  const playerBonusA = influenceXgBonus(influenceA, influenceB, tacticalA, tacticalB, possessionA);
-  const playerBonusB = influenceXgBonus(influenceB, influenceA, tacticalB, tacticalA, possessionB);
+  const playerBonusA = influenceXgBonus(influenceA, influenceB, tacticalA, tacticalB, possessionA, engineSignal);
+  const playerBonusB = influenceXgBonus(influenceB, influenceA, tacticalB, tacticalA, possessionB, engineSignal);
 
   const context = { knockout, stage };
   const lateStarA = maybeStarMoment(teamA, 'A', context, cardPlan.dismissalMinutesA, [80, 90], 'late', tacticalA);
   const lateStarB = maybeStarMoment(teamB, 'B', context, cardPlan.dismissalMinutesB, [80, 90], 'late', tacticalB);
   let starMoments = [lateStarA, lateStarB].filter(Boolean);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.18, 3.25);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.18, 3.25);
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA, engineSignal) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.18, 3.25);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB, engineSignal) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.18, 3.25);
 
   let goalsA = clamp(poissonSample(xgA), 0, 7);
   let goalsB = clamp(poissonSample(xgB), 0, 7);
@@ -651,6 +653,7 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   return {
     goalsA, goalsB, xgA, xgB, stats, events,
     tactical: { A: tacticalA, B: tacticalB },
+    engineSignal: { aiVsAi, qualityTacticalMultiplier: engineSignal },
     moralePressure: { A: pressureA, B: pressureB },
     chemistry: { A: chemA, B: chemB },
     influence: { A: influenceA, B: influenceB },

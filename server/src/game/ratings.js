@@ -265,6 +265,7 @@ module.exports = {
   computeChemistry,
   computeSquadCard,
   computeChampionshipOdds,
+  computePower,
   predictKeyPlayers,
   slotWeights,
   CAPTAIN_BONUS
