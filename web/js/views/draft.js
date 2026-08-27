@@ -21,6 +21,8 @@ const DraftView = {
     let tacticalStyleLocked = false;
     let moveFromSlot = null;
     let currentSlotsMap = {};
+    let myDraftComplete = false;
+    let lastDraftCompleteState = null;
     let autoDraftRequested = false;
     let sharedDraftMode = false;
     let sharedDraft = null;
@@ -258,6 +260,28 @@ const DraftView = {
       });
     }
 
+    function rememberDraftCompleteState(slotsMap, captainSlot, tacticalStyle, locked, ratingsCard) {
+      myDraftComplete = true;
+      lastDraftCompleteState = {
+        slots: slotsMap || currentSlotsMap || {},
+        captainSlot: captainSlot || null,
+        tacticalStyle: tacticalStyle || myTacticalStyle,
+        tacticalStyleLocked: !!locked,
+        ratingsCard: ratingsCard || null
+      };
+    }
+
+    function restoreDraftCompleteControls() {
+      const state = lastDraftCompleteState || {
+        slots: currentSlotsMap || {},
+        captainSlot: null,
+        tacticalStyle: myTacticalStyle,
+        tacticalStyleLocked,
+        ratingsCard: null
+      };
+      handleDraftComplete(state.slots, state.captainSlot, state.tacticalStyle, state.tacticalStyleLocked, state.ratingsCard);
+    }
+
     function handleSlotMoveClick(slotCode) {
       if (!currentSlotsMap) return;
       if (!moveFromSlot) {
@@ -288,7 +312,8 @@ const DraftView = {
     function renderReveal(payload) {
       if (payload.done) {
         stopTimer();
-        revealCard.innerHTML = '<p class="muted center">Your XI is complete. Rearrange the pitch if needed, then lock your tactical style.</p>';
+        myDraftComplete = true;
+        restoreDraftCompleteControls();
         return;
       }
       if (payload.exhausted) {
@@ -382,6 +407,7 @@ const DraftView = {
 
     function handleDraftComplete(slotsMap, captainSlot, tacticalStyle, locked, ratingsCard) {
       stopTimer();
+      rememberDraftCompleteState(slotsMap, captainSlot, tacticalStyle, locked, ratingsCard);
       renderRatingsCard(ratingsCard);
       myTacticalStyle = tacticalStyle || myTacticalStyle;
       tacticalStyleLocked = !!locked;
@@ -477,6 +503,7 @@ const DraftView = {
       sharedDraftMode = !!s.sharedDraftMode;
       allReady = !!s.allReady;
       if (s.myDraft) {
+        myDraftComplete = !!s.myDraft.draftComplete;
         renderSquadPitch(s.myDraft.slots);
         poolCount.textContent = s.poolRemaining ?? '-';
         const autoKey = `draftbox.autoDraft.${code}`;
@@ -497,7 +524,7 @@ const DraftView = {
     App.onSocket('draft:reveal', renderReveal);
 
     App.onSocket('draft:sharedStateChanged', () => {
-      if (!iAmReady) socket.emit('draft:reveal', { code });
+      if (!iAmReady && !myDraftComplete) socket.emit('draft:reveal', { code });
     });
 
 
@@ -510,6 +537,7 @@ const DraftView = {
 
     App.onSocket('draft:picked', (payload) => {
       if (payload.userId !== App.state.user.id) return;
+      myDraftComplete = !!payload.draftComplete;
       renderSquadPitch(payload.slots);
       if (payload.auto && !autoDraftRequested) App.toast(`Time is up - auto-picked ${payload.player.name} (${POS_LABEL[payload.player.pos]})`, false);
       if (!payload.draftComplete) {
@@ -528,6 +556,7 @@ const DraftView = {
       myTacticalStyle = payload.tacticalStyle || myTacticalStyle;
       tacticalStyleLocked = true;
       renderRatingsCard(payload.ratingsCard);
+      rememberDraftCompleteState(payload.slots, payload.captainSlot, myTacticalStyle, true, payload.ratingsCard);
       revealCard.innerHTML = '';
       iAmReady = true;
       renderWaitingZone();
