@@ -224,6 +224,66 @@ function influenceXgBonus(own, opp, ownTactical, oppTactical, possession, signal
   return clamp((creatorLift + finisherLift + own.starClutch * 0.55 + territory - shieldTax - own.staminaDrag) * signal, -0.18, 0.25);
 }
 
+function lineQualityProfile(team, ratings, tactical) {
+  const slots = new Map(getSlots(team.formation).map((s) => [s.code, s]));
+  const buckets = { defense: [], midfield: [], attack: [], spine: [] };
+  for (const p of team.xi) {
+    const slot = slots.get(p.slotCode);
+    const y = slot ? slot.y : 50;
+    const central = slot ? Math.abs(slot.x - 50) <= 20 : false;
+    if (p.pos === 'GK' || y >= 62) buckets.defense.push(p.overall);
+    else if (y <= 34) buckets.attack.push(p.overall);
+    else buckets.midfield.push(p.overall);
+    if (p.pos === 'GK' || central || ['CB', 'CDM', 'CM', 'CAM', 'ST'].includes(p.pos)) buckets.spine.push(p.overall);
+  }
+  const avg = (arr, fallback) => arr.length ? arr.reduce((s, n) => s + n, 0) / arr.length : fallback;
+  const defAvg = avg(buckets.defense, ratings.defense);
+  const midAvg = avg(buckets.midfield, ratings.overall || 75);
+  const atkAvg = avg(buckets.attack, ratings.attack);
+  const spineAvg = avg(buckets.spine, ratings.overall || 75);
+  const p = getProfile(team.formation);
+  const maxGap = Math.max(Math.abs(defAvg - midAvg), Math.abs(midAvg - atkAvg));
+  const bridge = clamp((midAvg - 74) / 115 + (p.compactness - 0.55) * 0.055 - Math.max(0, p.verticalGap - 64) * 0.002, -0.075, 0.085);
+  const cover = clamp((defAvg - 74) / 120 + (midAvg - 74) / 190 + (p.backLine - 4) * 0.012, -0.075, 0.09);
+  const punch = clamp((atkAvg - 74) / 105 + Math.max(0, tactical.mods.transition - 1) * 0.035 + Math.max(0, tactical.mods.control - 1) * 0.018, -0.08, 0.095);
+  const spine = clamp((spineAvg - 75) / 145, -0.045, 0.065);
+  const gapPenalty = clamp(Math.max(0, maxGap - 12) * 0.0065, 0, 0.07);
+  const attackMultiplier = clamp(1 + bridge + punch + spine * 0.55 - gapPenalty, 0.9, 1.14);
+  const defenseMultiplier = clamp(1 + cover + bridge * 0.45 + spine * 0.7 - gapPenalty * 0.85, 0.9, 1.14);
+  const chanceQuality = clamp(0.98 + punch * 0.9 + bridge * 0.55 + spine * 0.35 - gapPenalty * 0.7, 0.88, 1.12);
+  const structure = clamp(0.98 + cover * 0.85 + bridge * 0.35 + p.compactness * 0.04 - gapPenalty, 0.88, 1.12);
+  return {
+    defense: rounded(defAvg, 1), midfield: rounded(midAvg, 1), attack: rounded(atkAvg, 1), spine: rounded(spineAvg, 1),
+    attackMultiplier: rounded(attackMultiplier, 3), defenseMultiplier: rounded(defenseMultiplier, 3),
+    chanceQuality: rounded(chanceQuality, 3), structure: rounded(structure, 3), gapPenalty: rounded(gapPenalty, 3)
+  };
+}
+
+function applyLineQuality(ratings, profile) {
+  ratings.attack *= profile.attackMultiplier;
+  ratings.defense *= profile.defenseMultiplier;
+}
+
+function disciplineProfile(team, tactical, lineProfile) {
+  const composure = clamp(((lineProfile.midfield + lineProfile.spine) / 2 - 72) / 24, -0.45, 0.65);
+  const riskLoad = Math.max(0, tactical.mods.risk - 1) * 0.55 + Math.max(0, tactical.mods.press - 1) * 0.45;
+  const fatigue = clamp(riskLoad - composure * 0.45 + Math.max(0, 1 - lineProfile.structure) * 0.8, 0, 0.48);
+  return {
+    cardRisk: rounded(clamp(1 + riskLoad * 0.42 - composure * 0.16, 0.78, 1.36), 3),
+    lateDrop: rounded(clamp(fatigue * 0.045, 0, 0.035), 3),
+    composure: rounded(composure, 3)
+  };
+}
+
+function chanceQualityBonus(ownLine, oppLine, ownInfluence, oppInfluence, ownStyle, oppStyle) {
+  const lineEdge = (ownLine.chanceQuality - oppLine.structure) * 0.16;
+  const creatorEdge = clamp((ownInfluence.supportFocus - oppInfluence.shieldFocus) / 230, -0.055, 0.075);
+  const tempoTax = Math.max(0, ownStyle.mods.tempo - ownStyle.mods.control) * 0.028;
+  const eliteFinishing = clamp((ownInfluence.attackFocus - 80) / 280, 0, 0.045);
+  const defensiveShell = Math.max(0, oppStyle.mods.defense - 1) * 0.03;
+  return clamp(lineEdge + creatorEdge + eliteFinishing - tempoTax - defensiveShell, -0.13, 0.16);
+}
+
 function tacticalPlan(ownStyle, oppStyle) {
   const key = normalizeStyle(ownStyle);
   const style = TACTICAL_STYLES[key] || TACTICAL_STYLES.balanced;
@@ -397,7 +457,7 @@ const REDCARD_IMPACT_PCT = 0.20;
 const REDCARD_BASE_MINUTES = 15;
 const CAPTAIN_REDCARD_MULTIPLIER = 1.8;
 
-function generateCardEvents(teamA, teamB) {
+function generateCardEvents(teamA, teamB, disciplineA = { cardRisk: 1 }, disciplineB = { cardRisk: 1 }) {
   const events = [];
   const dismissals = [];
   const sentOff = new Set();
@@ -422,12 +482,13 @@ function generateCardEvents(teamA, teamB) {
 
   // Yellow-card incidents, resolved chronologically so a second yellow for the same
   // player is recognized as it happens (rather than two independent, unlinked yellows).
-  const numYellowIncidents = Math.floor(Math.random() * YELLOW_INCIDENTS_MAX);
+  const avgCardRisk = clamp(((disciplineA.cardRisk || 1) + (disciplineB.cardRisk || 1)) / 2, 0.75, 1.4);
+  const numYellowIncidents = Math.floor(Math.random() * YELLOW_INCIDENTS_MAX * avgCardRisk);
   const incidentMinutes = Array.from({ length: numYellowIncidents }, () => 1 + Math.floor(Math.random() * 90)).sort((a, b) => a - b);
   for (const minute of incidentMinutes) {
     const avail = eligible();
     if (!avail.length) break;
-    const p = avail[Math.floor(Math.random() * avail.length)];
+    const p = pickWeighted(avail, (candidate) => candidate.side === 'A' ? (disciplineA.cardRisk || 1) : (disciplineB.cardRisk || 1));
     const count = (yellowCount.get(key(p)) || 0) + 1;
     yellowCount.set(key(p), count);
     events.push({ minute, type: 'yellow', player: p.name, pos: p.pos, side: p.side });
@@ -439,7 +500,8 @@ function generateCardEvents(teamA, teamB) {
   // up a yellow this match can only be sent off via a second yellow, never an unrelated
   // straight red, so their card history never contradicts itself in minute order.
   for (const side of ['A', 'B']) {
-    if (Math.random() >= STRAIGHT_RED_CHANCE) continue;
+    const straightRisk = side === 'A' ? (disciplineA.cardRisk || 1) : (disciplineB.cardRisk || 1);
+    if (Math.random() >= STRAIGHT_RED_CHANCE * straightRisk) continue;
     const avail = eligible(side).filter((p) => !yellowCount.has(key(p)));
     if (!avail.length) continue;
     const p = avail[Math.floor(Math.random() * avail.length)];
@@ -625,7 +687,7 @@ function simulatePenaltyShootout(teamA, teamB, dismissedIdsA = null, dismissedId
 
 function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', moraleContext = null } = {}) {
   const aiVsAi = !teamA.isHuman && !teamB.isHuman;
-  const engineSignal = aiVsAi ? 1.16 : 1;
+  const engineSignal = aiVsAi ? 1.2 : 1;
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
   const chemA = computeChemistry(teamA.xi, teamA.formation);
@@ -650,6 +712,15 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   applyTacticalStyle(ratingsA, tacticalA, engineSignal, teamA.formation);
   applyTacticalStyle(ratingsB, tacticalB, engineSignal, teamB.formation);
 
+  const lineProfileA = lineQualityProfile(teamA, ratingsA, tacticalA);
+  const lineProfileB = lineQualityProfile(teamB, ratingsB, tacticalB);
+  applyLineQuality(ratingsA, lineProfileA);
+  applyLineQuality(ratingsB, lineProfileB);
+  const disciplineA = disciplineProfile(teamA, tacticalA, lineProfileA);
+  const disciplineB = disciplineProfile(teamB, tacticalB, lineProfileB);
+  ratingsA.attack *= (1 - disciplineA.lateDrop);
+  ratingsB.attack *= (1 - disciplineB.lateDrop);
+
   const pressureA = pressureModifier(moraleContext && moraleContext.A, tacticalA);
   const pressureB = pressureModifier(moraleContext && moraleContext.B, tacticalB);
   ratingsA.attack *= pressureA.attack;
@@ -657,7 +728,7 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   ratingsB.attack *= pressureB.attack;
   ratingsB.defense *= pressureB.defense;
 
-  const cardPlan = generateCardEvents(teamA, teamB);
+  const cardPlan = generateCardEvents(teamA, teamB, disciplineA, disciplineB);
   for (const d of cardPlan.dismissals) {
     const affected = d.side === 'A' ? ratingsA : ratingsB;
     affected.attack *= (1 - d.moraleImpact);
@@ -682,14 +753,16 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   const influenceB = influenceProfile(teamB, tacticalB);
   const playerBonusA = influenceXgBonus(influenceA, influenceB, tacticalA, tacticalB, possessionA, engineSignal);
   const playerBonusB = influenceXgBonus(influenceB, influenceA, tacticalB, tacticalA, possessionB, engineSignal);
+  const chanceQualityA = chanceQualityBonus(lineProfileA, lineProfileB, influenceA, influenceB, tacticalA, tacticalB);
+  const chanceQualityB = chanceQualityBonus(lineProfileB, lineProfileA, influenceB, influenceA, tacticalB, tacticalA);
 
   const context = { knockout, stage };
   const lateStarA = maybeStarMoment(teamA, 'A', context, cardPlan.dismissalMinutesA, [80, 90], 'late', tacticalA);
   const lateStarB = maybeStarMoment(teamB, 'B', context, cardPlan.dismissalMinutesB, [80, 90], 'late', tacticalB);
   let starMoments = [lateStarA, lateStarB].filter(Boolean);
 
-  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA, engineSignal) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + (lateStarA ? lateStarA.boost : 0), 0.16, 2.95);
-  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB, engineSignal) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + (lateStarB ? lateStarB.boost : 0), 0.16, 2.95);
+  const xgA = clamp(expectedGoals(ratingsA.attack, ratingsB.defense, edgeA, engineSignal) * gkModB + setPieceBonusA + transitionBonusA + playerBonusA + chanceQualityA + (lateStarA ? lateStarA.boost : 0), 0.14, 2.85);
+  const xgB = clamp(expectedGoals(ratingsB.attack, ratingsA.defense, edgeB, engineSignal) * gkModA + setPieceBonusB + transitionBonusB + playerBonusB + chanceQualityB + (lateStarB ? lateStarB.boost : 0), 0.14, 2.85);
 
   let goalsA = footballGoalSample(xgA, 5);
   let goalsB = footballGoalSample(xgB, 5);
@@ -750,6 +823,9 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
     moralePressure: { A: pressureA, B: pressureB },
     chemistry: { A: chemA, B: chemB },
     influence: { A: influenceA, B: influenceB },
+    lineQuality: { A: lineProfileA, B: lineProfileB },
+    discipline: { A: disciplineA, B: disciplineB },
+    chanceQuality: { A: rounded(chanceQualityA, 3), B: rounded(chanceQualityB, 3) },
     starMoments,
     wentToExtraTime, etGoalsA, etGoalsB,
     wentToPenalties, penaltyWinner, penalties, penaltyKicks

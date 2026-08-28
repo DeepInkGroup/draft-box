@@ -239,6 +239,12 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppTac = mySide === 'A' ? (m.tactical && m.tactical.B) : (m.tactical && m.tactical.A);
   const myInfluence = mySide === 'A' ? (m.influence && m.influence.A) : (m.influence && m.influence.B);
   const oppInfluence = mySide === 'A' ? (m.influence && m.influence.B) : (m.influence && m.influence.A);
+  const myLineQuality = mySide === 'A' ? (m.lineQuality && m.lineQuality.A) : (m.lineQuality && m.lineQuality.B);
+  const oppLineQuality = mySide === 'A' ? (m.lineQuality && m.lineQuality.B) : (m.lineQuality && m.lineQuality.A);
+  const myDiscipline = mySide === 'A' ? (m.discipline && m.discipline.A) : (m.discipline && m.discipline.B);
+  const oppDiscipline = mySide === 'A' ? (m.discipline && m.discipline.B) : (m.discipline && m.discipline.A);
+  const myEngineChance = mySide === 'A' ? (m.chanceQuality && m.chanceQuality.A) : (m.chanceQuality && m.chanceQuality.B);
+  const oppEngineChance = mySide === 'A' ? (m.chanceQuality && m.chanceQuality.B) : (m.chanceQuality && m.chanceQuality.A);
   const myPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.A) : (m.moralePressure && m.moralePressure.B);
   const oppPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.B) : (m.moralePressure && m.moralePressure.A);
   const events = m.events || [];
@@ -290,6 +296,19 @@ function analyzeMatch(m, mySide, myName, oppName) {
     const detail = `Creator ${Math.round(myInfluence.supportFocus)} vs ${Math.round(oppInfluence.supportFocus)}, finisher ${Math.round(myInfluence.attackFocus)} vs ${Math.round(oppInfluence.attackFocus)}, shield ${Math.round(myInfluence.shieldFocus)}.`;
     addFactor('Player Influence', `${attackDiff >= 0 ? '+' : ''}${fmt1(attackDiff)}`, detail, creatorDiff >= 4 || attackDiff >= 4 ? 'good' : creatorDiff <= -4 || attackDiff <= -4 ? 'bad' : 'neutral');
   }
+  if (myLineQuality && oppLineQuality) {
+    const lineSwing = (myLineQuality.attackMultiplier + myLineQuality.defenseMultiplier) - (oppLineQuality.attackMultiplier + oppLineQuality.defenseMultiplier);
+    const detail = `Lines ${myLineQuality.defense}/${myLineQuality.midfield}/${myLineQuality.attack}, spine ${myLineQuality.spine}; opponent ${oppLineQuality.defense}/${oppLineQuality.midfield}/${oppLineQuality.attack}.`;
+    addFactor('Line Synergy', `${lineSwing >= 0 ? '+' : ''}${fmt1(lineSwing * 100)}%`, detail, lineSwing >= 0.04 ? 'good' : lineSwing <= -0.04 ? 'bad' : 'neutral');
+  }
+  if (myEngineChance != null && oppEngineChance != null) {
+    const chanceSwing = myEngineChance - oppEngineChance;
+    addFactor('Engine Chance Quality', `${chanceSwing >= 0 ? '+' : ''}${fmt1(chanceSwing * 100)}%`, `Line structure and player influence added ${fmt1(myEngineChance * 100)}% xG pressure vs ${fmt1(oppEngineChance * 100)}%.`, chanceSwing >= 0.04 ? 'good' : chanceSwing <= -0.04 ? 'bad' : 'neutral');
+  }
+  if (myDiscipline && oppDiscipline) {
+    const riskSwing = oppDiscipline.cardRisk - myDiscipline.cardRisk;
+    addFactor('Tactical Discipline', `${riskSwing >= 0 ? '+' : ''}${fmt1(riskSwing * 100)}%`, `Card risk ${fmt1(myDiscipline.cardRisk * 100)}%, late drop ${fmt1(myDiscipline.lateDrop * 100)}%; opponent card risk ${fmt1(oppDiscipline.cardRisk * 100)}%.`, riskSwing >= 0.08 ? 'good' : riskSwing <= -0.08 ? 'bad' : 'neutral');
+  }
   if (starEvents.length) {
     const myStars = starEvents.filter((e) => e.side === mySide);
     const oppStars = starEvents.filter((e) => e.side === oppSide);
@@ -326,6 +345,7 @@ function analyzeMatch(m, mySide, myName, oppName) {
       { label: 'Chemistry', mine: myChem ? `${fmt1(myChem.multiplier * 100)}%` : '-', opponent: oppChem ? `${fmt1(oppChem.multiplier * 100)}%` : '-' },
       { label: 'Style', mine: myTac ? myTac.label : '-', opponent: oppTac ? oppTac.label : '-' },
       { label: 'Influence', mine: myInfluence ? Math.round((myInfluence.attackFocus + myInfluence.supportFocus) / 2) : '-', opponent: oppInfluence ? Math.round((oppInfluence.attackFocus + oppInfluence.supportFocus) / 2) : '-' },
+      { label: 'Line Spine', mine: myLineQuality ? myLineQuality.spine : '-', opponent: oppLineQuality ? oppLineQuality.spine : '-' },
       { label: 'Saves', mine: myStats.saves, opponent: oppStats.saves }
     ],
     factors

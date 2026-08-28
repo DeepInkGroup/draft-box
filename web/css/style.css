@@ -495,6 +495,14 @@ a { color: var(--accent-strong); }
 .event-symbol.card.yellow { background: #facc15; border: 1px solid rgba(250, 204, 21, .85); }
 .event-symbol.card.red { background: #ef4444; border: 1px solid rgba(248, 113, 113, .85); }
 .event-symbol.card.small { width: 9px; min-width: 9px; height: 12px; margin: 0 0 0 3px; vertical-align: -1px; }
+.match-card-icon {
+  display: inline-block; flex: 0 0 auto; width: 10px; min-width: 10px; max-width: 10px;
+  height: 14px; max-height: 14px; padding: 0; margin: 0 6px 0 0; border-radius: 2px;
+  vertical-align: -2px; box-sizing: border-box; box-shadow: 0 1px 4px rgba(0,0,0,.24);
+}
+.match-card-icon.yellow { background: #facc15; border: 1px solid rgba(250, 204, 21, .85); }
+.match-card-icon.red { background: #ef4444; border: 1px solid rgba(248, 113, 113, .85); }
+.match-card-icon.small { width: 8px; min-width: 8px; max-width: 8px; height: 11px; max-height: 11px; margin: 0 0 0 3px; vertical-align: -1px; }
 .event-symbol.chance { border-radius: 999px; background: rgba(34, 197, 94, .16); color: #86efac; border: 1px solid rgba(34, 197, 94, .3); }
 .event-symbol.post, .event-symbol.pressure { min-width: 34px; padding: 0 5px; border-radius: 999px; font-size: .56rem; letter-spacing: 0; }
 .event-symbol.post { color: #fdba74; background: rgba(249, 115, 22, .13); border: 1px solid rgba(249, 115, 22, .26); }

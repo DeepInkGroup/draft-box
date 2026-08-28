@@ -67,13 +67,13 @@ const TournamentView = {
 
     function eventIcon(e) {
       if (e.type === 'goal') return '<span class="event-symbol ball" title="Goal">&#9917;</span>';
-      if (e.type === 'yellow') return '<span class="event-symbol card yellow" title="Yellow card"></span>';
-      if (e.type === 'red') return '<span class="event-symbol card red" title="Red card"></span>';
+      if (e.type === 'yellow') return '<span class="match-card-icon yellow" title="Yellow card"></span>';
+      if (e.type === 'red') return '<span class="match-card-icon red" title="Red card"></span>';
       if (e.type === 'star') return '<span class="event-symbol star" title="Star moment">&#9733;</span>';
       if (e.type === 'chance') return '<span class="event-symbol chance" title="Big chance">!</span>';
       if (e.type === 'woodwork') return '<span class="event-symbol post" title="Woodwork">POST</span>';
       if (e.type === 'pressure') return '<span class="event-symbol pressure" title="Pressure">PRESS</span>';
-      return '<span class="event-symbol card red" title="Red card"></span>';
+      return '<span class="match-card-icon red" title="Red card"></span>';
     }
 
     function eventTone(e) {
@@ -190,8 +190,8 @@ const TournamentView = {
       `;
       const cardsText = (s) => {
         const parts = [];
-        if (s.yellowCards) parts.push(`<span class="card-stat">${s.yellowCards}<span class="event-symbol card yellow small"></span></span>`);
-        if (s.redCards) parts.push(`<span class="card-stat">${s.redCards}<span class="event-symbol card red small"></span></span>`);
+        if (s.yellowCards) parts.push(`<span class="card-stat">${s.yellowCards}<span class="match-card-icon yellow small"></span></span>`);
+        if (s.redCards) parts.push(`<span class="card-stat">${s.redCards}<span class="match-card-icon red small"></span></span>`);
         return parts.length ? parts.join(' ') : '-';
       };
       return `
