@@ -485,6 +485,21 @@ a { color: var(--accent-strong); }
   border-top: none; border-radius: 0 0 var(--radius-sm) var(--radius-sm); background: var(--surface); font-size: .82rem;
 }
 .report-line { padding: 3px 0; }
+.event-symbol {
+  display: inline-flex; align-items: center; justify-content: center; vertical-align: -2px;
+  min-width: 18px; height: 18px; margin-right: 5px; font-weight: 900; font-size: .72rem; line-height: 1;
+}
+.event-symbol.ball { color: var(--pitch-accent); font-size: .95rem; }
+.event-symbol.star { color: var(--accent-strong); font-size: .95rem; }
+.event-symbol.card { min-width: 11px; width: 11px; height: 15px; border-radius: 2px; box-shadow: 0 1px 4px rgba(0,0,0,.24); }
+.event-symbol.card.yellow { background: #facc15; border: 1px solid rgba(250, 204, 21, .85); }
+.event-symbol.card.red { background: #ef4444; border: 1px solid rgba(248, 113, 113, .85); }
+.event-symbol.card.small { width: 9px; min-width: 9px; height: 12px; margin: 0 0 0 3px; vertical-align: -1px; }
+.event-symbol.chance { border-radius: 999px; background: rgba(34, 197, 94, .16); color: #86efac; border: 1px solid rgba(34, 197, 94, .3); }
+.event-symbol.post, .event-symbol.pressure { min-width: 34px; padding: 0 5px; border-radius: 999px; font-size: .56rem; letter-spacing: 0; }
+.event-symbol.post { color: #fdba74; background: rgba(249, 115, 22, .13); border: 1px solid rgba(249, 115, 22, .26); }
+.event-symbol.pressure { color: #93c5fd; background: rgba(59, 130, 246, .13); border: 1px solid rgba(59, 130, 246, .26); }
+.card-stat { display: inline-flex; align-items: center; justify-content: center; gap: 2px; min-width: 24px; }
 .report-line.star, .live-feed-line.star {
   border-radius: 7px;
   border: 1px solid rgba(234, 179, 8, .28);
@@ -679,51 +694,86 @@ a { color: var(--accent-strong); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
 .dialog-wide { width: min(680px, 92vw); }
-#profileDialog.dialog-wide { width: min(1120px, 96vw); max-height: min(820px, 92vh); overflow: hidden; }
-#profileDialog .dialog-form { padding: 16px 18px; max-height: 92vh; overflow-y: auto; }
-#profileDialog h3 { margin: 0 0 12px; }
-#profileDialog .field { margin-bottom: 8px; }
-#profileDialog .field label { font-size: .78rem; }
-#profileDialog .dialog-form input { margin: 5px 0; padding: 8px 10px; }
-.rulebook-body { max-height: 70vh; overflow-y: auto; padding-right: 6px; }
-.rulebook-body h3 { margin: 18px 0 6px; color: var(--accent-strong); }
-.rulebook-body h3:first-child { margin-top: 0; }
-.rulebook-body p { font-size: .88rem; line-height: 1.55; margin: 0 0 8px; }
+#profileDialog.dialog-wide { width: min(1180px, 96vw); max-height: none; overflow: visible; }
+#profileDialog .dialog-form { padding: 14px 16px; max-height: none; overflow: visible; }
+#profileDialog h3 { margin: 0; }
+#profileDialog .field { margin-bottom: 6px; }
+#profileDialog .field label { font-size: .72rem; }
+#profileDialog .dialog-form input { margin: 4px 0; padding: 7px 9px; }
+.rulebook-body, .game-guide-body { max-height: 70vh; overflow-y: auto; padding-right: 6px; }
+.rulebook-body h3, .game-guide-body h4 { margin: 18px 0 6px; color: var(--accent-strong); }
+.rulebook-body h3:first-child, .game-guide-body h4:first-child { margin-top: 0; }
+.rulebook-body p, .game-guide-body p { font-size: .88rem; line-height: 1.55; margin: 0 0 8px; }
 .rulebook-body ul { margin: 0 0 10px; padding-inline-start: 20px; font-size: .88rem; line-height: 1.55; }
 .rulebook-body li { margin-bottom: 4px; }
-.rulebook-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
-.rulebook-highlights div { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.025); padding: 10px; }
-.rulebook-highlights b { display: block; color: var(--accent-strong); font-size: .82rem; margin-bottom: 4px; }
-.rulebook-highlights span { display: block; color: var(--muted); font-size: .74rem; line-height: 1.35; }
-
-.profile-columns { display: grid; grid-template-columns: minmax(300px, .82fr) minmax(440px, 1.18fr); gap: 14px; align-items: start; }
-.profile-col { border: 1px solid var(--border-soft); border-radius: var(--radius-sm); background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(255,255,255,.012)); padding: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
-.profile-col h4 { margin: 2px 0 8px; color: var(--accent-strong); font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; }
-#profileDialog .toggle-group { gap: 7px; }
-#profileDialog .toggle-option { padding: 8px; }
-#profileDialog .toggle-option .toggle-title { margin-bottom: 2px; font-size: .82rem; }
-#profileDialog .toggle-option .toggle-sub { font-size: .68rem; line-height: 1.25; }
-.friend-card { border: 1px solid var(--border); border-radius: var(--radius-sm); background: linear-gradient(135deg, rgba(45,212,191,.08), rgba(250,204,21,.06)); padding: 10px; margin: 4px 0 10px; }
+.rulebook-highlights, .guide-hero-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 14px; }
+.rulebook-highlights div, .guide-hero-grid div, .tactic-guide-grid div, .guide-flow span { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.025); padding: 10px; }
+.rulebook-highlights b, .guide-hero-grid b, .tactic-guide-grid b { display: block; color: var(--accent-strong); font-size: .82rem; margin-bottom: 4px; }
+.rulebook-highlights span, .guide-hero-grid span, .tactic-guide-grid span, .guide-flow span { display: block; color: var(--muted); font-size: .74rem; line-height: 1.35; }
+.game-guide-dialog.dialog-wide { width: min(960px, 94vw); }
+.tactic-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.guide-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.profile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.profile-head p { margin: 4px 0 0; font-size: .78rem; }
+.profile-head-actions { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
+.profile-grid-minimal { display: grid; grid-template-columns: minmax(250px, .86fr) minmax(420px, 1.36fr) minmax(270px, .98fr); gap: 10px; align-items: start; }
+.profile-panel { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.02); padding: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
+.profile-panel h4 { margin: 0 0 7px; color: var(--accent-strong); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
+.profile-mini-fields, .password-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.profile-help { font-size: .75rem; margin: -3px 0 7px; }
+#profileDialog .toggle-group { gap: 6px; }
+#profileDialog .toggle-option { padding: 7px; }
+#profileDialog .toggle-option .toggle-title { margin-bottom: 2px; font-size: .78rem; }
+#profileDialog .toggle-option .toggle-sub { font-size: .64rem; line-height: 1.22; }
+.friend-card { border: 1px solid var(--border); border-radius: 8px; background: linear-gradient(135deg, rgba(45,212,191,.08), rgba(250,204,21,.06)); padding: 9px; margin: 2px 0 8px; }
+.friend-card.compact { margin-top: 0; }
 .friend-card div { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.friend-card span { color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .04em; }
-.friend-card b { font-size: 1.35rem; color: var(--ink); letter-spacing: .08em; }
-.friend-card p { margin: 5px 0 0; color: var(--muted); font-size: .76rem; }
-.friend-add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; margin-bottom: 8px; }
+.friend-card span { color: var(--muted); font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; }
+.friend-card b { font-size: 1.18rem; color: var(--ink); letter-spacing: .08em; }
+.friend-card p { margin: 4px 0 0; color: var(--muted); font-size: .7rem; }
+.friend-add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: center; margin-bottom: 7px; }
 #friendCodeInput { text-transform: uppercase; letter-spacing: .08em; }
-.friend-list { display: grid; gap: 6px; margin-bottom: 10px; max-height: 128px; overflow-y: auto; padding-right: 2px; }
-.friend-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: 1px solid var(--border-soft); background: rgba(255,255,255,.018); border-radius: var(--radius-sm); padding: 7px 8px; }
-.friend-row b { display: block; font-size: .82rem; }
-.friend-row span { display: block; color: var(--muted); font-size: .68rem; }
+.friend-list { display: grid; gap: 5px; margin-bottom: 0; max-height: none; overflow: visible; padding-right: 0; }
+.friend-row { display: flex; justify-content: space-between; align-items: center; gap: 7px; border: 1px solid var(--border-soft); background: rgba(255,255,255,.018); border-radius: 8px; padding: 6px 7px; }
+.friend-row b { display: block; font-size: .78rem; }
+.friend-row span { display: block; color: var(--muted); font-size: .64rem; }
 .friend-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; flex-wrap: wrap; }
-@media (max-width: 560px) {
-  .tactical-style-grid { grid-template-columns: 1fr; }
-  .profile-columns { grid-template-columns: 1fr; }
-  .rulebook-highlights { grid-template-columns: 1fr; }
+.career-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 7px; }
+.career-stat { background: rgba(26,26,34,.72); border: 1px solid var(--border); border-radius: 8px; padding: 7px 8px; text-align: center; }
+.career-stat .career-value { font-size: 1rem; font-weight: 800; color: var(--accent-strong); display: block; white-space: nowrap; }
+.career-stat .career-label { font-size: .64rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.profile-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 0; }
+.profile-insight-card, .profile-ideas { border: 1px solid var(--border); border-radius: 8px; background: rgba(26,26,34,.74); padding: 7px 8px; }
+.profile-insight-card.wide { grid-column: span 2; }
+.profile-insight-card span, .profile-idea-head { display: block; color: var(--muted); font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+.profile-insight-card b { display: block; color: var(--ink); font-size: .74rem; line-height: 1.24; }
+.profile-ideas { margin-top: 0; background: linear-gradient(135deg, rgba(124,92,255,.10), rgba(34,197,94,.045)); }
+.plan-panel { grid-column: 1 / -1; }
+.profile-idea-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+.profile-idea-list div { display: grid; gap: 2px; align-items: start; border-left: 2px solid rgba(146,118,255,.44); padding-left: 8px; }
+.profile-idea-list b { font-size: .72rem; color: var(--accent-strong); }
+.profile-idea-list span { font-size: .68rem; color: var(--muted); line-height: 1.22; }
+.profile-footer-actions { justify-content: flex-start; margin-top: 8px; }
+@media (max-width: 1020px) {
+  #profileDialog.dialog-wide { width: min(820px, 96vw); }
+  .profile-grid-minimal { grid-template-columns: 1fr 1fr; }
+  .stats-panel { grid-column: 1 / -1; }
+  .guide-flow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  #profileDialog .dialog-form { padding: 12px; }
+  .profile-head { align-items: stretch; flex-direction: column; }
+  .profile-head-actions { justify-content: stretch; }
+  .profile-head-actions .btn { flex: 1; }
+  .profile-grid-minimal, .profile-mini-fields, .password-grid, .tactic-guide-grid, .guide-hero-grid, .guide-flow { grid-template-columns: 1fr; }
+  .profile-insights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profile-insight-card.wide { grid-column: auto; }
+  .profile-idea-list { grid-template-columns: 1fr; }
+  .career-grid { grid-template-columns: repeat(2, 1fr); }
   .friend-add-row { grid-template-columns: 1fr; }
   .friend-row { align-items: flex-start; flex-direction: column; }
   .friend-actions { justify-content: flex-start; }
 }
-
 .rulebook-pdf-link {
   display: inline-flex; align-items: center; gap: 6px; margin: 16px 0 2px;
   font-size: .82rem; color: var(--accent-strong); text-decoration: none; border: 1px solid var(--border);
@@ -753,42 +803,6 @@ a { color: var(--accent-strong); }
 }
 .team-chip:hover { border-color: var(--accent); }
 .team-chip.selected { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
-
-.career-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 4px; }
-.career-stat {
-  background: rgba(26,26,34,.86); border: 1px solid var(--border); border-radius: var(--radius-sm);
-  padding: 8px 9px; text-align: center;
-}
-.career-stat .career-value { font-size: 1.08rem; font-weight: 800; color: var(--accent-strong); display: block; white-space: nowrap; }
-.career-stat .career-label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-
-.profile-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; margin-top: 9px; }
-.profile-insight-card, .profile-ideas {
-  border: 1px solid var(--border); border-radius: var(--radius-sm); background: rgba(26,26,34,.88); padding: 8px 10px;
-}
-.profile-insight-card.wide { grid-column: span 2; }
-.profile-insight-card span, .profile-idea-head {
-  display: block; color: var(--muted); font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 4px;
-}
-.profile-insight-card b { display: block; color: var(--ink); font-size: .82rem; line-height: 1.3; }
-.profile-ideas { margin-top: 9px; background: linear-gradient(135deg, rgba(124,92,255,.12), rgba(34,197,94,.055)); }
-.profile-idea-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-.profile-idea-list div { display: grid; gap: 3px; align-items: start; border-left: 2px solid rgba(146,118,255,.44); padding-left: 8px; }
-.profile-idea-list b { font-size: .76rem; color: var(--accent-strong); }
-.profile-idea-list span { font-size: .72rem; color: var(--muted); line-height: 1.28; }
-@media (max-width: 900px) {
-  #profileDialog.dialog-wide { width: min(760px, 96vw); }
-  .profile-columns { grid-template-columns: 1fr; }
-  .profile-idea-list { grid-template-columns: 1fr; }
-}
-@media (max-width: 560px) {
-  #profileDialog .dialog-form { padding: 13px; }
-  .profile-insights { grid-template-columns: 1fr; }
-  .profile-insight-card.wide { grid-column: auto; }
-  .profile-idea-list div { grid-template-columns: 1fr; gap: 2px; }
-  .career-grid { grid-template-columns: repeat(2, 1fr); }
-}
-
 
 .advance-ready-panel {
   margin-top: 14px;

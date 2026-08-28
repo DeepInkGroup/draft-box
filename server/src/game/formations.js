@@ -489,6 +489,10 @@ function playerFitsSlot(player, slot) {
 //              outfield slots) — wide shapes exploit narrow ones
 const profileCache = new Map();
 
+function clamp(n, lo, hi) {
+  return Math.max(lo, Math.min(hi, n));
+}
+
 function getProfile(formation) {
   if (profileCache.has(formation)) return profileCache.get(formation);
 
@@ -497,6 +501,15 @@ function getProfile(formation) {
   let atkShape = 0;
   let minX = 100;
   let maxX = 0;
+  let centralPresence = 0;
+  let midfieldDensity = 0;
+  let backLine = 0;
+  let frontLine = 0;
+  let wideOutlets = 0;
+  let ySum = 0;
+  let yMin = 100;
+  let yMax = 0;
+  let outfieldCount = 0;
 
   for (const s of slots) {
     if (s.group === 'DF') defShape += 1;
@@ -506,10 +519,23 @@ function getProfile(formation) {
     if (s.group !== 'GK') {
       minX = Math.min(minX, s.x);
       maxX = Math.max(maxX, s.x);
+      outfieldCount += 1;
+      ySum += s.y;
+      yMin = Math.min(yMin, s.y);
+      yMax = Math.max(yMax, s.y);
+      if (s.x >= 28 && s.x <= 72) centralPresence += 1;
+      if (s.group === 'MF') midfieldDensity += 1;
+      if (s.group === 'DF' || (s.group === 'MF' && s.y >= 58)) backLine += 1;
+      if (s.group === 'FW' || (s.group === 'MF' && s.y <= 34)) frontLine += 1;
+      if (s.x <= 18 || s.x >= 82) wideOutlets += 1;
     }
   }
 
-  const profile = { defShape, atkShape, width: maxX - minX };
+  const width = maxX - minX;
+  const avgY = ySum / Math.max(1, outfieldCount);
+  const verticalGap = yMax - yMin;
+  const compactness = clamp(1 - Math.max(0, verticalGap - 56) / 32, 0, 1);
+  const profile = { defShape, atkShape, width, centralPresence, midfieldDensity, backLine, frontLine, wideOutlets, avgY, verticalGap, compactness };
   profileCache.set(formation, profile);
   return profile;
 }

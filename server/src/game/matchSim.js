@@ -51,7 +51,38 @@ function formationEdge(formationX, formationY) {
   const py = getProfile(formationY);
   const shapeEdge = (px.atkShape - py.defShape) * 0.43;
   const widthEdge = (px.width - py.width) * 0.065;
-  return clamp(shapeEdge + widthEdge, -6, 6);
+  const centralEdge = (px.centralPresence - py.centralPresence) * 0.18;
+  const midfieldEdge = (px.midfieldDensity - py.midfieldDensity) * 0.22;
+  const compactEdge = (px.compactness - py.compactness) * 0.9;
+  const gapPenalty = Math.max(0, px.verticalGap - 62) * 0.035;
+  return clamp(shapeEdge + widthEdge + centralEdge + midfieldEdge + compactEdge - gapPenalty, -7, 7);
+}
+
+function formationStyleFit(formation, plan) {
+  const p = getProfile(formation);
+  const width = clamp((p.width - 62) / 30, -1, 1);
+  const center = clamp((p.centralPresence - 5.5) / 3.5, -1, 1);
+  const midfield = clamp((p.midfieldDensity - 4) / 2, -1, 1);
+  const back = clamp((p.backLine - 4.5) / 2.5, -1, 1);
+  const front = clamp((p.frontLine - 2.5) / 2.5, -1, 1);
+  const compact = clamp((p.compactness - 0.55) / 0.45, -1, 1);
+  const gapRisk = clamp((p.verticalGap - 62) / 26, 0, 1);
+
+  const fitByStyle = {
+    defensive: { attack: -0.012 + back * 0.018 + compact * 0.01, defense: back * 0.035 + compact * 0.024 - gapRisk * 0.026 },
+    balanced: { attack: compact * 0.01 + center * 0.008, defense: compact * 0.012 + center * 0.006 },
+    gegenpress: { attack: midfield * 0.026 + front * 0.022 + compact * 0.014 - gapRisk * 0.03, defense: midfield * 0.018 + compact * 0.018 - gapRisk * 0.035 },
+    possession: { attack: center * 0.026 + midfield * 0.022 + compact * 0.014 - gapRisk * 0.018, defense: center * 0.018 + midfield * 0.015 + compact * 0.02 },
+    counter: { attack: front * 0.024 + back * 0.016 + width * 0.012 - midfield * 0.006, defense: back * 0.024 + compact * 0.014 - gapRisk * 0.012 },
+    wingplay: { attack: width * 0.036 + front * 0.014 - Math.max(0, -width) * 0.025, defense: back * 0.01 - Math.max(0, -center) * 0.012 },
+    compact: { attack: center * 0.012 + midfield * 0.014 - Math.max(0, width) * 0.008, defense: center * 0.028 + midfield * 0.02 + compact * 0.03 }
+  };
+  const fit = fitByStyle[plan.key] || fitByStyle.balanced;
+  return {
+    attack: clamp(1 + fit.attack, 0.94, 1.07),
+    defense: clamp(1 + fit.defense, 0.94, 1.08),
+    profile: p
+  };
 }
 
 function expectedGoals(ratingFor, ratingAgainst, edge, signal = 1) {
@@ -200,15 +231,17 @@ function tacticalPlan(ownStyle, oppStyle) {
   return { key, label: style.label, description: style.description, edge, mods: style };
 }
 
-function applyTacticalStyle(ratings, plan, signal = 1) {
+function applyTacticalStyle(ratings, plan, signal = 1, formation = '4-3-3') {
   const tempoAtk = 1 + (plan.mods.tempo - 1) * 0.05;
   const riskAtk = 1 + (plan.mods.risk - 1) * 0.04;
   const transitionAtk = 1 + (plan.mods.transition - 1) * 0.04;
   const controlDef = 1 + (plan.mods.control - 1) * 0.035;
   const pressDef = 1 + (plan.mods.press - 1) * 0.03;
   const riskDef = 1 - Math.max(0, plan.mods.risk - 1) * 0.05;
-  ratings.attack *= plan.mods.attack * (1 + plan.edge * signal) * tempoAtk * riskAtk * transitionAtk;
-  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.6 * signal) * controlDef * pressDef * riskDef;
+  const fit = formationStyleFit(formation, plan);
+  ratings.attack *= plan.mods.attack * (1 + plan.edge * signal) * tempoAtk * riskAtk * transitionAtk * fit.attack;
+  ratings.defense *= plan.mods.defense * (1 + plan.edge * 0.6 * signal) * controlDef * pressDef * riskDef * fit.defense;
+  plan.formationFit = { attack: rounded(fit.attack, 3), defense: rounded(fit.defense, 3), profile: fit.profile };
 }
 
 function starCandidates(team, dismissalMinutes = null, minute = 80) {
@@ -614,8 +647,8 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
 
   const tacticalA = tacticalPlan(teamA.tacticalStyle, teamB.tacticalStyle);
   const tacticalB = tacticalPlan(teamB.tacticalStyle, teamA.tacticalStyle);
-  applyTacticalStyle(ratingsA, tacticalA, engineSignal);
-  applyTacticalStyle(ratingsB, tacticalB, engineSignal);
+  applyTacticalStyle(ratingsA, tacticalA, engineSignal, teamA.formation);
+  applyTacticalStyle(ratingsB, tacticalB, engineSignal, teamB.formation);
 
   const pressureA = pressureModifier(moraleContext && moraleContext.A, tacticalA);
   const pressureB = pressureModifier(moraleContext && moraleContext.B, tacticalB);

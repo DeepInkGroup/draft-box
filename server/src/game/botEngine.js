@@ -4,6 +4,27 @@ const { STYLE_KEYS, TACTICAL_STYLES, matchupEdge, normalizeStyle } = require('./
 
 const BOT_FORMATION = '4-3-3';
 const CENTRAL_SLOT_RE = /CM|CDM|CAM|LAM|RAM/;
+const FAST_FORMATION_POOL = [
+  '4-3-3', '4-2-3-1', '4-4-2', '4-5-1', '4-1-4-1', '4-3-2-1',
+  '4-3-1-2', '3-5-2', '3-4-1-2', '5-4-1', '5-3-2', '4-2-2-2'
+];
+const setupCache = new Map();
+
+function cacheKey(team) {
+  const players = (team.players || [])
+    .map((p) => `${p.id}:${p.overall}:${p.rawPos || p.pos || ''}:${p.isStar ? 1 : 0}`)
+    .join('|');
+  return `${team.code || team.name}:${players}`;
+}
+
+function cloneSetup(setup) {
+  return {
+    formation: setup.formation,
+    tacticalStyle: setup.tacticalStyle,
+    score: setup.score,
+    xi: setup.xi.map((p) => ({ ...p }))
+  };
+}
 
 function cloneForSlot(player, slot) {
   return {
@@ -69,6 +90,24 @@ function lineAverage(xi, group) {
   return average(xi.filter((p) => p.pos === group));
 }
 
+function profileFitScore(profile, styleKey) {
+  const width = Math.max(-1, Math.min(1, (profile.width - 62) / 30));
+  const center = Math.max(-1, Math.min(1, (profile.centralPresence - 5.5) / 3.5));
+  const midfield = Math.max(-1, Math.min(1, (profile.midfieldDensity - 4) / 2));
+  const back = Math.max(-1, Math.min(1, (profile.backLine - 4.5) / 2.5));
+  const front = Math.max(-1, Math.min(1, (profile.frontLine - 2.5) / 2.5));
+  const compact = Math.max(-1, Math.min(1, (profile.compactness - 0.55) / 0.45));
+  const gapRisk = Math.max(0, Math.min(1, (profile.verticalGap - 62) / 26));
+
+  if (styleKey === 'defensive') return back * 2.4 + compact * 2.1 - front * 0.5 - gapRisk * 2.6;
+  if (styleKey === 'balanced') return compact * 1.2 + center * 0.9 + midfield * 0.7 - gapRisk * 1.1;
+  if (styleKey === 'gegenpress') return midfield * 2.2 + front * 1.7 + compact * 1.4 - gapRisk * 3.1;
+  if (styleKey === 'possession') return center * 2.2 + midfield * 1.9 + compact * 1.3 - gapRisk * 1.8;
+  if (styleKey === 'counter') return front * 1.8 + back * 1.6 + width * 1.1 - midfield * 0.4 - gapRisk * 1.2;
+  if (styleKey === 'wingplay') return width * 2.7 + front * 1.1 + back * 0.5 - Math.max(0, -width) * 2.4;
+  if (styleKey === 'compact') return center * 2.1 + midfield * 1.7 + compact * 2.3 - Math.max(0, width) * 0.9;
+  return 0;
+}
 function styleFitScore(xi, formation, styleKey, opponent = null) {
   const style = TACTICAL_STYLES[normalizeStyle(styleKey)] || TACTICAL_STYLES.balanced;
   const ratings = computeTeamRatings(xi, formation);
@@ -95,6 +134,7 @@ function styleFitScore(xi, formation, styleKey, opponent = null) {
   if (styleKey === 'counter') score += Math.max(0, forwardAvg - 74) * 0.38 + Math.max(0, defenseAvg - 73) * 0.3 + Math.max(0, -attackBias) * 0.35;
   if (styleKey === 'wingplay') score += Math.max(0, profile.width - 72) * 0.09 + Math.max(0, forwardAvg - 74) * 0.25;
   if (styleKey === 'compact') score += Math.max(0, midfieldAvg - 73) * 0.42 + Math.max(0, defenseAvg - 73) * 0.35 - Math.max(0, forwardAvg - midfieldAvg) * 0.25;
+  score += profileFitScore(profile, styleKey);
   score -= Math.max(0, style.risk - 1) * Math.max(0, 74 - controlCore) * 0.85;
 
   if (opponent) {
@@ -110,16 +150,32 @@ function styleFitScore(xi, formation, styleKey, opponent = null) {
 }
 
 function bestBotSetup(team) {
+  const key = cacheKey(team);
+  if (setupCache.has(key)) return cloneSetup(setupCache.get(key));
+
   let best = null;
-  for (const formation of Object.keys(FORMATIONS)) {
+  const allFormations = Object.keys(FORMATIONS);
+  const fastFormations = FAST_FORMATION_POOL.filter((formation) => FORMATIONS[formation]);
+  const fallbackFormations = allFormations.filter((formation) => !fastFormations.includes(formation));
+  const evaluate = (formation) => {
     const xi = bestXI(team, formation);
-    if (xi.length !== 11) continue;
+    if (xi.length !== 11) return;
     const score = computePower(xi, formation, 'balanced') + computeChemistry(xi, formation).positionFit * 6;
     if (!best || score > best.score) best = { formation, xi, tacticalStyle: 'balanced', score };
+  };
+
+  for (const formation of fastFormations) evaluate(formation);
+  if (!best) {
+    for (const formation of fallbackFormations) evaluate(formation);
   }
-  if (best) return best;
+  if (best) {
+    setupCache.set(key, cloneSetup(best));
+    return cloneSetup(best);
+  }
   const xi = bestXI(team, BOT_FORMATION);
-  return { formation: BOT_FORMATION, xi, tacticalStyle: 'balanced', score: computePower(xi, BOT_FORMATION, 'balanced') };
+  best = { formation: BOT_FORMATION, xi, tacticalStyle: 'balanced', score: computePower(xi, BOT_FORMATION, 'balanced') };
+  setupCache.set(key, cloneSetup(best));
+  return cloneSetup(best);
 }
 
 function prepareBotForMatch(team, opponent) {

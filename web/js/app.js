@@ -211,6 +211,10 @@ const App = (() => {
     document.getElementById('btnRulebook').addEventListener('click', () => rulebookDialog.showModal());
     document.getElementById('btnCloseRulebook').addEventListener('click', () => rulebookDialog.close());
 
+    const gameGuideDialog = document.getElementById('gameGuideDialog');
+    document.getElementById('btnGameGuide').addEventListener('click', () => gameGuideDialog.showModal());
+    document.getElementById('btnCloseGameGuide').addEventListener('click', () => gameGuideDialog.close());
+
     const profileDialog = document.getElementById('profileDialog');
     const profileError = document.getElementById('profileError');
     profileBtn.addEventListener('click', async () => {
