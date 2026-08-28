@@ -86,12 +86,17 @@ const App = (() => {
     goAuth();
   }
 
-  function renderProfileInsights(el, stats, layoutLabel) {
+  function renderProfileInsights(el, roadmapEl, stats, layoutLabel) {
     const totalMatches = stats.w + stats.d + stats.l;
     const winRate = totalMatches > 0 ? Math.round((stats.w / totalMatches) * 100) : 0;
+    const lossRate = totalMatches > 0 ? Math.round((stats.l / totalMatches) * 100) : 0;
+    const titleRate = stats.tournaments > 0 ? Math.round((stats.titles / stats.tournaments) * 100) : 0;
     const goalDiff = stats.gf - stats.ga;
     const goalsPerMatch = totalMatches > 0 ? (stats.gf / totalMatches).toFixed(1) : '0.0';
     const goalsAgainstPerMatch = totalMatches > 0 ? (stats.ga / totalMatches).toFixed(1) : '0.0';
+    const attackIndex = Math.min(99, Math.round(Number(goalsPerMatch) * 28 + Math.max(goalDiff, 0) * 2));
+    const controlIndex = Math.max(1, Math.min(99, Math.round(86 - Number(goalsAgainstPerMatch) * 24 + Math.max(goalDiff, 0) * 1.4)));
+    const momentumTier = totalMatches === 0 ? 'Fresh Start' : winRate >= 65 && goalDiff > 0 ? 'Hot Run' : lossRate <= 25 ? 'Stable' : 'Volatile';
     const formLabel = totalMatches === 0 ? 'Unranked' : winRate >= 65 ? 'Title Contender' : winRate >= 45 ? 'Knockout Threat' : 'Rebuild Mode';
     const profileStyle = totalMatches === 0
       ? 'Play one tournament to unlock a style read.'
@@ -114,16 +119,45 @@ const App = (() => {
       : stats.tournaments > 0
         ? 'Reach your first final and convert one deep run into a title.'
         : 'Finish one tournament to build your career baseline.';
+    const draftFocus = Number(goalsAgainstPerMatch) > 1.4
+      ? 'Prioritize a natural back line, CDM cover and chemistry before chasing another attacker.'
+      : Number(goalsPerMatch) < 1.4 && totalMatches > 0
+        ? 'Add one high-overall creator or star forward to raise shot quality in tight games.'
+        : 'Keep the core balanced: one creator, one ball-winner and clean position fit.';
+    const matchPlan = winRate >= 60
+      ? 'Protect leads with Balanced or Possession after minute 70 instead of over-pressing.'
+      : lossRate >= 45
+        ? 'Reduce risky styles against stronger squads and lean on Counter Attack as an upset plan.'
+        : 'Your results are close. Use tactical matchup edges before changing the XI.';
+    const milestone = stats.titles > 0
+      ? `Next milestone: ${stats.titles + 1} titles and a ${Math.min(90, winRate + 5)}% win-rate push.`
+      : stats.tournaments > 0
+        ? 'Next milestone: first title, then build a repeatable draft identity.'
+        : 'Next milestone: finish a tournament to unlock richer history reads.';
     el.innerHTML = `
       <div class="profile-insight-card wide"><span>Coach Note</span><b>${coachNote}</b></div>
       <div class="profile-insight-card"><span>Goal Diff</span><b>${goalDiff >= 0 ? '+' : ''}${goalDiff}</b></div>
       <div class="profile-insight-card"><span>Goals / Match</span><b>${goalsPerMatch}</b></div>
       <div class="profile-insight-card"><span>Conceded / Match</span><b>${goalsAgainstPerMatch}</b></div>
+      <div class="profile-insight-card"><span>Title Rate</span><b>${titleRate}%</b></div>
+      <div class="profile-insight-card"><span>Attack Index</span><b>${attackIndex}</b></div>
+      <div class="profile-insight-card"><span>Control Index</span><b>${controlIndex}</b></div>
+      <div class="profile-insight-card"><span>Momentum</span><b>${momentumTier}</b></div>
       <div class="profile-insight-card"><span>Form Label</span><b>${formLabel}</b></div>
       <div class="profile-insight-card wide"><span>Next Target</span><b>${nextTarget}</b></div>
       <div class="profile-insight-card wide"><span>Draft Setup</span><b>${layoutLabel}</b></div>
       <div class="profile-insight-card wide"><span>Manager Read</span><b>${profileStyle}</b></div>
     `;
+    if (roadmapEl) {
+      roadmapEl.innerHTML = `
+        <div class="profile-idea-head">Profile Game Plan</div>
+        <div class="profile-idea-list">
+          <div><b>Draft Focus</b><span>${draftFocus}</span></div>
+          <div><b>Match Plan</b><span>${matchPlan}</span></div>
+          <div><b>Next Milestone</b><span>${milestone}</span></div>
+        </div>
+      `;
+    }
   }
 
   function renderFriends(el, friends) {
@@ -189,9 +223,11 @@ const App = (() => {
       document.getElementById('friendCodeInput').value = '';
       const careerEl = document.getElementById('profileCareer');
       const insightsEl = document.getElementById('profileInsights');
+      const roadmapEl = document.getElementById('profileRoadmap');
       const labelByLayout = { vertical: 'Vertical', 'pitch-first': 'Pitch First', horizontal: 'Side-by-Side' };
       careerEl.innerHTML = '<p class="muted">Loading...</p>';
       if (insightsEl) insightsEl.innerHTML = '';
+      if (roadmapEl) roadmapEl.innerHTML = '<div class="profile-idea-head">Profile Game Plan</div><p class="muted">Loading profile recommendations...</p>';
       const layoutContainer = document.getElementById('profileDraftLayout');
       if (layoutContainer) {
         const savedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
@@ -227,10 +263,11 @@ const App = (() => {
           <div class="career-stat"><span class="career-value">${stats.gf}-${stats.ga}</span><span class="career-label">Goals For-Against</span></div>
           <div class="career-stat" style="grid-column: 1 / -1;"><span class="career-value">${winRate}%</span><span class="career-label">Win Rate</span></div>
         `;
-        if (insightsEl) renderProfileInsights(insightsEl, stats, labelByLayout[selectedLayout] || selectedLayout);
+        if (insightsEl) renderProfileInsights(insightsEl, roadmapEl, stats, labelByLayout[selectedLayout] || selectedLayout);
       } catch {
         careerEl.innerHTML = '<p class="muted">Career stats unavailable right now.</p>';
         if (insightsEl) insightsEl.innerHTML = '<div class="profile-insight-card wide"><span>Coach Note</span><b>Career insights unavailable right now.</b></div>';
+        if (roadmapEl) roadmapEl.innerHTML = '<div class="profile-idea-head">Profile Game Plan</div><p class="muted">Recommendations unavailable right now.</p>';
       }
     });
     document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());

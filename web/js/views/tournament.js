@@ -65,13 +65,28 @@ const TournamentView = {
       return isHuman ? username : name;
     }
 
+    function eventIcon(e) {
+      if (e.type === 'goal') return 'GOAL';
+      if (e.type === 'yellow') return 'YC';
+      if (e.type === 'star') return 'STAR';
+      if (e.type === 'chance') return 'CHANCE';
+      if (e.type === 'woodwork') return 'POST';
+      if (e.type === 'pressure') return 'PRESS';
+      return 'RC';
+    }
+
+    function eventTone(e) {
+      return ['star', 'chance', 'woodwork', 'pressure'].includes(e.type) ? e.type : '';
+    }
+
     function eventLine(e) {
-      const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : e.type === 'star' ? 'STAR' : '🟥';
+      const icon = eventIcon(e);
       let text = `${icon} ${e.minute}' ${e.player}`;
       if (e.type === 'goal' && e.assistBy) text += ` <span class="muted">(assist: ${e.assistBy})</span>`;
       if (e.type === 'star' && e.effect) text += ` <span class="muted">(${e.effect}, +${e.boost} xG)</span>`;
+      if (['chance', 'woodwork', 'pressure'].includes(e.type) && e.effect) text += ` <span class="muted">(${e.effect})</span>`;
       if (e.type === 'red') text += e.reason === 'second-yellow' ? ` <span class="muted">(2nd yellow)</span>` : ` <span class="muted">(straight red)</span>`;
-      return `<div class="report-line ${e.type === 'star' ? 'star' : ''}">${text}</div>`;
+      return `<div class="report-line ${eventTone(e)}">${text}</div>`;
     }
 
     function teamEventsHtml(m) {
@@ -101,38 +116,65 @@ const TournamentView = {
       return { A: m.stats.A, B: m.stats.B, xgA: m.xgA, xgB: m.xgB };
     }
 
-    // Interpolates the same stats toward their final values as the live clock ticks, so
-    // the numbers build up over the match instead of appearing fully-formed at kickoff.
-    // xG, passes, shots, corners and fouls accumulate roughly linearly with time;
-    // possession gets a per-match random early wobble that settles down to the true
-    // final split by the final whistle, the way a live "possession so far" stat behaves
-    // in a real broadcast. matchLenMinutes is 90 or 120 (extra time) so the fraction
-    // reflects the whole match, not just normal time. Cards/saves are exact — passed in
-    // separately by the caller, derived from events actually revealed so far.
+    function statProgressFraction(m, side, clock, matchLenMinutes, statKey) {
+      const final = m.stats && m.stats[side] ? Number(m.stats[side][statKey] || 0) : 0;
+      if (!final) return 0;
+      const base = clamp(clock / matchLenMinutes, 0, 1);
+      if (base >= 0.995) return 1;
+      const sideBias = side === 'A' ? 0.31 : 0.57;
+      const wave = Math.sin((base * Math.PI * 2.6) + sideBias) * 0.055 + Math.sin((base * Math.PI * 5.1) + sideBias * 2) * 0.025;
+      const tacticalTempo = ((m.tactical && m.tactical[side] && m.tactical[side].mods && m.tactical[side].mods.tempo) || 1) - 1;
+      const urgency = tacticalTempo * 0.075 * (1 - base);
+      const curve = statKey === 'passes' ? Math.pow(base, 0.9) : Math.pow(base, 1.04) + wave + urgency;
+      return clamp(curve, 0, 1);
+    }
+
+    function liveXgForSide(m, side, clock, matchLenMinutes, timeline) {
+      const finalXg = side === 'A' ? Number(m.xgA || 0) : Number(m.xgB || 0);
+      const baseFrac = clamp(clock / matchLenMinutes, 0, 1);
+      if (baseFrac >= 0.995) return finalXg;
+      const base = finalXg * Math.pow(baseFrac, 1.08) * 0.58;
+      const eventXg = timeline.filter((e) => e.side === side && e.minute <= clock).reduce((sum, e) => {
+        if (e.type === 'goal') return sum + 0.3;
+        if (e.type === 'star') return sum + Number(e.boost || 0.12);
+        if (e.type === 'chance') return sum + 0.22;
+        if (e.type === 'woodwork') return sum + 0.16;
+        if (e.type === 'pressure') return sum + 0.08;
+        return sum;
+      }, 0);
+      const lateCatchup = finalXg * Math.pow(baseFrac, 2.25) * 0.2;
+      return clamp(Math.min(finalXg, base + eventXg + lateCatchup), 0, finalXg);
+    }
+
+    // Builds live stats with tempo waves and event-driven xG jumps, so shots/xG do not
+    // rise in a perfectly straight line while the match clock runs.
     function liveStatsAtClock(m, clock, possessionJitter, matchLenMinutes, cardCounts) {
       if (!m.stats) return null;
       const frac = clamp(clock / matchLenMinutes, 0, 1);
       const decay = 1 - frac;
       const possA = Math.round(clamp(m.stats.A.possession + possessionJitter * decay, 20, 80));
       const possB = 100 - possA;
-      const scale = (n) => Math.round(n * frac);
+      const timeline = (m.events || []).filter((e) => e.type !== 'save');
+      const eventShots = (sideKey) => timeline.filter((e) => e.side === sideKey && e.minute <= clock && ['goal', 'chance', 'woodwork'].includes(e.type)).length;
+      const eventSot = (sideKey) => timeline.filter((e) => e.side === sideKey && e.minute <= clock && e.type === 'goal').length;
+      const scale = (n, sideKey, statKey) => Math.round(n * statProgressFraction(m, sideKey, clock, matchLenMinutes, statKey));
       const side = (s, sideKey) => ({
         possession: sideKey === 'A' ? possA : possB,
         passAccuracy: s.passAccuracy,
-        passes: scale(s.passes),
-        shots: scale(s.shots),
-        shotsOnTarget: scale(s.shotsOnTarget),
-        corners: scale(s.corners),
-        fouls: scale(s.fouls),
+        passes: scale(s.passes, sideKey, 'passes'),
+        shots: Math.max(eventShots(sideKey), scale(s.shots, sideKey, 'shots')),
+        shotsOnTarget: Math.max(eventSot(sideKey), scale(s.shotsOnTarget, sideKey, 'shotsOnTarget')),
+        corners: scale(s.corners, sideKey, 'corners'),
+        fouls: scale(s.fouls, sideKey, 'fouls'),
         yellowCards: cardCounts ? cardCounts.A_yellow : 0,
         redCards: cardCounts ? cardCounts.A_red : 0,
-        saves: scale(s.saves)
+        saves: scale(s.saves, sideKey, 'saves')
       });
       return {
         A: side(m.stats.A, 'A'),
         B: { ...side(m.stats.B, 'B'), yellowCards: cardCounts ? cardCounts.B_yellow : 0, redCards: cardCounts ? cardCounts.B_red : 0 },
-        xgA: m.xgA * frac,
-        xgB: m.xgB * frac
+        xgA: liveXgForSide(m, 'A', clock, matchLenMinutes, timeline),
+        xgB: liveXgForSide(m, 'B', clock, matchLenMinutes, timeline)
       };
     }
 
@@ -273,10 +315,10 @@ const TournamentView = {
         feedEl.innerHTML = '';
         for (let i = cursor - 1; i >= 0; i--) {
           const e = myTimeline[i];
-          const icon = e.type === 'goal' ? '⚽' : e.type === 'yellow' ? '🟨' : e.type === 'star' ? 'STAR' : '🟥';
+          const icon = eventIcon(e);
           const line = document.createElement('div');
-          line.className = `live-feed-line ${e.type === 'star' ? 'star' : ''}`;
-          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player}${e.assistBy ? ` <span class="muted">(assist: ${e.assistBy})</span>` : ''}${e.type === 'star' && e.effect ? ` <span class="muted">(${e.effect})</span>` : ''}`;
+          line.className = `live-feed-line ${eventTone(e)}`;
+          line.innerHTML = `<b>${e.minute}'</b> ${icon} ${e.player}${e.assistBy ? ` <span class="muted">(assist: ${e.assistBy})</span>` : ''}${e.effect ? ` <span class="muted">(${e.effect})</span>` : ''}`;
           feedEl.appendChild(line);
         }
       }

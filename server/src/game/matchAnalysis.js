@@ -128,6 +128,32 @@ function setPieceStory(myStats, oppStats) {
   return sentences.join(' ');
 }
 
+function chanceEventStory(events, mySide, oppSide, myProfile, oppProfile, myStats, oppStats) {
+  const mine = events.filter((e) => e.side === mySide && ['chance', 'woodwork', 'pressure'].includes(e.type));
+  const opp = events.filter((e) => e.side === oppSide && ['chance', 'woodwork', 'pressure'].includes(e.type));
+  const myBig = mine.filter((e) => e.type === 'chance').length;
+  const oppBig = opp.filter((e) => e.type === 'chance').length;
+  const myPost = mine.filter((e) => e.type === 'woodwork').length;
+  const oppPost = opp.filter((e) => e.type === 'woodwork').length;
+  const myQuality = myProfile ? myProfile.shotQuality : myStats.shots ? myStats.xg / myStats.shots : 0;
+  const oppQuality = oppProfile ? oppProfile.shotQuality : oppStats.shots ? oppStats.xg / oppStats.shots : 0;
+  const sentences = [];
+
+  if (myBig > oppBig) {
+    sentences.push(`The chance map was more dangerous than the raw shot count suggests: this side created ${myBig} clear miss${myBig === 1 ? '' : 'es'} while the opponent managed ${oppBig}.`);
+  } else if (oppBig > myBig) {
+    sentences.push(`The opponent found the cleaner openings, with ${oppBig} clear miss${oppBig === 1 ? '' : 'es'} against this side's ${myBig}.`);
+  }
+  if (myPost || oppPost) {
+    sentences.push(`Fine margins showed up too: woodwork incidents finished ${myPost}-${oppPost}.`);
+  }
+  if (myQuality && oppQuality && Math.abs(myQuality - oppQuality) >= 0.035) {
+    const better = myQuality > oppQuality ? 'this side' : 'the opponent';
+    sentences.push(`Shot selection favored ${better}, with average xG per shot at ${fmt1(myQuality * 100)}% versus ${fmt1(oppQuality * 100)}%.`);
+  }
+  return sentences.join(' ');
+}
+
 function moraleStory(myMorale, oppMorale) {
   const sentences = [];
   if (myMorale >= 0.35) {
@@ -203,6 +229,8 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppXg = mySide === 'A' ? m.xgB : m.xgA;
   const myStats = mySide === 'A' ? m.stats.A : m.stats.B;
   const oppStats = mySide === 'A' ? m.stats.B : m.stats.A;
+  const myShotProfile = m.stats.shotProfile ? (mySide === 'A' ? m.stats.shotProfile.A : m.stats.shotProfile.B) : null;
+  const oppShotProfile = m.stats.shotProfile ? (mySide === 'A' ? m.stats.shotProfile.B : m.stats.shotProfile.A) : null;
   const myMorale = mySide === 'A' ? (m.moraleA || 0) : (m.moraleB || 0);
   const oppMorale = mySide === 'A' ? (m.moraleB || 0) : (m.moraleA || 0);
   const myChem = mySide === 'A' ? (m.chemistry && m.chemistry.A) : (m.chemistry && m.chemistry.B);
@@ -227,12 +255,21 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const possDiff = myStats.possession - oppStats.possession;
   const saveSwing = myStats.saves - oppStats.saves;
   const disciplineSwing = (oppYellows + oppReds * 2) - (myYellows + myReds * 2);
+  const myChanceEvents = events.filter((e) => e.side === mySide && ['chance', 'woodwork', 'pressure'].includes(e.type));
+  const oppChanceEvents = events.filter((e) => e.side === oppSide && ['chance', 'woodwork', 'pressure'].includes(e.type));
+  const myShotQuality = myShotProfile ? myShotProfile.shotQuality : myStats.shots ? myXg / myStats.shots : 0;
+  const oppShotQuality = oppShotProfile ? oppShotProfile.shotQuality : oppStats.shots ? oppXg / oppStats.shots : 0;
 
   const factors = [];
   const addFactor = (label, value, detail, tone = 'neutral') => factors.push({ label, value, detail, tone });
   addFactor('xG Balance', `${xgDiff >= 0 ? '+' : ''}${fmt1(xgDiff)}`, xgDiff >= 0.6 ? 'Created the better chance quality.' : xgDiff <= -0.6 ? 'Opponent produced the stronger chances.' : 'Chance quality was almost level.', xgDiff >= 0.4 ? 'good' : xgDiff <= -0.4 ? 'bad' : 'neutral');
   addFactor('Finishing', `${finishingDiff >= 0 ? '+' : ''}${fmt1(finishingDiff)}`, finishingDiff >= 0.8 ? 'Finished well above expected output.' : finishingDiff <= -0.8 ? 'Chances were left on the table.' : 'Conversion tracked the chance quality.', finishingDiff >= 0.6 ? 'good' : finishingDiff <= -0.6 ? 'bad' : 'neutral');
   addFactor('Shot Pressure', `${shotDiff >= 0 ? '+' : ''}${shotDiff}`, `${myStats.shots}-${oppStats.shots} shots, ${myStats.shotsOnTarget}-${oppStats.shotsOnTarget} on target.`, shotDiff >= 4 || sotDiff >= 2 ? 'good' : shotDiff <= -4 || sotDiff <= -2 ? 'bad' : 'neutral');
+  addFactor('Chance Profile', `${fmt1(myShotQuality * 100)}%`, `${myChanceEvents.length}-${oppChanceEvents.length} major events; opponent shot quality ${fmt1(oppShotQuality * 100)}%.`, myShotQuality > oppShotQuality + 0.025 || myChanceEvents.length > oppChanceEvents.length ? 'good' : myShotQuality < oppShotQuality - 0.025 || myChanceEvents.length < oppChanceEvents.length ? 'bad' : 'neutral');
+  if (myShotProfile && oppShotProfile) {
+    const tempoDiff = myShotProfile.tempoIndex - oppShotProfile.tempoIndex;
+    addFactor('Attacking Tempo', `${tempoDiff >= 0 ? '+' : ''}${fmt1(tempoDiff)}`, `Tempo index ${myShotProfile.tempoIndex} vs ${oppShotProfile.tempoIndex}; this shapes shot volume without forcing xG upward linearly.`, tempoDiff >= 0.15 ? 'good' : tempoDiff <= -0.15 ? 'bad' : 'neutral');
+  }
   addFactor('Control', `${possDiff >= 0 ? '+' : ''}${possDiff}%`, `${myStats.possession}% possession and ${myStats.passAccuracy}% pass accuracy.`, possDiff >= 10 ? 'good' : possDiff <= -10 ? 'bad' : 'neutral');
   addFactor('Keeper Impact', `${saveSwing >= 0 ? '+' : ''}${saveSwing}`, `${myStats.saves} saves for, ${oppStats.saves} against.`, saveSwing >= 2 ? 'good' : saveSwing <= -2 ? 'bad' : 'neutral');
   if (myChem && oppChem) {
@@ -268,6 +305,7 @@ function analyzeMatch(m, mySide, myName, oppName) {
     territorialStory(myStats, oppStats),
     disciplineStory(myReds, oppReds, myYellows, oppYellows),
     setPieceStory(myStats, oppStats),
+    chanceEventStory(events, mySide, oppSide, myShotProfile, oppShotProfile, { ...myStats, xg: myXg }, { ...oppStats, xg: oppXg }),
     moraleStory(myMorale, oppMorale),
     chemistryStory(myChem, oppChem),
     tacticalStory(myTac, oppTac),
@@ -282,6 +320,7 @@ function analyzeMatch(m, mySide, myName, oppName) {
       { label: 'xG', mine: fmt1(myXg), opponent: fmt1(oppXg) },
       { label: 'Shots', mine: myStats.shots, opponent: oppStats.shots },
       { label: 'On Target', mine: myStats.shotsOnTarget, opponent: oppStats.shotsOnTarget },
+      { label: 'Shot Quality', mine: `${fmt1(myShotQuality * 100)}%`, opponent: `${fmt1(oppShotQuality * 100)}%` },
       { label: 'Possession', mine: `${myStats.possession}%`, opponent: `${oppStats.possession}%` },
       { label: 'Pass Acc.', mine: `${myStats.passAccuracy}%`, opponent: `${oppStats.passAccuracy}%` },
       { label: 'Chemistry', mine: myChem ? `${fmt1(myChem.multiplier * 100)}%` : '-', opponent: oppChem ? `${fmt1(oppChem.multiplier * 100)}%` : '-' },
