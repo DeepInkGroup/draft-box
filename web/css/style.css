@@ -1028,3 +1028,108 @@ a { color: var(--accent-strong); }
 .shared-draft-order span.active { border-color: rgba(45,212,191,.65); color: #2dd4bf; background: rgba(45,212,191,.12); font-weight: 800; }
 .shared-draft-order span.done { opacity: .55; }
 @media (max-width: 560px) { .shared-draft-panel { padding: 10px; } .shared-draft-panel > div:first-child { align-items: flex-start; flex-direction: column; } }
+
+/* Profile V2 */
+.profile-v2 .profile-grid-minimal {
+    grid-template-columns: 320px 1fr;
+    gap: 16px;
+}
+
+.profile-v2 .identity-panel {
+    grid-column: 1 / 2;
+}
+
+.profile-v2 .stats-panel {
+    grid-column: 2 / 3;
+}
+
+.profile-v2 .plan-panel {
+    grid-column: 1 / -1;
+    margin-top: 16px;
+}
+
+.profile-v2 #statsChart {
+     margin-top: 16px;
+}
+
+/* Custom Tactics Page */
+#tactics-container {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+}
+
+#tactic-list-container h2, #tactic-form-container h2 {
+    margin-top: 0;
+}
+
+#tactic-list {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.tactic-item {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tactic-item:hover {
+    background: var(--surface-2);
+}
+
+.tactic-item.selected {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent-strong);
+    font-weight: 700;
+}
+
+.delete-tactic {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.delete-tactic:hover {
+    color: var(--danger);
+}
+
+#tactic-form-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+}
+
+#tactic-form-fields label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: .8rem;
+    color: var(--muted);
+}
+
+#tactic-form-fields input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--ink);
+}
+
+#tactic-form-fields input[type="range"] {
+    width: 100%;
+}
+
+#tactic-form-fields span {
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--accent-strong);
+}
+

@@ -42,14 +42,17 @@ router.put('/:id', auth, (req, res) => {
   const { id } = req.params;
   const { name, ...tacticParams } = req.body;
 
+  // id should not be in the tacticParams
+  delete tacticParams.id;
+
   const columns = Object.keys(tacticParams);
   const values = Object.values(tacticParams);
 
   try {
     const stmt = db.prepare(
-      `UPDATE custom_tactics SET ${columns.map(col => `${col} = ?`).join(', ')} WHERE id = ? AND user_id = ?`
+      `UPDATE custom_tactics SET name = ?, ${columns.map(col => `${col} = ?`).join(', ')} WHERE id = ? AND user_id = ?`
     );
-    const result = stmt.run(...values, id, req.user.id);
+    const result = stmt.run(name, ...values, id, req.user.id);
 
     if (result.changes === 0) {
       return res.status(404).json({ error: 'Tactic not found or you do not have permission to edit it' });
