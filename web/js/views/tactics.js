@@ -26,137 +26,217 @@ const TacticsView = (() => {
     weaknesses: ''
   };
 
+  const textFields = [
+    { key: 'name', label: 'Tactic Name', placeholder: 'Late Counter Press' },
+    { key: 'description', label: 'Short Match Card Text', placeholder: 'Fast transitions with disciplined pressure.' },
+    { key: 'longDescription', label: 'Full Guide Note', placeholder: 'Explain when this tactic should be used.' },
+    { key: 'strengths', label: 'Strengths', placeholder: 'Good vs high line, tired defenders, narrow shapes.' },
+    { key: 'weaknesses', label: 'Weaknesses', placeholder: 'Weak vs deep blocks and elite possession teams.' }
+  ];
+
+  const fieldGroups = [
+    { title: 'Core Power', hint: 'Direct attack and defensive multipliers used before chance sampling.', fields: [
+      ['attack', 'Attack', 'Chance volume before finishing quality.', 0.5, 1.5, 0.01],
+      ['defense', 'Defense', 'Shot suppression and pressure resistance.', 0.5, 1.5, 0.01],
+      ['tempo', 'Tempo', 'Raises event speed, fatigue and volatility.', 0.5, 1.5, 0.01],
+      ['risk', 'Risk', 'More upside, but more counters and cards.', 0.5, 1.5, 0.01]
+    ] },
+    { title: 'Ball Control', hint: 'How the tactic moves the ball and controls territory.', fields: [
+      ['possession', 'Possession +/-', 'Flat possession swing added to the match model.', -10, 10, 1],
+      ['passAccuracy', 'Passing +/-', 'Flat passing quality swing.', -6, 6, 1],
+      ['press', 'Press', 'Turnovers, late pressure and defensive stamina cost.', 0.5, 1.5, 0.01],
+      ['control', 'Control', 'Keeps xG cleaner and lowers chaos.', 0.5, 1.5, 0.01]
+    ] },
+    { title: 'Chance Engine', hint: 'Midfield creates xG; forwards convert it into goals.', fields: [
+      ['midfieldBias', 'Midfield Creation', 'Boosts creator-driven xG production.', 0.5, 1.5, 0.01],
+      ['finishingBias', 'Finishing Edge', 'Boosts conversion from striker quality.', 0.5, 1.5, 0.01],
+      ['transition', 'Transitions', 'Counter and recovery speed.', 0.5, 1.5, 0.01],
+      ['starMoment', 'Star Moments', 'Late-game Game Changer trigger weight.', 0.5, 1.5, 0.01]
+    ] },
+    { title: 'Shape Bias', hint: 'Formation fit modifiers layered over the selected XI.', fields: [
+      ['widthBias', 'Width', 'Wide lanes, wing value and crossing routes.', 0.5, 1.5, 0.01],
+      ['highlineBias', 'High Line', 'Press height and space behind defense.', 0.5, 1.5, 0.01],
+      ['buildupBias', 'Build-up', 'Short passing and central progression.', 0.5, 1.5, 0.01],
+      ['setPiece', 'Set Piece Power', 'Dead-ball chance generation.', 0.5, 1.5, 0.01],
+      ['setPieceBias', 'Set Piece Bias', 'Formation-side set-piece multiplier.', 0.5, 1.5, 0.01],
+      ['physicalityBias', 'Physicality', 'Duels, pressure and late-game contact.', 0.5, 1.5, 0.01],
+      ['foulBias', 'Fouls +/-', 'Discipline swing; positive means more fouls/cards.', -5, 5, 1]
+    ] }
+  ];
+
   let tactics = [];
   let selectedTactic = null;
+
+  function esc(value) {
+    return String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+  }
+
+  function numberValue(key) {
+    const fallback = defaultTactic[key];
+    const raw = selectedTactic && selectedTactic[key] !== null && selectedTactic[key] !== undefined ? selectedTactic[key] : fallback;
+    return Number.isInteger(defaultTactic[key]) ? parseInt(raw, 10) || 0 : Number(raw || fallback).toFixed(2);
+  }
 
   function renderTacticForm() {
     const form = document.getElementById('tactic-form-fields');
     if (!form) return;
 
     if (!selectedTactic) {
-        form.innerHTML = '<p class="muted">Select a tactic to edit, or create a new one.</p>';
-        return;
+      form.innerHTML = '<div class="tactic-empty"><b>Select or create a tactic</b><span>Build a custom style, then use it from the tactical picker after drafting.</span></div>';
+      return;
     }
 
-    let fields = '';
-    for (const key in defaultTactic) {
-        const value = selectedTactic[key] !== null && selectedTactic[key] !== undefined ? selectedTactic[key] : defaultTactic[key];
-        if (key === 'name' || key === 'description' || key === 'longDescription' || key === 'strengths' || key === 'weaknesses') {
-            fields += `
-                <label for="tactic-${key}">${key}</label>
-                <input type="text" id="tactic-${key}" value="${value}">
-            `;
-        } else {
-            fields += `
-                <label for="tactic-${key}">${key}</label>
-                <input type="range" id="tactic-${key}" min="0.5" max="1.5" step="0.01" value="${value}">
-                <span>${value}</span>
-            `;
-        }
-    }
-    form.innerHTML = fields;
+    const textHtml = textFields.map((field) => {
+      const value = selectedTactic[field.key] ?? defaultTactic[field.key];
+      const input = field.key === 'longDescription'
+        ? `<textarea id="tactic-${field.key}" rows="3" placeholder="${esc(field.placeholder)}">${esc(value)}</textarea>`
+        : `<input type="text" id="tactic-${field.key}" value="${esc(value)}" placeholder="${esc(field.placeholder)}">`;
+      return `<label class="tactic-text-field" for="tactic-${field.key}"><span>${field.label}</span>${input}</label>`;
+    }).join('');
 
-    // Add event listeners to update the selectedTactic object on input change
-    for (const key in defaultTactic) {
-        const input = document.getElementById(`tactic-${key}`);
-        if(!input) continue;
-        input.addEventListener('input', (event) => {
+    const groupHtml = fieldGroups.map((group) => `
+      <section class="tactic-field-group">
+        <div class="tactic-group-head"><b>${group.title}</b><span>${group.hint}</span></div>
+        <div class="tactic-control-grid">
+          ${group.fields.map(([key, label, help, min, max, step]) => {
+            const value = numberValue(key);
+            return `<label class="tactic-range-field" for="tactic-${key}">
+              <span class="tactic-range-label"><b>${label}</b><em id="tactic-${key}-value">${value}</em></span>
+              <input type="range" id="tactic-${key}" min="${min}" max="${max}" step="${step}" value="${value}">
+              <small>${help}</small>
+            </label>`;
+          }).join('')}
+        </div>
+      </section>`).join('');
+
+    form.innerHTML = `<section class="tactic-identity-card">${textHtml}</section>${groupHtml}`;
+
+    [...textFields.map((f) => f.key), ...fieldGroups.flatMap((g) => g.fields.map((f) => f[0]))].forEach((key) => {
+      const input = document.getElementById(`tactic-${key}`);
+      if (!input) return;
+      input.addEventListener('input', (event) => {
         if (typeof defaultTactic[key] === 'number') {
-            selectedTactic[key] = parseFloat(event.target.value);
-            if(event.target.nextElementSibling) {
-                event.target.nextElementSibling.textContent = selectedTactic[key];
-            }
+          selectedTactic[key] = Number.isInteger(defaultTactic[key]) ? parseInt(event.target.value, 10) : parseFloat(event.target.value);
+          const valueEl = document.getElementById(`tactic-${key}-value`);
+          if (valueEl) valueEl.textContent = Number.isInteger(defaultTactic[key]) ? selectedTactic[key] : selectedTactic[key].toFixed(2);
         } else {
-            selectedTactic[key] = event.target.value;
+          selectedTactic[key] = event.target.value;
         }
-        });
-    }
+      });
+    });
   }
 
   function renderTacticList() {
     const list = document.getElementById('tactic-list');
     if (!list) return;
 
-    list.innerHTML = tactics.map(tactic => `
-        <div class="tactic-item ${selectedTactic && selectedTactic.id === tactic.id ? 'selected' : ''}" data-id="${tactic.id}">
-        ${tactic.name}
-        <button class="delete-tactic" data-id="${tactic.id}">Delete</button>
-        </div>
-    `).join('');
+    if (!tactics.length) {
+      list.innerHTML = '<div class="tactic-list-empty">No custom tactic yet.</div>';
+    } else {
+      list.innerHTML = tactics.map((tactic) => `
+        <button type="button" class="tactic-item ${selectedTactic && selectedTactic.id === tactic.id ? 'selected' : ''}" data-id="${tactic.id}">
+          <span><b>${esc(tactic.name)}</b><small>${esc(tactic.description || 'Custom engine style')}</small></span>
+          <i class="delete-tactic" data-id="${tactic.id}" title="Delete">x</i>
+        </button>
+      `).join('');
+    }
 
-    // Add event listeners for selecting and deleting tactics
-    document.querySelectorAll('.tactic-item').forEach(item => {
-        item.addEventListener('click', (event) => {
-        if(event.target.classList.contains('delete-tactic')) return;
-        const id = parseInt(event.currentTarget.dataset.id);
-        selectedTactic = tactics.find(t => t.id === id);
+    document.querySelectorAll('.tactic-item').forEach((item) => {
+      item.addEventListener('click', (event) => {
+        if (event.target.classList.contains('delete-tactic')) return;
+        const id = parseInt(event.currentTarget.dataset.id, 10);
+        selectedTactic = { ...tactics.find((t) => t.id === id) };
         renderTacticList();
         renderTacticForm();
-        });
+      });
     });
 
-    document.querySelectorAll('.delete-tactic').forEach(button => {
-        button.addEventListener('click', async (event) => {
-            event.stopPropagation();
-            const id = parseInt(event.target.dataset.id);
-            await Api.delete(`/tactics/${id}`);
-            tactics = tactics.filter(t => t.id !== id);
-            if (selectedTactic && selectedTactic.id === id) {
-                selectedTactic = null;
-            }
-            renderTacticList();
-            renderTacticForm();
-        });
+    document.querySelectorAll('.delete-tactic').forEach((button) => {
+      button.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        const id = parseInt(event.target.dataset.id, 10);
+        try {
+          await Api.delete(`/tactics/${id}`);
+          tactics = tactics.filter((t) => t.id !== id);
+          if (selectedTactic && selectedTactic.id === id) selectedTactic = null;
+          App.toast('Tactic deleted.');
+          renderTacticList();
+          renderTacticForm();
+        } catch (e) {
+          App.toast(e.message || 'Could not delete tactic.', true);
+        }
+      });
     });
+  }
+
+  function newTacticFromPreset(preset = {}) {
+    selectedTactic = { ...defaultTactic, ...preset, id: null };
+    renderTacticList();
+    renderTacticForm();
   }
 
   async function init(container) {
     container.innerHTML = `
-        <div id="tactics-view">
-        <h1>Custom Tactics</h1>
-        <div id="tactics-container">
-            <div id="tactic-list-container">
+      <div id="tactics-view" class="tactics-page">
+        <div class="tactics-hero card">
+          <div><span>Engine Lab</span><h1>Custom Tactics</h1><p class="muted">Create styles that shape xG creation, finishing, risk, pressure and formation fit.</p></div>
+          <button id="new-tactic" class="btn btn-primary">New Tactic</button>
+        </div>
+        <div id="tactics-container" class="tactic-builder-shell">
+          <aside id="tactic-list-container" class="tactic-side-card">
             <h2>My Tactics</h2>
+            <div class="tactic-preset-row">
+              <button type="button" class="btn btn-ghost btn-sm" data-preset="balanced">Balanced</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-preset="creator">Creator</button>
+              <button type="button" class="btn btn-ghost btn-sm" data-preset="finisher">Finisher</button>
+            </div>
             <div id="tactic-list"></div>
-            <button id="new-tactic" class="btn btn-primary">New Tactic</button>
-            </div>
-            <div id="tactic-form-container">
-            <h2>Tactic Editor</h2>
+          </aside>
+          <main id="tactic-form-container" class="tactic-editor-card">
+            <div class="tactic-editor-head"><h2>Tactic Editor</h2><button id="save-tactic" class="btn btn-primary">Save Tactic</button></div>
             <div id="tactic-form-fields"></div>
-            <button id="save-tactic" class="btn btn-primary">Save Tactic</button>
-            </div>
+          </main>
         </div>
-        </div>
+      </div>
     `;
 
-    document.getElementById('new-tactic').addEventListener('click', () => {
-        selectedTactic = { ...defaultTactic, id: null };
-        renderTacticList();
-        renderTacticForm();
-    });
+    const presets = {
+      balanced: { name: 'Balanced Custom', attack: 1, defense: 1, possession: 0, passAccuracy: 0, risk: 1, control: 1, description: 'Stable baseline with no extreme weakness.' },
+      creator: { name: 'Midfield Creator', attack: 1.06, defense: 0.98, possession: 5, passAccuracy: 3, control: 1.14, midfieldBias: 1.18, finishingBias: 0.96, buildupBias: 1.16, description: 'High creation through midfield control.' },
+      finisher: { name: 'Direct Finisher', attack: 1.08, defense: 0.94, tempo: 1.13, risk: 1.18, transition: 1.16, midfieldBias: 0.92, finishingBias: 1.2, highlineBias: 1.08, description: 'Lower build-up, sharper conversion.' }
+    };
+
+    document.getElementById('new-tactic').addEventListener('click', () => newTacticFromPreset());
+    document.querySelectorAll('[data-preset]').forEach((btn) => btn.addEventListener('click', () => newTacticFromPreset(presets[btn.dataset.preset])));
 
     document.getElementById('save-tactic').addEventListener('click', async () => {
-        if (!selectedTactic) return;
+      if (!selectedTactic) return App.toast('Select or create a tactic first.', true);
+      if (!String(selectedTactic.name || '').trim()) return App.toast('Tactic name is required.', true);
 
+      try {
         if (selectedTactic.id) {
-        // Update existing tactic
-        const updatedTactic = await Api.put(`/tactics/${selectedTactic.id}`, selectedTactic);
-        const index = tactics.findIndex(t => t.id === selectedTactic.id);
-        tactics[index] = updatedTactic;
+          const updatedTactic = await Api.put(`/tactics/${selectedTactic.id}`, selectedTactic);
+          const index = tactics.findIndex((t) => t.id === selectedTactic.id);
+          if (index >= 0) tactics[index] = updatedTactic;
+          selectedTactic = { ...updatedTactic };
         } else {
-        // Create new tactic
-        const newTactic = await Api.post('/tactics', selectedTactic);
-        tactics.push(newTactic);
-        selectedTactic = newTactic;
+          const newTactic = await Api.post('/tactics', selectedTactic);
+          tactics.push(newTactic);
+          selectedTactic = { ...newTactic };
         }
+        App.toast('Tactic saved.');
         renderTacticList();
+        renderTacticForm();
+      } catch (e) {
+        App.toast(e.message || 'Could not save tactic.', true);
+      }
     });
 
     try {
-        tactics = await Api.get('/tactics');
+      tactics = await Api.get('/tactics');
     } catch (e) {
-        tactics = [];
-        console.error(e);
+      tactics = [];
+      App.toast(e.message || 'Could not load custom tactics.', true);
     }
     renderTacticList();
     renderTacticForm();

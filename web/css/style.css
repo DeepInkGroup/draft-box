@@ -245,7 +245,7 @@ a { color: var(--accent-strong); }
 .draft-formation-badge { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 12px; border-radius: var(--radius-sm); border: 1px solid var(--pitch-accent); background: var(--pitch-accent-soft); color: var(--pitch-accent); font-weight: 800; }
 .draft-lineup-tools span { color: var(--muted); font-size: .78rem; line-height: 1.35; }
 
-/* Role colors: Attack=red, Midfield=green, Defence=blue, GK=yellow — consistent
+/* Role colors: Attack=red, Midfield=green, Defence=blue, GK=yellow - consistent
    everywhere a filled pitch dot represents an actual player. */
 .pitch-dot.role-fw { background: #ef4444; border-color: #fecaca; color: #ffffff; }
 .pitch-dot.role-mf { background: #22c55e; border-color: #bbf7d0; color: #06240f; }
@@ -724,8 +724,8 @@ a { color: var(--accent-strong); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
 
 .dialog-wide { width: min(680px, 92vw); }
-#profileDialog.dialog-wide { width: min(1180px, 96vw); max-height: none; overflow: visible; }
-#profileDialog .dialog-form { padding: 14px 16px; max-height: none; overflow: visible; }
+#profileDialog.dialog-wide { width: min(1120px, 96vw); max-height: min(760px, 92vh); overflow: hidden; }
+#profileDialog .dialog-form { padding: 12px 14px; max-height: min(760px, 92vh); overflow-y: auto; scrollbar-width: thin; }
 #profileDialog h3 { margin: 0; }
 #profileDialog .field { margin-bottom: 6px; }
 #profileDialog .field label { font-size: .72rem; }
@@ -743,11 +743,11 @@ a { color: var(--accent-strong); }
 .game-guide-dialog.dialog-wide { width: min(960px, 94vw); }
 .tactic-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .guide-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
-.profile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.profile-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
 .profile-head p { margin: 4px 0 0; font-size: .78rem; }
 .profile-head-actions { display: inline-flex; align-items: center; gap: 7px; flex-wrap: wrap; justify-content: flex-end; }
-.profile-grid-minimal { display: grid; grid-template-columns: minmax(250px, .86fr) minmax(420px, 1.36fr) minmax(270px, .98fr); gap: 10px; align-items: start; }
-.profile-panel { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.02); padding: 10px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
+.profile-grid-minimal { display: grid; grid-template-columns: minmax(230px, .82fr) minmax(390px, 1.32fr) minmax(250px, .9fr); gap: 9px; align-items: start; }
+.profile-panel { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.02); padding: 9px; box-shadow: inset 0 1px 0 rgba(255,255,255,.03); }
 .profile-panel h4 { margin: 0 0 7px; color: var(--accent-strong); font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; }
 .profile-mini-fields, .password-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
 .profile-help { font-size: .75rem; margin: -3px 0 7px; }
@@ -763,16 +763,16 @@ a { color: var(--accent-strong); }
 .friend-card p { margin: 4px 0 0; color: var(--muted); font-size: .7rem; }
 .friend-add-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 7px; align-items: center; margin-bottom: 7px; }
 #friendCodeInput { text-transform: uppercase; letter-spacing: .08em; }
-.friend-list { display: grid; gap: 5px; margin-bottom: 0; max-height: none; overflow: visible; padding-right: 0; }
+.friend-list { display: grid; gap: 5px; margin-bottom: 0; max-height: 138px; overflow-y: auto; padding-right: 2px; scrollbar-width: thin; }
 .friend-row { display: flex; justify-content: space-between; align-items: center; gap: 7px; border: 1px solid var(--border-soft); background: rgba(255,255,255,.018); border-radius: 8px; padding: 6px 7px; }
 .friend-row b { display: block; font-size: .78rem; }
 .friend-row span { display: block; color: var(--muted); font-size: .64rem; }
 .friend-actions { display: inline-flex; align-items: center; justify-content: flex-end; gap: 5px; flex-wrap: wrap; }
-.career-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-bottom: 7px; }
+.career-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; margin-bottom: 6px; }
 .career-stat { background: rgba(26,26,34,.72); border: 1px solid var(--border); border-radius: 8px; padding: 7px 8px; text-align: center; }
 .career-stat .career-value { font-size: 1rem; font-weight: 800; color: var(--accent-strong); display: block; white-space: nowrap; }
 .career-stat .career-label { font-size: .64rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-.profile-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 0; }
+.profile-insights { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin-top: 0; }
 .profile-insight-card, .profile-ideas { border: 1px solid var(--border); border-radius: 8px; background: rgba(26,26,34,.74); padding: 7px 8px; }
 .profile-insight-card.wide { grid-column: span 2; }
 .profile-insight-card span, .profile-idea-head { display: block; color: var(--muted); font-size: .62rem; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
@@ -783,7 +783,7 @@ a { color: var(--accent-strong); }
 .profile-idea-list div { display: grid; gap: 2px; align-items: start; border-left: 2px solid rgba(146,118,255,.44); padding-left: 8px; }
 .profile-idea-list b { font-size: .72rem; color: var(--accent-strong); }
 .profile-idea-list span { font-size: .68rem; color: var(--muted); line-height: 1.22; }
-.profile-footer-actions { justify-content: flex-start; margin-top: 8px; }
+.profile-footer-actions { justify-content: flex-start; margin-top: 6px; }
 @media (max-width: 1020px) {
   #profileDialog.dialog-wide { width: min(820px, 96vw); }
   .profile-grid-minimal { grid-template-columns: 1fr 1fr; }
@@ -1053,83 +1053,50 @@ a { color: var(--accent-strong); }
 }
 
 /* Custom Tactics Page */
-#tactics-container {
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    gap: 24px;
+.tactics-page { display: grid; gap: 16px; }
+.tactics-hero { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; }
+.tactics-hero span { color: var(--accent-strong); font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+.tactics-hero h1 { margin: 2px 0 4px; }
+#tactics-container.tactic-builder-shell { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
+.tactic-side-card, .tactic-editor-card { border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,.025); padding: 14px; }
+.tactic-side-card { position: sticky; top: 78px; }
+.tactic-side-card h2, .tactic-editor-card h2 { margin: 0; font-size: 1rem; }
+.tactic-preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
+#tactic-list { display: grid; gap: 8px; }
+.tactic-list-empty, .tactic-empty { border: 1px dashed var(--border); border-radius: 8px; color: var(--muted); padding: 14px; font-size: .82rem; }
+.tactic-empty { display: grid; gap: 4px; min-height: 160px; place-content: center; text-align: center; }
+.tactic-empty b { color: var(--ink); }
+.tactic-item { width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--surface); color: var(--ink); text-align: left; }
+.tactic-item:hover { border-color: var(--accent); background: var(--surface-2); }
+.tactic-item.selected { background: rgba(234,179,8,.09); border-color: var(--accent); color: var(--accent-strong); }
+.tactic-item span { min-width: 0; display: grid; gap: 2px; }
+.tactic-item b, .tactic-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tactic-item small { color: var(--muted); font-size: .68rem; }
+.delete-tactic { flex: 0 0 24px; width: 24px; height: 24px; display: inline-grid; place-items: center; border: 1px solid var(--border-soft); border-radius: 999px; color: var(--muted); font-style: normal; font-weight: 900; }
+.delete-tactic:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
+.tactic-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+#tactic-form-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tactic-identity-card, .tactic-field-group { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(26,26,34,.56); padding: 12px; }
+.tactic-identity-card { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tactic-text-field { display: grid; gap: 5px; margin: 0; }
+.tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: 1 / -1; }
+.tactic-text-field span, .tactic-group-head span, .tactic-range-field small { color: var(--muted); font-size: .72rem; line-height: 1.35; }
+.tactic-text-field input, .tactic-text-field textarea { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); resize: vertical; }
+.tactic-field-group { display: grid; gap: 10px; }
+.tactic-group-head { display: grid; gap: 3px; }
+.tactic-group-head b { color: var(--accent-strong); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
+.tactic-control-grid { display: grid; gap: 10px; }
+.tactic-range-field { display: grid; gap: 5px; margin: 0; }
+.tactic-range-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.tactic-range-label b { font-size: .8rem; color: var(--ink); }
+.tactic-range-label em { min-width: 46px; text-align: right; color: var(--accent-strong); font-style: normal; font-weight: 900; }
+.tactic-range-field input[type="range"] { width: 100%; accent-color: var(--accent); }
+@media (max-width: 900px) {
+  #tactics-container.tactic-builder-shell { grid-template-columns: 1fr; }
+  .tactic-side-card { position: static; }
 }
-
-#tactic-list-container h2, #tactic-form-container h2 {
-    margin-top: 0;
+@media (max-width: 640px) {
+  .tactics-hero, .tactic-editor-head { align-items: stretch; flex-direction: column; }
+  #tactic-form-fields, .tactic-identity-card { grid-template-columns: 1fr; }
+  .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: auto; }
 }
-
-#tactic-list {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.tactic-item {
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.tactic-item:hover {
-    background: var(--surface-2);
-}
-
-.tactic-item.selected {
-    background: var(--accent-soft);
-    border-color: var(--accent);
-    color: var(--accent-strong);
-    font-weight: 700;
-}
-
-.delete-tactic {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-}
-
-.delete-tactic:hover {
-    color: var(--danger);
-}
-
-#tactic-form-fields {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 16px;
-}
-
-#tactic-form-fields label {
-    display: block;
-    margin-bottom: 4px;
-    font-size: .8rem;
-    color: var(--muted);
-}
-
-#tactic-form-fields input[type="text"] {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--border);
-    background: var(--surface-2);
-    color: var(--ink);
-}
-
-#tactic-form-fields input[type="range"] {
-    width: 100%;
-}
-
-#tactic-form-fields span {
-    font-size: .9rem;
-    font-weight: 700;
-    color: var(--accent-strong);
-}
-

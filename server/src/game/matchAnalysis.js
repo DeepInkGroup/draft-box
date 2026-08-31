@@ -1,9 +1,9 @@
 // Turns one already-simulated match (a matchLog entry from tournamentEngine, plus which
 // side the viewer's team was) into a professional, human-readable explanation of why that
-// match went the way it did — pulling together the same numbers the engine actually used
+// match went the way it did - pulling together the same numbers the engine actually used
 // to decide it (xG, possession/shots/passing, discipline, set pieces, momentum) rather
 // than just restating the scoreline. Purely narrative, generated deterministically from
-// the match's own recorded data — no external calls, nothing hidden from the rest of the
+// the match's own recorded data - no external calls, nothing hidden from the rest of the
 // engine.
 
 function clamp(n, lo, hi) {
@@ -56,17 +56,17 @@ function xgStory(myGoals, oppGoals, myXg, oppXg) {
   const sentences = [];
 
   if (xgDiff > 0.6) {
-    sentences.push(`The underlying numbers back it up — ${fmt1(myXg)} xG created against ${fmt1(oppXg)} conceded shows this side generated clearly the better chances over the course of the match.`);
+    sentences.push(`The underlying numbers back it up - ${fmt1(myXg)} xG created against ${fmt1(oppXg)} conceded shows this side generated clearly the better chances over the course of the match.`);
   } else if (xgDiff < -0.6) {
-    sentences.push(`The underlying numbers tell a tougher story — ${fmt1(myXg)} xG against ${fmt1(oppXg)} conceded means the opponent created the more dangerous openings on the balance of play.`);
+    sentences.push(`The underlying numbers tell a tougher story - ${fmt1(myXg)} xG against ${fmt1(oppXg)} conceded means the opponent created the more dangerous openings on the balance of play.`);
   } else {
-    sentences.push(`Chance quality was close to even (${fmt1(myXg)} xG for, ${fmt1(oppXg)} against) — this was a genuinely tight contest on the numbers, not just the scoreline.`);
+    sentences.push(`Chance quality was close to even (${fmt1(myXg)} xG for, ${fmt1(oppXg)} against) - this was a genuinely tight contest on the numbers, not just the scoreline.`);
   }
 
   if (finishingDiff >= 0.8) {
     sentences.push(`Finishing was the difference-maker: converting ${myGoals} from ${fmt1(myXg)} expected goals is a clinical return well above what the chances alone suggested.`);
   } else if (finishingDiff <= -0.8) {
-    sentences.push(`Finishing let this side down — ${fmt1(myXg)} xG should have produced more than ${myGoals} goal${myGoals === 1 ? '' : 's'}, and those missed opportunities are the story of the match.`);
+    sentences.push(`Finishing let this side down - ${fmt1(myXg)} xG should have produced more than ${myGoals} goal${myGoals === 1 ? '' : 's'}, and those missed opportunities are the story of the match.`);
   }
 
   if (oppFinishingDiff <= -0.8) {
@@ -84,19 +84,19 @@ function territorialStory(myStats, oppStats) {
   const sentences = [];
 
   if (possDiff >= 14) {
-    sentences.push(`Territorially this was one-way traffic — ${myStats.possession}% possession and a ${myStats.shots}-${oppStats.shots} shot count both point to sustained control.`);
+    sentences.push(`Territorially this was one-way traffic - ${myStats.possession}% possession and a ${myStats.shots}-${oppStats.shots} shot count both point to sustained control.`);
   } else if (possDiff <= -14) {
     sentences.push(`This side saw far less of the ball (${myStats.possession}% possession) and were outshot ${oppStats.shots}-${myStats.shots}, a sign the opponent dictated the terms of the match.`);
   } else if (shotDiff >= 6) {
     sentences.push(`Even with possession fairly even, a ${myStats.shots}-${oppStats.shots} edge in shots shows real attacking intent going forward.`);
   } else if (shotDiff <= -6) {
-    sentences.push(`Despite a similar share of possession, this side managed only ${myStats.shots} shots to the opponent's ${oppStats.shots} — a passive night in the final third.`);
+    sentences.push(`Despite a similar share of possession, this side managed only ${myStats.shots} shots to the opponent's ${oppStats.shots} - a passive night in the final third.`);
   }
 
   if (myStats.passAccuracy - oppStats.passAccuracy >= 10) {
     sentences.push(`Passing was noticeably crisper too, at ${myStats.passAccuracy}% accuracy against the opponent's ${oppStats.passAccuracy}%.`);
   } else if (oppStats.passAccuracy - myStats.passAccuracy >= 10) {
-    sentences.push(`Ball retention was a problem — ${myStats.passAccuracy}% pass accuracy trailed the opponent's ${oppStats.passAccuracy}% by some distance.`);
+    sentences.push(`Ball retention was a problem - ${myStats.passAccuracy}% pass accuracy trailed the opponent's ${oppStats.passAccuracy}% by some distance.`);
   }
 
   return sentences.join(' ');
@@ -121,7 +121,7 @@ function setPieceStory(myStats, oppStats) {
   const foulsWon = oppStats.fouls; // fouls the opponent committed = free kicks this side won
   const sentences = [];
   if (cornerDiff >= 4 || (cornerDiff > 0 && foulsWon >= 12)) {
-    sentences.push(`Set pieces played a real part — ${myStats.corners} corners won and ${foulsWon} free kicks earned from opponent fouls gave this side a steady stream of extra scoring chances beyond open play.`);
+    sentences.push(`Set pieces played a real part - ${myStats.corners} corners won and ${foulsWon} free kicks earned from opponent fouls gave this side a steady stream of extra scoring chances beyond open play.`);
   } else if (cornerDiff <= -4) {
     sentences.push(`The opponent had the better of the set-piece battle too, winning ${oppStats.corners} corners to this side's ${myStats.corners}.`);
   }
@@ -157,7 +157,7 @@ function chanceEventStory(events, mySide, oppSide, myProfile, oppProfile, myStat
 function moraleStory(myMorale, oppMorale) {
   const sentences = [];
   if (myMorale >= 0.35) {
-    sentences.push(`This side carried real momentum into kickoff, on the back of strong recent results — visible confidence that fed into the performance.`);
+    sentences.push(`This side carried real momentum into kickoff, on the back of strong recent results - visible confidence that fed into the performance.`);
   } else if (myMorale <= -0.35) {
     sentences.push(`Confidence looked shaky coming in after a rough run of results, and it showed in a side that never quite settled.`);
   }
@@ -210,11 +210,11 @@ function starStory(starEvents, mySide, oppSide) {
 
 function verdict(outcome, xgDiff, finishingDiff) {
   if (outcome === 'w') {
-    if (xgDiff < 0) return `Overall: a win that owes as much to clinical finishing and a bit of fortune as to control of the match — the kind of result that doesn't always repeat.`;
+    if (xgDiff < 0) return `Overall: a win that owes as much to clinical finishing and a bit of fortune as to control of the match - the kind of result that doesn't always repeat.`;
     return `Overall: a deserved result that matches the balance of play.`;
   }
   if (outcome === 'l') {
-    if (xgDiff > 0) return `Overall: the performance deserved more — on another night, with sharper finishing, this is a different result.`;
+    if (xgDiff > 0) return `Overall: the performance deserved more - on another night, with sharper finishing, this is a different result.`;
     return `Overall: outplayed for large stretches, and the scoreline reflects it.`;
   }
   return `Overall: an even contest that could plausibly have gone either way.`;
@@ -245,6 +245,10 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const oppDiscipline = mySide === 'A' ? (m.discipline && m.discipline.B) : (m.discipline && m.discipline.A);
   const myEngineChance = mySide === 'A' ? (m.chanceQuality && m.chanceQuality.A) : (m.chanceQuality && m.chanceQuality.B);
   const oppEngineChance = mySide === 'A' ? (m.chanceQuality && m.chanceQuality.B) : (m.chanceQuality && m.chanceQuality.A);
+  const myFinishing = mySide === 'A' ? (m.finishing && m.finishing.A) : (m.finishing && m.finishing.B);
+  const oppFinishing = mySide === 'A' ? (m.finishing && m.finishing.B) : (m.finishing && m.finishing.A);
+  const myXgSplit = mySide === 'A' ? (m.xgSplit && m.xgSplit.A) : (m.xgSplit && m.xgSplit.B);
+  const oppXgSplit = mySide === 'A' ? (m.xgSplit && m.xgSplit.B) : (m.xgSplit && m.xgSplit.A);
   const myPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.A) : (m.moralePressure && m.moralePressure.B);
   const oppPressure = mySide === 'A' ? (m.moralePressure && m.moralePressure.B) : (m.moralePressure && m.moralePressure.A);
   const events = m.events || [];
@@ -270,6 +274,16 @@ function analyzeMatch(m, mySide, myName, oppName) {
   const addFactor = (label, value, detail, tone = 'neutral') => factors.push({ label, value, detail, tone });
   addFactor('xG Balance', `${xgDiff >= 0 ? '+' : ''}${fmt1(xgDiff)}`, xgDiff >= 0.6 ? 'Created the better chance quality.' : xgDiff <= -0.6 ? 'Opponent produced the stronger chances.' : 'Chance quality was almost level.', xgDiff >= 0.4 ? 'good' : xgDiff <= -0.4 ? 'bad' : 'neutral');
   addFactor('Finishing', `${finishingDiff >= 0 ? '+' : ''}${fmt1(finishingDiff)}`, finishingDiff >= 0.8 ? 'Finished well above expected output.' : finishingDiff <= -0.8 ? 'Chances were left on the table.' : 'Conversion tracked the chance quality.', finishingDiff >= 0.6 ? 'good' : finishingDiff <= -0.6 ? 'bad' : 'neutral');
+  if (myFinishing && oppFinishing) {
+    const finEdge = (myFinishing.finishingMultiplier || 1) - (oppFinishing.finishingMultiplier || 1);
+    const finDetail = `Own finisher multiplier ${fmt1((myFinishing.finishingMultiplier || 1) * 100)}% vs opponent ${fmt1((oppFinishing.finishingMultiplier || 1) * 100)}%; top finisher quality ${myFinishing.finisherQuality || '-'} vs ${oppFinishing.finisherQuality || '-'}.`;
+    addFactor('Finishing Edge', `${finEdge >= 0 ? '+' : ''}${fmt1(finEdge * 100)}%`, finDetail, finEdge >= 0.04 ? 'good' : finEdge <= -0.04 ? 'bad' : 'neutral');
+  }
+  if (myXgSplit && oppXgSplit) {
+    const createdDiff = (myXgSplit.createdXg || 0) - (oppXgSplit.createdXg || 0);
+    const splitDetail = `Created xG ${fmt1(myXgSplit.createdXg || 0)} vs ${fmt1(oppXgSplit.createdXg || 0)}; creation share ${fmt1((myXgSplit.creationShare || 0) * 100)}% vs ${fmt1((oppXgSplit.creationShare || 0) * 100)}%.`;
+    addFactor('Creation Split', `${createdDiff >= 0 ? '+' : ''}${fmt1(createdDiff)}`, splitDetail, createdDiff >= 0.25 ? 'good' : createdDiff <= -0.25 ? 'bad' : 'neutral');
+  }
   addFactor('Shot Pressure', `${shotDiff >= 0 ? '+' : ''}${shotDiff}`, `${myStats.shots}-${oppStats.shots} shots, ${myStats.shotsOnTarget}-${oppStats.shotsOnTarget} on target.`, shotDiff >= 4 || sotDiff >= 2 ? 'good' : shotDiff <= -4 || sotDiff <= -2 ? 'bad' : 'neutral');
   addFactor('Chance Profile', `${fmt1(myShotQuality * 100)}%`, `${myChanceEvents.length}-${oppChanceEvents.length} major events; opponent shot quality ${fmt1(oppShotQuality * 100)}%.`, myShotQuality > oppShotQuality + 0.025 || myChanceEvents.length > oppChanceEvents.length ? 'good' : myShotQuality < oppShotQuality - 0.025 || myChanceEvents.length < oppChanceEvents.length ? 'bad' : 'neutral');
   if (myShotProfile && oppShotProfile) {
@@ -340,6 +354,8 @@ function analyzeMatch(m, mySide, myName, oppName) {
       { label: 'Shots', mine: myStats.shots, opponent: oppStats.shots },
       { label: 'On Target', mine: myStats.shotsOnTarget, opponent: oppStats.shotsOnTarget },
       { label: 'Shot Quality', mine: `${fmt1(myShotQuality * 100)}%`, opponent: `${fmt1(oppShotQuality * 100)}%` },
+      { label: 'Created xG', mine: myXgSplit ? fmt1(myXgSplit.createdXg || 0) : '-', opponent: oppXgSplit ? fmt1(oppXgSplit.createdXg || 0) : '-' },
+      { label: 'Finishing Mult.', mine: myFinishing ? `${fmt1((myFinishing.finishingMultiplier || 1) * 100)}%` : '-', opponent: oppFinishing ? `${fmt1((oppFinishing.finishingMultiplier || 1) * 100)}%` : '-' },
       { label: 'Possession', mine: `${myStats.possession}%`, opponent: `${oppStats.possession}%` },
       { label: 'Pass Acc.', mine: `${myStats.passAccuracy}%`, opponent: `${oppStats.passAccuracy}%` },
       { label: 'Chemistry', mine: myChem ? `${fmt1(myChem.multiplier * 100)}%` : '-', opponent: oppChem ? `${fmt1(oppChem.multiplier * 100)}%` : '-' },

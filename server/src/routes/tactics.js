@@ -3,6 +3,20 @@ const router = express.Router();
 const db = require('../db');
 const auth = require('../middleware/auth');
 
+const TACTIC_COLUMNS = [
+  'attack', 'defense', 'possession', 'passAccuracy', 'foulBias', 'tempo', 'risk',
+  'press', 'control', 'transition', 'setPiece', 'starMoment', 'midfieldBias',
+  'finishingBias', 'widthBias', 'highlineBias', 'buildupBias', 'setPieceBias',
+  'physicalityBias', 'description', 'longDescription', 'strengths', 'weaknesses'
+];
+
+function tacticPayload(body) {
+  return TACTIC_COLUMNS.reduce((payload, column) => {
+    if (Object.prototype.hasOwnProperty.call(body, column)) payload[column] = body[column];
+    return payload;
+  }, {});
+}
+
 // Get all custom tactics for the logged-in user
 router.get('/', auth, (req, res) => {
   try {
@@ -16,7 +30,8 @@ router.get('/', auth, (req, res) => {
 
 // Create a new custom tactic
 router.post('/', auth, (req, res) => {
-  const { name, ...tacticParams } = req.body;
+  const { name } = req.body;
+  const tacticParams = tacticPayload(req.body);
 
   if (!name) {
     return res.status(400).json({ error: 'Tactic name is required' });
@@ -24,6 +39,10 @@ router.post('/', auth, (req, res) => {
 
   const columns = Object.keys(tacticParams);
   const values = Object.values(tacticParams);
+
+  if (!columns.length) {
+    return res.status(400).json({ error: 'Tactic parameters are required' });
+  }
 
   try {
     const stmt = db.prepare(
@@ -40,13 +59,23 @@ router.post('/', auth, (req, res) => {
 // Update a custom tactic
 router.put('/:id', auth, (req, res) => {
   const { id } = req.params;
-  const { name, ...tacticParams } = req.body;
+  const { name } = req.body;
+  const tacticParams = tacticPayload(req.body);
 
-  // id should not be in the tacticParams
-  delete tacticParams.id;
+  if (!name) {
+    return res.status(400).json({ error: 'Tactic name is required' });
+  }
 
   const columns = Object.keys(tacticParams);
   const values = Object.values(tacticParams);
+
+  if (!columns.length) {
+    const result = db.prepare('UPDATE custom_tactics SET name = ? WHERE id = ? AND user_id = ?').run(name, id, req.user.id);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: 'Tactic not found or you do not have permission to edit it' });
+    }
+    return res.json({ id, name });
+  }
 
   try {
     const stmt = db.prepare(
