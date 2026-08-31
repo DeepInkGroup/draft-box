@@ -32,6 +32,7 @@ const Api = (() => {
     friends: () => request('/api/auth/friends'),
     addFriend: (friendCode) => request('/api/auth/friends/request', { method: 'POST', body: { friendCode } }),
     respondFriend: (id, action) => request('/api/auth/friends/respond', { method: 'POST', body: { id, action } }),
+    getUserStats: (userId) => request(`/api/users/${userId}/career`),
     careerStats: () => request('/api/auth/me/career'),
     matchHistory: () => request('/api/auth/me/matches'),
     teams: () => request('/api/teams'),

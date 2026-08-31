@@ -93,6 +93,39 @@ CREATE TABLE IF NOT EXISTS drafted_players (
   FOREIGN KEY (room_id) REFERENCES rooms(id),
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS custom_tactics (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    attack REAL NOT NULL,
+    defense REAL NOT NULL,
+    possession INTEGER NOT NULL,
+    passAccuracy INTEGER NOT NULL,
+    foulBias INTEGER NOT NULL,
+    tempo REAL NOT NULL,
+    risk REAL NOT NULL,
+    press REAL NOT NULL,
+    control REAL NOT NULL,
+    transition REAL NOT NULL,
+    setPiece REAL NOT NULL,
+    starMoment REAL NOT NULL,
+    midfieldBias REAL NOT NULL,
+    finishingBias REAL NOT NULL,
+    widthBias REAL NOT NULL,
+    highlineBias REAL NOT NULL,
+    buildupBias REAL NOT NULL,
+    setPieceBias REAL NOT NULL,
+    physicalityBias REAL NOT NULL,
+    description TEXT,
+    longDescription TEXT,
+    strengths TEXT,
+    weaknesses TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    UNIQUE(user_id, name)
+);
+
 `);
 
 // Lightweight migration guards for pre-existing local dev databases created before

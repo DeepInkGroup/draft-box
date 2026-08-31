@@ -8,6 +8,7 @@ const config = require('./config');
 require('./db'); // ensures schema is created on boot
 const authRoutes = require('./routes/auth');
 const roomRoutes = require('./routes/rooms');
+const tacticsRoutes = require('./routes/tactics');
 const { registerSocketHandlers } = require('./sockets');
 const { ALL_TEAMS } = require('./data/teams');
 
@@ -23,6 +24,7 @@ app.get('/api/teams', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/tactics', tacticsRoutes);
 
 app.use(express.static(WEB_DIR));
 app.get('*', (req, res, next) => {

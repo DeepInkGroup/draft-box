@@ -551,52 +551,218 @@ const FORMATION_DEEP_INFO = {
     bestStyles: ['gegenpress', 'wingplay', 'possession'],
     worstStyles: ['defensive', 'compact'],
     synergy: 'Classic high-tempo width. The three forwards thrive on gegenpress turnovers and wingplay crosses. Avoid ultra-defensive styles — the back four is exposed and the three CMs need space to advance.',
-    xgProfile: 'Midfield creates 55% / Strikers convert 45%. Balanced split with wide creators.'
+    xgProfile: 'Midfield creates 55% / Strikers convert 45%. Balanced split with wide creators.',
+    archetype: 'Modern-Attack',
+    biases: { width: 1.22, highline: 1.12, buildup: 1.06, setPiece: 1.0, physicality: 1.0 }
   },
   '4-4-2': {
     keywords: ['Two banks of four', 'Strike partnership', 'Balanced'],
     bestStyles: ['direct', 'balanced', 'wingplay'],
     worstStyles: ['tiki-taka', 'gegenpress'],
     synergy: 'Two strikers feast on direct balls and flick-ons. The flat four-man midfield lacks central density for tiki-taka but is perfect for wing-play width and counter-attack speed.',
-    xgProfile: 'Midfield creates 45% / Strikers convert 55%. Strike partnership drives finishing.'
+    xgProfile: 'Midfield creates 45% / Strikers convert 55%. Strike partnership drives finishing.',
+    archetype: 'Classic-Balanced',
+    biases: { width: 1.06, highline: 0.96, buildup: 0.88, setPiece: 1.12, physicality: 1.1 }
   },
   '4-2-3-1': {
     keywords: ['Double pivot', 'No.10 playmaker', 'Creative overload'],
     bestStyles: ['possession', 'tiki-taka', 'balanced'],
     worstStyles: ['direct', 'defensive'],
     synergy: 'The CAM (No.10) plus two CDMs behind him is the possession king — 5-man midfield generates xG through circulation. Bad for direct play because the lone striker gets isolated.',
-    xgProfile: 'Midfield creates 65% / Strikers convert 35%. Creator-heavy, conversion-reliant on one finisher.'
+    xgProfile: 'Midfield creates 65% / Strikers convert 35%. Creator-heavy, conversion-reliant on one finisher.',
+    archetype: 'Possession-Playmaker',
+    biases: { width: 0.96, highline: 1.06, buildup: 1.2, setPiece: 0.98, physicality: 0.94 }
   },
   '4-5-1': {
     keywords: ['Compact midfield', 'Counter ready', 'Low block'],
     bestStyles: ['counter', 'defensive', 'compact'],
     worstStyles: ['direct', 'tiki-taka'],
     synergy: 'Five-man midfield absorbs pressure then releases wingers on the break. Ideal counter shape. The lone striker needs elite finishing because chance creation is deliberately low.',
-    xgProfile: 'Midfield creates 40% / Strikers convert 60%. Counter specialist: low volume, high-value breaks.'
+    xgProfile: 'Midfield creates 40% / Strikers convert 60%. Counter specialist: low volume, high-value breaks.',
+    archetype: 'Counter-LowBlock',
+    biases: { width: 0.96, highline: 0.72, buildup: 0.88, setPiece: 1.04, physicality: 1.08 }
   },
   '3-4-3': {
     keywords: ['Bold width', 'Back three', 'High risk high reward'],
     bestStyles: ['wingplay', 'gegenpress', 'direct'],
     worstStyles: ['defensive', 'compact'],
     synergy: 'Two wide wing-backs plus two wide forwards = max width. Wing Play thrives. Gegenpress wins the ball high; the three-man backline covers. Avoid deep blocks because the wing-backs leave flank space behind.',
-    xgProfile: 'Midfield creates 50% / Strikers convert 50%. Front three shoulders the load.'
+    xgProfile: 'Midfield creates 50% / Strikers convert 50%. Front three shoulders the load.',
+    archetype: 'Modern-Wingback',
+    biases: { width: 1.42, highline: 1.18, buildup: 0.96, setPiece: 1.12, physicality: 1.04 }
   },
   '3-5-2': {
     keywords: ['Five-man midfield', 'Wing-backs', 'Strike duo'],
     bestStyles: ['possession', 'compact', 'tiki-taka'],
     worstStyles: ['defensive', 'direct'],
     synergy: 'Wing-backs provide the width while five central players dominate the middle. Possession and Compact shine with this much central density. Two strikers finish well from wing-back crosses.',
-    xgProfile: 'Midfield creates 60% / Strikers convert 40%. Central overload = more created chances.'
+    xgProfile: 'Midfield creates 60% / Strikers convert 40%. Central overload = more created chances.',
+    archetype: 'Central-Overload',
+    biases: { width: 1.04, highline: 1.08, buildup: 1.14, setPiece: 1.06, physicality: 1.04 }
   },
   '5-4-1': {
     keywords: ['Fortress back five', 'Deep block', 'Rare breaks'],
     bestStyles: ['defensive', 'counter', 'compact'],
     worstStyles: ['tiki-taka', 'gegenpress', 'wingplay'],
     synergy: 'Parking the bus at its finest. Three CBs + two wing-backs in a deep five-man line. Counter-attack or Defensive only — anything more adventurous wastes the shape.',
-    xgProfile: 'Midfield creates 35% / Strikers convert 65%. Striker is isolated, so elite finishing is mandatory.'
+    xgProfile: 'Midfield creates 35% / Strikers convert 65%. Striker is isolated, so elite finishing is mandatory.',
+    archetype: 'Deep-Block-Fortress',
+    biases: { width: 0.86, highline: 0.54, buildup: 0.68, setPiece: 1.18, physicality: 1.16 }
   },
   '4-1-2-1-2': {
     keywords: ['Narrow diamond', 'Through the middle', 'No width'],
+    bestStyles: ['compact', 'tiki-taka', 'possession'],
+    worstStyles: ['wingplay', 'direct'],
+    synergy: 'The diamond has no natural wingers — wing-play is wasted. Compact and Tiki-Taka crush the central lanes. Two strikers finish through-ball chances created by the No.10.',
+    xgProfile: 'Midfield creates 62% / Strikers convert 38%. Midfield diamond is the engine; two finishers share the spoils.',
+    archetype: 'Narrow-Diamond',
+    biases: { width: 0.62, highline: 1.02, buildup: 1.18, setPiece: 0.92, physicality: 1.04 }
+  },
+  '4-4-1-1': {
+    keywords: ['Second striker', 'Link play', 'False forward'],
+    bestStyles: ['balanced', 'counter', 'possession'],
+    worstStyles: ['wingplay', 'defensive'],
+    synergy: 'The SS (second striker) links midfield and attack. Perfect for patient build-up or counter transitions. Not ideal for pure wing-play because the SS narrows the attack.',
+    xgProfile: 'Midfield creates 55% / Strikers convert 45%. The SS acts as creator + finisher.',
+    archetype: 'Link-Play',
+    biases: { width: 0.92, highline: 0.94, buildup: 1.04, setPiece: 1.02, physicality: 1.0 }
+  },
+  '5-3-2': {
+    keywords: ['Back five', 'Solid', 'Strike partnership'],
+    bestStyles: ['defensive', 'counter', 'compact'],
+    worstStyles: ['tiki-taka', 'wingplay'],
+    synergy: 'Three central midfielders in the engine room with a back five shield. Defensive and Counter styles shine. Two strikers handle the finishing. No room for wide play.',
+    xgProfile: 'Midfield creates 45% / Strikers convert 55%. The two finishers carry the goalscoring.',
+    archetype: 'Solid-Counter',
+    biases: { width: 0.8, highline: 0.78, buildup: 0.9, setPiece: 1.12, physicality: 1.14 }
+  },
+  '3-4-1-2': {
+    keywords: ['No.10 freedom', 'Back three', 'Two strikers'],
+    bestStyles: ['tiki-taka', 'possession', 'balanced'],
+    worstStyles: ['defensive', 'direct'],
+    synergy: 'CAM feeds two strikers from a free central role. Possession & Tiki-Taka maximize touches for the playmaker. Not defensive — the back three relies on ball retention.',
+    xgProfile: 'Midfield creates 63% / Strikers convert 37%. Playmaker drives creation; two poachers finish.',
+    archetype: 'Playmaker-Front2',
+    biases: { width: 0.9, highline: 1.12, buildup: 1.16, setPiece: 0.98, physicality: 0.98 }
+  },
+  '4-2-2-2': {
+    keywords: ['Magic rectangle', 'Two pivots, two playmakers'],
+    bestStyles: ['possession', 'tiki-taka', 'balanced'],
+    worstStyles: ['direct', 'defensive'],
+    synergy: 'Two CDM + two attacking midfielders = the "magic rectangle" of short passing. Tiki-Taka loves this shape. Two strikers are pure finishers fed by the central creators.',
+    xgProfile: 'Midfield creates 68% / Strikers convert 32%. Creator heavy; strikers get spoon-fed chances.',
+    archetype: 'Magic-Rectangle',
+    biases: { width: 0.9, highline: 1.04, buildup: 1.22, setPiece: 1.0, physicality: 0.92 }
+  },
+  '5-2-3': {
+    keywords: ['Back five, front three', 'Wide outlet forwards'],
+    bestStyles: ['counter', 'wingplay', 'defensive'],
+    worstStyles: ['tiki-taka', 'compact'],
+    synergy: 'Defensive solidity at the back with explosive forwards up top. Counter and Wing Play thrive. Front three covers width. Avoid Tiki-Taka — only two CMs can\'t circulate.',
+    xgProfile: 'Midfield creates 42% / Strikers convert 58%. Counter-release forwards need elite finishing.',
+    archetype: 'Solid-Front3',
+    biases: { width: 1.22, highline: 0.72, buildup: 0.82, setPiece: 1.12, physicality: 1.1 }
+  },
+  '5-3-1-1': {
+    keywords: ['Defensive fortress', 'SS link + target man'],
+    bestStyles: ['counter', 'defensive', 'direct'],
+    worstStyles: ['tiki-taka', 'wingplay'],
+    synergy: 'Extreme low-block. Direct balls to the target man ST; the SS holds and links. Only counter/defensive/direct make sense — too defensive for anything else.',
+    xgProfile: 'Midfield creates 32% / Strikers convert 68%. Elite strikers only; creation is minimal.',
+    archetype: 'Bunker-Linkup',
+    biases: { width: 0.72, highline: 0.5, buildup: 0.62, setPiece: 1.22, physicality: 1.22 }
+  },
+  '3-2-4-1': {
+    keywords: ['Six attackers', 'Double pivot shield', 'Gegenpress ready'],
+    bestStyles: ['gegenpress', 'wingplay', 'possession'],
+    worstStyles: ['defensive', 'direct'],
+    synergy: 'Four attacking midfielders plus a striker: heavy forward commitment. Gegenpress wins turnovers into the overload. Wing Play uses the wide outlets. Bad defensively.',
+    xgProfile: 'Midfield creates 66% / Strikers convert 34%. Creator deluge; one finisher gets fed.',
+    archetype: 'Gegen-Front6',
+    biases: { width: 1.16, highline: 1.3, buildup: 1.14, setPiece: 0.94, physicality: 1.0 }
+  },
+  '3-3-2-2': {
+    keywords: ['Compact triangle', 'Half-space creators', 'Two finishers'],
+    bestStyles: ['tiki-taka', 'possession', 'compact'],
+    worstStyles: ['wingplay', 'direct'],
+    synergy: 'Central overload with two creators and two finishers. Tiki-Taka and Compact dominate the middle. Wing Play is wasted because the shape is narrow and central.',
+    xgProfile: 'Midfield creates 64% / Strikers convert 36%. Half-space creators do the work.',
+    archetype: 'Narrow-HalfSpaces',
+    biases: { width: 0.76, highline: 1.08, buildup: 1.18, setPiece: 0.94, physicality: 1.04 }
+  },
+  '4-1-4-1': {
+    keywords: ['Single pivot shield', 'Advanced eights', 'Wide mids'],
+    bestStyles: ['possession', 'balanced', 'gegenpress'],
+    worstStyles: ['direct', 'defensive'],
+    synergy: 'The CDM protects while four advanced midfielders push on. Possession circulates; Gegenpress wins it high. Bad for Direct because the lone striker is isolated from long balls.',
+    xgProfile: 'Midfield creates 60% / Strikers convert 40%. Midfield-heavy; finisher needs to hold-up play.',
+    archetype: 'Shield-Advanced8',
+    biases: { width: 1.08, highline: 1.1, buildup: 1.14, setPiece: 0.98, physicality: 0.98 }
+  },
+  '5-2-2-1': {
+    keywords: ['Deep five, double pivot, two narrow creators'],
+    bestStyles: ['compact', 'defensive', 'counter'],
+    worstStyles: ['wingplay', 'tiki-taka'],
+    synergy: 'Central compactness at both ends. Creators narrow behind a lone striker. Defend first, counter in numbers. No wide outlets so Wing Play is pointless.',
+    xgProfile: 'Midfield creates 48% / Strikers convert 52%. Narrow creators feed a clinical finisher.',
+    archetype: 'Compact-Narrow',
+    biases: { width: 0.78, highline: 0.72, buildup: 0.94, setPiece: 1.04, physicality: 1.1 }
+  },
+  '3-5-1-1': {
+    keywords: ['Five-man midfield', 'Close striker pair'],
+    bestStyles: ['possession', 'compact', 'tiki-taka'],
+    worstStyles: ['direct', 'wingplay'],
+    synergy: 'SS + ST close together behind a five-man midfield. Possession and Compact play through the middle. Bad for direct because five midfielders clog the pass lanes for long balls.',
+    xgProfile: 'Midfield creates 58% / Strikers convert 42%. The SS bridges creation & finishing.',
+    archetype: 'Possession-StrikeLink',
+    biases: { width: 0.96, highline: 1.02, buildup: 1.18, setPiece: 1.02, physicality: 1.02 }
+  },
+  '2-5-2-1': {
+    keywords: ['Two CBs only', 'Radical possession shape'],
+    bestStyles: ['tiki-taka', 'possession', 'compact'],
+    worstStyles: ['direct', 'counter', 'defensive'],
+    synergy: 'Only two centre-backs — radical, for elite ball-players only. Tiki-Taka and Possession must dominate because if you lose the ball, two CBs are exposed. Never direct or counter.',
+    xgProfile: 'Midfield creates 72% / Strikers convert 28%. Midfield is everything; ST gets spoon-fed.',
+    archetype: 'Radical-BuildUp',
+    biases: { width: 0.92, highline: 1.24, buildup: 1.42, setPiece: 0.82, physicality: 0.86 }
+  },
+  '3-3-1-3': {
+    keywords: ['Front three + No.10', 'Sustained pressure'],
+    bestStyles: ['gegenpress', 'possession', 'wingplay'],
+    worstStyles: ['defensive', 'direct'],
+    synergy: 'Four real forwards plus a No.10: huge attacking commitment. Gegenpress and Possession work. Wing Play uses the wide forwards. Never defensive — too thin at the back.',
+    xgProfile: 'Midfield creates 56% / Strikers convert 44%. Three finishers share conversion duties.',
+    archetype: 'All-Attack-Presser',
+    biases: { width: 1.2, highline: 1.26, buildup: 1.08, setPiece: 0.92, physicality: 0.96 }
+  },
+  '4-3-2-1': {
+    keywords: ['Christmas tree', 'Three CMs + two creators + one finisher'],
+    bestStyles: ['possession', 'tiki-taka', 'compact'],
+    worstStyles: ['direct', 'wingplay'],
+    synergy: 'Narrow "Christmas tree" — three CMs + two creators + one ST. Possession/Tiki-Taka/Compact all use central density well. No wingers so Wing Play is wasted.',
+    xgProfile: 'Midfield creates 67% / Strikers convert 33%. One elite finisher needed; creators supply everything.',
+    archetype: 'Christmas-Tree',
+    biases: { width: 0.74, highline: 1.08, buildup: 1.22, setPiece: 0.94, physicality: 1.0 }
+  },
+  '4-3-1-2': {
+    keywords: ['Narrow diamond variant', 'Playmaker + two strikers'],
+    bestStyles: ['tiki-taka', 'possession', 'compact'],
+    worstStyles: ['wingplay', 'direct'],
+    synergy: 'The CDM + 2 CM + CAM diamond feeds two strikers. Tiki-Taka builds through the diamond. Compact uses the narrow density. Wing Play wasted with no wingers.',
+    xgProfile: 'Midfield creates 63% / Strikers convert 37%. Diamond creators feed two poachers.',
+    archetype: 'Diamond-Front2',
+    biases: { width: 0.68, highline: 1.06, buildup: 1.2, setPiece: 0.92, physicality: 1.04 }
+  },
+  '4-2-4': {
+    keywords: ['Four forwards', 'Direct chaos', 'Midfield thin'],
+    bestStyles: ['direct', 'gegenpress', 'counter'],
+    worstStyles: ['tiki-taka', 'possession', 'compact'],
+    synergy: 'Only two CMs vs four forwards — Tiki-Taka and Possession are impossible (no one to circulate). Direct balls, gegenpress turnovers, and counter-release all feed the four forwards. High risk, high reward.',
+    xgProfile: 'Midfield creates 30% / Strikers convert 70%. The four forwards are pure finishers; midfield just wins balls.',
+    archetype: 'Chaos-Front4',
+    biases: { width: 1.18, highline: 1.16, buildup: 0.62, setPiece: 1.18, physicality: 1.12 }
+  }
+};
     bestStyles: ['compact', 'tiki-taka', 'possession'],
     worstStyles: ['wingplay', 'direct'],
     synergy: 'The diamond has no natural wingers — wing-play is wasted. Compact and Tiki-Taka crush the central lanes. Two strikers finish through-ball chances created by the No.10.',
@@ -754,6 +920,21 @@ function getStyleSynergy(formation, tacticalStyle) {
   return { match: 'neutral', bonus: 1 + (Math.random() - 0.5) * 0.01, label: 'Neutral fit' };
 }
 
+function getCombinedBiases(formation, styleDef) {
+  const info = FORMATION_DEEP_INFO[formation];
+  const inherent = (info && info.biases) || { width: 1, highline: 1, buildup: 1, setPiece: 1, physicality: 1 };
+  const s = styleDef || {};
+  return {
+    width: clamp(inherent.width * (s.widthBias || 1), 0.55, 1.6),
+    highline: clamp(inherent.highline * (s.highlineBias || 1), 0.45, 1.65),
+    buildup: clamp(inherent.buildup * (s.buildupBias || 1), 0.45, 1.7),
+    setPiece: clamp(inherent.setPiece * (s.setPieceBias || 1), 0.6, 1.55),
+    physicality: clamp(inherent.physicality * (s.physicalityBias || 1), 0.6, 1.5),
+    creation: clamp((s.midfieldBias || 1), 0.55, 1.45),
+    conversion: clamp((s.finishingBias || 1), 0.7, 1.35)
+  };
+}
+
 module.exports = {
   FORMATIONS,
   POSITION_GROUPS,
@@ -769,5 +950,6 @@ module.exports = {
   getProfile,
   getAdjacentPairs,
   getDeepInfo,
-  getStyleSynergy
+  getStyleSynergy,
+  getCombinedBiases
 };

@@ -192,6 +192,43 @@ router.get('/me/career', requireAuth, (req, res) => {
   res.json({ tournaments, titles, w, d, l, gf, ga });
 });
 
+router.get('/users/:id/career', requireAuth, (req, res) => {
+    const userId = Number(req.params.id);
+    if (isNaN(userId)) return res.status(400).json({ error: 'invalid user id' });
+
+    const rows = db.prepare(`
+      SELECT r.tournament_state FROM rooms r
+      JOIN room_members rm ON rm.room_id = r.id
+      WHERE rm.user_id = ? AND r.status = 'finished' AND r.tournament_state IS NOT NULL
+    `).all(userId);
+  
+    let tournaments = 0;
+    let titles = 0;
+    let w = 0;
+    let d = 0;
+    let l = 0;
+    let gf = 0;
+    let ga = 0;
+  
+    for (const row of rows) {
+      let t;
+      try { t = JSON.parse(row.tournament_state); } catch { continue; }
+      if (!t || !t.slotByCode) continue;
+      const myCode = findMyCode(t, userId);
+      if (!myCode) continue;
+  
+      tournaments += 1;
+      if (t.champion === myCode) titles += 1;
+  
+      const record = computeTeamRecord(t, myCode);
+      if (record) {
+        w += record.w; d += record.d; l += record.l; gf += record.gf; ga += record.ga;
+      }
+    }
+  
+    res.json({ tournaments, titles, w, d, l, gf, ga });
+});
+
 // Full match history: every match this user's team played in, across every finished
 // tournament, most recent tournament first — each match carries a generated performance
 // analysis (matchAnalysis.js) explaining why it went the way it did, so a player can look
