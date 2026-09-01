@@ -1,6 +1,6 @@
 const { computeTeamRatings, computeChemistry } = require('./ratings');
 const { getProfile, getSlots, getStyleSynergy } = require('./formations');
-const { TACTICAL_STYLES, normalizeStyle, matchupEdge } = require('./tacticalStyles');
+const { TACTICAL_STYLES, normalizeStyle, baseStyleKey, matchupEdge } = require('./tacticalStyles');
 
 // Simulates a match from each side's Attack/Defense ratings (player quality, weighted by
 // slot depth) plus a formation "edge" term (attacking shape vs. the opponent's defensive
@@ -81,7 +81,7 @@ function formationStyleFit(formation, plan) {
     wingplay: { attack: width * 0.036 + front * 0.014 - Math.max(0, -width) * 0.025, defense: back * 0.01 - Math.max(0, -center) * 0.012 },
     compact: { attack: center * 0.012 + midfield * 0.014 - Math.max(0, width) * 0.008, defense: center * 0.028 + midfield * 0.02 + compact * 0.03 }
   };
-  const fit = fitByStyle[plan.key] || fitByStyle.balanced;
+  const fit = fitByStyle[plan.baseKey || plan.key] || fitByStyle.balanced;
   return {
     attack: clamp(1 + fit.attack, 0.94, 1.07),
     defense: clamp(1 + fit.defense, 0.94, 1.08),
@@ -335,12 +335,40 @@ function chanceQualityBonus(ownLine, oppLine, ownInfluence, oppInfluence, ownSty
   return clamp(lineEdge + creatorEdge + midfieldBridge - tempoTax - defensiveShell, -0.14, 0.17);
 }
 
-function tacticalPlan(ownStyle, oppStyle, formation = null) {
-  const key = normalizeStyle(ownStyle);
-  const style = TACTICAL_STYLES[key] || TACTICAL_STYLES.balanced;
-  const edge = matchupEdge(key, oppStyle);
-  const synergy = formation ? getStyleSynergy(formation, key) : { match: 'neutral', bonus: 1, label: 'Neutral fit' };
-  return { key, label: style.label, description: style.description, longDescription: style.longDescription, strengths: style.strengths, weaknesses: style.weaknesses, edge, mods: style, synergy };
+const TACTIC_NUMERIC_KEYS = [
+  'attack', 'defense', 'possession', 'passAccuracy', 'foulBias', 'tempo', 'risk',
+  'press', 'control', 'transition', 'setPiece', 'starMoment', 'midfieldBias',
+  'finishingBias', 'widthBias', 'highlineBias', 'buildupBias', 'setPieceBias', 'physicalityBias'
+];
+
+function tacticNumber(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function customStyleFromRow(customTactic, fallbackKey = 'balanced') {
+  const base = TACTICAL_STYLES[baseStyleKey(fallbackKey)] || TACTICAL_STYLES.balanced;
+  if (!customTactic) return base;
+  const style = {
+    ...base,
+    key: `custom:${customTactic.id}`,
+    label: customTactic.name || 'Custom Tactic',
+    description: customTactic.description || base.description,
+    longDescription: customTactic.longDescription || customTactic.description || base.longDescription,
+    strengths: customTactic.strengths ? String(customTactic.strengths).split(',').map((v) => v.trim()).filter(Boolean) : base.strengths,
+    weaknesses: customTactic.weaknesses ? String(customTactic.weaknesses).split(',').map((v) => v.trim()).filter(Boolean) : base.weaknesses
+  };
+  for (const key of TACTIC_NUMERIC_KEYS) style[key] = tacticNumber(customTactic[key], base[key]);
+  return style;
+}
+
+function tacticalPlan(ownStyle, oppStyle, formation = null, customTactic = null) {
+  const normalized = normalizeStyle(ownStyle);
+  const baseKey = baseStyleKey(normalized);
+  const style = customStyleFromRow(customTactic, baseKey);
+  const edge = matchupEdge(baseKey, oppStyle);
+  const synergy = formation ? getStyleSynergy(formation, baseKey) : { match: 'neutral', bonus: 1, label: 'Neutral fit' };
+  return { key: normalized, baseKey, label: style.label, description: style.description, longDescription: style.longDescription, strengths: style.strengths, weaknesses: style.weaknesses, edge, mods: style, custom: !!customTactic, synergy };
 }
 
 function applyTacticalStyle(ratings, plan, signal = 1, formation = '4-3-3') {
@@ -760,8 +788,8 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   applyHumanVsAiBoost(ratingsA, teamA, teamB);
   applyHumanVsAiBoost(ratingsB, teamB, teamA);
 
-  const tacticalA = tacticalPlan(teamA.tacticalStyle, teamB.tacticalStyle, teamA.formation);
-  const tacticalB = tacticalPlan(teamB.tacticalStyle, teamA.tacticalStyle, teamB.formation);
+  const tacticalA = tacticalPlan(teamA.tacticalStyle, teamB.tacticalStyle, teamA.formation, teamA.customTactic);
+  const tacticalB = tacticalPlan(teamB.tacticalStyle, teamA.tacticalStyle, teamB.formation, teamB.customTactic);
   applyTacticalStyle(ratingsA, tacticalA, engineSignal, teamA.formation);
   applyTacticalStyle(ratingsB, tacticalB, engineSignal, teamB.formation);
 

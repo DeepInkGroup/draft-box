@@ -114,7 +114,17 @@ const MATCHUP_EDGE = {
   'tiki-taka': { defensive: 0.05, gegenpress: -0.1, possession: -0.03, counter: -0.06, wingplay: -0.04, direct: -0.05, compact: -0.02 }
 };
 
+function isCustomStyleKey(style) {
+  return /^custom:\d+$/.test(String(style || ''));
+}
+
 function normalizeStyle(style) {
+  if (STYLE_KEYS.includes(style)) return style;
+  if (isCustomStyleKey(style)) return String(style);
+  return 'balanced';
+}
+
+function baseStyleKey(style) {
   return STYLE_KEYS.includes(style) ? style : 'balanced';
 }
 
@@ -123,8 +133,8 @@ function randomStyle() {
 }
 
 function matchupEdge(ownStyle, oppStyle) {
-  const own = normalizeStyle(ownStyle);
-  const opp = normalizeStyle(oppStyle);
+  const own = baseStyleKey(normalizeStyle(ownStyle));
+  const opp = baseStyleKey(normalizeStyle(oppStyle));
   if (own === opp) return 0;
   return (MATCHUP_EDGE[own] && MATCHUP_EDGE[own][opp]) || 0;
 }
@@ -139,4 +149,4 @@ const BIAS_LABELS = {
   physicalityBias: 'Physical'
 };
 
-module.exports = { TACTICAL_STYLES, STYLE_KEYS, normalizeStyle, randomStyle, matchupEdge, BIAS_LABELS };
+module.exports = { TACTICAL_STYLES, STYLE_KEYS, normalizeStyle, baseStyleKey, isCustomStyleKey, randomStyle, matchupEdge, BIAS_LABELS };

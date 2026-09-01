@@ -162,6 +162,10 @@
         <button id="btnCloseGameGuide" class="btn btn-ghost btn-sm">Close</button>
       </div>
       <div class="game-guide-body">
+        <div class="guide-purple-hero">
+          <b>Purple Tactical Board</b>
+          <span>Every formation is read as a pitch shape: width, midfield density, back-line security, front-line pressure, compactness and vertical gaps. Tactical style then modifies how that shape creates xG, converts chances, protects transitions and handles late-game pressure.</span>
+        </div>
         <div class="guide-hero-grid">
           <div><b>Formation Shape</b><span>Back line, front line, midfield density, width, central presence and vertical gaps all affect Attack, Defense and transition quality.</span></div>
           <div><b>Chemistry</b><span>Natural positions, balanced lines and fewer OOP picks raise the team multiplier before match events are sampled.</span></div>
@@ -181,12 +185,31 @@
           <div><b>Possession</b><span>Good vs Defensive &amp; Compact by territory. Weak vs Gegenpress &amp; fast counters. Creation-heavy, conversion-light.</span></div>
           <div><b>Tiki-Taka <span class="new-badge">NEW</span></b><span>Short triangles, patient, 500+ passes per game. Dominant creation but single-chance conversion suffers. Weak vs Gegenpress swarm.</span></div>
         </div>
+        <h4>Style Matchup Matrix</h4>
+        <div class="guide-matrix">
+          <div><b>Defensive</b><span>Good vs Counter and Direct because space is denied. Bad vs Possession, Tiki-Taka and Wing Play because deep blocks get stretched or circulated around.</span></div>
+          <div><b>Gegenpress</b><span>Good vs Possession and Tiki-Taka by forcing high turnovers. Bad vs Counter and Compact when the first press is survived.</span></div>
+          <div><b>Possession</b><span>Good vs Defensive and Compact through territory control. Bad vs Gegenpress and Counter because turnovers are punished.</span></div>
+          <div><b>Counter Attack</b><span>Good vs Gegenpress, Possession and Tiki-Taka. Bad vs Defensive or Direct teams that do not leave useful space.</span></div>
+          <div><b>Wing Play</b><span>Good vs Defensive and Compact by overloading wide lanes. Bad vs Possession and Gegenpress when wide outlets are trapped.</span></div>
+          <div><b>Compact Midfield</b><span>Good vs Gegenpress, Counter and Direct by winning second balls. Bad vs Wing Play and patient Possession.</span></div>
+          <div><b>Direct Play</b><span>Good vs slow creation-heavy teams with weak forwards. Bad vs Defensive, Compact and Wing Play because long balls become predictable.</span></div>
+          <div><b>Tiki-Taka</b><span>Good vs passive Defensive teams through repeated creation. Bad vs Gegenpress, Counter and Direct pressure on turnovers.</span></div>
+          <div><b>Balanced</b><span>No hard counter. It protects squad quality when your XI is stronger and you do not want high tactical volatility.</span></div>
+        </div>
         <h4>Two-phase xG: Created xG vs Converted xG</h4>
         <div class="guide-flow">
           <span><b>Creation phase (Midfield)</b> — volume of chances. Raised by Tiki-Taka, Possession, Gegenpress, Compact + 5-midfielder formations.</span>
           <span><b>Conversion phase (Strikers)</b> — how many chances → goals. Raised by Direct, Counter, Wing Play, 2–4 striker formations &amp; STs rated 86+.</span>
           <span>Realism now: <i>low xG teams can absolutely win</i>. 4-2-4 + Direct with a pair of 88-rated strikers outperforms their xG; a beautiful-passing Tiki-Taka team with a 76-rated ST will underperform theirs.</span>
           <span>Synergy bonus shows in the match preview — 4-2-3-1 + Possession is a great fit; 5-4-1 + Tiki-Taka is wasted.</span>
+        </div>
+        <h4>Custom Tactics</h4>
+        <div class="guide-flow">
+          <span><b>Personal saved styles</b> - tactics built in Engine Lab appear in the post-draft style picker under Saved. Only the owner can lock and use them.</span>
+          <span><b>Live trade-offs</b> - sliders show Attack, Defense, Control, xG Creation, Finishing, Transition, Risk, Discipline, Set Pieces and Star Moment changes before saving.</span>
+          <span><b>Engine impact</b> - saved values feed the same match simulator fields as built-in styles, including xG split, card risk, star moments and set-piece pressure.</span>
+          <span><b>Use case</b> - build one tactic for elite midfield creators, one for clinical strikers, and one safer knockout tactic for protecting a lead.</span>
         </div>
         <h4>Formation Reading</h4>
         <div class="guide-flow">

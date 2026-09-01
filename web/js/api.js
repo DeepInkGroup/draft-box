@@ -24,6 +24,10 @@ const Api = (() => {
   }
 
   return {
+    get: (path) => request(path),
+    post: (path, body) => request(path, { method: 'POST', body }),
+    put: (path, body) => request(path, { method: 'PUT', body }),
+    delete: (path) => request(path, { method: 'DELETE' }),
     register: (username, email, password) => request('/api/auth/register', { method: 'POST', body: { username, email, password } }),
     login: (username, password) => request('/api/auth/login', { method: 'POST', body: { username, password } }),
     me: () => request('/api/auth/me'),

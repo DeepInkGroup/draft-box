@@ -67,6 +67,9 @@ const TacticsView = (() => {
   let tactics = [];
   let selectedTactic = null;
 
+  const percentFields = new Set(['attack', 'defense', 'tempo', 'risk', 'press', 'control', 'transition', 'setPiece', 'starMoment', 'midfieldBias', 'finishingBias', 'widthBias', 'highlineBias', 'buildupBias', 'setPieceBias', 'physicalityBias']);
+  const pointFields = new Set(['possession', 'passAccuracy']);
+
   function esc(value) {
     return String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
   }
@@ -74,7 +77,71 @@ const TacticsView = (() => {
   function numberValue(key) {
     const fallback = defaultTactic[key];
     const raw = selectedTactic && selectedTactic[key] !== null && selectedTactic[key] !== undefined ? selectedTactic[key] : fallback;
-    return Number.isInteger(defaultTactic[key]) ? parseInt(raw, 10) || 0 : Number(raw || fallback).toFixed(2);
+    const value = Number(raw);
+    return Number.isFinite(value) ? value : fallback;
+  }
+
+  function formatTacticValue(key, value) {
+    if (percentFields.has(key)) {
+      const pct = Math.round((Number(value) - 1) * 100);
+      return pct === 0 ? 'Base' : `${pct > 0 ? '+' : ''}${pct}%`;
+    }
+    if (pointFields.has(key)) {
+      const n = Math.round(Number(value));
+      return n === 0 ? '0 pts' : `${n > 0 ? '+' : ''}${n} pts`;
+    }
+    if (key === 'foulBias') {
+      const n = Math.round(Number(value));
+      if (n === 0) return 'Neutral';
+      return n > 0 ? `Risk +${n}` : `Safer ${Math.abs(n)}`;
+    }
+    return String(value);
+  }
+
+  function tacticImpact(tactic) {
+    const m = (key) => Number(tactic[key] ?? defaultTactic[key]);
+    return {
+      attack: (m('attack') - 1) * 100 + (m('tempo') - 1) * 15 + (m('risk') - 1) * 12 + (m('transition') - 1) * 14,
+      defense: (m('defense') - 1) * 100 + (m('control') - 1) * 16 + (m('press') - 1) * 9 - Math.max(0, m('risk') - 1) * 22,
+      control: (m('control') - 1) * 100 + m('possession') * 1.4 + m('passAccuracy') * 2 - Math.max(0, m('risk') - 1) * 18,
+      xgCreation: (m('midfieldBias') - 1) * 100 + (m('buildupBias') - 1) * 24 + (m('press') - 1) * 18 + m('possession'),
+      finishing: (m('finishingBias') - 1) * 100 + (m('transition') - 1) * 18 + (m('setPiece') - 1) * 7,
+      transition: (m('transition') - 1) * 100 + (m('tempo') - 1) * 30 + (m('widthBias') - 1) * 16,
+      risk: (m('risk') - 1) * 100 + (m('tempo') - 1) * 35 + (m('highlineBias') - 1) * 30 + m('foulBias') * 5,
+      discipline: -(Math.max(0, m('risk') - 1) * 70 + Math.max(0, m('press') - 1) * 35 + Math.max(0, m('physicalityBias') - 1) * 30 + m('foulBias') * 6),
+      setPieces: (m('setPiece') - 1) * 100 + (m('setPieceBias') - 1) * 70 + (m('physicalityBias') - 1) * 14,
+      starMoment: (m('starMoment') - 1) * 100 + (m('risk') - 1) * 12 + (m('control') - 1) * 8
+    };
+  }
+
+  function impactCard(key, label, value, inverted = false) {
+    const roundedValue = Math.round(value);
+    const good = inverted ? roundedValue < -2 : roundedValue > 2;
+    const bad = inverted ? roundedValue > 2 : roundedValue < -2;
+    const cls = good ? 'good' : bad ? 'bad' : 'neutral';
+    const width = Math.min(100, Math.abs(roundedValue));
+    const text = roundedValue === 0 ? 'Base' : `${roundedValue > 0 ? '+' : ''}${roundedValue}`;
+    return `<div class="impact-card ${cls}" data-impact="${key}"><span>${label}</span><b>${text}</b><div class="impact-meter"><i style="width:${width}%"></i></div></div>`;
+  }
+
+  function updateImpactPreview() {
+    const panel = document.getElementById('tactic-impact-preview');
+    if (!panel || !selectedTactic) return;
+    const i = tacticImpact(selectedTactic);
+    panel.innerHTML = `
+      <div class="tactic-impact-head"><b>Live Tactical Impact</b><span>Moving a control immediately shows what you gain and what you give up.</span></div>
+      <div class="impact-grid">
+        ${impactCard('attack', 'Attack', i.attack)}
+        ${impactCard('defense', 'Defense', i.defense)}
+        ${impactCard('control', 'Control', i.control)}
+        ${impactCard('xg', 'xG Creation', i.xgCreation)}
+        ${impactCard('finish', 'Finishing', i.finishing)}
+        ${impactCard('transition', 'Transition', i.transition)}
+        ${impactCard('risk', 'Risk', i.risk, true)}
+        ${impactCard('discipline', 'Discipline', i.discipline)}
+        ${impactCard('set', 'Set Pieces', i.setPieces)}
+        ${impactCard('star', 'Star Moment', i.starMoment)}
+      </div>`;
   }
 
   function renderTacticForm() {
@@ -101,7 +168,7 @@ const TacticsView = (() => {
           ${group.fields.map(([key, label, help, min, max, step]) => {
             const value = numberValue(key);
             return `<label class="tactic-range-field" for="tactic-${key}">
-              <span class="tactic-range-label"><b>${label}</b><em id="tactic-${key}-value">${value}</em></span>
+              <span class="tactic-range-label"><b>${label}</b><em id="tactic-${key}-value">${formatTacticValue(key, value)}</em></span>
               <input type="range" id="tactic-${key}" min="${min}" max="${max}" step="${step}" value="${value}">
               <small>${help}</small>
             </label>`;
@@ -109,21 +176,23 @@ const TacticsView = (() => {
         </div>
       </section>`).join('');
 
-    form.innerHTML = `<section class="tactic-identity-card">${textHtml}</section>${groupHtml}`;
+    form.innerHTML = `<section class="tactic-identity-card">${textHtml}</section><section class="tactic-impact-panel" id="tactic-impact-preview"></section>${groupHtml}`;
 
     [...textFields.map((f) => f.key), ...fieldGroups.flatMap((g) => g.fields.map((f) => f[0]))].forEach((key) => {
       const input = document.getElementById(`tactic-${key}`);
       if (!input) return;
       input.addEventListener('input', (event) => {
         if (typeof defaultTactic[key] === 'number') {
-          selectedTactic[key] = Number.isInteger(defaultTactic[key]) ? parseInt(event.target.value, 10) : parseFloat(event.target.value);
+          selectedTactic[key] = parseFloat(event.target.value);
           const valueEl = document.getElementById(`tactic-${key}-value`);
-          if (valueEl) valueEl.textContent = Number.isInteger(defaultTactic[key]) ? selectedTactic[key] : selectedTactic[key].toFixed(2);
+          if (valueEl) valueEl.textContent = formatTacticValue(key, selectedTactic[key]);
+          updateImpactPreview();
         } else {
           selectedTactic[key] = event.target.value;
         }
       });
     });
+    updateImpactPreview();
   }
 
   function renderTacticList() {
@@ -156,7 +225,7 @@ const TacticsView = (() => {
         event.stopPropagation();
         const id = parseInt(event.target.dataset.id, 10);
         try {
-          await Api.delete(`/tactics/${id}`);
+          await Api.delete(`/api/tactics/${id}`);
           tactics = tactics.filter((t) => t.id !== id);
           if (selectedTactic && selectedTactic.id === id) selectedTactic = null;
           App.toast('Tactic deleted.');
@@ -215,12 +284,12 @@ const TacticsView = (() => {
 
       try {
         if (selectedTactic.id) {
-          const updatedTactic = await Api.put(`/tactics/${selectedTactic.id}`, selectedTactic);
+          const updatedTactic = await Api.put(`/api/tactics/${selectedTactic.id}`, selectedTactic);
           const index = tactics.findIndex((t) => t.id === selectedTactic.id);
           if (index >= 0) tactics[index] = updatedTactic;
           selectedTactic = { ...updatedTactic };
         } else {
-          const newTactic = await Api.post('/tactics', selectedTactic);
+          const newTactic = await Api.post('/api/tactics', selectedTactic);
           tactics.push(newTactic);
           selectedTactic = { ...newTactic };
         }
@@ -233,7 +302,7 @@ const TacticsView = (() => {
     });
 
     try {
-      tactics = await Api.get('/tactics');
+      tactics = await Api.get('/api/tactics');
     } catch (e) {
       tactics = [];
       App.toast(e.message || 'Could not load custom tactics.', true);

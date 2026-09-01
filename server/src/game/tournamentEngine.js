@@ -92,6 +92,7 @@ function startTournament(roomState) {
       xi,
       formation: member.formation,
       tacticalStyle: normalizeStyle(member.tacticalStyle),
+      customTactic: member.customTactic || null,
       strength: avg(member.squad.map((p) => p.overall)),
       eliminated: false,
       morale: 0

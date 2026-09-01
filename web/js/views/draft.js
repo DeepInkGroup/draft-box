@@ -26,6 +26,8 @@ const DraftView = {
     let autoDraftRequested = false;
     let sharedDraftMode = false;
     let sharedDraft = null;
+    let customTactics = [];
+    let customTacticsLoaded = false;
 
     const TACTICAL_STYLES = [
       { key: 'defensive', label: 'Defensive', meta: 'Deep block', new: false, mods: { ATT: 0.94, DEF: 1.08, TMP: 0.88, CTR: 0.82, SET: 1.04 }, desc: 'Deep shape, solid lines, set-piece danger. Low shot volume but much harder to break down.', longDesc: 'Two banks of four/five sit deep and narrow the box. Midfield screens, goalkeeper sees lots of shots but few high-value ones. xG creation is intentionally sacrificed for resilience.', biases: { mid: 0.78, fin: 0.94 }, synergyBest: ['5-4-1','5-3-2','5-3-1-1','4-5-1'], synergyWorst: ['3-4-3','3-2-4-1','3-3-1-3','4-2-4'] },
@@ -436,6 +438,13 @@ const DraftView = {
     }
 
     function renderTacticalStylePicker() {
+      if (!customTacticsLoaded) {
+        customTacticsLoaded = true;
+        Api.get('/api/tactics').then((rows) => {
+          customTactics = Array.isArray(rows) ? rows : [];
+          if (!tacticalStyleLocked && myDraftComplete) renderTacticalStylePicker();
+        }).catch(() => { customTactics = []; });
+      }
       const fmtMod = (v) => {
         const pct = Math.round((v - 1) * 100);
         if (pct === 0) return '0%';
@@ -448,22 +457,36 @@ const DraftView = {
         const sign = diff > 0 ? '+' : '';
         return `<span class='bias-pill ${cls}'>${label} · ${sign}${diff}%</span>`;
       };
+      const customCards = customTactics.map((t) => ({
+        key: `custom:${t.id}`,
+        label: t.name,
+        meta: 'My custom tactic',
+        custom: true,
+        new: false,
+        mods: { ATT: Number(t.attack) || 1, DEF: Number(t.defense) || 1, TMP: Number(t.tempo) || 1, CTR: Number(t.control) || 1, SET: Number(t.setPiece) || 1 },
+        desc: t.description || 'Personal saved tactic from the Engine Lab.',
+        longDesc: t.longDescription || 'Uses your saved Attack, Defense, Control, Creation, Finishing, Risk and Star Moment modifiers in the match engine.',
+        biases: { mid: Number(t.midfieldBias) || 1, fin: Number(t.finishingBias) || 1 },
+        synergyBest: [],
+        synergyWorst: []
+      }));
+      const styles = TACTICAL_STYLES.concat(customCards);
       revealCard.innerHTML = `
         <div class='reveal-team'>Choose Tactical Style</div>
         <div class='reveal-sub'>Each style changes attack, defence, tempo, possession, fouls, star moments and matchup edge. Also has a <b>Midfield Creation Bias</b> and a <b>Finisher Conversion Bias</b> (see the "two-phase xG" explainer in Formations &amp; Tactics → Game Guide).</div>
         <div class='tactical-style-grid' id='tacticalStyleGrid'>
-          ${TACTICAL_STYLES.map((s) => {
+          ${styles.map((s) => {
             const syn = getStyleSynergyForFormation(s.key, myFormation);
             const synCls = `synergy-tag synergy-${syn.match}`;
             return `
-            <button type='button' class='tactical-style-card ${s.key === myTacticalStyle ? 'selected' : ''}' data-style='${s.key}'>
+            <button type='button' class='tactical-style-card ${s.custom ? 'custom-style-card' : ''} ${s.key === myTacticalStyle ? 'selected' : ''}' data-style='${s.key}'>
               <div style='display:flex; align-items:center; justify-content:space-between;'>
                 <span>${s.meta}</span>
-                ${s.new ? `<span class='new-badge'>New</span>` : ''}
+                ${s.custom ? `<span class='new-badge'>Saved</span>` : (s.new ? `<span class='new-badge'>New</span>` : '')}
               </div>
               <div>
                 <b>${s.label}</b>
-                <span class='${synCls}'>${syn.label}</span>
+                ${s.custom ? `<span class='synergy-tag synergy-neutral'>Personal</span>` : `<span class='${synCls}'>${syn.label}</span>`}
               </div>
               <small>${s.desc}</small>
               <div class='mods'>

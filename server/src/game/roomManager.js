@@ -1,7 +1,7 @@
 const db = require('../db');
 const { allPlayerIds, getPlayer, ALL_TEAMS } = require('../data/teams');
 const { isValidFormation, getSlots } = require('./formations');
-const { normalizeStyle } = require('./tacticalStyles');
+const { normalizeStyle, isCustomStyleKey } = require('./tacticalStyles');
 
 const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
 const ALLOWED_REROLLS = [0, 1, 2, 3];
@@ -123,6 +123,7 @@ function loadRoomState(roomRow) {
       if (d.slot_code) slots[d.slot_code] = entry;
       squad.push(entry);
     }
+    const tacticalStyle = normalizeStyle(row.tactical_style);
     members.set(row.user_id, {
       userId: row.user_id,
       username: row.username,
@@ -133,7 +134,8 @@ function loadRoomState(roomRow) {
       eliminated: !!row.eliminated,
       viewedStep: row.viewed_step || 0,
       captainSlot: row.captain_slot || null,
-      tacticalStyle: normalizeStyle(row.tactical_style),
+      tacticalStyle,
+      customTactic: customTacticForUser(row.user_id, tacticalStyle),
       tacticalStyleLocked: !!row.tactical_style_locked,
       currentReveal: null,
       lastRevealedTeam: null,
@@ -199,7 +201,15 @@ function persistCaptain(roomId, userId, slotCode) {
 
 function persistTacticalStyle(roomId, userId, tacticalStyle) {
   const style = normalizeStyle(tacticalStyle);
+  if (isCustomStyleKey(style) && !customTacticForUser(userId, style)) throw new Error('custom tactic not found');
   db.prepare('UPDATE room_members SET tactical_style = ?, tactical_style_locked = 1 WHERE room_id = ? AND user_id = ?').run(style, roomId, userId);
+}
+
+function customTacticForUser(userId, tacticalStyle) {
+  if (!isCustomStyleKey(tacticalStyle)) return null;
+  const id = Number(String(tacticalStyle).slice('custom:'.length));
+  if (!Number.isInteger(id) || id <= 0) return null;
+  return db.prepare('SELECT * FROM custom_tactics WHERE id = ? AND user_id = ?').get(id, userId) || null;
 }
 
 function runTransaction(work) {
@@ -293,6 +303,7 @@ module.exports = {
   persistViewedStep,
   persistCaptain,
   persistTacticalStyle,
+  customTacticForUser,
   persistDraftFormation,
   persistSlotMoves,
   setRoomStatus,

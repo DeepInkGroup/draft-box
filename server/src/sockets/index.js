@@ -3,7 +3,7 @@ const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
-const { normalizeStyle } = require('../game/tacticalStyles');
+const { normalizeStyle, isCustomStyleKey } = require('../game/tacticalStyles');
 const { lobbySnapshot } = rm;
 
 function channelName(code) {
@@ -379,6 +379,7 @@ function registerSocketHandlers(io) {
 
         if (!member.tacticalStyleLocked) {
           member.tacticalStyle = normalizeStyle(member.tacticalStyle || 'balanced');
+          member.customTactic = rm.customTacticForUser(socket.user.id, member.tacticalStyle);
           member.tacticalStyleLocked = true;
           rm.persistTacticalStyle(roomRow.id, socket.user.id, member.tacticalStyle);
           socket.emit('draft:tacticalStyleSet', { tacticalStyle: member.tacticalStyle, ...myDraftView(member, state.showOverall) });
@@ -434,7 +435,11 @@ function registerSocketHandlers(io) {
       if (!member) return socket.emit('error:message', { error: 'not a member of this room' });
       if (!member.draftComplete) return socket.emit('error:message', { error: 'finish drafting your squad before choosing a tactical style' });
 
-      member.tacticalStyle = normalizeStyle(tacticalStyle);
+      const style = normalizeStyle(tacticalStyle);
+      const customTactic = isCustomStyleKey(style) ? rm.customTacticForUser(socket.user.id, style) : null;
+      if (isCustomStyleKey(style) && !customTactic) return socket.emit('error:message', { error: 'custom tactic not found' });
+      member.tacticalStyle = style;
+      member.customTactic = customTactic;
       member.tacticalStyleLocked = true;
       rm.persistTacticalStyle(roomRow.id, socket.user.id, member.tacticalStyle);
       socket.emit('draft:tacticalStyleSet', { tacticalStyle: member.tacticalStyle, ...myDraftView(member, state.showOverall) });

@@ -578,6 +578,9 @@ a { color: var(--accent-strong); }
 .tactical-style-card .synergy-neutral { background: rgba(148,163,184,0.24); color: #475569; font-weight: 600; }
 .tactical-style-card .style-long { display: none; color: var(--muted); font-size: 0.66rem; line-height: 1.3; margin-top: 2px; }
 .tactical-style-card.selected .style-long { display: block; }
+.tactical-style-card.custom-style-card { border-color: rgba(168,85,247,.5); background: linear-gradient(145deg, rgba(88,28,135,.22), rgba(30,27,75,.16)); }
+.tactical-style-card.custom-style-card span:first-child { color: #c084fc; }
+.tactical-style-card.custom-style-card.selected { border-color: #c084fc; box-shadow: inset 0 0 0 1px rgba(192,132,252,.24), 0 12px 28px rgba(88,28,135,.18); }
 .style-cheat { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 0.78rem; }
 .style-cheat th, .style-cheat td { padding: 5px 7px; border-bottom: 1px solid var(--border-soft); text-align: left; }
 .style-cheat th { background: var(--surface-2); color: var(--muted); font-weight: 700; }
@@ -740,6 +743,17 @@ a { color: var(--accent-strong); }
 .rulebook-highlights div, .guide-hero-grid div, .tactic-guide-grid div, .guide-flow span { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(255,255,255,.025); padding: 10px; }
 .rulebook-highlights b, .guide-hero-grid b, .tactic-guide-grid b { display: block; color: var(--accent-strong); font-size: .82rem; margin-bottom: 4px; }
 .rulebook-highlights span, .guide-hero-grid span, .tactic-guide-grid span, .guide-flow span { display: block; color: var(--muted); font-size: .74rem; line-height: 1.35; }
+.game-guide-dialog .dialog-form { background: radial-gradient(circle at top left, rgba(168,85,247,.18), transparent 34%), linear-gradient(160deg, rgba(24,16,46,.96), rgba(13,16,28,.96)); border-color: rgba(168,85,247,.34); }
+.game-guide-body h4 { color: #d8b4fe; }
+.guide-hero-grid div, .tactic-guide-grid div, .guide-flow span { border-color: rgba(168,85,247,.24); background: linear-gradient(150deg, rgba(88,28,135,.18), rgba(255,255,255,.025)); }
+.guide-hero-grid b, .tactic-guide-grid b, .guide-flow b { color: #c084fc; }
+.guide-purple-hero { border: 1px solid rgba(168,85,247,.34); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: linear-gradient(135deg, rgba(109,40,217,.32), rgba(49,46,129,.2)); }
+.guide-purple-hero b { display: block; color: #f5d0fe; font-size: 1rem; margin-bottom: 5px; }
+.guide-purple-hero span { color: #cbd5e1; font-size: .78rem; line-height: 1.45; }
+.guide-matrix { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.guide-matrix div { border: 1px solid rgba(168,85,247,.34); border-radius: 8px; padding: 10px; background: linear-gradient(145deg, rgba(126,34,206,.24), rgba(76,29,149,.13)); box-shadow: inset 0 1px 0 rgba(255,255,255,.035); }
+.guide-matrix b { color: #e9d5ff; font-size: .8rem; }
+.guide-matrix span { display:block; color: var(--muted); font-size: .72rem; line-height: 1.35; margin-top: 4px; }
 .game-guide-dialog.dialog-wide { width: min(960px, 94vw); }
 .tactic-guide-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .guide-flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -1054,11 +1068,11 @@ a { color: var(--accent-strong); }
 
 /* Custom Tactics Page */
 .tactics-page { display: grid; gap: 16px; }
-.tactics-hero { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; }
-.tactics-hero span { color: var(--accent-strong); font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+.tactics-hero { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px 20px; border-color: rgba(168,85,247,.32); background: radial-gradient(circle at top left, rgba(168,85,247,.22), transparent 36%), rgba(255,255,255,.025); }
+.tactics-hero span { color: #c084fc; font-size: .72rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
 .tactics-hero h1 { margin: 2px 0 4px; }
 #tactics-container.tactic-builder-shell { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 16px; align-items: start; }
-.tactic-side-card, .tactic-editor-card { border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,.025); padding: 14px; }
+.tactic-side-card, .tactic-editor-card { border: 1px solid rgba(168,85,247,.22); border-radius: 10px; background: linear-gradient(150deg, rgba(88,28,135,.1), rgba(255,255,255,.02)); padding: 14px; }
 .tactic-side-card { position: sticky; top: 78px; }
 .tactic-side-card h2, .tactic-editor-card h2 { margin: 0; font-size: 1rem; }
 .tactic-preset-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0; }
@@ -1068,7 +1082,7 @@ a { color: var(--accent-strong); }
 .tactic-empty b { color: var(--ink); }
 .tactic-item { width: 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--surface); color: var(--ink); text-align: left; }
 .tactic-item:hover { border-color: var(--accent); background: var(--surface-2); }
-.tactic-item.selected { background: rgba(234,179,8,.09); border-color: var(--accent); color: var(--accent-strong); }
+.tactic-item.selected { background: rgba(168,85,247,.16); border-color: #a855f7; color: #d8b4fe; }
 .tactic-item span { min-width: 0; display: grid; gap: 2px; }
 .tactic-item b, .tactic-item small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tactic-item small { color: var(--muted); font-size: .68rem; }
@@ -1076,27 +1090,43 @@ a { color: var(--accent-strong); }
 .delete-tactic:hover { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
 .tactic-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 #tactic-form-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.tactic-identity-card, .tactic-field-group { border: 1px solid var(--border-soft); border-radius: 8px; background: rgba(26,26,34,.56); padding: 12px; }
+.tactic-identity-card, .tactic-field-group, .tactic-impact-panel { border: 1px solid rgba(168,85,247,.2); border-radius: 8px; background: rgba(26,20,44,.62); padding: 12px; }
 .tactic-identity-card { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.tactic-impact-panel { grid-column: 1 / -1; display: grid; gap: 10px; }
+.tactic-impact-head { display: flex; justify-content: space-between; gap: 10px; align-items: end; }
+.tactic-impact-head b { color: #e9d5ff; }
+.tactic-impact-head span { color: var(--muted); font-size: .72rem; }
+.impact-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.impact-card { border: 1px solid rgba(148,163,184,.2); border-radius: 8px; padding: 8px; background: rgba(15,23,42,.42); display: grid; gap: 5px; }
+.impact-card span { color: var(--muted); font-size: .66rem; }
+.impact-card b { color: #e2e8f0; font-size: .82rem; }
+.impact-card.good b { color: #86efac; }
+.impact-card.bad b { color: #fca5a5; }
+.impact-card.neutral b { color: #d8b4fe; }
+.impact-meter { height: 4px; border-radius: 999px; background: rgba(148,163,184,.18); overflow: hidden; }
+.impact-meter i { display: block; height: 100%; border-radius: inherit; background: #a855f7; }
+.impact-card.good .impact-meter i { background: #22c55e; }
+.impact-card.bad .impact-meter i { background: #ef4444; }
 .tactic-text-field { display: grid; gap: 5px; margin: 0; }
 .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: 1 / -1; }
 .tactic-text-field span, .tactic-group-head span, .tactic-range-field small { color: var(--muted); font-size: .72rem; line-height: 1.35; }
 .tactic-text-field input, .tactic-text-field textarea { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); resize: vertical; }
 .tactic-field-group { display: grid; gap: 10px; }
 .tactic-group-head { display: grid; gap: 3px; }
-.tactic-group-head b { color: var(--accent-strong); font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
+.tactic-group-head b { color: #c084fc; font-size: .82rem; text-transform: uppercase; letter-spacing: .04em; }
 .tactic-control-grid { display: grid; gap: 10px; }
 .tactic-range-field { display: grid; gap: 5px; margin: 0; }
 .tactic-range-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .tactic-range-label b { font-size: .8rem; color: var(--ink); }
-.tactic-range-label em { min-width: 46px; text-align: right; color: var(--accent-strong); font-style: normal; font-weight: 900; }
-.tactic-range-field input[type="range"] { width: 100%; accent-color: var(--accent); }
+.tactic-range-label em { min-width: 62px; text-align: right; color: #d8b4fe; font-style: normal; font-weight: 900; }
+.tactic-range-field input[type="range"] { width: 100%; accent-color: #a855f7; }
 @media (max-width: 900px) {
   #tactics-container.tactic-builder-shell { grid-template-columns: 1fr; }
   .tactic-side-card { position: static; }
 }
 @media (max-width: 640px) {
   .tactics-hero, .tactic-editor-head { align-items: stretch; flex-direction: column; }
-  #tactic-form-fields, .tactic-identity-card { grid-template-columns: 1fr; }
+  #tactic-form-fields, .tactic-identity-card, .guide-matrix { grid-template-columns: 1fr; }
+  .impact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: auto; }
 }
