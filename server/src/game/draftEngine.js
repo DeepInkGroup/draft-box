@@ -338,6 +338,7 @@ function buildRevealPayload(team, pool, availableSlots, hideOverall, member, pic
     rawPos: p.rawPos || p.pos,
     overall: hideOverall ? null : p.overall,
     isStar: p.isStar,
+    poolAvailable: pool.has(p.id),
     available: pool.has(p.id) && availableSlots.some((slot) => playerFitsSlot(p, slot))
   }));
   players = hideOverall

@@ -174,6 +174,29 @@ const DraftView = {
       return positionCodes(player.rawPos, player.pos).some((p) => allowed.includes(p));
     }
 
+    function refreshOpenSlotsFromLineup(openSlots) {
+      if (Array.isArray(openSlots)) {
+        lastOpenSlots = openSlots;
+      } else {
+        lastOpenSlots = getSlots(myFormation).filter((slot) => !(currentSlotsMap && currentSlotsMap[slot.code]));
+      }
+      if (lastRevealPayload) lastRevealPayload.openSlots = lastOpenSlots;
+    }
+
+    function refreshRevealPlayersForOpenSlots() {
+      if (!lastRevealPayload || !Array.isArray(lastPlayers) || !lastPlayers.length) return;
+      lastPlayers = lastPlayers.map((player) => {
+        const inPool = player.poolAvailable !== undefined ? player.poolAvailable : player.available;
+        return {
+          ...player,
+          poolAvailable: inPool,
+          available: !!inPool && lastOpenSlots.some((slot) => playerFitsSlot(player, slot))
+        };
+      });
+      lastRevealPayload.players = lastPlayers;
+      renderPlayerGrid();
+    }
+
     function setFormationControl() {
       if (formationBadge) formationBadge.textContent = myFormation;
     }
@@ -337,7 +360,11 @@ const DraftView = {
 
       lastRevealPayload = payload;
       lastOpenSlots = payload.openSlots;
-      lastPlayers = payload.players;
+      lastPlayers = (payload.players || []).map((player) => ({
+        ...player,
+        poolAvailable: player.poolAvailable !== undefined ? player.poolAvailable : player.available
+      }));
+      lastRevealPayload.players = lastPlayers;
       sharedDraft = payload.sharedDraft || sharedDraft;
       const ratingsVisible = payload.players.some((p) => p.overall !== null);
       if (sortMode === 'rating' && !ratingsVisible) sortMode = 'position';
@@ -597,6 +624,8 @@ const DraftView = {
     App.onSocket('draft:lineupChanged', (payload) => {
       moveFromSlot = null;
       renderSquadPitch(payload.slots);
+      refreshOpenSlotsFromLineup(payload.openSlots);
+      refreshRevealPlayersForOpenSlots();
       renderRatingsCard(payload.ratingsCard);
       if (payload.draftComplete) handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
     });
@@ -605,6 +634,7 @@ const DraftView = {
       if (payload.userId !== App.state.user.id) return;
       myDraftComplete = !!payload.draftComplete;
       renderSquadPitch(payload.slots);
+      refreshOpenSlotsFromLineup(payload.openSlots);
       if (payload.auto && !autoDraftRequested) App.toast(`Time is up - auto-picked ${payload.player.name} (${POS_LABEL[payload.player.pos]})`, false);
       if (!payload.draftComplete) {
         if (!autoDraftRequested) socket.emit('draft:reveal', { code });
