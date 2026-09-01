@@ -8,8 +8,15 @@ const Api = (() => {
     return sessionStorage.getItem('draftbox.token');
   }
 
+  function apiUrl(path) {
+    const base = getApiBase().replace(/\/+$/, '');
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    if (base.endsWith('/api') && cleanPath.startsWith('/api/')) return base + cleanPath.slice(4);
+    return base + cleanPath;
+  }
+
   async function request(path, { method = 'GET', body } = {}) {
-    const res = await fetch(getApiBase() + path, {
+    const res = await fetch(apiUrl(path), {
       method,
       headers: {
         'Content-Type': 'application/json',

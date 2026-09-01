@@ -1096,6 +1096,14 @@ a { color: var(--accent-strong); }
 .tactic-impact-head { display: flex; justify-content: space-between; gap: 10px; align-items: end; }
 .tactic-impact-head b { color: #e9d5ff; }
 .tactic-impact-head span { color: var(--muted); font-size: .72rem; }
+.tactic-balance-card { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tactic-balance-card > div {
+  border: 1px solid rgba(168,85,247,.24); border-radius: 8px; padding: 10px;
+  background: linear-gradient(135deg, rgba(88,28,135,.34), rgba(147,51,234,.12));
+}
+.tactic-balance-card span { display: block; color: #c084fc; font-size: .64rem; font-weight: 900; text-transform: uppercase; letter-spacing: .05em; }
+.tactic-balance-card b { display: block; margin: 2px 0; color: #f5d0fe; font-size: 1rem; }
+.tactic-balance-card small { color: var(--muted); font-size: .72rem; line-height: 1.35; }
 .impact-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .impact-card { border: 1px solid rgba(148,163,184,.2); border-radius: 8px; padding: 8px; background: rgba(15,23,42,.42); display: grid; gap: 5px; }
 .impact-card span { color: var(--muted); font-size: .66rem; }
@@ -1107,6 +1115,16 @@ a { color: var(--accent-strong); }
 .impact-meter i { display: block; height: 100%; border-radius: inherit; background: #a855f7; }
 .impact-card.good .impact-meter i { background: #22c55e; }
 .impact-card.bad .impact-meter i { background: #ef4444; }
+.trade-ledger { display: grid; gap: 8px; border-top: 1px solid rgba(168,85,247,.18); padding-top: 10px; }
+.trade-ledger > b { color: #e9d5ff; font-size: .82rem; }
+.trade-ledger > div { display: flex; flex-wrap: wrap; gap: 6px; }
+.trade-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; border-radius: 999px; border: 1px solid rgba(168,85,247,.25); padding: 5px 9px; color: #ddd6fe; background: rgba(88,28,135,.18); font-size: .7rem; }
+.trade-chip b { color: #f0abfc; font-size: .64rem; text-transform: uppercase; letter-spacing: .05em; }
+.trade-chip.gain { border-color: rgba(34,197,94,.36); background: rgba(34,197,94,.1); color: #bbf7d0; }
+.trade-chip.gain b { color: #86efac; }
+.trade-chip.loss { border-color: rgba(248,113,113,.36); background: rgba(127,29,29,.14); color: #fecaca; }
+.trade-chip.loss b { color: #fca5a5; }
+.trade-empty { width: 100%; border: 1px dashed rgba(168,85,247,.25); border-radius: 8px; padding: 10px; color: var(--muted); font-size: .75rem; }
 .tactic-text-field { display: grid; gap: 5px; margin: 0; }
 .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: 1 / -1; }
 .tactic-text-field span, .tactic-group-head span, .tactic-range-field small { color: var(--muted); font-size: .72rem; line-height: 1.35; }
@@ -1127,6 +1145,7 @@ a { color: var(--accent-strong); }
 @media (max-width: 640px) {
   .tactics-hero, .tactic-editor-head { align-items: stretch; flex-direction: column; }
   #tactic-form-fields, .tactic-identity-card, .guide-matrix { grid-template-columns: 1fr; }
+  .tactic-balance-card { grid-template-columns: 1fr; }
   .impact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: auto; }
 }
