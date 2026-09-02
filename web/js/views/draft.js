@@ -624,8 +624,12 @@ const DraftView = {
     App.onSocket('draft:lineupChanged', (payload) => {
       moveFromSlot = null;
       renderSquadPitch(payload.slots);
-      refreshOpenSlotsFromLineup(payload.openSlots);
-      refreshRevealPlayersForOpenSlots();
+      if (payload.reveal && !payload.draftComplete) {
+        renderReveal(payload.reveal);
+      } else {
+        refreshOpenSlotsFromLineup(payload.openSlots);
+        refreshRevealPlayersForOpenSlots();
+      }
       renderRatingsCard(payload.ratingsCard);
       if (payload.draftComplete) handleDraftComplete(payload.slots, payload.captainSlot, payload.tacticalStyle, payload.tacticalStyleLocked, payload.ratingsCard);
     });

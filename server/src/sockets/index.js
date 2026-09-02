@@ -402,7 +402,10 @@ function registerSocketHandlers(io) {
         if (!member) throw new Error('not a member of this room');
         const result = draftEngine.movePlayerSlot(member, fromSlotCode, toSlotCode);
         rm.persistSlotMoves(roomRow.id, socket.user.id, member, result.moved);
-        socket.emit('draft:lineupChanged', { ...myDraftView(member, state.showOverall) });
+        socket.emit('draft:lineupChanged', {
+          ...myDraftView(member, state.showOverall),
+          reveal: draftEngine.currentRevealForMember(state, socket.user.id)
+        });
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }

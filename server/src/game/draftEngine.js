@@ -314,6 +314,19 @@ function revealSharedDraftForMember(roomState, userId) {
   };
 }
 
+function currentRevealForMember(roomState, userId) {
+  const member = roomState.members.get(userId);
+  if (!member || !member.currentReveal || isDraftComplete(member)) return null;
+  const team = getTeam(member.currentReveal);
+  if (!team) return null;
+
+  const hideOverall = !roomState.showOverall;
+  const pickTimeMs = roomState.pickTimeMs != null ? roomState.pickTimeMs : DEFAULT_PICK_TIME_MS;
+  const payload = buildRevealPayload(team, roomState.pool, openSlots(member), hideOverall, member, pickTimeMs, roomState);
+  if (roomState.sharedDraftMode) payload.sharedDraft = sharedDraftSnapshot(roomState, userId);
+  return payload;
+}
+
 // Consumes one of the member's rerolls (if any remain) and immediately reveals a fresh
 // team in place of the current one — the skipped team still counts as "seen" (it was
 // already added to member.seenTeams by the reveal() that first showed it) so it can
@@ -429,6 +442,7 @@ module.exports = {
   pickPlayer,
   autoPickForMember,
   autoPickSharedTurn,
+  currentRevealForMember,
   sharedDraftSnapshot,
   slotsRemaining,
   openSlots,
