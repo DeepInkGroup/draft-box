@@ -83,16 +83,20 @@ function ensureAdvanceReady(roomState) {
 function advanceReadySnapshot(roomState) {
   const ready = ensureAdvanceReady(roomState);
   const readyIds = new Set(ready.userIds);
-  const members = spoilerGateMembers(roomState).map((m) => ({
+  const gateMembers = spoilerGateMembers(roomState);
+  const allReady = gateMembers.length > 0 && gateMembers.every((m) => readyIds.has(Number(m.userId)));
+  const showEliminationBadges = allReady || roomState.tournament.stage === 'done';
+  const members = gateMembers.map((m) => ({
     userId: m.userId,
     username: m.username,
-    eliminated: !!m.eliminated,
+    eliminated: showEliminationBadges ? !!m.eliminated : false,
     ready: readyIds.has(Number(m.userId))
   }));
   return {
     spoilerMode: !!roomState.spoilerMode,
     step: ready.step,
-    allReady: members.length > 0 && members.every((m) => m.ready),
+    allReady,
+    showEliminationBadges,
     members
   };
 }
