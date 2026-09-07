@@ -14,6 +14,7 @@ const DraftView = {
     let lastPlayers = [];
     let isCreator = false;
     let singlePlayer = false;
+    let spoilerMode = false;
     let allReady = false;
     let iAmReady = false;
     let lastRevealPayload = null;
@@ -201,12 +202,11 @@ const DraftView = {
       if (formationBadge) formationBadge.textContent = myFormation;
     }
 
-    // Multiplayer rooms wait for the room creator's explicit confirmation once everyone
-    // is ready, instead of yanking every player into the tournament the instant the last
-    // person finishes drafting. Singleplayer auto-starts (nobody else to coordinate with).
+    // Standard multiplayer rooms use a creator confirmation; singleplayer and Spoiler
+    // Mode begin automatically when every drafter is ready.
     function renderWaitingZone() {
       if (!iAmReady) { waitingZone.innerHTML = ''; return; }
-      if (singlePlayer) {
+      if (singlePlayer || (spoilerMode && allReady)) {
         waitingZone.innerHTML = `<p class="muted center">Your draft is complete! Starting the World Cup...</p>`;
         return;
       }
@@ -593,6 +593,7 @@ const DraftView = {
       captainEnabled = !!s.captainEnabled;
       isCreator = s.creatorId === App.state.user.id;
       singlePlayer = !!s.singlePlayer;
+      spoilerMode = !!s.spoilerMode;
       sharedDraftMode = !!s.sharedDraftMode;
       allReady = !!s.allReady;
       if (s.myDraft) {

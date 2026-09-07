@@ -151,10 +151,6 @@ function revealForMember(roomState, userId) {
   const teamPool = roomState.allowedTeams
     ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
     : ALL_TEAMS;
-  if (turnMember && !teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, turnMember))) {
-    turnMember = firstPickableSharedMember(roomState) || turnMember;
-    state.turnUserId = turnMember.userId;
-  }
   const candidates = teamPool.filter((t) => !member.seenTeams.has(t.code));
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
@@ -208,15 +204,8 @@ function rotateAfter(members, userId) {
   return members.slice(idx + 1).concat(members.slice(0, idx + 1));
 }
 
-function sharedDraftTurnOrder(roomState) {
-  const active = sharedDraftMemberOrder(roomState);
-  const direction = roomState.sharedDraft && Number(roomState.sharedDraft.direction) === -1 ? -1 : 1;
-  return direction === -1 ? active.slice().reverse() : active;
-}
-
 function nextSharedDraftMember(roomState, currentUserId, team, picked) {
-  const ordered = sharedDraftTurnOrder(roomState);
-  return rotateAfter(ordered, currentUserId)
+  return rotateAfter(sharedDraftMemberOrder(roomState), currentUserId)
     .find((m) => !picked.has(Number(m.userId)) && sharedTeamCanSupplyMember(roomState, team, m)) || null;
 }
 
@@ -224,11 +213,7 @@ function firstPickableSharedMember(roomState) {
   const teamPool = roomState.allowedTeams
     ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
     : ALL_TEAMS;
-  if (turnMember && !teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, turnMember))) {
-    turnMember = firstPickableSharedMember(roomState) || turnMember;
-    state.turnUserId = turnMember.userId;
-  }
-  return sharedDraftTurnOrder(roomState).find((m) => teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, m))) || null;
+  return sharedDraftMemberOrder(roomState).find((m) => teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, m))) || null;
 }
 
 function sharedTeamCanSupplyMember(roomState, team, member) {
@@ -239,11 +224,10 @@ function sharedTeamCanSupplyMember(roomState, team, member) {
 
 function ensureSharedDraftState(roomState) {
   if (!roomState.sharedDraft) {
-    roomState.sharedDraft = { currentTeam: null, seenTeams: [], turnUserId: null, round: 1, teamPickUserIds: [], direction: 1 };
+    roomState.sharedDraft = { currentTeam: null, seenTeams: [], turnUserId: null, round: 1, teamPickUserIds: [] };
   }
   const state = roomState.sharedDraft;
   if (!Array.isArray(state.teamPickUserIds)) state.teamPickUserIds = [];
-  if (Number(state.direction) !== -1) state.direction = 1;
   const active = sharedDraftMemberOrder(roomState);
   if (!active.length) {
     state.turnUserId = null;
@@ -253,7 +237,7 @@ function ensureSharedDraftState(roomState) {
   }
 
   if (!active.some((m) => Number(m.userId) === Number(state.turnUserId))) {
-    const firstTurnMember = firstPickableSharedMember(roomState) || sharedDraftTurnOrder(roomState)[0];
+    const firstTurnMember = firstPickableSharedMember(roomState) || active[0];
     state.turnUserId = firstTurnMember ? firstTurnMember.userId : null;
   }
   let turnMember = active.find((m) => Number(m.userId) === Number(state.turnUserId)) || firstPickableSharedMember(roomState) || active[0];
@@ -306,8 +290,7 @@ function advanceSharedDraftTurn(roomState, currentUserId) {
 
   state.currentTeam = null;
   state.teamPickUserIds = [];
-  state.direction = Number(state.direction) === -1 ? 1 : -1;
-  const firstTurnMember = firstPickableSharedMember(roomState) || sharedDraftTurnOrder(roomState)[0];
+  const firstTurnMember = firstPickableSharedMember(roomState) || active[0];
   state.turnUserId = firstTurnMember ? firstTurnMember.userId : null;
   ensureSharedDraftState(roomState);
 }
@@ -323,9 +306,8 @@ function sharedDraftSnapshot(roomState, userId) {
     turnUsername: turnMember ? turnMember.username : null,
     isMyTurn: Number(state.turnUserId) === Number(userId),
     round: state.round || 1,
-    direction: Number(state.direction) === -1 ? -1 : 1,
     teamPickCount: Array.isArray(state.teamPickUserIds) ? state.teamPickUserIds.length : 0,
-    members: sharedDraftTurnOrder(roomState).concat(Array.from(roomState.members.values()).filter((m) => isDraftComplete(m))).map((m) => ({
+    members: Array.from(roomState.members.values()).map((m) => ({
       userId: m.userId,
       username: m.username,
       draftComplete: isDraftComplete(m),

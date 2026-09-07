@@ -215,13 +215,14 @@ const TournamentView = {
         return;
       }
       const members = advanceReady.members || [];
-      const readyCount = members.filter((m) => m.ready).length;
+      const requiredMembers = members.filter((m) => m.required !== false);
+      const readyCount = requiredMembers.filter((m) => m.ready).length;
       const showEliminationBadges = !!advanceReady.showEliminationBadges;
       advanceReadyPanel.style.display = 'block';
       advanceReadyPanel.innerHTML = [
-        '<div class="advance-ready-head"><span>Ready for next stage</span><span class="muted">' + readyCount + '/' + members.length + '</span></div>',
+        '<div class="advance-ready-head"><span>Ready for next stage</span><span class="muted">' + readyCount + '/' + requiredMembers.length + '</span></div>',
         '<div class="advance-ready-list">',
-        members.map((m) => '<div class="advance-ready-row ' + (m.ready ? 'ready' : '') + '"><span class="advance-ready-check">' + (m.ready ? '✓' : '') + '</span><span class="advance-ready-name">' + m.username + '</span>' + (showEliminationBadges && m.eliminated ? '<span class="advance-ready-badge">Out</span>' : '') + '</div>').join(''),
+        members.map((m) => '<div class="advance-ready-row ' + (m.ready ? 'ready' : '') + '"><span class="advance-ready-check">' + (m.ready ? '✓' : '') + '</span><span class="advance-ready-name">' + m.username + '</span>' + (showEliminationBadges && m.eliminated ? '<span class="advance-ready-badge">Watching</span>' : '') + '</div>').join(''),
         '</div>'
       ].join('');
     }

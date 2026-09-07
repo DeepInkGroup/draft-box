@@ -54,12 +54,12 @@ function startTournamentNow(io, roomRow, roomState) {
   io.to(channelName(roomRow.code)).emit('tournament:started', {});
 }
 
-// Singleplayer auto-starts the instant the lone drafter is ready — there's nobody to
-// coordinate with. Multiplayer rooms instead wait for the creator's explicit
-// confirmation (room:startTournament) once everyone is ready, so nobody gets yanked
-// into the World Cup mid-draft while a teammate is still finishing up.
+// Standard multiplayer rooms wait for the creator's explicit confirmation once
+// everyone is ready. Singleplayer and Spoiler Mode start automatically.
 function maybeStartTournament(io, roomRow, roomState) {
-  if (!roomState.singlePlayer) return false;
+  // Spoiler Mode coordinates every later stage, so it starts immediately once the
+  // final drafter is ready instead of adding a creator-only confirmation step.
+  if (!roomState.singlePlayer && !roomState.spoilerMode) return false;
   const allReady = Array.from(roomState.members.values()).every((m) => memberReady(m, roomState.captainEnabled));
   if (!allReady) return false;
   startTournamentNow(io, roomRow, roomState);
@@ -67,7 +67,8 @@ function maybeStartTournament(io, roomRow, roomState) {
 }
 
 function spoilerGateMembers(roomState) {
-  return Array.from(roomState.members.values());
+  // Eliminated players remain connected spectators, but do not hold up competitors.
+  return Array.from(roomState.members.values()).filter((member) => !member.eliminated);
 }
 
 function ensureAdvanceReady(roomState) {
@@ -83,19 +84,24 @@ function ensureAdvanceReady(roomState) {
 function advanceReadySnapshot(roomState) {
   const ready = ensureAdvanceReady(roomState);
   const readyIds = new Set(ready.userIds);
+  const allMembers = Array.from(roomState.members.values());
   const gateMembers = spoilerGateMembers(roomState);
-  const allReady = gateMembers.length > 0 && gateMembers.every((m) => readyIds.has(Number(m.userId)));
+  // If every human has been eliminated, spectators can continue revealing the
+  // tournament without a nonexistent player being required to ready up.
+  const allReady = gateMembers.every((m) => readyIds.has(Number(m.userId)));
   const showEliminationBadges = allReady || roomState.tournament.stage === 'done';
-  const members = gateMembers.map((m) => ({
+  const members = allMembers.map((m) => ({
     userId: m.userId,
     username: m.username,
     eliminated: showEliminationBadges ? !!m.eliminated : false,
-    ready: readyIds.has(Number(m.userId))
+    ready: !m.eliminated && readyIds.has(Number(m.userId)),
+    required: !m.eliminated
   }));
   return {
     spoilerMode: !!roomState.spoilerMode,
     step: ready.step,
     allReady,
+    requiredMemberCount: gateMembers.length,
     showEliminationBadges,
     members
   };
@@ -132,14 +138,6 @@ function persistSimulatedTournamentStep(io, socket, code, roomRow, roomState) {
   socket.to(channelName(code)).emit('tournament:newStepAvailable', { historyLength: currentHistoryLength });
   if (roomState.spoilerMode) broadcastAdvanceReady(io, code, roomState);
   return currentHistoryLength;
-}
-
-function viewerMaySeeSpoilerStep(roomState, member, stepIndex) {
-  if (!member.eliminated || roomState.tournament.stage === 'done') return true;
-  const myCode = tournamentEngine.findMyCode(roomState.tournament, member.userId);
-  if (!myCode) return false;
-  const step = roomState.tournament.history[stepIndex];
-  return !!(step && Array.isArray(step.eliminatedCodes) && step.eliminatedCodes.includes(myCode));
 }
 
 function broadcastSharedDraftState(io, code, roomState) {
@@ -492,28 +490,6 @@ function registerSocketHandlers(io) {
 
         if (spoilerMode) ensureAdvanceReady(state);
 
-        if (spoilerMode && member.eliminated && t.stage === 'done' && currentHistoryLength > 0) {
-          member.viewedStep = currentHistoryLength;
-          rm.persistViewedStep(roomRow.id, socket.user.id, member.viewedStep);
-          return socket.emit('tournament:step', {
-            step: tournamentEngine.decorateStep(state, currentHistoryLength - 1, socket.user.id),
-            viewedStep: member.viewedStep,
-            historyLength: currentHistoryLength,
-            stage: t.stage
-          });
-        }
-
-        if (spoilerMode && member.eliminated && currentHistoryLength > member.viewedStep && !viewerMaySeeSpoilerStep(state, member, member.viewedStep)) {
-          const ready = ensureAdvanceReady(state);
-          if (!ready.userIds.includes(Number(member.userId))) ready.userIds.push(Number(member.userId));
-          rm.persistTournamentSnapshot(state);
-          broadcastAdvanceReady(io, code, state);
-          if (allSpoilerGateMembersReady(state) && t.stage !== 'done') {
-            persistSimulatedTournamentStep(io, socket, code, roomRow, state);
-          }
-          return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
-        }
-
         if (member.viewedStep >= currentHistoryLength) {
           if (t.stage === 'done') {
             return socket.emit('error:message', { error: 'the tournament has already finished' });
@@ -528,10 +504,6 @@ function registerSocketHandlers(io) {
           }
 
           currentHistoryLength = persistSimulatedTournamentStep(io, socket, code, roomRow, state);
-        }
-
-        if (spoilerMode && member.eliminated && currentHistoryLength > member.viewedStep && !viewerMaySeeSpoilerStep(state, member, member.viewedStep)) {
-          return socket.emit('error:message', { error: 'spoiler mode is on: your run is over, so later results stay hidden until the tournament ends' });
         }
 
         member.viewedStep += 1;
