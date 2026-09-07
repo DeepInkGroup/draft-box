@@ -3,7 +3,6 @@ const TournamentView = {
     container.innerHTML = `<div class="card center muted">Loading the World Cup...</div>`;
 
     const socket = App.ensureSocket();
-    socket.emit('room:join', { code });
 
     let viewedStep = 0;
     let historyLength = 0;
@@ -13,6 +12,8 @@ const TournamentView = {
     let lineupRevealShown = false;
     let myCode = null;
     let advanceReady = null;
+    let isSpectator = false;
+    let advancePending = false;
 
     container.innerHTML = `
       <div id="championZone"></div>
@@ -217,12 +218,11 @@ const TournamentView = {
       const members = advanceReady.members || [];
       const requiredMembers = members.filter((m) => m.required !== false);
       const readyCount = requiredMembers.filter((m) => m.ready).length;
-      const showEliminationBadges = !!advanceReady.showEliminationBadges;
       advanceReadyPanel.style.display = 'block';
       advanceReadyPanel.innerHTML = [
         '<div class="advance-ready-head"><span>Ready for next stage</span><span class="muted">' + readyCount + '/' + requiredMembers.length + '</span></div>',
         '<div class="advance-ready-list">',
-        members.map((m) => '<div class="advance-ready-row ' + (m.ready ? 'ready' : '') + '"><span class="advance-ready-check">' + (m.ready ? '✓' : '') + '</span><span class="advance-ready-name">' + m.username + '</span>' + (showEliminationBadges && m.eliminated ? '<span class="advance-ready-badge">Watching</span>' : '') + '</div>').join(''),
+        members.map((m) => '<div class="advance-ready-row ' + (m.ready ? 'ready' : '') + '"><span class="advance-ready-check">' + (m.ready ? '✓' : '') + '</span><span class="advance-ready-name">' + m.username + '</span>' + (m.required === false ? '<span class="advance-ready-badge">Watching</span>' : '') + '</div>').join(''),
         '</div>'
       ].join('');
     }
@@ -234,13 +234,19 @@ const TournamentView = {
         return;
       }
       continueZone.style.display = 'block';
+      btnContinue.style.display = '';
+      btnContinue.disabled = advancePending;
+      const me = advanceReady && (advanceReady.members || []).find((m) => Number(m.userId) === Number(App.state.user.id));
+      if (me) isSpectator = me.required === false;
       if (viewedStep === 0) {
-        btnContinue.textContent = '▶ Start Matchday 1';
+        btnContinue.textContent = advanceReady ? '✓ Ready to Start Matchday 1' : '▶ Start Matchday 1';
       } else if (historyLength > viewedStep) {
-        btnContinue.textContent = '▶ See Next Results (Ready)';
+        btnContinue.textContent = '▶ See Next Results';
+      } else if (advanceReady && isSpectator && Number(advanceReady.requiredMemberCount) > 0) {
+        btnContinue.style.display = 'none';
       } else {
-        const me = advanceReady && (advanceReady.members || []).find((m) => m.userId === App.state.user.id);
         btnContinue.textContent = me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
+        btnContinue.disabled = advancePending || !!(me && me.ready);
       }
       renderAdvanceReady();
     }
@@ -784,11 +790,15 @@ const TournamentView = {
     }
 
     App.onSocket('room:state', (s) => {
+      if (s.stage === 'drafting') return App.goDraft(code);
+      if (s.stage === 'lobby') return App.goLobby(code);
       if (s.stage !== 'tournament') return;
+      advancePending = false;
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
       advanceReady = s.advanceReady || null;
+      isSpectator = !!s.spectator;
       isCreator = s.creatorId === App.state.user.id;
       if (s.myLineup) myCode = s.myLineup.code;
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
@@ -799,9 +809,11 @@ const TournamentView = {
     });
 
     App.onSocket('tournament:step', (payload) => {
+      advancePending = false;
       viewedStep = payload.viewedStep;
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;
+      isSpectator = !!payload.spectator;
       if (payload.step && payload.step.matches && payload.step.matches.length && myCode) {
         playLiveReport(payload.step, myCode, () => renderStep(payload.step));
       } else {
@@ -818,11 +830,15 @@ const TournamentView = {
     });
 
     App.onSocket('tournament:advanceReady', (payload) => {
+      advancePending = false;
       advanceReady = payload;
+      const me = (payload.members || []).find((m) => Number(m.userId) === Number(App.state.user.id));
+      if (me) isSpectator = me.required === false;
       renderButton();
     });
 
     App.onSocket('tournament:started', () => {
+      advancePending = false;
       viewedStep = 0;
       historyLength = 0;
       tournamentStage = 'group';
@@ -835,12 +851,24 @@ const TournamentView = {
       App.goLobby(newCode);
     });
 
-    App.onSocket('error:message', (e) => App.toast(e.error, true));
+    App.onSocket('tournament:waiting', () => {
+      advancePending = false;
+      renderButton();
+    });
+
+    App.onSocket('error:message', (e) => {
+      advancePending = false;
+      renderButton();
+      App.toast(e.error, true);
+    });
 
     btnContinue.addEventListener('click', () => {
-      btnContinue.disabled = true;
+      if (advancePending) return;
+      advancePending = true;
+      renderButton();
       socket.emit('tournament:advance', { code });
-      setTimeout(() => { btnContinue.disabled = false; }, 400);
     });
+
+    socket.emit('room:join', { code });
   }
 };

@@ -4,6 +4,13 @@ const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey } = require('../game/tacticalStyles');
+const {
+  allMembersReady,
+  shouldAutoStartTournament,
+  spoilerGateMembers,
+  ensureAdvanceReady,
+  advanceReadySnapshot
+} = require('../game/gameFlow');
 const { lobbySnapshot } = rm;
 
 function channelName(code) {
@@ -32,12 +39,6 @@ function myDraftView(member, showOverall) {
   };
 }
 
-// A member is fully ready to enter the tournament once their draft is complete AND,
-// if the room has captains enabled, they've chosen one.
-function memberReady(member, captainEnabled) {
-  return member.draftComplete && !!member.tacticalStyleLocked && (!captainEnabled || !!member.captainSlot);
-}
-
 function clearPickTimer(member) {
   if (member.pickTimer) {
     clearTimeout(member.pickTimer);
@@ -46,65 +47,30 @@ function clearPickTimer(member) {
 }
 
 function startTournamentNow(io, roomRow, roomState) {
+  const latestRoomRow = rm.getRoomRow(roomRow.id);
+  if (!latestRoomRow || latestRoomRow.status !== 'drafting') return false;
+  for (const member of roomState.members.values()) clearPickTimer(member);
   tournamentEngine.startTournament(roomState);
   rm.setRoomStatus(roomRow.id, 'group_stage');
+  roomState.status = 'group_stage';
   rm.persistTournamentSnapshot(roomState);
   // Deliberately no results payload here: every member pulls the tournament's
   // steps at their own pace via tournament:advance once they land on the view.
   io.to(channelName(roomRow.code)).emit('tournament:started', {});
+  return true;
 }
 
 // Standard multiplayer rooms wait for the creator's explicit confirmation once
 // everyone is ready. Singleplayer and Spoiler Mode start automatically.
 function maybeStartTournament(io, roomRow, roomState) {
-  // Spoiler Mode coordinates every later stage, so it starts immediately once the
-  // final drafter is ready instead of adding a creator-only confirmation step.
-  if (!roomState.singlePlayer && !roomState.spoilerMode) return false;
-  const allReady = Array.from(roomState.members.values()).every((m) => memberReady(m, roomState.captainEnabled));
-  if (!allReady) return false;
-  startTournamentNow(io, roomRow, roomState);
-  return true;
-}
-
-function spoilerGateMembers(roomState) {
-  // Eliminated players remain connected spectators, but do not hold up competitors.
-  return Array.from(roomState.members.values()).filter((member) => !member.eliminated);
-}
-
-function ensureAdvanceReady(roomState) {
-  const t = roomState.tournament;
-  const step = tournamentEngine.historyLength(roomState);
-  if (!t.advanceReady || t.advanceReady.step !== step || !Array.isArray(t.advanceReady.userIds)) {
-    t.advanceReady = { step, userIds: [] };
+  if (!shouldAutoStartTournament(roomState)) return false;
+  try {
+    return startTournamentNow(io, roomRow, roomState);
+  } catch (error) {
+    console.error(`Could not start tournament for room ${roomRow.code}:`, error);
+    io.to(channelName(roomRow.code)).emit('error:message', { error: 'the World Cup could not start; please try again' });
+    return false;
   }
-  t.advanceReady.userIds = [...new Set(t.advanceReady.userIds.map((id) => Number(id)).filter(Boolean))];
-  return t.advanceReady;
-}
-
-function advanceReadySnapshot(roomState) {
-  const ready = ensureAdvanceReady(roomState);
-  const readyIds = new Set(ready.userIds);
-  const allMembers = Array.from(roomState.members.values());
-  const gateMembers = spoilerGateMembers(roomState);
-  // If every human has been eliminated, spectators can continue revealing the
-  // tournament without a nonexistent player being required to ready up.
-  const allReady = gateMembers.every((m) => readyIds.has(Number(m.userId)));
-  const showEliminationBadges = allReady || roomState.tournament.stage === 'done';
-  const members = allMembers.map((m) => ({
-    userId: m.userId,
-    username: m.username,
-    eliminated: showEliminationBadges ? !!m.eliminated : false,
-    ready: !m.eliminated && readyIds.has(Number(m.userId)),
-    required: !m.eliminated
-  }));
-  return {
-    spoilerMode: !!roomState.spoilerMode,
-    step: ready.step,
-    allReady,
-    requiredMemberCount: gateMembers.length,
-    showEliminationBadges,
-    members
-  };
 }
 
 function broadcastAdvanceReady(io, code, roomState) {
@@ -201,6 +167,8 @@ function registerSocketHandlers(io) {
     socket.on('room:join', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
       if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
+      const isMember = rm.getMembers(roomRow.id).some((member) => Number(member.user_id) === Number(socket.user.id));
+      if (!isMember) return socket.emit('error:message', { error: 'you are not a member of this room' });
       socket.join(channelName(roomRow.code));
       socket.data.roomCode = roomRow.code;
 
@@ -236,15 +204,16 @@ function registerSocketHandlers(io) {
           };
         }
         const historyLength = tournamentEngine.historyLength(state);
-        const visibleStepIndex = state.tournament.stage === 'done' && historyLength > 0 ? historyLength - 1 : viewedStep - 1;
+        const visibleStepIndex = viewedStep - 1;
         socket.emit('room:state', {
           stage: 'tournament',
           ...lobbySnapshot(roomRow),
           myStep: visibleStepIndex >= 0 ? tournamentEngine.decorateStep(state, visibleStepIndex, socket.user.id) : null,
           myLineup,
-          viewedStep: state.tournament.stage === 'done' ? historyLength : viewedStep,
+          viewedStep,
           historyLength,
           tournamentStage: state.tournament.stage,
+          spectator: !!member.eliminated,
           advanceReady: state.spoilerMode ? advanceReadySnapshot(state) : null
         });
       }
@@ -463,9 +432,12 @@ function registerSocketHandlers(io) {
       if (roomRow.creator_id !== socket.user.id) return socket.emit('error:message', { error: 'only the room creator can start the tournament' });
       if (roomRow.status !== 'drafting') return socket.emit('error:message', { error: 'the draft is not ready to start the tournament' });
       const state = rm.loadRoomState(roomRow);
-      const allReady = Array.from(state.members.values()).every((m) => memberReady(m, state.captainEnabled));
-      if (!allReady) return socket.emit('error:message', { error: 'not everyone has finished drafting yet' });
-      startTournamentNow(io, roomRow, state);
+      if (!allMembersReady(state)) return socket.emit('error:message', { error: 'not everyone has finished drafting yet' });
+      try {
+        startTournamentNow(io, roomRow, state);
+      } catch (e) {
+        socket.emit('error:message', { error: e.message });
+      }
     });
 
     // Each member pulls the shared tournament forward at their own pace: if the room's
@@ -496,11 +468,17 @@ function registerSocketHandlers(io) {
           }
 
           if (spoilerMode) {
-            const ready = ensureAdvanceReady(state);
-            if (!ready.userIds.includes(Number(member.userId))) ready.userIds.push(Number(member.userId));
-            rm.persistTournamentSnapshot(state);
-            broadcastAdvanceReady(io, code, state);
-            if (!allSpoilerGateMembersReady(state)) return;
+            const activeMembers = spoilerGateMembers(state);
+            if (member.eliminated && activeMembers.length > 0) {
+              return socket.emit('tournament:waiting', { reason: 'active-players' });
+            }
+            if (!member.eliminated) {
+              const ready = ensureAdvanceReady(state);
+              if (!ready.userIds.includes(Number(member.userId))) ready.userIds.push(Number(member.userId));
+              rm.persistTournamentSnapshot(state);
+              broadcastAdvanceReady(io, code, state);
+              if (!allSpoilerGateMembersReady(state)) return;
+            }
           }
 
           currentHistoryLength = persistSimulatedTournamentStep(io, socket, code, roomRow, state);
@@ -513,7 +491,8 @@ function registerSocketHandlers(io) {
           step: tournamentEngine.decorateStep(state, member.viewedStep - 1, socket.user.id),
           viewedStep: member.viewedStep,
           historyLength: tournamentEngine.historyLength(state),
-          stage: t.stage
+          stage: t.stage,
+          spectator: !!member.eliminated
         });
       } catch (e) {
         socket.emit('error:message', { error: e.message });

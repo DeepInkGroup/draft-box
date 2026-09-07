@@ -61,9 +61,9 @@ const LobbyView = {
     });
 
     const socket = App.ensureSocket();
-    socket.emit('room:join', { code });
     App.onSocket('room:memberUpdate', renderMembers);
     App.onSocket('room:started', () => App.goDraft(code));
+    App.onSocket('error:message', (e) => App.toast(e.error, true));
 
     const startBtn = container.querySelector('#btnStart');
     if (startBtn) {
@@ -71,5 +71,7 @@ const LobbyView = {
         socket.emit('room:start', { code });
       });
     }
+
+    socket.emit('room:join', { code });
   }
 };

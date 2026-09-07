@@ -3,7 +3,6 @@ const DraftView = {
     container.innerHTML = `<div class="card center muted">Connecting to the draft...</div>`;
 
     const socket = App.ensureSocket();
-    socket.emit('room:join', { code });
 
     let myFormation = '4-3-3';
     let timerInterval = null;
@@ -586,6 +585,8 @@ const DraftView = {
     }
 
     App.onSocket('room:state', (s) => {
+      if (s.stage === 'tournament') return App.goTournament(code);
+      if (s.stage !== 'drafting') return;
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
       if (me && me.tacticalStyle) myTacticalStyle = me.tacticalStyle;
@@ -669,6 +670,13 @@ const DraftView = {
 
     App.onSocket('tournament:started', () => { sessionStorage.removeItem(`draftbox.autoDraft.${code}`); stopTimer(); App.goTournament(code); });
 
-    App.onSocket('error:message', (e) => App.toast(e.error, true));
+    App.onSocket('error:message', (e) => {
+      renderWaitingZone();
+      App.toast(e.error, true);
+    });
+
+    // Register every state listener before joining so a fast server response cannot
+    // leave this view stuck on its loading state.
+    socket.emit('room:join', { code });
   }
 };
