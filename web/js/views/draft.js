@@ -374,10 +374,10 @@ const DraftView = {
       const isMySharedTurn = !sharedDraftMode || !sharedDraft || sharedDraft.isMyTurn;
       const sharedStatus = sharedDraftMode && sharedDraft ? `
         <div class="shared-draft-panel">
-          <div><span>Shared Team Draft · pick ${Number(sharedDraft.teamPickCount || 0) + 1}</span><b>${sharedDraft.currentTeam ? sharedDraft.currentTeam.name : payload.team.name}</b></div>
+          <div><span>Snake Round ${Number(sharedDraft.round || 1)} · first pick: ${sharedDraft.starterUsername || '—'}</span><b>${sharedDraft.currentTeam ? sharedDraft.currentTeam.name : payload.team.name}</b></div>
           <p>${sharedDraft.isMyTurn ? 'Your turn: pick one player from this team.' : `Waiting for ${sharedDraft.turnUsername || 'the next player'} to pick from this team.`}</p>
           <div class="shared-draft-order">
-            ${(sharedDraft.members || []).map((m) => `<span class="${m.turn ? 'active' : ''} ${m.draftComplete ? 'done' : ''}">${m.username} (${m.picks}/11)</span>`).join('')}
+            ${(sharedDraft.members || []).map((m) => `<span class="${m.turn ? 'active' : ''} ${m.first ? 'first' : ''} ${m.draftComplete ? 'done' : ''}">${m.username} (${m.picks}/11)</span>`).join('')}
           </div>
         </div>
       ` : '';

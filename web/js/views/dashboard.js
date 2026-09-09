@@ -224,7 +224,7 @@ const DashboardView = {
   sharedDraftOptions() {
     return [
       { value: false, title: 'Solo Reveal', sub: 'Each player gets private random teams' },
-      { value: true, title: 'Team Snake', sub: 'One shared team, players pick one by one' }
+      { value: true, title: 'Team Snake', sub: 'One shared team; first picker rotates every round' }
     ];
   },
 

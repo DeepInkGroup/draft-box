@@ -216,6 +216,15 @@ function firstPickableSharedMember(roomState) {
   return sharedDraftMemberOrder(roomState).find((m) => teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, m))) || null;
 }
 
+function nextPickableSharedStarter(roomState, previousStarterId) {
+  const teamPool = roomState.allowedTeams
+    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
+    : ALL_TEAMS;
+  const fullRotation = rotateAfter(Array.from(roomState.members.values()), previousStarterId);
+  return fullRotation.find((member) => !isDraftComplete(member)
+    && teamPool.some((team) => sharedTeamCanSupplyMember(roomState, team, member))) || null;
+}
+
 function sharedTeamCanSupplyMember(roomState, team, member) {
   if (!team || !member || isDraftComplete(member)) return false;
   const slots = openSlots(member);
@@ -224,20 +233,22 @@ function sharedTeamCanSupplyMember(roomState, team, member) {
 
 function ensureSharedDraftState(roomState) {
   if (!roomState.sharedDraft) {
-    roomState.sharedDraft = { currentTeam: null, seenTeams: [], turnUserId: null, round: 1, teamPickUserIds: [] };
+    roomState.sharedDraft = { currentTeam: null, seenTeams: [], turnUserId: null, starterUserId: null, round: 1, teamPickUserIds: [] };
   }
   const state = roomState.sharedDraft;
   if (!Array.isArray(state.teamPickUserIds)) state.teamPickUserIds = [];
   const active = sharedDraftMemberOrder(roomState);
   if (!active.length) {
     state.turnUserId = null;
+    state.starterUserId = null;
     state.currentTeam = null;
     state.teamPickUserIds = [];
     return state;
   }
 
   if (!active.some((m) => Number(m.userId) === Number(state.turnUserId))) {
-    const firstTurnMember = firstPickableSharedMember(roomState) || active[0];
+    const savedStarter = active.find((member) => Number(member.userId) === Number(state.starterUserId));
+    const firstTurnMember = savedStarter || firstPickableSharedMember(roomState) || active[0];
     state.turnUserId = firstTurnMember ? firstTurnMember.userId : null;
   }
   let turnMember = active.find((m) => Number(m.userId) === Number(state.turnUserId)) || firstPickableSharedMember(roomState) || active[0];
@@ -262,7 +273,7 @@ function ensureSharedDraftState(roomState) {
   if (!seen.has(pickable.code)) state.seenTeams = [...(state.seenTeams || []), pickable.code];
   state.currentTeam = pickable.code;
   state.teamPickUserIds = [];
-  state.round = Number(state.round || 1) + (current && current.code !== pickable.code ? 1 : 0);
+  if (!state.starterUserId) state.starterUserId = turnMember.userId;
   return state;
 }
 
@@ -275,6 +286,7 @@ function advanceSharedDraftTurn(roomState, currentUserId) {
   const active = sharedDraftMemberOrder(roomState);
   if (!active.length) {
     state.turnUserId = null;
+    state.starterUserId = null;
     state.currentTeam = null;
     state.teamPickUserIds = [];
     return;
@@ -288,9 +300,12 @@ function advanceSharedDraftTurn(roomState, currentUserId) {
     return;
   }
 
+  const previousStarterId = state.starterUserId || currentUserId;
   state.currentTeam = null;
   state.teamPickUserIds = [];
-  const firstTurnMember = firstPickableSharedMember(roomState) || active[0];
+  state.round = Number(state.round || 1) + 1;
+  const firstTurnMember = nextPickableSharedStarter(roomState, previousStarterId) || firstPickableSharedMember(roomState) || active[0];
+  state.starterUserId = firstTurnMember ? firstTurnMember.userId : null;
   state.turnUserId = firstTurnMember ? firstTurnMember.userId : null;
   ensureSharedDraftState(roomState);
 }
@@ -299,11 +314,14 @@ function sharedDraftSnapshot(roomState, userId) {
   const state = ensureSharedDraftState(roomState);
   const active = sharedDraftMemberOrder(roomState);
   const turnMember = active.find((m) => Number(m.userId) === Number(state.turnUserId)) || null;
+  const starterMember = Array.from(roomState.members.values()).find((m) => Number(m.userId) === Number(state.starterUserId)) || null;
   return {
     enabled: !!roomState.sharedDraftMode,
     currentTeam: state.currentTeam ? { code: state.currentTeam, name: getTeam(state.currentTeam)?.name || state.currentTeam } : null,
     turnUserId: state.turnUserId,
     turnUsername: turnMember ? turnMember.username : null,
+    starterUserId: state.starterUserId,
+    starterUsername: starterMember ? starterMember.username : null,
     isMyTurn: Number(state.turnUserId) === Number(userId),
     round: state.round || 1,
     teamPickCount: Array.isArray(state.teamPickUserIds) ? state.teamPickUserIds.length : 0,
@@ -312,6 +330,7 @@ function sharedDraftSnapshot(roomState, userId) {
       username: m.username,
       draftComplete: isDraftComplete(m),
       picks: (m.squad || []).length,
+      first: Number(state.starterUserId) === Number(m.userId),
       turn: Number(state.turnUserId) === Number(m.userId)
     }))
   };

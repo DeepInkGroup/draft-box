@@ -6,6 +6,8 @@ const App = (() => {
   const tacticsBtn = document.getElementById('btnTactics');
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
+  let profileStatsChart = null;
+  let friendStatsChart = null;
 
   function toast(msg, isError) {
     toastEl.textContent = msg;
@@ -105,6 +107,10 @@ const App = (() => {
   const controlIndex = Math.max(1, Math.min(99, Math.round(86 - Number(goalsAgainstPerMatch) * 24 + Math.max(goalDiff, 0) * 1.4)));
   const momentumTier = totalMatches === 0 ? 'Fresh Start' : winRate >= 65 && goalDiff > 0 ? 'Hot Run' : lossRate <= 25 ? 'Stable' : 'Volatile';
   const formLabel = totalMatches === 0 ? 'Unranked' : winRate >= 65 ? 'Title Contender' : winRate >= 45 ? 'Knockout Threat' : 'Rebuild Mode';
+  const heroRank = document.getElementById('profileHeroRank');
+  const heroMeta = document.getElementById('profileHeroMeta');
+  if (heroRank) heroRank.textContent = formLabel;
+  if (heroMeta) heroMeta.textContent = totalMatches ? `${totalMatches} matches · ${winRate}% win rate` : 'Ready for a first tournament';
   const profileStyle = totalMatches === 0
     ? 'Play one tournament to unlock a style read.'
     : goalDiff >= 6
@@ -168,8 +174,10 @@ const App = (() => {
 }
 
 function renderStatsChart(stats) {
-  const ctx = document.getElementById('statsChart').getContext('2d');
-  new Chart(ctx, {
+  const canvas = document.getElementById('statsChart');
+  if (!canvas) return;
+  if (profileStatsChart) profileStatsChart.destroy();
+  profileStatsChart = new Chart(canvas.getContext('2d'), {
     type: 'doughnut',
     data: {
       labels: ['Wins', 'Draws', 'Losses'],
@@ -185,18 +193,21 @@ function renderStatsChart(stats) {
           '#ffffff',
           '#f0455a'
         ],
-        borderWidth: 1
+        borderWidth: 0,
+        hoverOffset: 5
       }]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,
+      cutout: '72%',
       plugins: {
         legend: {
-          position: 'top',
+          position: 'bottom',
+          labels: { color: '#8b8b96', boxWidth: 8, boxHeight: 8, usePointStyle: true, padding: 14 }
         },
         title: {
-          display: true,
-          text: 'Match Record'
+          display: false
         }
       }
     }
@@ -265,7 +276,12 @@ function renderStatsChart(stats) {
       profileError.classList.add('hidden');
       document.getElementById('profileCurrentPassword').value = '';
       document.getElementById('profileNewPassword').value = '';
-      document.getElementById('profileUsername').value = state.user ? state.user.username : '';
+      const profileName = state.user ? state.user.username : 'Manager';
+      document.getElementById('profileUsername').value = profileName;
+      document.getElementById('profileHeroName').textContent = profileName;
+      document.getElementById('profileHeroInitials').textContent = profileName.split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase() || 'DB';
+      document.getElementById('profileHeroRank').textContent = 'Fresh Start';
+      document.getElementById('profileHeroMeta').textContent = 'Career data loading...';
       document.getElementById('profileEmail').value = '...';
       document.getElementById('profileFriendCode').textContent = state.user && state.user.friendCode ? state.user.friendCode : '-----';
       document.getElementById('friendCodeInput').value = '';
@@ -297,6 +313,8 @@ function renderStatsChart(stats) {
         const { user } = await Api.me();
         document.getElementById('profileEmail').value = user.email;
         document.getElementById('profileFriendCode').textContent = user.friendCode || '-----';
+        document.getElementById('profileHeroName').textContent = user.username;
+        document.getElementById('profileHeroInitials').textContent = user.username.split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase() || 'DB';
         state.user = { ...state.user, ...user };
       } catch { /* ignore — dialog still usable for password change / logout */ }
       loadProfileFriends();
@@ -309,7 +327,7 @@ function renderStatsChart(stats) {
           <div class="career-stat"><span class="career-value">🏆 ${stats.titles}</span><span class="career-label">Titles</span></div>
           <div class="career-stat"><span class="career-value">${stats.w}-${stats.d}-${stats.l}</span><span class="career-label">W-D-L</span></div>
           <div class="career-stat"><span class="career-value">${stats.gf}-${stats.ga}</span><span class="career-label">Goals For-Against</span></div>
-          <div class="career-stat" style="grid-column: 1 / -1;"><span class="career-value">${winRate}%</span><span class="career-label">Win Rate</span></div>
+          <div class="career-stat"><span class="career-value">${winRate}%</span><span class="career-label">Win Rate</span></div>
         `;
         if (insightsEl) renderProfileInsights(insightsEl, roadmapEl, stats, labelByLayout[selectedLayout] || selectedLayout);
         renderStatsChart(stats);
@@ -365,7 +383,8 @@ function renderStatsChart(stats) {
         `;
 
         const ctx = document.getElementById('friendStatsChart').getContext('2d');
-        new Chart(ctx, {
+        if (friendStatsChart) friendStatsChart.destroy();
+        friendStatsChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
             labels: ['Wins', 'Draws', 'Losses'],

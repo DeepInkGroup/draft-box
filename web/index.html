@@ -90,68 +90,95 @@
     </div>
 </dialog>
 
-  <dialog id="profileDialog" class="dialog dialog-wide">
-    <div class="dialog-form profile-shell">
-      <div class="profile-head">
-        <div>
-          <h3>Profile</h3>
-          <p class="muted">Manager identity, friends and draft preferences.</p>
+    <dialog id="profileDialog" class="dialog dialog-wide">
+    <div class="dialog-form profile-shell profile-redesign">
+      <header class="profile-hero">
+        <div class="profile-hero-glow" aria-hidden="true"></div>
+        <div class="profile-avatar" id="profileHeroInitials" aria-hidden="true">DB</div>
+        <div class="profile-hero-copy">
+          <span class="profile-eyebrow">Draft Box Manager</span>
+          <h3 id="profileHeroName">Your Profile</h3>
+          <p>Shape your setup, track your form, and stay connected to your rivals.</p>
+          <div class="profile-status-line">
+            <span class="profile-rank" id="profileHeroRank">Fresh Start</span>
+            <span id="profileHeroMeta">Career data loading...</span>
+          </div>
         </div>
         <div class="profile-head-actions">
           <button id="btnViewHistory" class="btn btn-ghost btn-sm">Match History</button>
-          <button id="btnCloseProfile" class="btn btn-ghost btn-sm">Close</button>
+          <button id="btnCloseProfile" class="profile-close" aria-label="Close profile">&times;</button>
         </div>
-      </div>
-      <div class="profile-grid-minimal">
-        <section class="profile-panel identity-panel">
-          <h4>Identity</h4>
-          <div class="profile-mini-fields">
-            <div class="field"><label>Username</label><input id="profileUsername" type="text" disabled /></div>
-            <div class="field"><label>Email</label><input id="profileEmail" type="text" disabled /></div>
-          </div>
-          <div class="friend-card compact">
-            <div><span>Friend ID</span><b id="profileFriendCode">-----</b></div>
-            <p>Share it or add another manager.</p>
-          </div>
-          <div class="friend-add-row">
-            <input id="friendCodeInput" type="text" maxlength="5" placeholder="E3202" />
-            <button id="btnAddFriend" class="btn btn-primary btn-sm">Add Friend</button>
-          </div>
-          <div id="profileFriends" class="friend-list"><p class="muted">Loading friends...</p></div>
-        </section>
+      </header>
 
-        <section class="profile-panel stats-panel">
-          <h4>Career</h4>
-          <div id="profileCareer" class="career-grid"><p class="muted">Loading...</p></div>
-          <canvas id="statsChart"></canvas>
-          <div id="profileInsights" class="profile-insights"></div>
-        </section>
+      <div class="profile-dashboard">
+        <aside class="profile-sidebar">
+          <section class="profile-panel identity-panel">
+            <div class="profile-section-heading"><span>01</span><div><h4>Manager Card</h4><p>Your account identity</p></div></div>
+            <div class="profile-account-fields">
+              <div class="field"><label>Username</label><input id="profileUsername" type="text" disabled /></div>
+              <div class="field"><label>Email</label><input id="profileEmail" type="text" disabled /></div>
+            </div>
+            <div class="friend-card compact">
+              <div><span>Friend ID</span><b id="profileFriendCode">-----</b></div>
+              <p>Share this code with another manager.</p>
+            </div>
+          </section>
 
-        <section class="profile-panel settings-panel">
-          <h4>Draft View</h4>
-          <p class="muted profile-help">Pick how the squad map and player list are arranged.</p>
-          <div id="profileDraftLayout"></div>
-          <h4>Password</h4>
-          <div class="password-grid">
-            <div class="field"><label>Current</label><input id="profileCurrentPassword" type="password" /></div>
-            <div class="field"><label>New</label><input id="profileNewPassword" type="password" placeholder="at least 6 characters" /></div>
-          </div>
-          <button id="btnChangePassword" class="btn btn-primary btn-block">Update Password</button>
-          <div class="error-text hidden" id="profileError"></div>
-        </section>
+          <section class="profile-panel network-panel">
+            <div class="profile-section-heading"><span>02</span><div><h4>Manager Network</h4><p>Friends and challengers</p></div></div>
+            <div class="friend-add-row">
+              <input id="friendCodeInput" type="text" maxlength="5" placeholder="ENTER ID" aria-label="Friend ID" />
+              <button id="btnAddFriend" class="btn btn-primary btn-sm">Add</button>
+            </div>
+            <div id="profileFriends" class="friend-list"><p class="muted">Loading friends...</p></div>
+          </section>
+        </aside>
 
-        <section id="profileRoadmap" class="profile-ideas profile-panel plan-panel">
-          <div class="profile-idea-head">Profile Roadmap</div>
-          <div class="profile-idea-list">
-            <div><b>Manager Identity</b><span>Preferred style, draft layout and form label.</span></div>
-            <div><b>Signature XI</b><span>Most-used shape, strongest line and star picks.</span></div>
-            <div><b>Chemistry Lab</b><span>Position fit and team balance from recent squads.</span></div>
+        <main class="profile-main">
+          <section class="profile-panel stats-panel profile-career-panel">
+            <div class="profile-section-heading"><span>03</span><div><h4>Career Pulse</h4><p>Your competitive record at a glance</p></div></div>
+            <div id="profileCareer" class="career-grid"><p class="muted">Loading...</p></div>
+            <div class="profile-performance-grid">
+              <div class="profile-chart-card">
+                <span class="profile-chart-label">Match outcomes</span>
+                <div class="profile-chart-wrap"><canvas id="statsChart"></canvas></div>
+              </div>
+              <div id="profileInsights" class="profile-insights"></div>
+            </div>
+          </section>
+
+          <div class="profile-preferences-grid">
+            <section class="profile-panel settings-panel">
+              <div class="profile-section-heading"><span>04</span><div><h4>Draft Workspace</h4><p>Choose your ideal board</p></div></div>
+              <div id="profileDraftLayout"></div>
+            </section>
+
+            <section class="profile-panel security-panel">
+              <div class="profile-section-heading"><span>05</span><div><h4>Security</h4><p>Refresh your password</p></div></div>
+              <div class="password-grid">
+                <div class="field"><label>Current password</label><input id="profileCurrentPassword" type="password" autocomplete="current-password" /></div>
+                <div class="field"><label>New password</label><input id="profileNewPassword" type="password" autocomplete="new-password" placeholder="6+ characters" /></div>
+              </div>
+              <button id="btnChangePassword" class="btn btn-primary btn-block">Update Password</button>
+              <div class="error-text hidden" id="profileError"></div>
+            </section>
           </div>
-        </section>
+
+          <section id="profileRoadmap" class="profile-ideas profile-panel plan-panel">
+            <div class="profile-idea-head">Manager Game Plan</div>
+            <div class="profile-idea-list">
+              <div><b>Draft Focus</b><span>Loading your next squad priority...</span></div>
+              <div><b>Match Plan</b><span>Reading your recent form...</span></div>
+              <div><b>Next Milestone</b><span>Building your next target...</span></div>
+            </div>
+          </section>
+        </main>
       </div>
-      <div class="dialog-actions profile-footer-actions">
-        <button id="btnLogout" class="btn btn-ghost" style="color: var(--danger);">Log out</button>
-      </div>
+
+      <footer class="profile-footer">
+        <span>Your Draft Box profile updates after every completed tournament.</span>
+        <button id="btnLogout" class="btn btn-ghost btn-sm profile-logout">Log out</button>
+      </footer>
     </div>
   </dialog>
 
