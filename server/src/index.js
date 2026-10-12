@@ -25,6 +25,7 @@ app.get('/api/teams', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/tactics', tacticsRoutes);
+app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));
 
 app.use(express.static(WEB_DIR));
 app.get('*', (req, res, next) => {
@@ -44,6 +45,6 @@ const io = new Server(server, {
 registerSocketHandlers(io);
 app.set('io', io);
 
-server.listen(config.port, () => {
-  console.log(`draft-box-server listening on :${config.port}`);
+server.listen(config.port, '0.0.0.0', () => {
+  console.log(`draft-box-server listening on :${server.address().port}`);
 });

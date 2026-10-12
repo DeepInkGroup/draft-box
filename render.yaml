@@ -3,15 +3,18 @@ services:
     name: draft-box-server
     runtime: docker
     dockerfilePath: ./server/Dockerfile
-    dockerContext: ./server
+    dockerContext: .
     plan: free
+    healthCheckPath: /api/health
     envVars:
       - key: JWT_SECRET
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://YOUR_GH_USERNAME.github.io
+        value: https://deepinkgroup.github.io
       - key: PORT
         value: 4321
+      - key: DB_PATH
+        value: /app/data/draftbox.sqlite
     # Free-tier web services have an EPHEMERAL filesystem: the SQLite DB is wiped
     # on every deploy/restart. To persist real user data, upgrade this service to
     # a paid plan and uncomment the block below to attach a real disk:

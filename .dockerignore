@@ -1,0 +1,10 @@
+.git
+.codepilot-uploads
+.npm-cache
+.devcontainer
+**/node_modules
+**/.env
+**/*.sqlite*
+**/*.log
+docs
+data

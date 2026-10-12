@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-const auth = require('../middleware/auth');
+const { requireAuth: auth } = require('../middleware/auth');
 
 const TACTIC_COLUMNS = [
   'attack', 'defense', 'possession', 'passAccuracy', 'foulBias', 'tempo', 'risk',

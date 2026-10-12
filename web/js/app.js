@@ -256,7 +256,11 @@ function renderStatsChart(stats) {
     document.getElementById('btnSaveSettings').addEventListener('click', (e) => {
       e.preventDefault();
       const val = document.getElementById('apiBaseInput').value.trim();
-      if (val) setApiBase(val);
+      try {
+        setApiBase(val);
+      } catch (err) {
+        return toast(err.message, true);
+      }
       settingsDialog.close();
       toast('Server address saved');
       disconnectSocket();

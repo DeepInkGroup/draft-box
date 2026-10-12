@@ -1,6 +1,8 @@
 services:
   draft-box-server:
-    build: ./server
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     ports:
       - "4321:4321"
     environment:

@@ -4,9 +4,13 @@
   "description": "Backend for Draft Box - World Cup player draft & league game",
   "type": "commonjs",
   "main": "src/index.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
+    "test": "node --test test/*.test.js",
     "gen:data": "node src/data/generate-teams-from-txt.js"
   },
   "dependencies": {
@@ -15,7 +19,9 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "socket.io": "^4.7.5",
-    "better-sqlite3": "^11.1.2"
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
   }
 }

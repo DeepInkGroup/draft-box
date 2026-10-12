@@ -61,7 +61,7 @@
   <dialog id="settingsDialog" class="dialog">
     <form method="dialog" class="dialog-form">
       <h3>Game Server Address (Backend URL)</h3>
-      <p class="muted">This frontend is static (GitHub Pages); enter the URL of your deployed Docker/Node backend here.</p>
+      <p class="muted">Enter your game server's address, or leave blank to use the default server.</p>
       <input id="apiBaseInput" type="text" placeholder="https://your-backend.example.com" />
       <div class="dialog-actions">
         <button value="cancel" class="btn btn-ghost">Cancel</button>
@@ -349,6 +349,7 @@
   </dialog>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script src="js/deploy-config.js"></script>
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/formations.js"></script>

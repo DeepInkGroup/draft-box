@@ -1,14 +1,15 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
-WORKDIR /app
+WORKDIR /app/server
 
-COPY package.json package-lock.json* ./
-RUN npm install --omit=dev --no-audit --no-fund
+COPY server/package.json server/package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund
 
-COPY src ./src
+COPY server/src ./src
+COPY web /app/web
 
-# regenerate the final player database at build time
-RUN node src/data/generate-teams-from-txt.js
+# Regenerate the final player database at build time.
+RUN npm run gen:data
 
 ENV NODE_ENV=production
 ENV PORT=4321

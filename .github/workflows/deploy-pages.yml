@@ -25,6 +25,13 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Configure the game server address
+        env:
+          DRAFTBOX_API_BASE: ${{ vars.DRAFTBOX_API_BASE }}
+        run: node scripts/write-pages-config.cjs
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

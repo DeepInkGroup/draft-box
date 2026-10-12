@@ -16,6 +16,9 @@ const Api = (() => {
   }
 
   async function request(path, { method = 'GET', body } = {}) {
+    if (window.location.hostname.endsWith('.github.io') && getApiBase() === window.location.origin) {
+      throw new Error('Set your game server address in the server settings to connect.');
+    }
     const res = await fetch(apiUrl(path), {
       method,
       headers: {
