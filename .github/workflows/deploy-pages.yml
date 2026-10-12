@@ -38,3 +38,9 @@ jobs:
           path: web
       - id: deployment
         uses: actions/deploy-pages@v4
+      - name: Verify the hosted game connection
+        if: ${{ vars.DRAFTBOX_API_BASE != '' }}
+        env:
+          DRAFTBOX_API_BASE: ${{ vars.DRAFTBOX_API_BASE }}
+          DRAFTBOX_PAGES_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/check-hosted.cjs
