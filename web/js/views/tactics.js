@@ -154,7 +154,7 @@ const TacticsView = (() => {
     refreshVersions();
     const result = document.getElementById('labResults');
     if (result) result.innerHTML = '';
-    if (!selectedTactic) { form.innerHTML = '<div class="tactic-empty"><b>Select or create a tactic</b><span>Build a custom style, then use it from the tactical picker after drafting.</span></div>'; return; }
+    if (!selectedTactic) { form.innerHTML = '<div class="tactic-empty"><b>Select or create a tactic</b><span>Build a custom style, save versions and test it in the Match Lab.</span></div>'; return; }
     selectedTactic = normalizeTactic(selectedTactic);
     const textHtml = textFields.map(([key, label, placeholder, area]) => {
       const value = selectedTactic[key] ?? defaultTactic[key]; const input = area ? `<textarea id="tactic-${key}" rows="3" placeholder="${esc(placeholder)}">${esc(value)}</textarea>` : `<input type="text" id="tactic-${key}" value="${esc(value)}" placeholder="${esc(placeholder)}">`;
@@ -237,7 +237,7 @@ const TacticsView = (() => {
         const source = parsed.tactic || parsed;
         if (!source || typeof source !== 'object' || Array.isArray(source) || !String(source.name || '').trim()) throw new Error('Provide a tactic JSON object with a name.');
         const payload = Object.fromEntries(Object.keys(defaultTactic).filter((key) => Object.hasOwn(source, key)).map((key) => [key, source[key]]));
-        newTacticFromPreset(payload); App.toast('Imported as a new tactic. Save to use it in games.');
+        newTacticFromPreset(payload); App.toast('Imported as a new tactic. Save to add it to your library.');
       } catch (error) { App.toast(error.message, true); }
     };
     document.getElementById('tacticVersions').onchange = (event) => { document.getElementById('restoreTactic').disabled = !event.target.value; };

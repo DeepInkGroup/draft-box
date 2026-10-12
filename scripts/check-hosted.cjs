@@ -25,7 +25,7 @@ async function request(url, verify, options = {}, attempts = 6) {
   await request(apiBase + '/api/health', async (response) => {
     const health = await response.json();
     assert.equal(health.ok, true);
-    assert.equal(health.version, '2.0.0', 'Wait for the updated server deployment');
+    assert.equal(health.version, '2.1.3', 'Wait for the updated server deployment');
     const origin = response.headers.get('access-control-allow-origin');
     assert.ok(origin === '*' || origin === pagesOrigin, `Server CORS must allow ${pagesOrigin}; received ${origin}`);
   }, { headers: { Origin: pagesOrigin } }, 60);

@@ -64,13 +64,15 @@ npm run test:ui           # browser checks; use npx playwright install chromium 
 
 If you serve `web/` separately, enter `http://localhost:4321` in its server settings.
 
-## Version 2.0: season results and admin tools
+## Version 2.1.3: season results and admin tools
 
 After completing or skipping mid-season transfers, **Finish Season & View Results** simulates the remaining fixtures and saves every match. Results include the final table, champion, relegated clubs, team record, awards, top scorers, creators, goalkeeper saves and star moments.
 
-**Custom Tactics** and **Admin Panel** require an administrator account. The server checks the stored role for every restricted request and custom-tactic selection. Normal players keep all 12 built-in tactical styles.
+**Admin** signs directly into a dedicated admin workspace. Administrator accounts cannot create/join games, draft, play leagues or connect to the live game server; the server enforces this separation. Normal players keep all 12 built-in tactical styles. **Custom Tactics** is an administrative analysis tool inside the panel.
 
-The requested `Admin` account is initialized on first server startup. Its initial password is stored as a bcrypt hash; no password is included in browser code. Deploys never reset an existing account's password. Hosts can set `ADMIN_INITIAL_PASSWORD` before first startup to override the initial password. Use Profile to change the password.
+The requested `Admin` account is initialized on first server startup. Its initial password is stored as a bcrypt hash; no password is included in browser code. Deploys never reset an existing account's password. Hosts can set `ADMIN_INITIAL_PASSWORD` before first startup to override the initial password. Use **Admin Panel → Account** to change the password.
+
+**Users** provides an administrator-only directory with usernames, emails, roles, friend codes, signup dates, last login and last activity, plus account details and recent games. Search, role/activity filters, sorting and pagination help inspect accounts. **Online** means at least one live game connection; **Recently active** means an authenticated request in the last five minutes; **Offline** means older activity; **No activity recorded** means there is no recorded timestamp (including older accounts before activity tracking). The directory never exposes password hashes or tokens. Refresh updates the overview and directory; desktop and mobile navigation keep each administrative task in its own section.
 
 The admin panel offers searchable PGL and World Cup player profiles, club/position/rating filters, comparisons of up to three players, game totals and league reports with club/player statistics. The tactics lab adds 12 built-in templates, bounded sliders with trade-offs, JSON import/export, duplication, saved version history and restore. Its Match Lab compares the current editor values against Balanced in 20–100 simulations per style using the actual match engine and the same XI, opponent and neutral morale. Random samples vary; these experiments do not advance a saved season.
 

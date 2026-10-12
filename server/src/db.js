@@ -146,6 +146,9 @@ if (!columnExists('rooms', 'squad_mode')) {
 if (!columnExists('users', 'role')) {
   db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';");
 }
+for (const column of ['last_login_at', 'last_seen_at']) {
+  if (!columnExists('users', column)) db.exec(`ALTER TABLE users ADD COLUMN ${column} TEXT;`);
+}
 db.exec(`CREATE TABLE IF NOT EXISTS tactic_versions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tactic_id INTEGER NOT NULL REFERENCES custom_tactics(id) ON DELETE CASCADE,

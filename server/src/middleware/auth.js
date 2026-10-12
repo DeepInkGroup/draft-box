@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const db = require('../db');
+const { touchUser } = require('../userActivity');
 
 function signToken(user) {
   return jwt.sign({ id: user.id, username: user.username }, config.jwtSecret, { expiresIn: '30d' });
@@ -19,7 +20,10 @@ function requireAuth(req, res, next) {
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   const payload = token && verifyToken(token);
   if (!payload) return res.status(401).json({ error: 'unauthorized' });
-  req.user = payload;
+  const user = db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(payload.id);
+  if (!user) return res.status(401).json({ error: 'unauthorized' });
+  req.user = user;
+  touchUser(user.id);
   next();
 }
 
@@ -33,4 +37,10 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-module.exports = { signToken, verifyToken, requireAuth, requireAdmin, isAdmin };
+function requirePlayer(req, res, next) {
+  if (!req.user) return requireAuth(req, res, () => requirePlayer(req, res, next));
+  if (req.user.role === 'admin') return res.status(403).json({ error: 'Administrator accounts can only use the admin panel' });
+  next();
+}
+
+module.exports = { signToken, verifyToken, requireAuth, requireAdmin, requirePlayer, isAdmin };

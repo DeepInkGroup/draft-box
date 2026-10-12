@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const db = require('../db');
-const { signToken, requireAuth } = require('../middleware/auth');
+const { signToken, requireAuth, requirePlayer } = require('../middleware/auth');
 const { computeTeamRecord, findMyCode } = require('../game/tournamentEngine');
 const { analyzeMatch, resultOutcome } = require('../game/matchAnalysis');
 
@@ -66,6 +66,7 @@ router.post('/register', (req, res) => {
     .run(username, email, friendCode, hash);
 
   const user = { id: Number(info.lastInsertRowid), username, friendCode, role: 'user' };
+  db.prepare("UPDATE users SET last_login_at = datetime('now'), last_seen_at = datetime('now') WHERE id = ?").run(user.id);
   const token = signToken(user);
   res.status(201).json({ token, user });
 });
@@ -80,6 +81,7 @@ router.post('/login', (req, res) => {
   }
 
   const user = { id: row.id, username: row.username, friendCode: row.friend_code, role: row.role };
+  db.prepare("UPDATE users SET last_login_at = datetime('now'), last_seen_at = datetime('now') WHERE id = ?").run(user.id);
   const token = signToken(user);
   res.json({ token, user });
 });
@@ -90,7 +92,7 @@ router.get('/me', requireAuth, (req, res) => {
   res.json({ user: row });
 });
 
-router.get('/friends', requireAuth, (req, res) => {
+router.get('/friends', requireAuth, requirePlayer, (req, res) => {
   const rows = db.prepare(`
     SELECT f.*, ru.username AS requester_username, ru.friend_code AS requester_code,
            au.username AS addressee_username, au.friend_code AS addressee_code
@@ -103,7 +105,7 @@ router.get('/friends', requireAuth, (req, res) => {
   res.json({ friends: rows.map((row) => mapFriendRow(row, req.user.id)) });
 });
 
-router.post('/friends/request', requireAuth, (req, res) => {
+router.post('/friends/request', requireAuth, requirePlayer, (req, res) => {
   const friendCode = String((req.body && req.body.friendCode) || '').trim().toUpperCase();
   if (!/^[A-Z][0-9]{4}$/.test(friendCode)) return res.status(400).json({ error: 'friend id must look like E3202' });
 
@@ -122,7 +124,7 @@ router.post('/friends/request', requireAuth, (req, res) => {
   res.status(201).json({ ok: true, status: 'pending' });
 });
 
-router.post('/friends/respond', requireAuth, (req, res) => {
+router.post('/friends/respond', requireAuth, requirePlayer, (req, res) => {
   const id = Number(req.body && req.body.id);
   const action = String((req.body && req.body.action) || '').toLowerCase();
   if (!id || !['accept', 'reject'].includes(action)) return res.status(400).json({ error: 'id and action are required' });
@@ -159,7 +161,7 @@ router.post('/change-password', requireAuth, (req, res) => {
 // Career stats: scans every finished tournament this user was a human participant in
 // and aggregates titles/record/goals from the same matchLog + events used for the
 // in-tournament "My Team" recap card — same source of truth, just summed across rooms.
-router.get('/me/career', requireAuth, (req, res) => {
+router.get('/me/career', requireAuth, requirePlayer, (req, res) => {
   const rows = db.prepare(`
     SELECT r.tournament_state FROM rooms r
     JOIN room_members rm ON rm.room_id = r.id
@@ -193,7 +195,7 @@ router.get('/me/career', requireAuth, (req, res) => {
   res.json({ tournaments, titles, w, d, l, gf, ga });
 });
 
-router.get('/users/:id/career', requireAuth, (req, res) => {
+router.get('/users/:id/career', requireAuth, requirePlayer, (req, res) => {
     const userId = Number(req.params.id);
     if (isNaN(userId)) return res.status(400).json({ error: 'invalid user id' });
 
@@ -234,7 +236,7 @@ router.get('/users/:id/career', requireAuth, (req, res) => {
 // tournament, most recent tournament first — each match carries a generated performance
 // analysis (matchAnalysis.js) explaining why it went the way it did, so a player can look
 // back at their whole record, not just the headline W-D-L from /me/career.
-router.get('/me/matches', requireAuth, (req, res) => {
+router.get('/me/matches', requireAuth, requirePlayer, (req, res) => {
   const rows = db.prepare(`
     SELECT r.code, r.name, r.created_at, r.tournament_state FROM rooms r
     JOIN room_members rm ON rm.room_id = r.id

@@ -1,12 +1,12 @@
 const express = require('express');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requirePlayer } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const { openSlots } = require('../game/draftEngine');
 const { getLeague } = require('../data/competitions');
 const { clubSquadSnapshot } = require('../game/leagueSquads');
 
 const router = express.Router();
-router.use(requireAuth);
+router.use(requireAuth, requirePlayer);
 router.get('/', (req, res) => res.json({ leagues: rm.listUserLeagues(req.user.id) }));
 
 function serializeRoom(roomRow) {

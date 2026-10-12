@@ -106,7 +106,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const injection = await request('/api/auth/register', { body: { username: 'injection_test', email: 'injection@example.test', password: 'test-password', role: 'admin' }, status: 201 });
   assert.equal(injection.user.role, 'user');
   await request('/api/admin/overview', { status: 401 });
-  for (const route of ['/api/admin/overview', '/api/admin/players', '/api/admin/leagues', '/api/admin/leagues/missing', '/api/tactics', '/api/tactics/templates', '/api/tactics/1/versions']) await request(route, { token: owner.token, status: 403 });
+  for (const route of ['/api/admin/overview', '/api/admin/users', '/api/admin/users/1', '/api/admin/players', '/api/admin/leagues', '/api/admin/leagues/missing', '/api/tactics', '/api/tactics/templates', '/api/tactics/1/versions']) await request(route, { token: owner.token, status: 403 });
   for (const [route, method] of [['/api/tactics', 'POST'], ['/api/tactics/1', 'PUT'], ['/api/tactics/1', 'DELETE'], ['/api/tactics/preview', 'POST'], ['/api/tactics/1/restore', 'POST']]) await request(route, { token: injection.token, method, body: { name: 'Forbidden' }, status: 403 });
   const jwt = require('jsonwebtoken');
   const spoofed = jwt.sign({ id: owner.user.id, username: owner.user.username, role: 'admin' }, 'deployment-test-secret');
@@ -156,6 +156,43 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   ready = event(hostSocket, 'room:memberUpdate');
   await request(`/api/rooms/${room.code}/join`, { token: friend.token, body: { formation: '4-4-2' } });
   assert.equal((await ready).members.length, 2);
+  const accounts = await request('/api/admin/users?search=host%40example.test', { token: admin.token });
+  assert.equal(accounts.total, 1);
+  assert.equal(accounts.users[0].username, owner.user.username);
+  assert.equal(accounts.users[0].email, 'host@example.test');
+  assert.equal(accounts.users[0].status, 'online');
+  assert.ok(accounts.users[0].lastLogin && accounts.users[0].lastSeen);
+  assert.ok(!('password_hash' in accounts.users[0]));
+  const userDetail = await request('/api/admin/users/' + owner.user.id, { token: admin.token });
+  assert.equal(userDetail.games.total, 1);
+  assert.equal(userDetail.rooms[0].code, room.code);
+  assert.ok(!('password_hash' in userDetail.user));
+  await request('/api/admin/users/999999', { token: admin.token, status: 404 });
+  await request('/api/admin/users/no-id', { token: admin.token, status: 400 });
+  assert.equal((await request('/api/admin/users?role=admin', { token: admin.token })).total, 1);
+  assert.equal((await request('/api/admin/users?search=notfound', { token: admin.token })).total, 0);
+  const presenceA = await connect(injection.token), presenceB = await connect(injection.token);
+  presenceA.disconnect();
+  assert.equal((await request('/api/admin/users/' + injection.user.id, { token: admin.token })).user.status, 'online');
+  presenceB.disconnect();
+  let disconnectedStatus;
+  for (let i = 0; i < 10; i++) {
+    disconnectedStatus = (await request('/api/admin/users/' + injection.user.id, { token: admin.token })).user.status;
+    if (disconnectedStatus !== 'online') break;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  assert.equal(disconnectedStatus, 'recent');
+  const { DatabaseSync } = require('node:sqlite');
+  const fixtures = new DatabaseSync(dbPath);
+  fixtures.prepare("UPDATE users SET last_seen_at = '2000-01-01 00:00:00' WHERE id = ?").run(injection.user.id);
+  for (let i = 0; i < 21; i++) fixtures.prepare('INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, ?)').run('directory_' + i, 'directory_' + i + '@example.test', 'unused-fixture-hash', 'user');
+  fixtures.close();
+  assert.equal((await request('/api/admin/users?status=offline', { token: admin.token })).users[0].id, injection.user.id);
+  const dormant = await request('/api/admin/users?status=new&page=1', { token: admin.token });
+  assert.equal(dormant.total, 21);
+  assert.equal(dormant.users.length, 20);
+  assert.equal(dormant.pages, 2);
+  assert.equal((await request('/api/admin/users?status=new&page=2', { token: admin.token })).users.length, 1);
   const friendSocket = await connect(friend.token);
   ready = event(friendSocket, 'room:state');
   friendSocket.emit('room:join', { code: room.code });
@@ -203,24 +240,10 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.equal(league.teamCount, 18);
   assert.equal(league.matchdays, 34);
   const clubCode = league.teams[0].code;
-  const adminSocket = await connect(admin.token);
-  const adminSeason = await request('/api/rooms/singleplayer', { token: admin.token, body: { mode: 'league', leagueId: 'pgl', clubCode, squadMode: 'real', formation: '4-3-3' }, status: 201 });
-  ready = event(adminSocket, 'room:state'); adminSocket.emit('room:join', { code: adminSeason.code }); await ready;
-  ready = event(adminSocket, 'tournament:started');
-  adminSocket.emit('draft:setTacticalStyle', { code: adminSeason.code, tacticalStyle: 'custom:' + tactic.id }); await ready;
-  ready = event(adminSocket, 'league:midseason'); adminSocket.emit('league:skipToTransfers', { code: adminSeason.code });
-  const adminHalf = await ready;
-  const customMatch = adminHalf.step.matches.find((match) => match.aCode === clubCode || match.bCode === clubCode);
-  const customSide = customMatch.aCode === clubCode ? 'A' : 'B';
-  assert.equal(customMatch.tactical[customSide].custom, true);
-  assert.equal(customMatch.tactical[customSide].key, 'custom:' + tactic.id);
-  ready = event(adminSocket, 'league:transferState'); adminSocket.emit('league:transfer', { code: adminSeason.code, action: 'skip' });
-  assert.equal((await ready).transfers.phase, 'skipped');
-  ready = event(adminSocket, 'league:seasonFinished'); adminSocket.emit('league:finishSeason', { code: adminSeason.code });
-  const adminFinish = await ready;
-  assert.equal(adminFinish.viewedStep, 34);
-  assert.equal(adminFinish.step.seasonResults.matches, 306);
-  assert.equal(adminFinish.step.champion.code, adminFinish.league.table[0].code);
+  await assert.rejects(connect(admin.token), /only use the admin panel/);
+  for (const [route, method] of [['/api/rooms', 'GET'], ['/api/rooms', 'POST'], ['/api/rooms/singleplayer', 'POST'], ['/api/rooms/' + room.code + '/join', 'POST'], ['/api/rooms/' + room.code + '/start', 'POST'], ['/api/auth/me/career', 'GET'], ['/api/auth/me/matches', 'GET'], ['/api/auth/friends', 'GET'], ['/api/auth/friends/request', 'POST']]) {
+    await request(route, { token: admin.token, method, ...(method === 'POST' ? { body: {} } : {}), status: 403 });
+  }
 
   await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'missing', clubCode }, status: 400 });
   await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode: 'IRN' }, status: 400 });

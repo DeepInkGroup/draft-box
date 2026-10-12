@@ -1,4 +1,6 @@
 const { verifyToken } = require('../middleware/auth');
+const db = require('../db');
+const activity = require('../userActivity');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
@@ -161,11 +163,16 @@ function registerSocketHandlers(io) {
     const token = socket.handshake.auth?.token;
     const payload = token && verifyToken(token);
     if (!payload) return next(new Error('unauthorized'));
-    socket.user = payload;
+    const user = db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(payload.id);
+    if (!user) return next(new Error('unauthorized'));
+    if (user.role === 'admin') return next(new Error('Administrator accounts can only use the admin panel'));
+    socket.user = user;
     next();
   });
 
   io.on('connection', (socket) => {
+    activity.connected(socket.user.id, socket.id);
+    socket.onAny(() => activity.touchUser(socket.user.id));
     socket.on('room:join', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
       if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
@@ -575,6 +582,7 @@ function registerSocketHandlers(io) {
     });
 
     socket.on('disconnect', () => {
+      activity.disconnected(socket.user.id, socket.id);
       // no server-side game-state changes on disconnect; state (and any running pick
       // timer) persists in memory and the draft can be resumed on reconnect.
     });

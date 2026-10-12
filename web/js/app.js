@@ -12,20 +12,26 @@ const App = (() => {
 
   function toast(msg, isError) {
     toastEl.textContent = msg;
-    toastEl.style.background = isError ? 'var(--danger)' : 'var(--ink)';
+    toastEl.style.background = isError ? 'var(--danger)' : 'var(--surface-2)';
+    toastEl.style.color = isError ? '#fff' : 'var(--ink)';
     toastEl.classList.remove('hidden');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.add('hidden'), 3500);
   }
 
   function setHeader() {
-    profileBtn.classList.toggle('hidden', !state.user);
-    tacticsBtn.classList.toggle('hidden', state.user?.role !== 'admin');
+    const admin = state.user?.role === 'admin';
+    document.body.classList.toggle('admin-session', admin);
+    profileBtn.classList.toggle('hidden', !state.user || admin);
+    tacticsBtn.classList.add('hidden');
     adminBtn.classList.toggle('hidden', state.user?.role !== 'admin');
-    homeBtn.classList.toggle('hidden', !state.user);
+    homeBtn.classList.toggle('hidden', !state.user || admin);
+    document.getElementById('btnRulebook').classList.toggle('hidden', admin);
+    document.getElementById('btnGameGuide').classList.toggle('hidden', admin);
   }
 
   function ensureSocket() {
+    if (state.user?.role === 'admin') throw new Error('Administrator accounts can only use the admin panel');
     if (state.socket) return state.socket;
     state.socket = io(getApiBase(), { auth: { token: sessionStorage.getItem('draftbox.token') } });
     state.socket.on('connect_error', (e) => toast('Server connection error: ' + e.message, true));
@@ -51,44 +57,49 @@ const App = (() => {
   }
 
   function goDashboard(startMode) {
+    if (state.user?.role === 'admin') return goAdmin();
     location.hash = '';
     DashboardView.render(appEl);
     if (startMode === 'create') DashboardView.renderCreateRoom(appEl);
   }
 
   function goLobby(code) {
+    if (state.user?.role === 'admin') return goAdmin();
     state.roomCode = code;
     location.hash = `lobby/${code}`;
     LobbyView.render(appEl, code);
   }
 
   function goDraft(code) {
+    if (state.user?.role === 'admin') return goAdmin();
     state.roomCode = code;
     location.hash = `draft/${code}`;
     DraftView.render(appEl, code);
   }
 
   function goTournament(code) {
+    if (state.user?.role === 'admin') return goAdmin();
     state.roomCode = code;
     location.hash = `tournament/${code}`;
     TournamentView.render(appEl, code);
   }
 
   function goMatchHistory() {
+    if (state.user?.role === 'admin') return goAdmin();
     location.hash = 'history';
     MatchHistoryView.render(appEl);
   }
 
   function goTactics() {
     if (state.user?.role !== 'admin') { toast('Custom Tactics requires admin access.', true); return goDashboard(); }
-    location.hash = 'tactics';
-    TacticsView.init(appEl);
+    goAdmin('tactics');
   }
 
-  function goAdmin() {
+  function goAdmin(tab = 'overview') {
     if (state.user?.role !== 'admin') { toast('Admin access required.', true); return goDashboard(); }
-    location.hash = 'admin';
-    AdminView.render(appEl);
+    disconnectSocket();
+    location.hash = tab === 'overview' ? 'admin' : `admin/${tab}`;
+    AdminView.render(appEl, tab);
   }
 
   function onAuthed(user, token) {
@@ -478,6 +489,7 @@ function renderStatsChart(stats) {
 
     const hash = location.hash.replace(/^#\/?/, '');
     const [view, code] = hash.split('/');
+    if (state.user?.role === 'admin') return goAdmin(view === 'admin' ? code || 'overview' : view === 'tactics' ? 'tactics' : 'overview');
     if (view === 'lobby' && code) return goLobby(code);
     if (view === 'draft' && code) return goDraft(code);
     if (view === 'tournament' && code) return goTournament(code);

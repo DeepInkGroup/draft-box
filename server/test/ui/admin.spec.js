@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('node:path');
 for (const width of [1280, 390]) {
-  test(`admin player analysis and tactics lab at ${width}px`, async ({ page }) => {
+  test(`admin player analysis and tactics lab at ${width}px`, async ({ page, request }) => {
     await page.setViewportSize({ width, height: 900 });
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
@@ -9,13 +9,46 @@ for (const width of [1280, 390]) {
     await page.route('https://fonts.googleapis.com/**', (route) => route.abort());
     await page.route('https://fonts.gstatic.com/**', (route) => route.abort());
     await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort());
+    const username = 'panel_379593_' + width;
+    const email = username + '@example.test';
+    const registration = await request.post('/api/auth/register', { data: { username, email, password: 'test-password' } });
+    expect(registration.status()).toBe(201);
     await page.goto('/');
     await page.locator('#authUsername').fill('Admin');
     await page.locator('#authPassword').fill(process.env.ADMIN_INITIAL_PASSWORD || 'ui-admin-password');
     await page.locator('#authSubmit').click();
     await expect(page.locator('#btnAdmin')).toBeVisible();
-    await expect(page.locator('#btnTactics')).toBeVisible();
-    await page.locator('#btnAdmin').click();
+    await expect(page.locator('#btnTactics')).toBeHidden();
+    await expect(page.locator('#btnHome')).toBeHidden();
+    await expect(page.locator('#btnProfile')).toBeHidden();
+    await expect(page.locator('#btnGameGuide')).toBeHidden();
+    await expect(page.locator('#modeSingle')).toHaveCount(0);
+    await expect(page.locator('#adminPageTitle')).toHaveText('Overview');
+    await expect(page.locator('#adminMetrics .admin-stat')).toHaveCount(5);
+    await expect(page.locator('.site-footer')).toContainText('V 2.1.3');
+    expect(await page.evaluate(() => App.state.socket)).toBe(null);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+    await page.screenshot({ path: `test-results/admin-overview-${width}.png`, fullPage: true });
+    await page.locator('[data-admin-tab="users"]').click();
+    await page.locator('#adminUserSearch').fill(email);
+    await expect(page.locator('#adminUsersTable tbody tr')).toHaveCount(1);
+    await expect(page.locator('#adminUsersTable')).toContainText(email);
+    await expect(page.locator('#adminUsersTable')).toContainText('Recently active');
+    await page.getByRole('button', { name: 'Inspect ' + username, exact: true }).click();
+    await expect(page.locator('#adminUserDetail')).toContainText(email);
+    await expect(page.locator('#adminUserDetail')).toContainText('Last login');
+    await expect(page.locator('#adminUserDetail')).toContainText('No games joined');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
+    await page.screenshot({ path: `test-results/admin-users-${width}.png`, fullPage: true });
+    await page.locator('#adminCloseUser').click();
+    await expect(page.locator('#adminUserDetail')).toBeHidden();
+    await page.locator('#adminUserRole').selectOption('admin');
+    await expect(page.locator('#adminUsersTable')).toContainText('No matching accounts');
+    await page.locator('#adminClearUserFilters').click();
+    await page.locator('#adminUserRole').selectOption('admin');
+    await expect(page.locator('#adminUsersTable tbody tr')).toHaveCount(1);
+    await expect(page.locator('#adminUsersTable')).toContainText('Administrator');
+    await page.locator('[data-admin-tab="players"]').click();
     await expect(page.locator('#adminPlayerSummary')).toContainText('510 players');
     await page.locator('#adminPosition').selectOption('FW');
     await page.locator('#adminSearch').fill('Jasir');
@@ -31,7 +64,7 @@ for (const width of [1280, 390]) {
     await expect(page.locator('#adminPlayerSummary')).toContainText('players');
     await page.locator('#adminPosition').selectOption('');
     await expect(page.locator('#adminPlayerSummary')).toContainText('1248 players');
-    await page.locator('#adminTactics').click();
+    await page.locator('[data-admin-tab="tactics"]').click();
     await expect(page.locator('#tacticTemplate option')).toHaveCount(13);
     await page.locator('#tacticTemplate').selectOption({ label: 'Vertical Tiki-Taka' });
     await expect(page.locator('#tactic-name')).toHaveValue('Vertical Tiki-Taka Custom');
@@ -62,6 +95,18 @@ for (const width of [1280, 390]) {
     await expect(page.locator('#tactic-name')).toHaveValue('Imported Test');
     await expect(page.locator('#tacticVersionNote')).toContainText('New tactic');
     expect(Number(await page.locator('#tactic-attack').inputValue())).toBeLessThanOrEqual(1.28);
+    await page.locator('[data-admin-tab="settings"]').click();
+    await page.locator('#adminCurrentPassword').fill('ui-admin-password');
+    await page.locator('#adminNewPassword').fill('new-password');
+    await page.locator('#adminConfirmPassword').fill('wrong-confirmation');
+    await page.getByRole('button', { name: 'Update Password' }).click();
+    await expect(page.locator('#adminPasswordMessage')).toContainText('do not match');
+    await page.goto('/#tournament/FAKE');
+    await expect(page.locator('#adminPageTitle')).toHaveText('Overview');
+    await expect(page.locator('#btnContinue')).toHaveCount(0);
+    await page.locator('#adminLogout').click();
+    await expect(page.locator('#authSubmit')).toBeVisible();
+    await expect(page.locator('#adminConsole')).toHaveCount(0);
     expect(errors).toEqual([]);
   });
 }
