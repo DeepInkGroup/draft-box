@@ -66,10 +66,10 @@ const TournamentView = {
       transferZone.style.display = open ? '' : 'none';
       if (!open) return;
       if (transferState.phase === 'release') {
-        transferZone.innerHTML = `<h3>Mid-season Transfer Window</h3><p class="muted">First release exactly two players from your XI. Then choose two replacements. The season pauses until your XI is complete.</p>
-          <p id="releaseCount">${releaseSelection.size} of 2 players selected</p>
+        transferZone.innerHTML = `<h3>Mid-season Transfer Window</h3><p class="muted">First release one or two players from your XI (maximum 2). Then choose a replacement for each vacant position. The season pauses until your XI is complete.</p>
+          <p id="releaseCount">${releaseSelection.size} selected · maximum 2</p>
           <div class="transfer-player-grid">${transferState.squad.map((player) => `<button class="transfer-player-card ${releaseSelection.has(player.id) ? 'selected' : ''}" data-release="${player.id}" aria-pressed="${releaseSelection.has(player.id)}" ${transferPending ? 'disabled' : ''}>${transferPlayerHtml(player)}</button>`).join('')}</div>
-          <div class="dialog-actions"><button class="btn btn-ghost" id="btnSkipTransfers" ${transferPending ? 'disabled' : ''}>Keep Current Squad</button><button class="btn btn-primary" id="btnReleasePlayers" ${releaseSelection.size !== 2 || transferPending ? 'disabled' : ''}>Release 2 Players</button></div>`;
+          <div class="dialog-actions"><button class="btn btn-ghost" id="btnSkipTransfers" ${transferPending ? 'disabled' : ''}>Keep Current Squad</button><button class="btn btn-primary" id="btnReleasePlayers" ${releaseSelection.size === 0 || transferPending ? 'disabled' : ''}>${releaseSelection.size === 1 ? 'Release 1 Player' : releaseSelection.size === 2 ? 'Release 2 Players' : 'Release Players'}</button></div>`;
         transferZone.querySelectorAll('[data-release]').forEach((button) => button.addEventListener('click', () => {
           const id = button.dataset.release;
           if (releaseSelection.has(id)) releaseSelection.delete(id);
@@ -79,15 +79,18 @@ const TournamentView = {
         transferZone.querySelector('#btnReleasePlayers').addEventListener('click', () => sendTransfer('release', { playerIds: [...releaseSelection] }));
         transferZone.querySelector('#btnSkipTransfers').addEventListener('click', () => sendTransfer('skip'));
       } else {
-        transferZone.innerHTML = `<h3>Transfer Window — Sign 2 Players</h3><p class="muted">Both players have been released. Choose one replacement for each vacant position to restore your XI.</p>
+        const count = transferState.vacancies.length;
+        const playerLabel = count === 1 ? '1 Player' : `${count} Players`;
+        transferZone.innerHTML = `<h3>Transfer Window — Sign ${playerLabel}</h3><p class="muted">${count === 1 ? 'One player has' : 'Both players have'} been released. Choose one replacement for each vacant position to restore your XI.</p>
           <details><summary>Released players</summary><div class="transfer-player-grid">${transferState.outgoing.map((player) => `<article class="transfer-player-card">${transferPlayerHtml(player)}</article>`).join('')}</div></details>
           <div class="transfer-sign-grid">${transferState.vacancies.map((slot, index) => `<div><div class="field"><label for="transferPick${index}">${slot.label} (${slot.code})${slot.isCaptain ? ' — Captain' : ''}</label><input type="search" id="transferSearch${index}" placeholder="Search player or club" aria-label="Search ${slot.code} replacements" ${transferPending ? 'disabled' : ''}/><select id="transferPick${index}" ${transferPending ? 'disabled' : ''}><option value="">Choose a replacement</option>${transferState.market.filter((player) => player.eligibleSlots.includes(slot.code)).map((player) => `<option value="${player.id}">${player.name} · ${player.clubName} · ${player.rawPos} · OVR ${player.overall}${player.isStar ? ' ★' : ''}</option>`).join('')}</select></div><div id="transferProfile${index}" class="transfer-player-card hidden"></div></div>`).join('')}</div>
-          <button class="btn btn-primary btn-block" id="btnSignPlayers" disabled>Sign 2 Players &amp; Continue Season</button><p class="error-text hidden" id="transferError"></p>`;
+          <button class="btn btn-primary btn-block" id="btnSignPlayers" disabled>Sign ${playerLabel} &amp; Continue Season</button><p class="error-text hidden" id="transferError"></p>`;
         const validate = () => {
-          const ids = [0, 1].map((index) => transferZone.querySelector('#transferPick' + index).value);
-          transferZone.querySelector('#btnSignPlayers').disabled = transferPending || ids.some((id) => !id) || ids[0] === ids[1];
+          const ids = transferState.vacancies.map((slot, index) => transferZone.querySelector('#transferPick' + index).value);
+          const duplicate = ids.filter(Boolean).length !== new Set(ids.filter(Boolean)).size;
+          transferZone.querySelector('#btnSignPlayers').disabled = transferPending || ids.some((id) => !id) || duplicate;
           const error = transferZone.querySelector('#transferError');
-          error.textContent = ids[0] && ids[0] === ids[1] ? 'Choose two different players.' : '';
+          error.textContent = duplicate ? 'Choose different players for each position.' : '';
           error.classList.toggle('hidden', !error.textContent);
         };
         transferState.vacancies.forEach((slot, index) => {
@@ -119,8 +122,12 @@ const TournamentView = {
         ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
         <div class="league-table-scroll"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
-          <tbody>${leagueState.table.map((row) => `<tr class="${row.code === myCode ? 'human' : ''}"><td>${row.rank}</td><td>${row.name}${row.code === myCode ? ' · You' : ''}</td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`).join('')}</tbody>
-        </table></div><p class="muted league-table-note league-table-hint">Swipe the table to see all stats.</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
+          <tbody>${leagueState.table.map((row, index) => {
+            const bottomTwo = index >= leagueState.table.length - 2;
+            const status = leagueState.matchday === leagueState.totalMatchdays ? 'Relegated' : 'Relegation zone';
+            return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td>${row.name}${row.code === myCode ? ' · You' : ''}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
+          }).join('')}</tbody>
+        </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">Swipe the table to see all stats.</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
     }
 
     function scoreText(m) {
@@ -963,7 +970,7 @@ const TournamentView = {
       releaseSelection.clear();
       renderTransfers();
       renderButton();
-      if (transferState.phase === 'complete') App.toast('Two players signed. Your XI is complete.', false);
+      if (transferState.phase === 'complete') App.toast(`${transferState.incoming.length === 1 ? 'One player' : 'Two players'} signed. Your XI is complete.`, false);
     });
 
     App.onSocket('error:message', (e) => {

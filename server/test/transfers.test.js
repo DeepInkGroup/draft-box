@@ -20,7 +20,8 @@ test('transfer validation keeps an XI unchanged until two players leave, and req
   const ids = [team.xi[0].id, team.xi[1].id];
   assert.equal(transferSnapshot(t, 1, 17).phase, 'release');
   assert.equal(transfersPending(t), true);
-  assert.throws(() => planTransfer(t, 1, 'release', { playerIds: [ids[0]] }), /exactly two/);
+  assert.throws(() => planTransfer(t, 1, 'release', { playerIds: [] }), /maximum 2/);
+  assert.throws(() => planTransfer(t, 1, 'release', { playerIds: team.xi.slice(0, 3).map((player) => player.id) }), /maximum 2/);
   assert.throws(() => planTransfer(t, 1, 'release', { playerIds: [ids[0], 'foreign-player'] }), /your XI/);
   const next = planTransfer(t, 1, 'release', { playerIds: ids });
   assert.equal(team.xi.length, 11);
@@ -45,6 +46,27 @@ test('transfer validation keeps an XI unchanged until two players leave, and req
   assert.equal(transfersPending(complete), false);
   assert.throws(() => planTransfer(complete, 1, 'release', { playerIds: ids }), /not open/);
   assert.equal(planTransfer(t, 1, 'skip').transferWindow.users[1].phase, 'skipped');
+});
+
+test('one release needs exactly one replacement and restores the full XI', () => {
+  const t = season();
+  t.matchday = 17;
+  const captain = Object.values(t.slotByCode).find((slot) => slot.userId === 1).xi.find((player) => player.isCaptain);
+  const next = planTransfer(t, 1, 'release', { playerIds: [captain.id] });
+  const signing = transferSnapshot(next, 1, 17);
+  assert.equal(signing.squad.length, 10);
+  assert.equal(signing.vacancies.length, 1);
+  assert.equal(signing.outgoing.length, 1);
+  const pick = { playerId: signing.market[0].id, slotCode: captain.slotCode };
+  assert.throws(() => planTransfer(next, 1, 'sign', { picks: [] }), /each vacant position/);
+  assert.throws(() => planTransfer(next, 1, 'sign', { picks: [pick, { ...pick, playerId: signing.market[1].id }] }), /each vacant position/);
+  const complete = planTransfer(next, 1, 'sign', { picks: [pick] });
+  const result = transferSnapshot(complete, 1, 17);
+  assert.equal(result.phase, 'complete');
+  assert.equal(result.squad.length, 11);
+  assert.equal(result.incoming.length, 1);
+  assert.equal(result.squad.find((player) => player.id === pick.playerId).isCaptain, true);
+  assert.equal(transfersPending(complete), false);
 });
 
 test('player statistics use saved match lineups after players leave the team', () => {

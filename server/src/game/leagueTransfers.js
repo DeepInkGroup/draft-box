@@ -74,11 +74,11 @@ function planTransfer(tournament, userId, action, payload = {}) {
     if (!match.lineups) match.lineups = { A: t.slotByCode[match.aCode].xi.map((player) => ({ ...player })), B: t.slotByCode[match.bCode].xi.map((player) => ({ ...player })) };
   }
   if (action === 'skip') {
-    if (progress.phase !== 'release') throw new Error('fill both vacant positions before continuing');
+    if (progress.phase !== 'release') throw new Error('fill all vacant positions before continuing');
     progress.phase = 'skipped';
   } else if (action === 'release') {
     const ids = payload.playerIds;
-    if (progress.phase !== 'release' || !Array.isArray(ids) || ids.length !== 2 || new Set(ids).size !== 2) throw new Error('release exactly two different players first');
+    if (progress.phase !== 'release' || !Array.isArray(ids) || ids.length < 1 || ids.length > 2 || new Set(ids).size !== ids.length) throw new Error('release one or two different players first (maximum 2)');
     const outgoing = ids.map((id) => team.xi.find((player) => player.id === id));
     if (outgoing.some((player) => !player)) throw new Error('you can only release players from your XI');
     progress.outgoing = outgoing.map((player) => ({ ...player }));
@@ -87,11 +87,11 @@ function planTransfer(tournament, userId, action, payload = {}) {
     progress.phase = 'sign';
   } else if (action === 'sign') {
     const picks = payload.picks;
-    if (progress.phase !== 'sign' || !Array.isArray(picks) || picks.length !== 2 || new Set(picks.map((pick) => pick.playerId)).size !== 2 || new Set(picks.map((pick) => pick.slotCode)).size !== 2) throw new Error('choose two different replacements for the two vacant positions');
+    if (progress.phase !== 'sign' || !Array.isArray(picks) || picks.length !== progress.vacancies.length || picks.length < 1 || picks.length > 2 || new Set(picks.map((pick) => pick?.playerId)).size !== picks.length || new Set(picks.map((pick) => pick?.slotCode)).size !== picks.length) throw new Error('choose a different replacement for each vacant position');
     const market = transferSnapshot(t, userId, t.matchday).market;
     const incoming = picks.map((pick) => {
-      const player = market.find((candidate) => candidate.id === pick.playerId);
-      const vacancy = progress.vacancies.find((slot) => slot.code === pick.slotCode);
+      const player = market.find((candidate) => candidate.id === pick?.playerId);
+      const vacancy = progress.vacancies.find((slot) => slot.code === pick?.slotCode);
       if (!player || !vacancy || !player.eligibleSlots.includes(vacancy.code)) throw new Error('choose an available league player who fits each vacant position');
       const source = getLeague(t.leagueId).teams.flatMap((club) => club.players).find((candidate) => candidate.id === player.id);
       return { ...source, slotCode: vacancy.code, isCaptain: !!vacancy.isCaptain };

@@ -37,6 +37,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     await expect(page.getByRole('heading', { name: "You're representing Persepolis!" })).toBeVisible({ timeout: 20000 });
     await page.locator('#btnEnterTournament').click();
     await expect(page.locator('#leagueZone tbody tr')).toHaveCount(18);
+    await expect(page.locator('#leagueZone tbody .relegation-mark')).toHaveCount(2);
+    await expect(page.locator('#leagueZone tbody tr').nth(16).locator('.relegation-mark')).toHaveAttribute('aria-label', 'Relegation zone');
+    await expect(page.locator('#leagueZone tbody tr').nth(17).locator('.relegation-mark')).toHaveAttribute('aria-label', 'Relegation zone');
     await expect(page.locator('#leagueZone')).toContainText('Matchday 0 / 34');
     const roomCode = (await page.url()).split('/').pop();
     // Drive the match through the real app socket, then reload to inspect the saved result.
@@ -61,7 +64,8 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
   });
 }
 
-test('real club squad and the two-step transfer window work on mobile', async ({ page, request }) => {
+for (const transferCount of [1, 2]) {
+test(`real squad with ${transferCount} transfer(s) and relegation markers works on mobile`, async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -99,24 +103,48 @@ test('real club squad and the two-step transfer window work on mobile', async ({
   await expect(page.locator('[data-release]')).toHaveCount(11);
   await expect(page.locator('#btnReleasePlayers')).toBeDisabled();
   await page.locator('[data-release]').nth(0).click();
-  await page.locator('[data-release]').nth(1).click();
+  await expect(page.locator('#btnReleasePlayers')).toBeEnabled();
+  await expect(page.locator('#btnReleasePlayers')).toHaveText('Release 1 Player');
+  if (transferCount === 2) {
+    await page.locator('[data-release]').nth(1).click();
+    await page.locator('[data-release]').nth(2).click();
+    await expect(page.locator('[data-release].selected')).toHaveCount(2);
+    await expect(page.locator('#btnReleasePlayers')).toHaveText('Release 2 Players');
+  }
   await page.locator('#btnReleasePlayers').click();
   await expect(page.locator('#transferPick0')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferPick0')).toBeVisible();
   const first = await page.locator('#transferPick0 option').nth(1).getAttribute('value');
-  const second = await page.locator('#transferPick1 option').evaluateAll((options, first) => options.find((option) => option.value && option.value !== first).value, first);
   await page.locator('#transferPick0').selectOption(first);
-  await page.locator('#transferPick1').selectOption(second);
+  if (transferCount === 2) {
+    const second = await page.locator('#transferPick1 option').evaluateAll((options, first) => options.find((option) => option.value && option.value !== first).value, first);
+    await page.locator('#transferPick1').selectOption(second);
+  } else await expect(page.locator('#transferPick1')).toHaveCount(0);
   await expect(page.locator('#transferProfile0')).toContainText('OVR');
   await expect(page.locator('#transferProfile0')).toContainText('Available');
   await expect(page.locator('#transferProfile0')).toContainText('Assists');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
-  await page.screenshot({ path: 'test-results/transfers-mobile.png', fullPage: true });
+  await page.screenshot({ path: `test-results/transfers-${transferCount}-mobile.png`, fullPage: true });
   await page.locator('#btnSignPlayers').click();
   await expect(page.locator('#transferZone')).toBeHidden();
   await expect(page.locator('#btnContinue')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferZone')).toBeHidden();
+  await page.evaluate(async (code) => {
+    const socket = App.ensureSocket();
+    socket.off('tournament:step');
+    for (let i = 0; i < 17; i++) await new Promise((resolve, reject) => {
+      socket.once('tournament:step', resolve);
+      socket.once('error:message', reject);
+      socket.emit('tournament:advance', { code });
+    });
+  }, code);
+  await page.reload();
+  await expect(page.locator('#leagueZone')).toContainText('Matchday 34 / 34');
+  await expect(page.locator('#leagueZone tbody .relegation-mark')).toHaveCount(2);
+  await expect(page.locator('#leagueZone tbody tr').nth(16).locator('.relegation-mark')).toHaveAttribute('aria-label', 'Relegated');
+  await expect(page.locator('#leagueZone tbody tr').nth(17).locator('.relegation-mark')).toHaveAttribute('aria-label', 'Relegated');
   expect(errors).toEqual([]);
 });
+}

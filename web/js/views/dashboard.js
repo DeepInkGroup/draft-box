@@ -276,7 +276,7 @@ const DashboardView = {
         <h3>${league ? 'League Games — ' + league.name : 'Single Player — World Cup'}</h3>
         <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
         ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
-        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><p class="muted">A transfer window opens halfway through the season. Release two players, then choose two replacements.</p>` : ''}
+        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><p class="muted">A transfer window opens halfway through the season. Release one or two players, then choose their replacements.</p>` : ''}
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
         <div id="spTimer" style="margin-bottom:16px;"></div>

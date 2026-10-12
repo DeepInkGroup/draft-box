@@ -282,8 +282,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     assert.match((await error).error, pattern);
   }
   await expectSocketError(() => seasonSocket.emit('tournament:advance', { code: real.code }), /transfer window/);
-  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [] }), /replacements/);
-  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: [captain.id, captain.id] }), /two different/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [] }), /replacement/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: [captain.id, captain.id] }), /different players/);
   ready = event(seasonSocket, 'league:transferState');
   seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: outgoingIds });
   const released = (await ready).transfers;
@@ -309,7 +309,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     usedIncoming.add(player.id);
     return { slotCode: slot.code, playerId: player.id };
   });
-  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [picks[0], picks[0]] }), /two different/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [picks[0], picks[0]] }), /different replacement/);
   await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [{ slotCode: picks[0].slotCode, playerId: outgoingIds[0] }, picks[1]] }), /available league player/);
   ready = event(seasonSocket, 'league:transferState');
   seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks });

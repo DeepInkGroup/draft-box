@@ -144,6 +144,9 @@ a { color: var(--accent-strong); }
 .league-table { min-width: 620px; }
 .league-table td:nth-child(2), .league-table th:nth-child(2) { min-width: 170px; text-align: left; }
 .league-table-note { font-size: .8rem; margin-bottom: 0; }
+.relegation-mark { color: var(--danger); font-weight: 800; font-size: 1rem; }
+.relegation-legend { color: var(--muted); }
+.league-relegation td:first-child { color: var(--danger); }
 .league-table-hint { display: none; }
 .transfer-window { border-color: var(--accent); }
 .transfer-player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 12px; margin: 14px 0; }
