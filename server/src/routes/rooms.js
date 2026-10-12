@@ -3,6 +3,7 @@ const { requireAuth } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const { openSlots } = require('../game/draftEngine');
 const { getLeague } = require('../data/competitions');
+const { clubSquadSnapshot } = require('../game/leagueSquads');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -110,6 +111,14 @@ router.get('/:code', (req, res) => {
   const room = rm.getRoomByCode(req.params.code);
   if (!room) return res.status(404).json({ error: 'room not found' });
   res.json(serializeRoom(room));
+});
+
+router.get('/:code/clubs/:clubCode', (req, res) => {
+  const room = rm.getRoomByCode(req.params.code);
+  if (!room) return res.status(404).json({ error: 'room not found' });
+  if (!rm.getMembers(room.id).some((member) => member.user_id === req.user.id)) return res.status(403).json({ error: 'not a member of this league' });
+  try { res.json(clubSquadSnapshot(rm.loadRoomState(room), req.user.id, req.params.clubCode)); }
+  catch (error) { res.status(400).json({ error: error.message }); }
 });
 
 router.get('/:code/state', (req, res) => {

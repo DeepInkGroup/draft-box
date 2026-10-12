@@ -785,21 +785,31 @@ function getAdjacentPairs(formation) {
   return pairs;
 }
 
+const EXTRA_STYLE_FITS = {
+  vertical: { best: ['4-2-3-1', '4-3-3', '4-3-1-2', '3-4-1-2'], worst: ['5-4-1', '5-3-1-1', '4-2-4'] },
+  overlap: { best: ['4-3-3', '4-4-2', '4-2-3-1', '5-2-3'], worst: ['3-5-2', '3-3-2-2', '3-2-4-1'] },
+  catenaccio: { best: ['5-4-1', '5-3-2', '5-3-1-1', '5-2-2-1'], worst: ['4-2-4', '3-3-1-3', '3-2-4-1'] }
+};
+
 function getDeepInfo(formation) {
-  return FORMATION_DEEP_INFO[formation] || null;
+  const info = FORMATION_DEEP_INFO[formation];
+  if (!info) return null;
+  return { ...info,
+    bestStyles: [...info.bestStyles, ...Object.keys(EXTRA_STYLE_FITS).filter((key) => EXTRA_STYLE_FITS[key].best.includes(formation))],
+    worstStyles: [...info.worstStyles, ...Object.keys(EXTRA_STYLE_FITS).filter((key) => EXTRA_STYLE_FITS[key].worst.includes(formation))] };
 }
 
 function getStyleSynergy(formation, tacticalStyle) {
-  const info = FORMATION_DEEP_INFO[formation];
+  const info = getDeepInfo(formation);
   if (!info) return { match: 'neutral', bonus: 1, label: 'Neutral fit' };
   const style = String(tacticalStyle || '').toLowerCase();
   if (info.bestStyles && info.bestStyles.includes(style)) {
-    return { match: 'great', bonus: clamp(1 + 0.018 + Math.random() * 0.012, 1.012, 1.032), label: 'Great fit — this style amplifies the formation' };
+    return { match: 'great', bonus: 1.025, label: 'Great fit — this style amplifies the formation' };
   }
   if (info.worstStyles && info.worstStyles.includes(style)) {
-    return { match: 'poor', bonus: clamp(0.968 - Math.random() * 0.012, 0.958, 0.982), label: 'Poor fit — the style fights the formation shape' };
+    return { match: 'poor', bonus: 0.965, label: 'Poor fit — the style fights the formation shape' };
   }
-  return { match: 'neutral', bonus: 1 + (Math.random() - 0.5) * 0.01, label: 'Neutral fit' };
+  return { match: 'neutral', bonus: 1, label: 'Neutral fit' };
 }
 
 function getCombinedBiases(formation, styleDef) {

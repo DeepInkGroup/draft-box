@@ -160,6 +160,9 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.equal((await ready).tournamentStage, 'done');
 
   const catalog = await request('/api/leagues');
+  const tacticCatalog = await request('/api/tactical-styles');
+  assert.equal(tacticCatalog.styles.length, 12);
+  assert.ok(tacticCatalog.styles.some((style) => style.key === 'catenaccio'));
   assert.deepEqual(catalog.leagues.map((league) => league.id), ['pgl']);
   const league = catalog.leagues[0];
   assert.equal(league.teamCount, 18);
@@ -197,6 +200,11 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.ok(initial.myLineup.xi.every((player) => player.id.startsWith('pgl-')));
   assert.equal(initial.league.table.length, 18);
   assert.equal(initial.league.totalMatchdays, 34);
+  const otherClub = league.teams[1].code;
+  const initialClub = await request(`/api/rooms/${season.code}/clubs/${otherClub}`, { token: login.token });
+  assert.equal(initialClub.players.filter((player) => player.status === 'Starting XI').length, 11);
+  assert.ok(initialClub.players.every((player) => player.stats.appearances === 0));
+  await request(`/api/rooms/${season.code}/clubs/${otherClub}`, { token: friend.token, status: 403 });
   const leagueResults = [];
   let seasonSocket = resumedSocket;
   for (let matchday = 1; matchday <= 34; matchday++) {
@@ -265,11 +273,21 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   ready = event(seasonSocket, 'tournament:started');
   seasonSocket.emit('draft:autoComplete', { code: real.code });
   await ready;
-  for (let matchday = 1; matchday <= 17; matchday++) {
-    ready = event(seasonSocket, 'tournament:step');
-    seasonSocket.emit('tournament:advance', { code: real.code });
-    step = await ready;
-  }
+  ready = event(seasonSocket, 'tournament:step');
+  seasonSocket.emit('tournament:advance', { code: real.code });
+  await ready;
+  const outsiderSocket = await connect(friend.token);
+  const deniedSkip = new Promise((resolve) => outsiderSocket.once('error:message', resolve));
+  outsiderSocket.emit('league:skipToTransfers', { code: real.code });
+  assert.match((await deniedSkip).error, /not a member/);
+  ready = event(seasonSocket, 'league:midseason');
+  seasonSocket.emit('league:skipToTransfers', { code: real.code });
+  step = await ready;
+  assert.equal(step.viewedStep, 17);
+  assert.equal(step.historyLength, 17);
+  assert.equal(step.step.matchday, 17);
+  const clubAtHalf = await request(`/api/rooms/${real.code}/clubs/${otherClub}`, { token: login.token });
+  assert.ok(clubAtHalf.players.filter((player) => player.status === 'Starting XI').every((player) => player.stats.appearances === 17));
   assert.equal(step.transfers.phase, 'release');
   const originalXi = step.transfers.squad;
   assert.ok(originalXi.every((player) => player.stats.appearances === 17));
@@ -326,5 +344,6 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const humanXi = humanMatch.lineups[humanMatch.aCode === clubCode ? 'A' : 'B'];
   assert.ok(humanXi.every((player) => !outgoingIds.includes(player.id)));
   assert.ok(picks.every((pick) => humanXi.some((player) => player.id === pick.playerId)));
+  await expectSocketError(() => seasonSocket.emit('league:skipToTransfers', { code: real.code }), /already passed/);
   await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: picks.map((pick) => pick.playerId) }), /not open/);
 });

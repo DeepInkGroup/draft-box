@@ -5,7 +5,7 @@ const tournamentEngine = require('../game/tournamentEngine');
 const { leagueSnapshot } = require('../game/leagueEngine');
 const { transferSnapshot, planTransfer } = require('../game/leagueTransfers');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
-const { normalizeStyle, isCustomStyleKey } = require('../game/tacticalStyles');
+const { normalizeStyle, isCustomStyleKey, tacticalCatalog } = require('../game/tacticalStyles');
 const {
   allMembersReady,
   shouldAutoStartTournament,
@@ -183,6 +183,7 @@ function registerSocketHandlers(io) {
           stage: 'drafting',
           ...lobbySnapshot(roomRow),
           myDraft: member && myDraftView(member, state.showOverall),
+          tacticalStyles: tacticalCatalog(),
           poolRemaining: state.pool.size
         });
       } else {
@@ -507,6 +508,33 @@ function registerSocketHandlers(io) {
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
+    });
+
+    socket.on('league:skipToTransfers', ({ code }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || !room.single_player || room.status !== 'league_stage') throw new Error('skip to transfers is only available during a single-player league season');
+        const state = rm.loadRoomState(room);
+        const member = state.members.get(socket.user.id);
+        if (!member) throw new Error('not a member of this league');
+        const t = state.tournament;
+        const halfway = Math.floor(t.fixtures.length / 2);
+        if (t.matchday > halfway || member.viewedStep > halfway) throw new Error('the mid-season transfer window has already passed');
+        // Run the normal engine for every fixture, preserving match reports and
+        // transfer state. Commit progress after each round, including its viewed step.
+        while (t.matchday < halfway) {
+          persistSimulatedTournamentStep(io, socket, code, room, state);
+          member.viewedStep = t.matchday;
+          rm.persistViewedStep(room.id, socket.user.id, member.viewedStep);
+        }
+        member.viewedStep = halfway;
+        rm.persistViewedStep(room.id, socket.user.id, halfway);
+        socket.emit('league:midseason', {
+          step: tournamentEngine.decorateStep(state, halfway - 1, socket.user.id), viewedStep: halfway,
+          historyLength: tournamentEngine.historyLength(state), stage: t.stage,
+          league: leagueSnapshot(t, halfway), transfers: transferSnapshot(t, socket.user.id, halfway), spectator: false
+        });
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
     socket.on('league:transfer', ({ code, action, playerIds, picks }) => {

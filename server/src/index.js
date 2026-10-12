@@ -12,6 +12,7 @@ const tacticsRoutes = require('./routes/tactics');
 const { registerSocketHandlers } = require('./sockets');
 const { ALL_TEAMS } = require('./data/teams');
 const { leagueCatalog } = require('./data/competitions');
+const { tacticalCatalog } = require('./game/tacticalStyles');
 
 const WEB_DIR = path.join(__dirname, '..', '..', 'web');
 
@@ -21,6 +22,7 @@ app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server' }));
 app.get('/api/leagues', (req, res) => res.json({ leagues: leagueCatalog() }));
+app.get('/api/tactical-styles', (req, res) => res.json({ styles: tacticalCatalog() }));
 app.get('/api/teams', (req, res) => {
   res.json({ teams: ALL_TEAMS.map((t) => ({ code: t.code, name: t.name })) });
 });

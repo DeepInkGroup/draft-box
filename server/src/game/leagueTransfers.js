@@ -12,15 +12,17 @@ function ensureTransferWindow(t) {
   return t.transferWindow || null;
 }
 
-function statsByPlayer(t) {
+function statsByPlayer(t, clubCode = null, throughMatchday = Infinity) {
   const stats = new Map();
   const entry = (id) => {
     if (!stats.has(id)) stats.set(id, { appearances: 0, goals: 0, assists: 0, saves: 0, yellowCards: 0, redCards: 0, starMoments: 0 });
     return stats.get(id);
   };
   for (const match of t.matchLog) {
+    if ((match.matchday || 0) > throughMatchday) continue;
     for (const side of ['A', 'B']) {
       const code = side === 'A' ? match.aCode : match.bCode;
+      if (clubCode && code !== clubCode) continue;
       // Legacy saved games predate per-match lineups; transfers did not exist then.
       const xi = match.lineups?.[side] || t.slotByCode[code].xi;
       const byName = new Map(xi.map((player) => [player.name, player.id]));

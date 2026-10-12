@@ -1,4 +1,4 @@
-const { FORMATIONS, getSlots, playerFitsSlot, getProfile } = require('./formations');
+const { FORMATIONS, getSlots, playerFitsSlot, getProfile, getStyleSynergy } = require('./formations');
 const { computePower, computeTeamRatings, computeChemistry } = require('./ratings');
 const { STYLE_KEYS, TACTICAL_STYLES, matchupEdge, normalizeStyle } = require('./tacticalStyles');
 
@@ -106,6 +106,11 @@ function profileFitScore(profile, styleKey) {
   if (styleKey === 'counter') return front * 1.8 + back * 1.6 + width * 1.1 - midfield * 0.4 - gapRisk * 1.2;
   if (styleKey === 'wingplay') return width * 2.7 + front * 1.1 + back * 0.5 - Math.max(0, -width) * 2.4;
   if (styleKey === 'compact') return center * 2.1 + midfield * 1.7 + compact * 2.3 - Math.max(0, width) * 0.9;
+  if (styleKey === 'direct') return front * 2 + back * 0.8 - midfield * 0.5 - gapRisk * 0.8;
+  if (styleKey === 'tiki-taka') return midfield * 2.4 + center * 2 + compact * 1.8 - gapRisk * 2;
+  if (styleKey === 'vertical') return midfield * 1.8 + center * 1.5 + front * 1.4 - gapRisk * 1.8;
+  if (styleKey === 'overlap') return width * 2.8 + front * 1.4 + back * 0.5 - gapRisk * 1.4;
+  if (styleKey === 'catenaccio') return back * 3 + compact * 2.4 - front * 0.8 - gapRisk * 2.8;
   return 0;
 }
 function styleFitScore(xi, formation, styleKey, opponent = null) {
@@ -135,6 +140,7 @@ function styleFitScore(xi, formation, styleKey, opponent = null) {
   if (styleKey === 'wingplay') score += Math.max(0, profile.width - 72) * 0.09 + Math.max(0, forwardAvg - 74) * 0.25;
   if (styleKey === 'compact') score += Math.max(0, midfieldAvg - 73) * 0.42 + Math.max(0, defenseAvg - 73) * 0.35 - Math.max(0, forwardAvg - midfieldAvg) * 0.25;
   score += profileFitScore(profile, styleKey);
+  score += (getStyleSynergy(formation, styleKey).bonus - 1) * 80;
   score -= Math.max(0, style.risk - 1) * Math.max(0, 74 - controlCore) * 0.85;
 
   if (opponent) {

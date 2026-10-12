@@ -84,19 +84,34 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await page.locator('#btnSingleplayer').click();
   await expect(page.locator('#squadProgress')).toContainText('11');
   const code = (await page.url()).split('/').pop();
-  await page.evaluate((code) => App.ensureSocket().emit('draft:setTacticalStyle', { code, tacticalStyle: 'balanced' }), code);
+  await expect(page.locator('#tacticalStyleGrid .tactical-style-card')).toHaveCount(12);
+  for (const style of ['vertical', 'overlap', 'catenaccio']) {
+    await expect(page.locator(`[data-style="${style}"]`)).toContainText('Strengths');
+    await expect(page.locator(`[data-style="${style}"]`)).toContainText('Trade-offs');
+  }
+  await page.locator(`[data-style="${transferCount === 1 ? 'vertical' : 'catenaccio'}"]`).click();
+  await page.locator('#btnLockTacticalStyle').click();
   await expect(page.locator('#btnEnterTournament')).toBeVisible();
   await page.locator('#btnEnterTournament').click();
-  // Advance through the first half using the real socket, without waiting for replay animations.
-  await page.evaluate(async (code) => {
-    const socket = App.ensureSocket();
-    socket.off('tournament:step');
-    for (let i = 0; i < 17; i++) await new Promise((resolve, reject) => {
-      socket.once('tournament:step', resolve);
-      socket.once('error:message', reject);
-      socket.emit('tournament:advance', { code });
-    });
-  }, code);
+  await page.locator('#leagueSquadBrowser summary').click();
+  await page.locator('#leagueClubSelect').selectOption({ label: 'Esteghlal' });
+  await expect(page.locator('#leagueClubMeta')).toContainText('Stats through matchday 0');
+  await page.locator('#leaguePlayerSearch').fill('Jasir');
+  await expect(page.locator('#leagueClubPlayers .transfer-player-card')).toHaveCount(1);
+  await expect(page.locator('#leagueClubPlayers')).toContainText('Jasir Asani');
+  await expect(page.locator('#leagueClubPlayers')).toContainText('Starting XI');
+  await page.locator('#leagueSquadBrowser summary').click();
+  await page.locator('#btnSkipToTransfers').click();
+  await expect(page.locator('#transferZone')).toContainText('Mid-season Transfer Window');
+  await expect(page.locator('#leagueZone')).toContainText('Matchday 17 / 34');
+  await expect(page.locator('#btnSkipToTransfers')).toBeHidden();
+  await page.locator('#leagueSquadBrowser summary').click();
+  await expect(page.locator('#leagueClubMeta')).toContainText('Stats through matchday 17');
+  await expect(page.locator('#leagueClubPlayers')).toContainText('Jasir Asani');
+  await expect(page.locator('#leagueClubPlayers dl div').filter({ has: page.locator('dt', { hasText: /^Apps$/ }) }).locator('dd')).toHaveText('17');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  await page.screenshot({ path: `test-results/league-teams-${transferCount}-mobile.png`, fullPage: true });
+  await page.locator('#leagueSquadBrowser summary').click();
   await page.reload();
   await expect(page.locator('#transferZone')).toContainText('Mid-season Transfer Window');
   await expect(page.locator('#continueZone')).toBeHidden();

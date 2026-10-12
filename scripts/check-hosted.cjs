@@ -30,6 +30,11 @@ async function request(url, verify, options = {}) {
   await request(apiBase + '/api/teams', async (response) => {
     assert.equal((await response.json()).teams.length, 48);
   });
+  await request(apiBase + '/api/tactical-styles', async (response) => {
+    const styles = (await response.json()).styles;
+    assert.equal(styles.length, 12);
+    for (const key of ['vertical', 'overlap', 'catenaccio']) assert.ok(styles.some((style) => style.key === key));
+  });
   await request(apiBase + '/api/leagues', async (response) => {
     const pgl = (await response.json()).leagues.find((league) => league.id === 'pgl');
     assert.ok(pgl, 'Persian Gulf League must be available');

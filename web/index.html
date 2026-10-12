@@ -200,9 +200,12 @@
           <div><b>Creation vs Conversion</b><span>Midfield creates raw xG volume; strikers decide how many go in. Low-xG wins now exist.</span></div>
           <div><b>Style Synergy</b><span>Formation + style fit gives a visible bonus (~+1.8–3.2% Attack/Defense) before the match kicks off.</span></div>
         </div>
-        <h4>Tactical Styles (9 — two new added: Direct &amp; Tiki-Taka)</h4>
+        <h4>Tactical Styles (12 available)</h4>
         <div class="tactic-guide-grid">
-          <div><b>Direct Play <span class="new-badge">NEW</span></b><span>Long balls, target men, bypass the midfield. Elite finishers feast; bad midfield is hidden. Bad vs deep compact blocks.</span></div>
+          <div><b>Vertical Tiki-Taka <span class="new-badge">NEW</span></b><span>Fast central combinations and forward passing. Good with a connected midfield; exposed to counterattacks and aggressive pressing.</span></div>
+          <div><b>Overlapping Fullbacks <span class="new-badge">NEW</span></b><span>Wide defenders join the attack for crossing and corner threat. Strong against narrow blocks, with less cover on the flanks.</span></div>
+          <div><b>Catenaccio <span class="new-badge">NEW</span></b><span>Deep defensive cover, set pieces and selective breaks. Sacrifices creation and possession; patient width can stretch the block.</span></div>
+          <div><b>Direct Play</b><span>Long balls and forward runs favor finishing over midfield creation. Useful for strong forwards, with less possession and passing accuracy.</span></div>
           <div><b>Counter Attack</b><span>Absorb pressure then sprint speed on breaks. Good vs Gegenpress &amp; Possession; weak vs Defensive low-blocks that deny space.</span></div>
           <div><b>Defensive</b><span>Good vs Counter &amp; Direct play. Weak vs Possession &amp; Wing Play because deep blocks get stretched.</span></div>
           <div><b>Balanced</b><span>Stable baseline, no sharp weakness or upside. Best when your XI is simply stronger and you want low-volatility results.</span></div>
@@ -210,10 +213,13 @@
           <div><b>Gegenpress</b><span>Good vs Possession &amp; Tiki-Taka (force turnovers). Weak vs Counter &amp; Compact teams that survive the first press.</span></div>
           <div><b>Wing Play</b><span>Good vs Defensive &amp; Compact via width. Weak vs Possession &amp; presses that trap the wide lanes.</span></div>
           <div><b>Possession</b><span>Good vs Defensive &amp; Compact by territory. Weak vs Gegenpress &amp; fast counters. Creation-heavy, conversion-light.</span></div>
-          <div><b>Tiki-Taka <span class="new-badge">NEW</span></b><span>Short triangles, patient, 500+ passes per game. Dominant creation but single-chance conversion suffers. Weak vs Gegenpress swarm.</span></div>
+          <div><b>Tiki-Taka</b><span>Patient short passing emphasizes control and creation, with slower transitions and less finishing emphasis. Vulnerable to Gegenpress and counters.</span></div>
         </div>
         <h4>Style Matchup Matrix</h4>
         <div class="guide-matrix">
+          <div><b>Vertical Tiki-Taka</b><span>Small edges against Defensive and Catenaccio. Vulnerable to Counter, Gegenpress and Compact Midfield.</span></div>
+          <div><b>Overlapping Fullbacks</b><span>Good against Compact Midfield, Defensive and Catenaccio. Vulnerable to Counter, Gegenpress and Possession.</span></div>
+          <div><b>Catenaccio</b><span>Good against Counter and Direct Play. Vulnerable to Tiki-Taka, Possession, Wing Play and Overlapping Fullbacks.</span></div>
           <div><b>Defensive</b><span>Good vs Counter and Direct because space is denied. Bad vs Possession, Tiki-Taka and Wing Play because deep blocks get stretched or circulated around.</span></div>
           <div><b>Gegenpress</b><span>Good vs Possession and Tiki-Taka by forcing high turnovers. Bad vs Counter and Compact when the first press is survived.</span></div>
           <div><b>Possession</b><span>Good vs Defensive and Compact through territory control. Bad vs Gegenpress and Counter because turnovers are punished.</span></div>
@@ -315,7 +321,7 @@
           <li><b>Chemistry</b> - a multiplier built from linkage, balanced squad quality, Game Changer leadership, correct position fit, line balance across defense/midfield/attack, and penalties for out-of-position picks. Bot squads are one real nation, so they keep perfect linkage; human all-star squads must manage fit and balance.</li>
           <li><b>Tactical Style</b> - after the draft, each team locks a style (9 available: 2 new styles added — Direct Play and Tiki-Taka). Every style has modifiers for Attack, Defense, Tempo, Risk, Press, Control, Transition, Set Pieces and Star Moment, plus a <b>Midfield Creation Bias</b> × <b>Finisher Conversion Bias</b> pair (see below). Matchups matter: Defensive beats Counter but struggles vs Possession; Gegenpress beats Possession/Tiki-Taka but is vulnerable to Counter; Possession beats Defensive but struggles vs pressing/counters; Counter beats Gegenpress and Possession but struggles vs Defensive; Wing Play beats Defensive/Compact but struggles vs Possession/Gegenpress; Compact beats Gegenpress/Counter but struggles vs Wing Play/Possession; Direct beats creation-heavy teams with bad finishers but struggles vs compact deep blocks; Tiki-Taka dominates possession vs passive teams but collapses vs gegenpress swarms; Balanced has no major weakness.</li>
           <li><b>Two-phase xG (Creation vs Conversion)</b> — xG is now calculated in two independent passes. First, your midfielders + tactical style generate <i>chance creation volume</i> (Tiki-Taka, Possession, Gegenpress and ≥5-CM formations all amplify this). Then your top finishers' quality + style decide <i>conversion rate</i> (Direct, Counter, 4-2-4, and 86+ rated STs/CFs strongly amplify this). It is now entirely possible to win with <b>low total xG</b>: a bad midfield paired with Direct + elite strikers will generate fewer chances but convert far more of the ones they get. The opposite also applies (great midfield + bad striker = lots of xG, few goals).</li>
-          <li><b>Formation + Style Synergy</b> — a visible bonus/penalty (~+1.8 to +3.2% Attack / matching Defense range) applied before xG is sampled if your tactical style fits (or clashes with) your chosen formation. 4-2-3-1 + Possession is "Great fit"; 5-4-1 + Tiki-Taka is "Poor fit" (shown on the style picker cards).</li>
+          <li><b>Formation + Style Synergy</b> — a visible bonus/penalty (+2.5% Attack for a great fit, -3.5% for a poor fit, and a smaller linked defensive adjustment) applied before xG is sampled if your tactical style fits (or clashes with) your chosen formation. 4-2-3-1 + Possession is "Great fit"; 5-4-1 + Tiki-Taka is "Poor fit" (shown on the style picker cards).</li>
           <li><b>Morale Dynamic</b> - recent results carry into the next match as persistent morale. On Matchday 3, qualification pressure is calculated from current rank, points and goal difference; must-win teams receive a controlled urgency/composure lift and a small volatility increase before xG is sampled.</li>
           <li><b>Star Moments</b> - starred Game Changers can create a special late chance after minute 80, in finals, extra time or pressure penalty rounds. These moments add real xG before the score is sampled, so they are part of the engine rather than cosmetic text.</li>
           <li><b>Human vs AI Boost</b> - human-controlled teams play at 1.2x Attack and Defense only when facing an AI team. Human vs human and AI vs AI matches stay neutral.</li>

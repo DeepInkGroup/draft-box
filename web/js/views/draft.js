@@ -29,17 +29,7 @@ const DraftView = {
     let customTactics = [];
     let customTacticsLoaded = false;
 
-    const TACTICAL_STYLES = [
-      { key: 'defensive', label: 'Defensive', meta: 'Deep block', new: false, mods: { ATT: 0.94, DEF: 1.08, TMP: 0.88, CTR: 0.82, SET: 1.04 }, desc: 'Deep shape, solid lines, set-piece danger. Low shot volume but much harder to break down.', longDesc: 'Two banks of four/five sit deep and narrow the box. Midfield screens, goalkeeper sees lots of shots but few high-value ones. xG creation is intentionally sacrificed for resilience.', biases: { mid: 0.78, fin: 0.94 }, synergyBest: ['5-4-1','5-3-2','5-3-1-1','4-5-1'], synergyWorst: ['3-4-3','3-2-4-1','3-3-1-3','4-2-4'] },
-      { key: 'balanced', label: 'Balanced', meta: 'Safe default', new: false, mods: { ATT: 1.00, DEF: 1.00, TMP: 1.00, CTR: 1.00, SET: 1.00 }, desc: 'No sharp weakness or upside. Steady baseline when your raw player quality wins out.', longDesc: 'Even commitment everywhere. The vanilla baseline — predictable, low-volatility, no tactical counter. Use it when you don\'t want any surprises.', biases: { mid: 1.00, fin: 1.00 }, synergyBest: [], synergyWorst: [] },
-      { key: 'gegenpress', label: 'Gegenpress', meta: 'High press', new: false, mods: { ATT: 1.07, DEF: 0.97, TMP: 1.15, CTR: 0.92, SET: 0.98 }, desc: 'Win the ball high up. More turnovers, more chaos, more cards.', longDesc: 'Lose the ball → swarm the carrier within 3 seconds. Turnovers in the final third make xG cheap. But beat the press → huge spaces behind your midfield.', biases: { mid: 1.18, fin: 1.06 }, synergyBest: ['4-3-3','3-4-3','4-1-4-1','3-3-1-3'], synergyWorst: ['5-4-1','5-3-1-1','5-3-2'] },
-      { key: 'possession', label: 'Possession', meta: 'Control', new: false, mods: { ATT: 1.01, DEF: 1.03, TMP: 0.94, CTR: 1.22, SET: 1.02 }, desc: 'Territory domination, low volatility. Midfield creates; strikers share the spoils.', longDesc: 'Circulate, draw the opponent out, play through the lines. Shot volume is high; individual chance quality slightly lower. You wear teams down rather than pouncing once.', biases: { mid: 1.22, fin: 0.92 }, synergyBest: ['4-2-3-1','3-5-2','4-1-4-1','4-2-2-2','2-5-2-1'], synergyWorst: ['4-2-4','5-4-1','5-3-1-1'] },
-      { key: 'counter', label: 'Counter Attack', meta: 'Transitions', new: false, mods: { ATT: 1.06, DEF: 1.01, TMP: 1.08, CTR: 0.78, SET: 1.06 }, desc: 'Absorb then sprint forward on vertical passes. Few chances, but very high-value.', longDesc: 'You let the opponent have the ball in safe areas, then the moment you win it 3–4 players surge past the disorganised defensive line. Elite finishers feast.', biases: { mid: 0.82, fin: 1.16 }, synergyBest: ['4-5-1','5-2-3','5-3-2','5-4-1','5-2-2-1'], synergyWorst: ['2-5-2-1','4-3-2-1','3-5-2'] },
-      { key: 'wingplay', label: 'Wing Play', meta: 'Width', new: false, mods: { ATT: 1.04, DEF: 0.99, TMP: 1.07, CTR: 0.94, SET: 1.14 }, desc: 'Fill the flanks, fire crosses, exploit set pieces. Centre gets slightly underloaded.', longDesc: 'Full-backs push high, wingers stay wide, the box fills with runners. Corners and second balls become your primary route. Just don\'t get trapped on the touchline.', biases: { mid: 0.96, fin: 1.08 }, synergyBest: ['4-3-3','3-4-3','4-4-2','5-2-3','3-3-1-3'], synergyWorst: ['4-1-2-1-2','4-3-1-2','3-3-2-2'] },
-      { key: 'compact', label: 'Compact Midfield', meta: 'Narrow control', new: false, mods: { ATT: 0.98, DEF: 1.05, TMP: 0.90, CTR: 1.12, SET: 0.98 }, desc: 'Clog the middle, win second balls. Width beats you.', longDesc: 'The midfield block stays narrow horizontally. Through-balls almost never land; opponents get funnelled wide so cross-shots come from bad angles.', biases: { mid: 1.14, fin: 0.90 }, synergyBest: ['3-5-2','4-1-2-1-2','5-2-2-1','3-3-2-2','4-3-2-1'], synergyWorst: ['3-4-3','5-2-3','3-3-1-3'] },
-      { key: 'direct', label: 'Direct Play', meta: 'Long balls', new: true, mods: { ATT: 1.05, DEF: 1.00, TMP: 1.10, CTR: 0.76, SET: 1.10 }, desc: 'Bypass midfield entirely. Target-men, flick-ons, through-runs. Striker quality = everything.', longDesc: 'Why build through the middle when you can go over it? GK/DCs ping long, wingers chase flick-ons. Elite finishers overperform xG heavily; bad midfield quality gets hidden.', biases: { mid: 0.72, fin: 1.24 }, synergyBest: ['4-4-2','5-3-2','4-2-4','5-3-1-1','4-4-1-1'], synergyWorst: ['2-5-2-1','4-3-2-1','4-2-2-2','3-5-2'] },
-      { key: 'tiki-taka', label: 'Tiki-Taka', meta: 'Short triangles', new: true, mods: { ATT: 1.03, DEF: 1.02, TMP: 0.90, CTR: 1.30, SET: 0.96 }, desc: 'Patient short-passing attrition. Mountains of xG from sheer volume. Single-chance conversion suffers.', longDesc: 'Every outfield player comfortable on the ball. Triangles everywhere, 1-2 touches every pass. 500–600 completed passes per match. Midfield is EVERYTHING; one 75-rated striker tanks your finishing.', biases: { mid: 1.32, fin: 0.88 }, synergyBest: ['4-2-3-1','2-5-2-1','4-3-2-1','3-5-2','4-2-2-2','4-3-1-2'], synergyWorst: ['4-2-4','5-3-1-1','5-4-1','5-2-3','4-4-2'] }
-    ];
+    let TACTICAL_STYLES = [];
 
     function getStyleSynergyForFormation(styleKey, formation) {
       if (!formation) return { match: 'neutral', label: '' };
@@ -489,7 +479,7 @@ const DraftView = {
         meta: 'My custom tactic',
         custom: true,
         new: false,
-        mods: { ATT: Number(t.attack) || 1, DEF: Number(t.defense) || 1, TMP: Number(t.tempo) || 1, CTR: Number(t.control) || 1, SET: Number(t.setPiece) || 1 },
+        mods: { ATT: Number(t.attack) || 1, DEF: Number(t.defense) || 1, TMP: Number(t.tempo) || 1, CTR: Number(t.control) || 1, SET: Number(t.setPiece) || 1, RISK: Number(t.risk) || 1, PRESS: Number(t.press) || 1 },
         desc: t.description || 'Personal saved tactic from the Engine Lab.',
         longDesc: t.longDescription || 'Uses your saved Attack, Defense, Control, Creation, Finishing, Risk and Star Moment modifiers in the match engine.',
         biases: { mid: Number(t.midfieldBias) || 1, fin: Number(t.finishingBias) || 1 },
@@ -499,7 +489,7 @@ const DraftView = {
       const styles = TACTICAL_STYLES.concat(customCards);
       revealCard.innerHTML = `
         <div class='reveal-team'>Choose Tactical Style</div>
-        <div class='reveal-sub'>Each style changes attack, defence, tempo, possession, fouls, star moments and matchup edge. Also has a <b>Midfield Creation Bias</b> and a <b>Finisher Conversion Bias</b> (see the "two-phase xG" explainer in Formations &amp; Tactics → Game Guide).</div>
+        <div class='reveal-sub'>Choose a plan for your ${myFormation}. Compare formation fit, strengths, weaknesses and matchups. More pressure and risk can create chances while leaving space behind your team.</div>
         <div class='tactical-style-grid' id='tacticalStyleGrid'>
           ${styles.map((s) => {
             const syn = getStyleSynergyForFormation(s.key, myFormation);
@@ -520,12 +510,18 @@ const DraftView = {
                 <span>DEF <b>${fmtMod(s.mods.DEF)}</b></span>
                 <span>TMP <b>${fmtMod(s.mods.TMP)}</b></span>
                 <span>CTR <b>${fmtMod(s.mods.CTR)}</b></span>
+                <span>RISK <b>${fmtMod(s.mods.RISK)}</b></span>
+                <span>PRESS <b>${fmtMod(s.mods.PRESS)}</b></span>
               </div>
               <div class='biases'>
                 ${fmtBias(s.biases.mid, 'Creation')}
                 ${fmtBias(s.biases.fin, 'Finishing')}
               </div>
               <div class='style-long'>${s.longDesc}</div>
+              ${s.strengths?.length ? `<div class='tactic-tradeoff'><strong>Strengths</strong><small>${s.strengths.join(' · ')}</small></div>` : ''}
+              ${s.weaknesses?.length ? `<div class='tactic-tradeoff'><strong>Trade-offs</strong><small>${s.weaknesses.join(' · ')}</small></div>` : ''}
+              ${s.strongAgainst?.length ? `<div class='tactic-matchup good'>Good against: ${s.strongAgainst.join(', ')}</div>` : ''}
+              ${s.weakAgainst?.length ? `<div class='tactic-matchup bad'>Watch out for: ${s.weakAgainst.join(', ')}</div>` : ''}
             </button>`;
           }).join('')}
         </div>
@@ -587,6 +583,7 @@ const DraftView = {
     App.onSocket('room:state', (s) => {
       if (s.stage === 'tournament') return App.goTournament(code);
       if (s.stage !== 'drafting') return;
+      TACTICAL_STYLES = s.tacticalStyles || [];
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
       if (me && me.tacticalStyle) myTacticalStyle = me.tacticalStyle;

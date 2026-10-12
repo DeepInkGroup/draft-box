@@ -52,6 +52,7 @@ const Api = (() => {
     teams: () => request('/api/teams'),
     leagues: () => request('/api/leagues'),
     activeLeagues: () => request('/api/rooms'),
+    clubSquad: (code, clubCode) => request(`/api/rooms/${encodeURIComponent(code)}/clubs/${encodeURIComponent(clubCode)}`),
 
     createRoom: (opts) => request('/api/rooms', { method: 'POST', body: opts }),
     createSingleplayer: (opts) => request('/api/rooms/singleplayer', { method: 'POST', body: opts }),

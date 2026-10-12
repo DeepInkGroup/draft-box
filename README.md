@@ -22,6 +22,12 @@ After **matchday 17**, a mid-season transfer window pauses the season. Keep your
 
 The standings mark the bottom two clubs with **↓** arrows: **Relegation zone** during the season and **Relegated** after the final matchday.
 
+**Simulate to Transfer Window** runs every remaining first-half fixture through the normal match engine and stops after matchday 17. Results, standings and reports are retained, and the existing transfer rules still apply. The button is available before mid-season in single-player leagues.
+
+Open **Teams & Player Stats** during the season to select any club, search its players and inspect its formation, tactical style, starting XI, roster/released status, positions, ratings, stars and recorded statistics. Statistics are counted for the selected club through the matchday you have reached; unplayed roster members show zero appearances.
+
+There are **12 built-in tactical styles**, including **Vertical Tiki-Taka**, **Overlapping Fullbacks** and **Catenaccio**. The picker uses the same modifiers and formation-fit data as the match engine, with strengths, trade-offs, risk, pressure and matchup guidance. Formation-fit modifiers are deterministic; match results remain sampled normally.
+
 The dashboard's **Your League Seasons** section resumes unfinished drafts and seasons. Match history and career totals include completed league seasons. A rematch keeps the league, club and squad mode, with a fresh XI and transfer window. Persistence follows the hosting storage limits below.
 
 `server/src/data/competitions.js` is the league registry, `generate-pgl.js` validates and imports the source list, and `leagueEngine.js` builds fixtures and tracks the season. Additional leagues can be registered independently of the UI. League multiplayer is currently disabled at the server boundary; club assignments are stored per participant so it can be added later.

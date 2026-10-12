@@ -19,12 +19,16 @@ const TournamentView = {
     let leagueState = null;
     let transferState = null;
     let transferPending = false;
+    let skipPending = false;
+    let clubRoster = null;
+    let clubRequest = 0;
     const releaseSelection = new Set();
 
     container.innerHTML = `
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
       <div class="card transfer-window" id="transferZone" style="display:none;"></div>
+      <div class="card league-tools" id="leagueTools" style="display:none;"></div>
       <div class="card" id="leagueZone" style="display:none;"></div>
       <div class="card" id="liveZone" style="display:none;"></div>
       <div class="card" id="stepCard"></div>
@@ -45,6 +49,58 @@ const TournamentView = {
     const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
     const leagueZone = container.querySelector('#leagueZone');
     const transferZone = container.querySelector('#transferZone');
+    const leagueTools = container.querySelector('#leagueTools');
+
+    async function loadClubSquad() {
+      const select = leagueTools.querySelector('#leagueClubSelect');
+      if (!select) return;
+      const requestId = ++clubRequest;
+      const body = leagueTools.querySelector('#leagueClubPlayers');
+      clubRoster = null;
+      body.textContent = 'Loading players and season statistics...';
+      try {
+        const data = await Api.clubSquad(code, select.value);
+        if (requestId !== clubRequest || !container.contains(leagueTools)) return;
+        clubRoster = data;
+        leagueTools.querySelector('#leagueClubMeta').textContent = `${data.name} · ${data.formation} · ${data.tacticalStyle} · Stats through matchday ${data.matchday}`;
+        renderClubPlayers();
+      } catch (error) { if (requestId === clubRequest) body.textContent = error.message; }
+    }
+
+    function renderClubPlayers() {
+      if (!clubRoster) return;
+      const query = leagueTools.querySelector('#leaguePlayerSearch').value.trim().toLowerCase();
+      const players = clubRoster.players.filter((player) => `${player.name} ${player.rawPos} ${player.clubName}`.toLowerCase().includes(query));
+      leagueTools.querySelector('#leagueClubPlayers').innerHTML = players.length ? players.map((player) => `<article class="transfer-player-card">${transferPlayerHtml(player)}</article>`).join('') : '<p class="muted">No players match this search.</p>';
+    }
+
+    function renderLeagueTools() {
+      if (!isLeague || !leagueState) return;
+      leagueTools.style.display = '';
+      if (!leagueTools.querySelector('#btnSkipToTransfers')) {
+        const clubs = leagueState.table.slice().sort((a, b) => a.name.localeCompare(b.name));
+        leagueTools.innerHTML = `<div class="league-skip"><button class="btn btn-primary" id="btnSkipToTransfers">Simulate to Transfer Window</button><p class="muted" id="leagueSkipNote">Simulate the remaining first-half fixtures and stop at mid-season transfers.</p></div>
+          <details id="leagueSquadBrowser"><summary>Teams &amp; Player Stats</summary><div class="field"><label for="leagueClubSelect">Club</label><select id="leagueClubSelect">${clubs.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>
+          <p class="muted" id="leagueClubMeta"></p><div class="field"><label for="leaguePlayerSearch">Search players or positions</label><input id="leaguePlayerSearch" type="search" placeholder="Name, position or source club"/></div><div class="transfer-player-grid league-squad-players" id="leagueClubPlayers"></div></details>`;
+        leagueTools.querySelector('#leagueClubSelect').value = clubs.find((club) => club.code !== myCode)?.code || clubs[0].code;
+        leagueTools.querySelector('#leagueClubSelect').addEventListener('change', loadClubSquad);
+        leagueTools.querySelector('#leaguePlayerSearch').addEventListener('input', renderClubPlayers);
+        leagueTools.querySelector('#leagueSquadBrowser').addEventListener('toggle', () => { if (leagueTools.querySelector('#leagueSquadBrowser').open) loadClubSquad(); });
+        leagueTools.querySelector('#btnSkipToTransfers').addEventListener('click', () => {
+          if (advancePending || skipPending) return;
+          skipPending = true;
+          advancePending = true;
+          renderButton();
+          renderLeagueTools();
+          socket.emit('league:skipToTransfers', { code });
+        });
+      }
+      const button = leagueTools.querySelector('#btnSkipToTransfers');
+      const halfway = Math.floor(leagueState.totalMatchdays / 2);
+      leagueTools.querySelector('.league-skip').style.display = viewedStep < halfway && tournamentStage !== 'done' ? '' : 'none';
+      button.disabled = advancePending || skipPending || transferPending;
+      button.textContent = skipPending ? 'Simulating to Mid-season...' : 'Simulate to Transfer Window';
+    }
 
     function transferPlayerHtml(player) {
       const stats = player.stats;
@@ -323,6 +379,7 @@ const TournamentView = {
     }
 
     function renderButton() {
+      renderLeagueTools();
       if (transferState && ['release', 'sign'].includes(transferState.phase)) {
         continueZone.style.display = 'none';
         return;
@@ -766,6 +823,7 @@ const TournamentView = {
     }
 
     function renderStep(step) {
+      renderLeagueTools();
       renderLeagueTable();
       renderTransfers();
       if (tournamentStage === 'done') {
@@ -900,6 +958,7 @@ const TournamentView = {
       leagueState = s.league || null;
       transferState = s.transfers || null;
       transferPending = false;
+      skipPending = false;
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
@@ -907,6 +966,7 @@ const TournamentView = {
       isSpectator = !!s.spectator;
       isCreator = s.creatorId === App.state.user.id;
       if (s.myLineup) myCode = s.myLineup.code;
+      renderLeagueTools();
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
         renderLineupReveal(s.myLineup);
       } else {
@@ -922,6 +982,8 @@ const TournamentView = {
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;
       isSpectator = !!payload.spectator;
+      renderLeagueTools();
+      if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
       if (payload.step && payload.step.matches && payload.step.matches.length && myCode) {
         playLiveReport(payload.step, myCode, () => renderStep(payload.step));
       } else {
@@ -964,17 +1026,34 @@ const TournamentView = {
       renderButton();
     });
 
+    App.onSocket('league:midseason', (payload) => {
+      advancePending = false;
+      skipPending = false;
+      lineupRevealShown = true;
+      leagueState = payload.league;
+      transferState = payload.transfers;
+      viewedStep = payload.viewedStep;
+      historyLength = payload.historyLength;
+      tournamentStage = payload.stage;
+      renderStep(payload.step);
+      if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
+      transferZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
     App.onSocket('league:transferState', (payload) => {
       transferPending = false;
       transferState = payload.transfers;
       releaseSelection.clear();
       renderTransfers();
       renderButton();
+      if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
       if (transferState.phase === 'complete') App.toast(`${transferState.incoming.length === 1 ? 'One player' : 'Two players'} signed. Your XI is complete.`, false);
     });
 
     App.onSocket('error:message', (e) => {
       advancePending = false;
+      skipPending = false;
+      renderLeagueTools();
       if (transferPending) { transferPending = false; renderTransfers(); }
       renderButton();
       App.toast(e.error, true);

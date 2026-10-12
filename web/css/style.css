@@ -161,6 +161,15 @@ button.transfer-player-card { cursor: pointer; }
 .transfer-player-stats dd { margin: 3px 0 0; font-weight: 700; }
 .transfer-sign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
 .transfer-sign-grid select { width: 100%; margin-top: 8px; }
+.league-tools summary { cursor: pointer; font-weight: 700; padding: 8px 0; }
+.league-tools details[open] summary { margin-bottom: 14px; }
+.league-squad-players { max-height: 580px; overflow-y: auto; padding-right: 6px; }
+.league-skip p { font-size: .85rem; }
+.tactic-tradeoff { margin-top: 8px; font-size: .8rem; }
+.tactic-tradeoff strong { display: block; color: var(--ink); margin-bottom: 3px; }
+.tactic-matchup { font-size: .75rem; margin-top: 8px; }
+.tactic-matchup.good { color: var(--accent-strong); }
+.tactic-matchup.bad { color: var(--danger); }
 @media (max-width: 640px) {
   .league-table-hint { display: block; }
   .league-table th:first-child, .league-table td:first-child { position: sticky; left: 0; min-width: 28px; background: var(--surface); z-index: 1; }

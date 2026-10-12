@@ -16,9 +16,9 @@ const TACTICAL_STYLES = {
     tempo: 1, risk: 1, press: 1, control: 1, transition: 1, setPiece: 1, starMoment: 1,
     midfieldBias: 1, finishingBias: 1,
     widthBias: 1, highlineBias: 1, buildupBias: 1, setPieceBias: 1, physicalityBias: 1,
-    description: 'No major weakness, adapts reasonably into any matchup. The vanilla baseline.',
-    longDescription: 'Evenly spread commitment between all four lines. Midfield creates at a standard rate and strikers convert at a standard rate — the middle of the road. Ideal when your raw player quality beats the opponent and you want predictable, low-volatility football without sharp counters.',
-    strengths: ['No sharp counter', 'Stable chemistry', 'Predictable output'],
+    description: 'An adaptable plan with neutral attack, defense and tempo. Keep your shape without a strong tactical commitment.',
+    longDescription: 'Spread commitment between defense, midfield and attack. Creation and finishing use their normal modifiers, with modest stability edges in familiar matchups. A useful starting point when you want your squad quality and formation to lead the game plan.',
+    strengths: ['Flexible shape', 'Steady tempo', 'Neutral core modifiers'],
     weaknesses: ['No explosive upside', 'Smaller matchup edges']
   },
   gegenpress: {
@@ -41,7 +41,7 @@ const TACTICAL_STYLES = {
     description: 'Controls territory, improves passing and reduces volatility. Midfield is the engine; striker quality matters less because volume carries you.',
     longDescription: 'Your eight outfield players behind the ball circulate, draw the opponent out, then play through the lines. Shot volume rises, but individual chance quality drops slightly — you wear teams down over 90 minutes rather than hit them on one break.',
     strengths: ['Territory control', 'High-passing volumes', 'Low volatility'],
-    weaknesses: ['Vulnerable to gegenpress', 'Low conversion ok']
+    weaknesses: ['Vulnerable to pressing and counters', 'Fewer fast transitions']
   },
   counter: {
     key: 'counter', label: 'Counter Attack',
@@ -82,10 +82,40 @@ const TACTICAL_STYLES = {
     tempo: 1.1, risk: 1.14, press: 0.86, control: 0.76, transition: 1.18, setPiece: 1.1, starMoment: 1.06,
     midfieldBias: 0.72, finishingBias: 1.24,
     widthBias: 1.04, highlineBias: 1.02, buildupBias: 0.6, setPieceBias: 1.22, physicalityBias: 1.14,
-    description: 'Bypass the midfield entirely — long balls, target-man play and fast vertical runs forward. Striker quality is everything. Chance creation by midfield is intentionally low; the striker feeds on scraps and second balls but converts at a premium.',
-    longDescription: 'Why build through the middle when you can go direct? Goalkeeper kicks long, centre-backs ping diagonals, wingers chase flick-ons. Your midfield sees little of the ball so raw chance creation suffers badly, but an elite finisher feeds on turnovers, flick-ons and through-balls. Ideal if your strikers are 90+ but your midfield is paper-thin.',
+    description: 'Long balls and forward runs favor finishing over midfield creation. Strong forwards matter, while possession and passing accuracy drop.',
+    longDescription: 'Play forward early and look for target players, flick-ons and second balls. The finishing modifier rises while midfield creation falls. Useful when your forwards are stronger than your creators, but compact defenses can cut off the supply and turnovers remain a risk.',
     strengths: ['Elite finishers overperform xG', 'Simple game plan', 'Set pieces amplify striker conversion rate', 'Big-man presence'],
     weaknesses: ['Low chance creation (midfield matters less)', 'Vulnerable on turnovers']
+  },
+  vertical: {
+    key: 'vertical', label: 'Vertical Tiki-Taka', meta: 'Fast passing', isNew: true,
+    attack: 1.06, defense: 0.98, possession: 4, passAccuracy: 3, foulBias: 1,
+    tempo: 1.1, risk: 1.1, press: 1.08, control: 1.12, transition: 1.12, setPiece: 0.98, starMoment: 1.06,
+    midfieldBias: 1.18, finishingBias: 1.04, widthBias: 0.94, highlineBias: 1.16, buildupBias: 1.2, setPieceBias: 0.94, physicalityBias: 0.98,
+    description: 'Move through midfield quickly with short, forward passes. More attacking tempo, less defensive cover.',
+    longDescription: 'Creative central midfielders link with a striker and runners between the lines. Faster passing and transitions create pressure without giving up all ball control. A high line and extra risk leave room for opponents to counter.',
+    strengths: ['Fast central combinations', 'Creative midfield involvement', 'Forward transition threat'],
+    weaknesses: ['Space behind the high line', 'Needs a connected midfield']
+  },
+  overlap: {
+    key: 'overlap', label: 'Overlapping Fullbacks', meta: 'Wide overloads', isNew: true,
+    attack: 1.06, defense: 0.96, possession: 2, passAccuracy: 0, foulBias: 1,
+    tempo: 1.08, risk: 1.14, press: 1.02, control: 1.0, transition: 1.08, setPiece: 1.12, starMoment: 1.04,
+    midfieldBias: 1.02, finishingBias: 1.08, widthBias: 1.4, highlineBias: 1.18, buildupBias: 1.04, setPieceBias: 1.18, physicalityBias: 1.02,
+    description: 'Fullbacks support the wingers to overload the flanks. Extra attacking width costs defensive cover.',
+    longDescription: 'Wide defenders push alongside the wingers, stretching narrow opponents and feeding runners in the box. Crossing and set pieces receive a lift. The advanced line and attacking commitment leave your flanks exposed to fast counters.',
+    strengths: ['Wide overloads', 'Crossing and corner threat', 'Stretches narrow blocks'],
+    weaknesses: ['Exposed flanks on turnovers', 'Poor fit without wide defenders']
+  },
+  catenaccio: {
+    key: 'catenaccio', label: 'Catenaccio', meta: 'Defensive cover', isNew: true,
+    attack: 0.9, defense: 1.12, possession: -7, passAccuracy: -2, foulBias: 2,
+    tempo: 0.82, risk: 0.64, press: 0.68, control: 0.78, transition: 1.08, setPiece: 1.08, starMoment: 0.98,
+    midfieldBias: 0.72, finishingBias: 1.06, widthBias: 0.8, highlineBias: 0.52, buildupBias: 0.72, setPieceBias: 1.18, physicalityBias: 1.1,
+    description: 'Protect the box with a deep defensive line and extra cover. Fewer chances, with short breaks and set pieces.',
+    longDescription: 'Keep players behind the ball, protect central lanes and wait for a small number of counterattacks. Strong defensive resistance comes at the cost of possession, midfield creation and shot volume. Patient circulation and wide overloads can pull the block apart.',
+    strengths: ['Deep defensive resistance', 'Low-risk shape', 'Set-piece and breakaway outlet'],
+    weaknesses: ['Low chance creation', 'Vulnerable to patient width']
   },
   'tiki-taka': {
     key: 'tiki-taka', label: 'Tiki-Taka',
@@ -93,8 +123,8 @@ const TACTICAL_STYLES = {
     tempo: 0.9, risk: 0.76, press: 0.94, control: 1.3, transition: 0.84, setPiece: 0.96, starMoment: 1.02,
     midfieldBias: 1.32, finishingBias: 0.88,
     widthBias: 0.88, highlineBias: 1.18, buildupBias: 1.34, setPieceBias: 0.86, physicalityBias: 0.84,
-    description: 'Ultra patient short-passing circulation. The midfield generates mountains of xG by attrition but demands elite passers; finishing suffers slightly because individual chances are less dangerous.',
-    longDescription: 'Every outfield player is comfortable on the ball. Triangles everywhere, 1-2 touches every pass, 500–600 completed passes per match. Midfield is EVERYTHING — pure volume wears defences down over 90 minutes so even average chances stack up. But a single 75-rated striker will seriously underperform because every single chance is half-chances rather than clear-cuts.',
+    description: 'Patient short passing increases control and midfield creation, with lower tempo, transitions and finishing emphasis.',
+    longDescription: 'Use central passing triangles to control territory and build repeated attacks. Strong midfielders support the creation bias, while slower transitions and a lower finishing bias limit direct threat. Aggressive pressing and fast counters can punish lost possession.',
     strengths: ['Dominant chance creation volume', 'Dominant passing', 'Low-attrition, high territory', 'Extreme low turnovers'],
     weaknesses: ['Poor against gegenpress', 'Finishing underperforms xG']
   }
@@ -113,6 +143,36 @@ const MATCHUP_EDGE = {
   direct: { defensive: -0.05, gegenpress: -0.02, possession: 0.04, counter: 0.04, compact: -0.06, wingplay: -0.03, 'tiki-taka': 0.05 },
   'tiki-taka': { defensive: 0.05, gegenpress: -0.1, possession: -0.03, counter: -0.06, wingplay: -0.04, direct: -0.05, compact: -0.02 }
 };
+
+const NEW_MATCHUPS = {
+  vertical: { defensive: 0.04, balanced: 0, gegenpress: -0.04, possession: 0.02, counter: -0.05, wingplay: 0.02, compact: -0.03, direct: -0.02, 'tiki-taka': 0.02, overlap: 0.02, catenaccio: 0.03 },
+  overlap: { defensive: 0.05, balanced: 0, gegenpress: -0.03, possession: -0.03, counter: -0.06, wingplay: 0, compact: 0.06, direct: -0.02, 'tiki-taka': -0.02, catenaccio: 0.05 },
+  catenaccio: { defensive: 0, balanced: 0, gegenpress: 0.02, possession: -0.05, counter: 0.05, wingplay: -0.05, compact: 0.02, direct: 0.06, 'tiki-taka': -0.06 }
+};
+for (const [style, opponents] of Object.entries(NEW_MATCHUPS)) {
+  MATCHUP_EDGE[style] ||= {};
+  for (const [opponent, edge] of Object.entries(opponents)) {
+    MATCHUP_EDGE[style][opponent] = edge;
+    MATCHUP_EDGE[opponent] ||= {};
+    MATCHUP_EDGE[opponent][style] = -edge;
+  }
+}
+
+function tacticalCatalog() {
+  const { FORMATIONS, getDeepInfo } = require('./formations');
+  return STYLE_KEYS.map((key) => {
+    const style = TACTICAL_STYLES[key];
+    return { key, label: style.label, meta: style.meta || style.label, new: !!style.isNew,
+      mods: { ATT: style.attack, DEF: style.defense, TMP: style.tempo, CTR: style.control, SET: style.setPiece, RISK: style.risk, PRESS: style.press },
+      desc: style.description, longDesc: style.longDescription, strengths: style.strengths, weaknesses: style.weaknesses,
+      biases: { mid: style.midfieldBias, fin: style.finishingBias },
+      synergyBest: Object.keys(FORMATIONS).filter((formation) => getDeepInfo(formation)?.bestStyles.includes(key)),
+      synergyWorst: Object.keys(FORMATIONS).filter((formation) => getDeepInfo(formation)?.worstStyles.includes(key)),
+      strongAgainst: STYLE_KEYS.filter((opponent) => matchupEdge(key, opponent) >= 0.03).map((opponent) => TACTICAL_STYLES[opponent].label),
+      weakAgainst: STYLE_KEYS.filter((opponent) => matchupEdge(key, opponent) <= -0.03).map((opponent) => TACTICAL_STYLES[opponent].label)
+    };
+  });
+}
 
 function isCustomStyleKey(style) {
   return /^custom:\d+$/.test(String(style || ''));
@@ -149,4 +209,4 @@ const BIAS_LABELS = {
   physicalityBias: 'Physical'
 };
 
-module.exports = { TACTICAL_STYLES, STYLE_KEYS, normalizeStyle, baseStyleKey, isCustomStyleKey, randomStyle, matchupEdge, BIAS_LABELS };
+module.exports = { TACTICAL_STYLES, STYLE_KEYS, normalizeStyle, baseStyleKey, isCustomStyleKey, randomStyle, matchupEdge, BIAS_LABELS, tacticalCatalog };

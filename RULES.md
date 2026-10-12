@@ -89,7 +89,9 @@ Your formation is chosen before the draft starts. Once the draft screen opens, t
 You can still rearrange the XI before locking tactical style: select a filled pitch slot, then choose another slot in the same position group to move or swap the players. For example, defenders can swap with defenders and midfielders with midfielders, but the formation's slot counts never change. This lets you polish the final lineup without changing the squad shape itself.
 
 ### Tactical style lock
-Once the XI is complete, each drafter locks one tactical style: Defensive, Balanced, Gegenpress, Possession, or Counter Attack. The tournament starts only after every drafter has finished this lock step.
+Once the XI is complete, each drafter locks one of 12 built-in tactical styles: Defensive, Balanced, Gegenpress, Possession, Counter Attack, Wing Play, Compact Midfield, Direct Play, Tiki-Taka, Vertical Tiki-Taka, Overlapping Fullbacks or Catenaccio. Saved custom tactics are also available. The tournament starts only after every drafter has finished this lock step.
+
+The style picker shows the same modifiers and formation fits used by the engine. A great fit applies a stable 1.025 attack modifier; a poor fit applies 0.965, with a smaller linked defense adjustment. Match outcomes remain random. Vertical Tiki-Taka trades defensive cover for faster central combinations, Overlapping Fullbacks trades cover for wide overloads, and Catenaccio trades creation and possession for a deeper defensive block and set-piece outlets. Each has positive and negative matchups.
 ---
 
 ## 5. The 2026 World Cup — the Real Format
@@ -147,6 +149,10 @@ The chosen club uses your XI; other clubs use their bot-selected real squads fro
 After matchday 17, **Transfer Window** offers one chance to change **one or two players, with a maximum of two**. You can keep your squad instead. Release the chosen player(s) from your XI first, then select one eligible league player for each vacant position. You cannot re-sign a released player in that window. A replacement in the captain's slot inherits the captain role. Matches remain paused until the XI is complete. Player cards include all supplied profile fields, roster status and recorded season statistics. The release/signing stage survives reconnects and server restarts when storage is retained.
 
 The bottom two clubs in the standings have **↓** arrows. They are labeled **Relegation zone** while matches remain and **Relegated** after the last matchday.
+
+Before halfway, **Simulate to Transfer Window** plays all remaining first-half fixtures through the normal match engine and stops at matchday 17. All match reports and standings are saved, and the squad must still be completed before the second half continues. The shortcut is single player only.
+
+**Teams & Player Stats** lets you select any league club and inspect its formation, tactical style, starting XI, other roster members and released players, plus player profiles and statistics through your reached matchday. Statistics belong to the selected club and use the saved lineups that actually played.
 
 Unfinished drafts and seasons appear under **Your League Seasons** on the dashboard. Reconnects restore the selected club, XI, matchday and results when the server's storage is retained. Completed seasons contribute to match history and career statistics. League Games is single player only for now; World Cup multiplayer remains available.
 
