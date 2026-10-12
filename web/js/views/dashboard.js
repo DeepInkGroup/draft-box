@@ -244,7 +244,7 @@ const DashboardView = {
       <div class="card center"><h3>Single Player</h3><p class="muted">Choose your competition.</p></div>
       <div class="mode-grid single-player-modes">
         <button class="mode-card" id="singleWorldCup"><h3>World Cup</h3><p class="muted">Draft from national teams and take on the 48-team tournament.</p></button>
-        <button class="mode-card" id="singleLeague"><h3>League Games</h3><p class="muted">Choose a league and club. Draft your XI and chase the title across a full season.</p></button>
+        <button class="mode-card" id="singleLeague"><h3>League Games</h3><p class="muted">Choose a league and club. Use the real club squad or draft your XI.</p></button>
       </div>`;
     this.wireBack(container);
     container.querySelector('#singleWorldCup').addEventListener('click', () => this.renderSingleplayer(container));
@@ -276,6 +276,7 @@ const DashboardView = {
         <h3>${league ? 'League Games — ' + league.name : 'Single Player — World Cup'}</h3>
         <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
         ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
+        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><p class="muted">A transfer window opens halfway through the season. Release two players, then choose two replacements.</p>` : ''}
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
         <div id="spTimer" style="margin-bottom:16px;"></div>
@@ -307,6 +308,16 @@ const DashboardView = {
     const spTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
     const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
+    const squadMode = league ? container.querySelector('#spSquadMode') : null;
+    if (squadMode) squadMode.addEventListener('change', () => {
+      const real = squadMode.value === 'real';
+      for (const id of ['spTimer', 'spRerolls', 'spAutoDraft']) {
+        const option = container.querySelector('#' + id);
+        option.classList.toggle('hidden', real);
+        option.previousElementSibling.classList.toggle('hidden', real);
+      }
+      container.querySelector('#btnSingleplayer').textContent = real ? 'Use Real Club Squad' : 'Start League Draft';
+    });
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
       const startButton = container.querySelector('#btnSingleplayer');
@@ -316,12 +327,13 @@ const DashboardView = {
         startButton.disabled = true;
         const room = await Api.createSingleplayer({
           mode: league ? 'league' : 'worldcup', leagueId: league?.id,
+          squadMode: squadMode?.value || 'draft',
           clubCode: league ? container.querySelector('#spClub').value : undefined,
           formation: spFormation.value, showOverall: spRatings.value, pickTimeMs: spTimer.value,
           captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value,
           rerollsAllowed: spRerolls.value
         });
-        if (spAutoDraft.value) sessionStorage.setItem(`draftbox.autoDraft.${room.code}`, '1');
+        if (spAutoDraft.value && squadMode?.value !== 'real') sessionStorage.setItem(`draftbox.autoDraft.${room.code}`, '1');
         else sessionStorage.removeItem(`draftbox.autoDraft.${room.code}`);
         App.goDraft(room.code);
       } catch (e) { showErr(e); startButton.disabled = false; }

@@ -25,6 +25,11 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     await expect(page.locator('#leagueSelect')).toHaveValue('pgl');
     await expect(page.locator('#leagueDetails')).toContainText('18 clubs');
     await page.locator('#btnSelectLeague').click();
+    await expect(page.locator('#spSquadMode')).toHaveValue('draft');
+    await page.locator('#spSquadMode').selectOption('real');
+    await expect(page.locator('#spAutoDraft')).toBeHidden();
+    await expect(page.locator('#btnSingleplayer')).toHaveText('Use Real Club Squad');
+    await page.locator('#spSquadMode').selectOption('draft');
     await expect(page.locator('#spClub option')).toHaveCount(18);
     await page.locator('#spClub').selectOption({ label: 'Persepolis' });
     await page.locator('#spAutoDraft').getByText('Auto', { exact: true }).click();
@@ -55,3 +60,63 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     expect(errors).toEqual([]);
   });
 }
+
+test('real club squad and the two-step transfer window work on mobile', async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.route('https://cdn.socket.io/**', (route) => route.fulfill({ path: path.join(__dirname, '..', '..', 'node_modules/socket.io/client-dist/socket.io.min.js'), contentType: 'application/javascript' }));
+  await page.route('https://fonts.googleapis.com/**', (route) => route.abort());
+  await page.route('https://fonts.gstatic.com/**', (route) => route.abort());
+  await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort());
+  const username = `real_${Date.now().toString().slice(-8)}`;
+  const account = await (await request.post('/api/auth/register', { data: { username, email: `${username}@example.test`, password: 'test-password' } })).json();
+  await page.addInitScript((token) => sessionStorage.setItem('draftbox.token', token), account.token);
+  await page.goto('/');
+  await page.locator('#modeSingle').click();
+  await page.locator('#singleLeague').click();
+  await page.locator('#btnSelectLeague').click();
+  await page.locator('#spSquadMode').selectOption('real');
+  await page.locator('#btnSingleplayer').click();
+  await expect(page.locator('#squadProgress')).toContainText('11');
+  const code = (await page.url()).split('/').pop();
+  await page.evaluate((code) => App.ensureSocket().emit('draft:setTacticalStyle', { code, tacticalStyle: 'balanced' }), code);
+  await expect(page.locator('#btnEnterTournament')).toBeVisible();
+  await page.locator('#btnEnterTournament').click();
+  // Advance through the first half using the real socket, without waiting for replay animations.
+  await page.evaluate(async (code) => {
+    const socket = App.ensureSocket();
+    socket.off('tournament:step');
+    for (let i = 0; i < 17; i++) await new Promise((resolve, reject) => {
+      socket.once('tournament:step', resolve);
+      socket.once('error:message', reject);
+      socket.emit('tournament:advance', { code });
+    });
+  }, code);
+  await page.reload();
+  await expect(page.locator('#transferZone')).toContainText('Mid-season Transfer Window');
+  await expect(page.locator('#continueZone')).toBeHidden();
+  await expect(page.locator('[data-release]')).toHaveCount(11);
+  await expect(page.locator('#btnReleasePlayers')).toBeDisabled();
+  await page.locator('[data-release]').nth(0).click();
+  await page.locator('[data-release]').nth(1).click();
+  await page.locator('#btnReleasePlayers').click();
+  await expect(page.locator('#transferPick0')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#transferPick0')).toBeVisible();
+  const first = await page.locator('#transferPick0 option').nth(1).getAttribute('value');
+  const second = await page.locator('#transferPick1 option').evaluateAll((options, first) => options.find((option) => option.value && option.value !== first).value, first);
+  await page.locator('#transferPick0').selectOption(first);
+  await page.locator('#transferPick1').selectOption(second);
+  await expect(page.locator('#transferProfile0')).toContainText('OVR');
+  await expect(page.locator('#transferProfile0')).toContainText('Available');
+  await expect(page.locator('#transferProfile0')).toContainText('Assists');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
+  await page.screenshot({ path: 'test-results/transfers-mobile.png', fullPage: true });
+  await page.locator('#btnSignPlayers').click();
+  await expect(page.locator('#transferZone')).toBeHidden();
+  await expect(page.locator('#btnContinue')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('#transferZone')).toBeHidden();
+  expect(errors).toEqual([]);
+});

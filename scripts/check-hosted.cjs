@@ -35,6 +35,8 @@ async function request(url, verify, options = {}) {
     assert.ok(pgl, 'Persian Gulf League must be available');
     assert.equal(pgl.teamCount, 18);
     assert.equal(pgl.matchdays, 34);
+    assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
+    assert.equal(pgl.transferWindowAfterMatchday, 17);
   });
   await request(apiBase + '/', async (response) => {
     assert.match(await response.text(), /Draft Box/);

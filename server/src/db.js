@@ -140,6 +140,9 @@ if (!columnExists('rooms', 'show_overall')) {
 if (!columnExists('rooms', 'league_id')) {
   db.exec('ALTER TABLE rooms ADD COLUMN league_id TEXT;');
 }
+if (!columnExists('rooms', 'squad_mode')) {
+  db.exec("ALTER TABLE rooms ADD COLUMN squad_mode TEXT NOT NULL DEFAULT 'draft';");
+}
 if (!columnExists('drafted_players', 'slot_code')) {
   db.exec(`ALTER TABLE drafted_players ADD COLUMN slot_code TEXT NOT NULL DEFAULT '';`);
 }

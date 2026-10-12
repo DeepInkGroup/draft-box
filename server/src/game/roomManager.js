@@ -2,6 +2,7 @@ const db = require('../db');
 const { ALL_TEAMS } = require('../data/teams');
 const { getPlayer, getLeague, teamsForRoom } = require('../data/competitions');
 const { isValidFormation, getSlots } = require('./formations');
+const { bestXI } = require('./botEngine');
 const { normalizeStyle, isCustomStyleKey } = require('./tacticalStyles');
 
 const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
@@ -55,11 +56,12 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft' }) {
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
   if (mode === 'league' && !singlePlayer) throw new Error('League Games is currently single player only');
+  if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   const code = uniqueCode();
   const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const length = normalizeTournamentLength(tournamentLength);
@@ -68,13 +70,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -174,6 +176,7 @@ function loadRoomState(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
+    squadMode: roomRow.squad_mode || 'draft',
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
     singlePlayer: !!roomRow.single_player,
@@ -268,6 +271,36 @@ function persistTournamentSnapshot(roomState) {
   );
 }
 
+function initializeRealSquad(roomRow, userId) {
+  const member = getMembers(roomRow.id).find((entry) => entry.user_id === userId);
+  const club = getLeague(roomRow.league_id)?.teams.find((team) => team.code === member?.country_code);
+  if (!club || roomRow.squad_mode !== 'real') throw new Error('real club squad is unavailable');
+  const xi = bestXI(club, member.formation);
+  if (xi.length !== 11) throw new Error('this club cannot field an XI in that formation');
+  runTransaction(() => {
+    for (const player of xi) persistPick(roomRow.id, userId, player, player.team, player.slotCode);
+    markMemberDraftComplete(roomRow.id, userId);
+  });
+}
+
+// Save roster and transfer progress together before changing the in-memory state.
+function persistLeagueRoster(roomState, userId, tournament) {
+  const slot = Object.values(tournament.slotByCode).find((team) => team.userId === userId && team.isHuman);
+  if (!slot) throw new Error('not a member of this league');
+  const captainSlot = slot.xi.find((player) => player.isCaptain)?.slotCode || null;
+  runTransaction(() => {
+    db.prepare('DELETE FROM drafted_players WHERE room_id = ? AND user_id = ?').run(roomState.roomId, userId);
+    for (const player of slot.xi) persistPick(roomState.roomId, userId, player, player.team, player.slotCode);
+    db.prepare('UPDATE room_members SET captain_slot = ? WHERE room_id = ? AND user_id = ?').run(captainSlot, roomState.roomId, userId);
+    db.prepare('UPDATE rooms SET tournament_state = ? WHERE id = ?').run(JSON.stringify(tournament), roomState.roomId);
+  });
+  roomState.tournament = tournament;
+  const member = roomState.members.get(userId);
+  member.squad = slot.xi.map((player) => ({ ...player }));
+  member.slots = Object.fromEntries(getSlots(member.formation).map((definition) => [definition.code, member.squad.find((player) => player.slotCode === definition.code) || null]));
+  member.captainSlot = captainSlot;
+}
+
 function allMembersDraftComplete(roomState) {
   return Array.from(roomState.members.values()).every((m) => m.draftComplete);
 }
@@ -280,6 +313,7 @@ function lobbySnapshot(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
+    squadMode: roomRow.squad_mode || 'draft',
     leagueName: getLeague(roomRow.league_id)?.name || null,
     spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,
@@ -331,6 +365,8 @@ module.exports = {
   persistSlotMoves,
   setRoomStatus,
   persistTournamentSnapshot,
+  initializeRealSquad,
+  persistLeagueRoster,
   allMembersDraftComplete,
   lobbySnapshot,
   ALLOWED_PICK_TIMES_MS,

@@ -145,6 +145,19 @@ a { color: var(--accent-strong); }
 .league-table td:nth-child(2), .league-table th:nth-child(2) { min-width: 170px; text-align: left; }
 .league-table-note { font-size: .8rem; margin-bottom: 0; }
 .league-table-hint { display: none; }
+.transfer-window { border-color: var(--accent); }
+.transfer-player-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 12px; margin: 14px 0; }
+.transfer-player-card { padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--ink); text-align: left; font: inherit; min-width: 0; }
+button.transfer-player-card { cursor: pointer; }
+.transfer-player-card.selected { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.transfer-player-head { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+.transfer-player-card p { font-size: .82rem; color: var(--muted); }
+.transfer-player-tags { display: flex; flex-wrap: wrap; gap: 6px; font-size: .75rem; color: var(--accent-strong); }
+.transfer-player-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 0; }
+.transfer-player-stats dt { font-size: .72rem; color: var(--muted); }
+.transfer-player-stats dd { margin: 3px 0 0; font-weight: 700; }
+.transfer-sign-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 16px 0; }
+.transfer-sign-grid select { width: 100%; margin-top: 8px; }
 @media (max-width: 640px) {
   .league-table-hint { display: block; }
   .league-table th:first-child, .league-table td:first-child { position: sticky; left: 0; min-width: 28px; background: var(--surface); z-index: 1; }

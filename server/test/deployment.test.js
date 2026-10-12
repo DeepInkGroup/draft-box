@@ -208,6 +208,12 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     assert.equal(result.spectator, false);
     assert.ok(result.step.leagueTable.every((row) => row.played === matchday && row.pts === row.w * 3 + row.d && row.played === row.w + row.d + row.l));
     leagueResults.push(...result.step.matches);
+    if (matchday === 17) {
+      assert.equal(result.transfers.phase, 'release');
+      ready = event(seasonSocket, 'league:transferState');
+      seasonSocket.emit('league:transfer', { code: season.code, action: 'skip' });
+      assert.equal((await ready).transfers.phase, 'skipped');
+    }
     if (matchday === 5) {
       const savedTable = result.step.leagueTable;
       sockets.forEach((socket) => socket.disconnect());
@@ -247,4 +253,78 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.equal(newSeason.mode, 'league');
   assert.equal(newSeason.leagueId, 'pgl');
   assert.equal(newSeason.members[0].clubCode, clubCode);
+
+  const real = await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode, squadMode: 'real', formation: '4-3-3', captainEnabled: true }, status: 201 });
+  assert.equal(real.squadMode, 'real');
+  assert.equal(real.members[0].draftComplete, true);
+  ready = event(seasonSocket, 'room:state');
+  seasonSocket.emit('room:join', { code: real.code });
+  const realDraft = await ready;
+  assert.equal(realDraft.myDraft.squad.length, 11);
+  assert.ok(realDraft.myDraft.squad.every((player) => player.team === clubCode));
+  ready = event(seasonSocket, 'tournament:started');
+  seasonSocket.emit('draft:autoComplete', { code: real.code });
+  await ready;
+  for (let matchday = 1; matchday <= 17; matchday++) {
+    ready = event(seasonSocket, 'tournament:step');
+    seasonSocket.emit('tournament:advance', { code: real.code });
+    step = await ready;
+  }
+  assert.equal(step.transfers.phase, 'release');
+  const originalXi = step.transfers.squad;
+  assert.ok(originalXi.every((player) => player.stats.appearances === 17));
+  const captain = originalXi.find((player) => player.isCaptain);
+  const another = originalXi.find((player) => player.id !== captain.id);
+  const outgoingIds = [captain.id, another.id];
+  async function expectSocketError(action, pattern) {
+    const error = new Promise((resolve) => seasonSocket.once('error:message', resolve));
+    action();
+    assert.match((await error).error, pattern);
+  }
+  await expectSocketError(() => seasonSocket.emit('tournament:advance', { code: real.code }), /transfer window/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [] }), /replacements/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: [captain.id, captain.id] }), /two different/);
+  ready = event(seasonSocket, 'league:transferState');
+  seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: outgoingIds });
+  const released = (await ready).transfers;
+  assert.equal(released.phase, 'sign');
+  assert.equal(released.squad.length, 9);
+  assert.equal(released.outgoing.length, 2);
+  assert.ok(released.market.every((player) => !outgoingIds.includes(player.id) && player.rawPos && player.clubName && typeof player.overall === 'number' && player.stats));
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'skip' }), /vacant positions/);
+  await expectSocketError(() => seasonSocket.emit('tournament:advance', { code: real.code }), /transfer window/);
+  sockets.forEach((socket) => socket.disconnect());
+  await server.stop();
+  server = await startServer(dbPath, dir);
+  seasonSocket = await connect(login.token);
+  ready = event(seasonSocket, 'room:state');
+  seasonSocket.emit('room:join', { code: real.code });
+  const restoredTransfers = await ready;
+  assert.equal(restoredTransfers.transfers.phase, 'sign');
+  assert.equal(restoredTransfers.myLineup.xi.length, 9);
+  assert.deepEqual(restoredTransfers.transfers.outgoing, released.outgoing);
+  const usedIncoming = new Set();
+  const picks = released.vacancies.map((slot) => {
+    const player = released.market.find((candidate) => candidate.eligibleSlots.includes(slot.code) && !usedIncoming.has(candidate.id));
+    usedIncoming.add(player.id);
+    return { slotCode: slot.code, playerId: player.id };
+  });
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [picks[0], picks[0]] }), /two different/);
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [{ slotCode: picks[0].slotCode, playerId: outgoingIds[0] }, picks[1]] }), /available league player/);
+  ready = event(seasonSocket, 'league:transferState');
+  seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks });
+  const signed = (await ready).transfers;
+  assert.equal(signed.phase, 'complete');
+  assert.equal(signed.squad.length, 11);
+  assert.equal(signed.squad.find((player) => player.isCaptain).slotCode, captain.slotCode);
+  assert.ok(signed.incoming.every((player) => player.stats.appearances >= 0));
+  ready = event(seasonSocket, 'tournament:step');
+  seasonSocket.emit('tournament:advance', { code: real.code });
+  const secondHalf = await ready;
+  assert.equal(secondHalf.step.matchday, 18);
+  const humanMatch = secondHalf.step.matches.find((match) => match.aCode === clubCode || match.bCode === clubCode);
+  const humanXi = humanMatch.lineups[humanMatch.aCode === clubCode ? 'A' : 'B'];
+  assert.ok(humanXi.every((player) => !outgoingIds.includes(player.id)));
+  assert.ok(picks.every((pick) => humanXi.some((player) => player.id === pick.playerId)));
+  await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: picks.map((pick) => pick.playerId) }), /not open/);
 });

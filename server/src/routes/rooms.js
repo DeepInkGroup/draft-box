@@ -42,11 +42,12 @@ router.post('/singleplayer', (req, res) => {
     const mode = req.body?.mode || 'worldcup';
     const leagueId = req.body?.leagueId;
     const clubCode = req.body?.clubCode;
+    const squadMode = req.body?.squadMode || 'draft';
     const league = mode === 'league' ? getLeague(leagueId) : null;
     if (mode === 'league' && (!league || !league.teams.some((team) => team.code === clubCode))) throw new Error('choose an available league and club');
     const room = rm.createRoom({
       name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
-      mode, leagueId,
+      mode, leagueId, squadMode,
       creatorId: req.user.id,
       humanSlotsMax: 1,
       singlePlayer: true,
@@ -59,6 +60,7 @@ router.post('/singleplayer', (req, res) => {
       spoilerMode: false
     });
     rm.joinRoom(room, req.user, req.body?.formation, clubCode);
+    if (squadMode === 'real') rm.initializeRealSquad(room, req.user.id);
     rm.setRoomStatus(room.id, 'drafting');
     const updated = rm.getRoomRow(room.id);
     res.status(201).json(serializeRoom(updated));

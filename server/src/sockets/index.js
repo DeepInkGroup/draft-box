@@ -3,6 +3,7 @@ const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { leagueSnapshot } = require('../game/leagueEngine');
+const { transferSnapshot, planTransfer } = require('../game/leagueTransfers');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey } = require('../game/tacticalStyles');
 const {
@@ -215,6 +216,7 @@ function registerSocketHandlers(io) {
           historyLength,
           tournamentStage: state.tournament.stage,
           league: leagueSnapshot(state.tournament, viewedStep),
+          transfers: transferSnapshot(state.tournament, socket.user.id, viewedStep),
           spectator: !!member.eliminated,
           advanceReady: state.spoilerMode ? advanceReadySnapshot(state) : null
         });
@@ -248,6 +250,7 @@ function registerSocketHandlers(io) {
         name: roomRow.name,
         mode: roomRow.mode,
         leagueId: roomRow.league_id,
+        squadMode: roomRow.squad_mode,
         creatorId: roomRow.creator_id,
         humanSlotsMax: roomRow.human_slots_max,
         singlePlayer: !!roomRow.single_player,
@@ -262,6 +265,7 @@ function registerSocketHandlers(io) {
       });
       for (const m of members) {
         rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation, m.country_code);
+        if (newRoom.squad_mode === 'real') rm.initializeRealSquad(newRoom, m.user_id);
       }
       if (newRoom.single_player) rm.setRoomStatus(newRoom.id, 'drafting');
       io.to(channelName(roomRow.code)).emit('room:rematchReady', { newCode: newRoom.code });
@@ -497,11 +501,26 @@ function registerSocketHandlers(io) {
           historyLength: tournamentEngine.historyLength(state),
           stage: t.stage,
           league: leagueSnapshot(t, member.viewedStep),
+          transfers: transferSnapshot(t, socket.user.id, member.viewedStep),
           spectator: !!member.eliminated
         });
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
+    });
+
+    socket.on('league:transfer', ({ code, action, playerIds, picks }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || room.status !== 'league_stage') throw new Error('the transfer window is not open');
+        const state = rm.loadRoomState(room);
+        const member = state.members.get(socket.user.id);
+        if (!member) throw new Error('not a member of this league');
+        if (member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('view the first half of the season before making transfers');
+        const next = planTransfer(state.tournament, socket.user.id, action, { playerIds, picks });
+        rm.persistLeagueRoster(state, socket.user.id, next);
+        socket.emit('league:transferState', { transfers: transferSnapshot(next, socket.user.id, member.viewedStep) });
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
     socket.on('disconnect', () => {

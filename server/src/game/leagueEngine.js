@@ -2,6 +2,7 @@ const { getLeague } = require('../data/competitions');
 const { bestBotSetup, teamStrength, prepareBotForMatch } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
 const { normalizeStyle } = require('./tacticalStyles');
+const { ensureTransferWindow, transfersPending } = require('./leagueTransfers');
 
 function createFixtures(codes) {
   if (codes.length < 2 || new Set(codes).size !== codes.length) throw new Error('a league needs distinct clubs');
@@ -64,6 +65,7 @@ function startLeague(roomState) {
 function simulateLeagueStep(roomState, applyResult) {
   const t = roomState.tournament;
   if (!t || t.stage === 'done') return null;
+  if (transfersPending(t)) throw new Error('complete or skip the mid-season transfer window before the next matchday');
   const matches = [];
   for (const fixture of t.fixtures[t.matchday]) {
     const a = t.slotByCode[fixture.aCode];
@@ -73,13 +75,15 @@ function simulateLeagueStep(roomState, applyResult) {
     const moraleA = a.morale;
     const moraleB = b.morale;
     const result = simulateMatch(a, b, { knockout: false, stage: 'league' });
-    const match = { ...fixture, ...result, stage: 'league', matchday: t.matchday + 1, moraleA, moraleB };
+    const match = { ...fixture, ...result, stage: 'league', matchday: t.matchday + 1, moraleA, moraleB,
+      lineups: { A: a.xi.map((player) => ({ ...player })), B: b.xi.map((player) => ({ ...player })) } };
     if (result.goalsA !== result.goalsB) match.winnerCode = result.goalsA > result.goalsB ? a.code : b.code;
     applyResult(t, a.code, b.code, result);
     t.matchLog.push(match);
     matches.push(match);
   }
   t.matchday++;
+  ensureTransferWindow(t);
   const table = rankTable(t);
   if (t.matchday === t.fixtures.length) {
     t.stage = 'done';

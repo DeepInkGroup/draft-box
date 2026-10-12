@@ -17,10 +17,14 @@ const TournamentView = {
     let isLeague = false;
     let leagueName = '';
     let leagueState = null;
+    let transferState = null;
+    let transferPending = false;
+    const releaseSelection = new Set();
 
     container.innerHTML = `
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
+      <div class="card transfer-window" id="transferZone" style="display:none;"></div>
       <div class="card" id="leagueZone" style="display:none;"></div>
       <div class="card" id="liveZone" style="display:none;"></div>
       <div class="card" id="stepCard"></div>
@@ -40,6 +44,72 @@ const TournamentView = {
     const newPing = container.querySelector('#newPing');
     const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
     const leagueZone = container.querySelector('#leagueZone');
+    const transferZone = container.querySelector('#transferZone');
+
+    function transferPlayerHtml(player) {
+      const stats = player.stats;
+      return `<div class="transfer-player-head"><b>${player.name}</b><span class="badge">OVR ${player.overall}</span></div>
+        <p>${player.clubName} · ${player.rawPos || player.pos}${player.slotCode ? ' · Slot ' + player.slotCode : ''}</p>
+        <div class="transfer-player-tags"><span>${player.status}</span>${player.isStar ? '<span>★ Star</span>' : ''}${player.isCaptain ? '<span>Captain</span>' : ''}</div>
+        <dl class="transfer-player-stats">${[['Apps', stats.appearances], ['Goals', stats.goals], ['Assists', stats.assists], ['Saves', stats.saves], ['Yellow', stats.yellowCards], ['Red', stats.redCards], ['Star moments', stats.starMoments]].map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl>`;
+    }
+
+    function sendTransfer(action, extra = {}) {
+      if (transferPending) return;
+      transferPending = true;
+      renderTransfers();
+      socket.emit('league:transfer', { code, action, ...extra });
+    }
+
+    function renderTransfers() {
+      const open = transferState && ['release', 'sign'].includes(transferState.phase);
+      transferZone.style.display = open ? '' : 'none';
+      if (!open) return;
+      if (transferState.phase === 'release') {
+        transferZone.innerHTML = `<h3>Mid-season Transfer Window</h3><p class="muted">First release exactly two players from your XI. Then choose two replacements. The season pauses until your XI is complete.</p>
+          <p id="releaseCount">${releaseSelection.size} of 2 players selected</p>
+          <div class="transfer-player-grid">${transferState.squad.map((player) => `<button class="transfer-player-card ${releaseSelection.has(player.id) ? 'selected' : ''}" data-release="${player.id}" aria-pressed="${releaseSelection.has(player.id)}" ${transferPending ? 'disabled' : ''}>${transferPlayerHtml(player)}</button>`).join('')}</div>
+          <div class="dialog-actions"><button class="btn btn-ghost" id="btnSkipTransfers" ${transferPending ? 'disabled' : ''}>Keep Current Squad</button><button class="btn btn-primary" id="btnReleasePlayers" ${releaseSelection.size !== 2 || transferPending ? 'disabled' : ''}>Release 2 Players</button></div>`;
+        transferZone.querySelectorAll('[data-release]').forEach((button) => button.addEventListener('click', () => {
+          const id = button.dataset.release;
+          if (releaseSelection.has(id)) releaseSelection.delete(id);
+          else if (releaseSelection.size < 2) releaseSelection.add(id);
+          renderTransfers();
+        }));
+        transferZone.querySelector('#btnReleasePlayers').addEventListener('click', () => sendTransfer('release', { playerIds: [...releaseSelection] }));
+        transferZone.querySelector('#btnSkipTransfers').addEventListener('click', () => sendTransfer('skip'));
+      } else {
+        transferZone.innerHTML = `<h3>Transfer Window — Sign 2 Players</h3><p class="muted">Both players have been released. Choose one replacement for each vacant position to restore your XI.</p>
+          <details><summary>Released players</summary><div class="transfer-player-grid">${transferState.outgoing.map((player) => `<article class="transfer-player-card">${transferPlayerHtml(player)}</article>`).join('')}</div></details>
+          <div class="transfer-sign-grid">${transferState.vacancies.map((slot, index) => `<div><div class="field"><label for="transferPick${index}">${slot.label} (${slot.code})${slot.isCaptain ? ' — Captain' : ''}</label><input type="search" id="transferSearch${index}" placeholder="Search player or club" aria-label="Search ${slot.code} replacements" ${transferPending ? 'disabled' : ''}/><select id="transferPick${index}" ${transferPending ? 'disabled' : ''}><option value="">Choose a replacement</option>${transferState.market.filter((player) => player.eligibleSlots.includes(slot.code)).map((player) => `<option value="${player.id}">${player.name} · ${player.clubName} · ${player.rawPos} · OVR ${player.overall}${player.isStar ? ' ★' : ''}</option>`).join('')}</select></div><div id="transferProfile${index}" class="transfer-player-card hidden"></div></div>`).join('')}</div>
+          <button class="btn btn-primary btn-block" id="btnSignPlayers" disabled>Sign 2 Players &amp; Continue Season</button><p class="error-text hidden" id="transferError"></p>`;
+        const validate = () => {
+          const ids = [0, 1].map((index) => transferZone.querySelector('#transferPick' + index).value);
+          transferZone.querySelector('#btnSignPlayers').disabled = transferPending || ids.some((id) => !id) || ids[0] === ids[1];
+          const error = transferZone.querySelector('#transferError');
+          error.textContent = ids[0] && ids[0] === ids[1] ? 'Choose two different players.' : '';
+          error.classList.toggle('hidden', !error.textContent);
+        };
+        transferState.vacancies.forEach((slot, index) => {
+          const select = transferZone.querySelector('#transferPick' + index);
+          select.addEventListener('change', () => {
+            const player = transferState.market.find((entry) => entry.id === select.value);
+            const profile = transferZone.querySelector('#transferProfile' + index);
+            profile.classList.toggle('hidden', !player);
+            profile.innerHTML = player ? transferPlayerHtml(player) : '';
+            validate();
+          });
+          transferZone.querySelector('#transferSearch' + index).addEventListener('input', (event) => {
+            const query = event.target.value.trim().toLowerCase();
+            for (const option of select.options) option.hidden = !!option.value && !option.textContent.toLowerCase().includes(query);
+          });
+        });
+        transferZone.querySelector('#btnSignPlayers').addEventListener('click', () => {
+          const picks = transferState.vacancies.map((slot, index) => ({ slotCode: slot.code, playerId: transferZone.querySelector('#transferPick' + index).value }));
+          sendTransfer('sign', { picks });
+        });
+      }
+    }
 
     function renderLeagueTable() {
       if (!leagueState) return;
@@ -246,6 +316,10 @@ const TournamentView = {
     }
 
     function renderButton() {
+      if (transferState && ['release', 'sign'].includes(transferState.phase)) {
+        continueZone.style.display = 'none';
+        return;
+      }
       newPing.style.display = newResultsPing ? 'block' : 'none';
       if (tournamentStage === 'done' && viewedStep >= historyLength) {
         continueZone.style.display = 'none';
@@ -686,6 +760,7 @@ const TournamentView = {
 
     function renderStep(step) {
       renderLeagueTable();
+      renderTransfers();
       if (tournamentStage === 'done') {
         stagePill.parentElement.style.display = 'none';
       } else {
@@ -816,6 +891,8 @@ const TournamentView = {
       isLeague = s.mode === 'league';
       leagueName = s.leagueName || '';
       leagueState = s.league || null;
+      transferState = s.transfers || null;
+      transferPending = false;
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
@@ -833,6 +910,7 @@ const TournamentView = {
     App.onSocket('tournament:step', (payload) => {
       advancePending = false;
       leagueState = payload.league || leagueState;
+      transferState = payload.transfers || transferState;
       viewedStep = payload.viewedStep;
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;
@@ -879,8 +957,18 @@ const TournamentView = {
       renderButton();
     });
 
+    App.onSocket('league:transferState', (payload) => {
+      transferPending = false;
+      transferState = payload.transfers;
+      releaseSelection.clear();
+      renderTransfers();
+      renderButton();
+      if (transferState.phase === 'complete') App.toast('Two players signed. Your XI is complete.', false);
+    });
+
     App.onSocket('error:message', (e) => {
       advancePending = false;
+      if (transferPending) { transferPending = false; renderTransfers(); }
       renderButton();
       App.toast(e.error, true);
     });
