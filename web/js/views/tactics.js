@@ -43,6 +43,9 @@ const TacticsView = (() => {
   const pointFields = new Set(['possession', 'passAccuracy']);
   let tactics = [];
   let selectedTactic = null;
+  let templates = [];
+  let labTeams = [];
+  let versionRequest = 0;
 
   function esc(value) { return String(value ?? '').replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])); }
   function clamp(value, min, max) { return Math.min(max, Math.max(min, value)); }
@@ -140,7 +143,7 @@ const TacticsView = (() => {
   function updateImpactPreview() {
     const panel = document.getElementById('tactic-impact-preview'); if (!panel || !selectedTactic) return;
     const i = impact(selectedTactic); const [tag, note] = identity(i);
-    panel.innerHTML = `<div class="tactic-impact-head"><b>Live Tactical Balance</b><span>Every boost now creates a visible tactical cost.</span></div>
+    panel.innerHTML = `<div class="tactic-impact-head"><b>Estimated Tactical Balance</b><span>Slider estimates. Use the Match Lab below to test actual simulated results.</span></div>
       <div class="tactic-balance-card"><div><span>Identity</span><b>${tag}</b><small>${note}</small></div><div><span>Trade-off Heat</span><b>${Math.min(100, Math.round(Object.values(i).reduce((s, v) => s + Math.abs(v), 0) / 7))}/100</b><small>${i.discipline < -35 ? 'Card risk is high.' : 'Discipline is manageable.'}</small></div></div>
       <div class="impact-grid">${impactCard('Attack', i.attack)}${impactCard('Defense', i.defense)}${impactCard('xG Creation', i.xgCreation)}${impactCard('Finishing', i.finishing)}${impactCard('Control', i.control)}${impactCard('Volatility', i.volatility, true)}${impactCard('Discipline', i.discipline)}${impactCard('Set Pieces', i.setPieces)}${impactCard('Star Moment', i.stars)}</div>
       <div class="trade-ledger"><b>Trade-off Ledger</b><div>${tradeLedger(selectedTactic)}</div></div>`;
@@ -148,6 +151,9 @@ const TacticsView = (() => {
 
   function renderTacticForm() {
     const form = document.getElementById('tactic-form-fields'); if (!form) return;
+    refreshVersions();
+    const result = document.getElementById('labResults');
+    if (result) result.innerHTML = '';
     if (!selectedTactic) { form.innerHTML = '<div class="tactic-empty"><b>Select or create a tactic</b><span>Build a custom style, then use it from the tactical picker after drafting.</span></div>'; return; }
     selectedTactic = normalizeTactic(selectedTactic);
     const textHtml = textFields.map(([key, label, placeholder, area]) => {
@@ -159,8 +165,8 @@ const TacticsView = (() => {
       return `<label class="tactic-range-field" for="tactic-${key}"><span class="tactic-range-label"><b>${m.label}</b><em id="tactic-${key}-value">${formatTacticValue(key, value)}</em></span><input type="range" id="tactic-${key}" min="${m.min}" max="${m.max}" step="${m.step}" value="${value}"><small>${m.help}</small></label>`;
     }).join('')}</div></section>`).join('');
     form.innerHTML = `<section class="tactic-identity-card">${textHtml}</section><section class="tactic-impact-panel" id="tactic-impact-preview"></section>${groupHtml}`;
-    textFields.forEach(([key]) => { const input = document.getElementById(`tactic-${key}`); if (input) input.addEventListener('input', (e) => { selectedTactic[key] = e.target.value; }); });
-    Object.keys(sliderMeta).forEach((key) => { const input = document.getElementById(`tactic-${key}`); if (input) input.addEventListener('input', (e) => { applyTradeoff(key, e.target.value); selectedTactic = normalizeTactic(selectedTactic); updateSliders(); updateImpactPreview(); }); });
+    textFields.forEach(([key]) => { const input = document.getElementById(`tactic-${key}`); if (input) input.addEventListener('input', (e) => { selectedTactic[key] = e.target.value; markEdited(); }); });
+    Object.keys(sliderMeta).forEach((key) => { const input = document.getElementById(`tactic-${key}`); if (input) input.addEventListener('input', (e) => { applyTradeoff(key, e.target.value); selectedTactic = normalizeTactic(selectedTactic); updateSliders(); updateImpactPreview(); markEdited(); }); });
     updateImpactPreview();
   }
 
@@ -173,8 +179,97 @@ const TacticsView = (() => {
 
   function newTacticFromPreset(preset = {}) { selectedTactic = normalizeTactic({ ...defaultTactic, ...preset, id: null }); renderTacticList(); renderTacticForm(); }
 
+  function markEdited() {
+    document.getElementById('tacticVersionNote').textContent = selectedTactic?.id ? `Editing version ${selectedTactic.version} · Unsaved changes` : 'New tactic · Unsaved';
+    document.getElementById('labResults').innerHTML = '';
+  }
+
+  async function refreshVersions() {
+    const select = document.getElementById('tacticVersions');
+    if (!select) return;
+    const request = ++versionRequest, id = selectedTactic?.id;
+    select.innerHTML = '<option value="">Saved versions</option>';
+    document.getElementById('restoreTactic').disabled = true;
+    document.getElementById('tacticVersionNote').textContent = id ? `Saved version ${selectedTactic.version || 0}` : 'New tactic · Unsaved';
+    if (!id) return;
+    try {
+      const versions = await Api.get(`/api/tactics/${id}/versions`);
+      if (request !== versionRequest) return;
+      select.innerHTML += versions.map((row) => `<option value="${row.version}">v${row.version} · ${esc(row.created_at)} · ${esc(row.payload.name)}</option>`).join('');
+    } catch (error) { if (request === versionRequest) App.toast(error.message, true); }
+  }
+
+  function renderLabTeams() {
+    for (const id of ['labClub', 'labOpponent']) document.getElementById(id).innerHTML = labTeams.map((team) => `<option value="${esc(team.code)}">${esc(team.name)}</option>`).join('');
+    document.getElementById('labOpponent').selectedIndex = 1;
+  }
+
+  async function setupLab() {
+    const [catalog, players] = await Promise.all([Api.get('/api/tactics/templates'), Api.get('/api/admin/players?competition=pgl')]);
+    templates = catalog; labTeams = players.clubs;
+    document.getElementById('tacticTemplate').innerHTML = '<option value="">Choose a built-in starting point</option>' + templates.map((template, index) => `<option value="${index}">${esc(template.name)}</option>`).join('');
+    document.getElementById('labFormation').innerHTML = Object.keys(FORMATIONS).map((formation) => `<option value="${esc(formation)}">${esc(formation)}</option>`).join('');
+    document.getElementById('labFormation').value = '4-3-3';
+    renderLabTeams();
+    document.getElementById('tacticTemplate').onchange = (event) => { if (event.target.value !== '') newTacticFromPreset({ ...templates[Number(event.target.value)], name: templates[Number(event.target.value)].name + ' Custom' }); };
+    document.getElementById('labCompetition').onchange = async (event) => {
+      document.getElementById('runTacticLab').disabled = true;
+      try { const data = await Api.get(`/api/admin/players?competition=${event.target.value}`); labTeams = data.clubs; renderLabTeams(); }
+      catch (error) { App.toast(error.message, true); }
+      finally { document.getElementById('runTacticLab').disabled = false; }
+    };
+  }
+
+  function installLabEvents() {
+    document.getElementById('duplicateTactic').onclick = () => {
+      if (!selectedTactic) return App.toast('Select a tactic first.', true);
+      newTacticFromPreset({ ...selectedTactic, name: `${selectedTactic.name} Copy`, version: undefined });
+    };
+    document.getElementById('exportTactic').onclick = () => {
+      if (!selectedTactic) return App.toast('Select a tactic first.', true);
+      const payload = Object.fromEntries([...Object.keys(defaultTactic)].map((key) => [key, selectedTactic[key]]));
+      const url = URL.createObjectURL(new Blob([JSON.stringify({ format: 'draftbox-tactic-v2', tactic: payload }, null, 2)], { type: 'application/json' }));
+      const link = document.createElement('a'); link.href = url; link.download = 'draftbox-tactic.json'; link.click(); URL.revokeObjectURL(url);
+    };
+    document.getElementById('importTactic').onclick = () => {
+      try {
+        const parsed = JSON.parse(document.getElementById('tacticJSON').value);
+        const source = parsed.tactic || parsed;
+        if (!source || typeof source !== 'object' || Array.isArray(source) || !String(source.name || '').trim()) throw new Error('Provide a tactic JSON object with a name.');
+        const payload = Object.fromEntries(Object.keys(defaultTactic).filter((key) => Object.hasOwn(source, key)).map((key) => [key, source[key]]));
+        newTacticFromPreset(payload); App.toast('Imported as a new tactic. Save to use it in games.');
+      } catch (error) { App.toast(error.message, true); }
+    };
+    document.getElementById('tacticVersions').onchange = (event) => { document.getElementById('restoreTactic').disabled = !event.target.value; };
+    document.getElementById('restoreTactic').onclick = async () => {
+      if (!selectedTactic?.id) return;
+      try {
+        const updated = await Api.post(`/api/tactics/${selectedTactic.id}/restore`, { version: Number(document.getElementById('tacticVersions').value) });
+        const index = tactics.findIndex((row) => Number(row.id) === Number(updated.id)); tactics[index] = updated; selectedTactic = { ...updated };
+        renderTacticList(); renderTacticForm(); App.toast(`Restored as version ${updated.version}.`);
+      } catch (error) { App.toast(error.message, true); }
+    };
+    document.getElementById('runTacticLab').onclick = async () => {
+      if (!selectedTactic) return App.toast('Select or create a tactic first.', true);
+      const button = document.getElementById('runTacticLab'), snapshot = JSON.stringify(selectedTactic);
+      button.disabled = true; button.textContent = 'Running Match Simulations…';
+      try {
+        const data = await Api.post('/api/tactics/preview', { tactic: selectedTactic, competition: document.getElementById('labCompetition').value, clubCode: document.getElementById('labClub').value, opponentCode: document.getElementById('labOpponent').value, formation: document.getElementById('labFormation').value, samples: Number(document.getElementById('labSamples').value) });
+        if (snapshot !== JSON.stringify(selectedTactic)) return App.toast('Tactic changed during analysis. Run it again.', true);
+        selectedTactic = { ...selectedTactic, ...data.normalizedTactic, id: selectedTactic.id }; updateSliders(); updateImpactPreview();
+        document.getElementById('labResults').innerHTML = `<h3>${esc(data.team)} vs ${esc(data.opponent)}</h3><p class="muted">${data.samples} matches per style · ${esc(data.formation)} · Same starting XI, neutral morale and Balanced opponent. Independent random samples; results vary between runs. Your season is unaffected.</p><div class="table-scroll"><table class="table"><thead><tr><th>Metric</th><th>${esc(selectedTactic.name)}</th><th>Balanced</th></tr></thead><tbody>${[['Wins', 'wins'], ['Draws', 'draws'], ['Losses', 'losses'], ['Win rate (%)', 'winRate'], ['Goals / match', 'goalsPerMatch'], ['Conceded / match', 'concededPerMatch'], ['xG / match', 'xg'], ['Opponent xG / match', 'xgAgainst'], ['Yellow cards (total)', 'yellowCards'], ['Red cards (total)', 'redCards']].map(([label, key]) => `<tr><th>${label}</th><td>${data.candidate[key]}</td><td>${data.baseline[key]}</td></tr>`).join('')}</tbody></table></div>`;
+      } catch (error) { App.toast(error.message, true); }
+      finally { button.disabled = false; button.textContent = 'Run Match Analysis'; }
+    };
+  }
+
   async function init(container) {
+    if (App.state.user?.role !== 'admin') return App.goDashboard();
+    selectedTactic = null;
     container.innerHTML = `<div id="tactics-view" class="tactics-page"><div class="tactics-hero card"><div><span>Engine Lab</span><h1>Custom Tactics</h1><p class="muted">Build a personal style with real gains, real costs, and match-engine impact.</p></div><button id="new-tactic" class="btn btn-primary">New Tactic</button></div><div id="tactics-container" class="tactic-builder-shell"><aside id="tactic-list-container" class="tactic-side-card"><h2>My Tactics</h2><div class="tactic-preset-row"><button type="button" class="btn btn-ghost btn-sm" data-preset="balanced">Balanced</button><button type="button" class="btn btn-ghost btn-sm" data-preset="creator">Creator</button><button type="button" class="btn btn-ghost btn-sm" data-preset="finisher">Finisher</button><button type="button" class="btn btn-ghost btn-sm" data-preset="chaos">Chaos</button></div><div id="tactic-list"></div></aside><main id="tactic-form-container" class="tactic-editor-card"><div class="tactic-editor-head"><h2>Tactic Editor</h2><button id="save-tactic" class="btn btn-primary">Save Tactic</button></div><div id="tactic-form-fields"></div></main></div></div>`;
+    document.getElementById('tactic-form-container').insertAdjacentHTML('beforeend', `<section class="tactic-field-group"><h2>Match Lab</h2><p class="muted">Test the current editor values using the real match engine, including changes you have not saved. Server balance limits apply.</p><div class="admin-filters"><label>Competition<select id="labCompetition"><option value="pgl">Persian Gulf League</option><option value="worldcup">World Cup</option></select></label><label>Your team<select id="labClub"></select></label><label>Opponent<select id="labOpponent"></select></label><label>Formation<select id="labFormation"></select></label><label>Matches per style<select id="labSamples"><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option></select></label></div><button id="runTacticLab" class="btn btn-primary">Run Match Analysis</button><div id="labResults" aria-live="polite"></div></section>`);
+    document.getElementById('tactic-form-fields').insertAdjacentHTML('beforebegin', `<div class="tactic-lab-toolbar"><p id="tacticVersionNote" class="muted"></p><div class="row"><button id="duplicateTactic" class="btn btn-ghost btn-sm">Duplicate</button><button id="exportTactic" class="btn btn-ghost btn-sm">Export JSON</button></div><label>Built-in Template<select id="tacticTemplate"></select></label><div class="row"><select id="tacticVersions" aria-label="Tactic versions"></select><button id="restoreTactic" class="btn btn-ghost btn-sm" disabled>Restore Version</button></div><details><summary>Import Tactic JSON</summary><textarea id="tacticJSON" rows="5" placeholder="Paste exported tactic JSON"></textarea><button id="importTactic" class="btn btn-ghost btn-sm">Import as New Tactic</button></details></div>`);
+    installLabEvents();
     const presets = {
       balanced: { name: 'Balanced Custom', description: 'Stable baseline with no extreme weakness.' },
       creator: { name: 'Midfield Creator', possession: 5, passAccuracy: 3, control: 1.14, midfieldBias: 1.18, finishingBias: .94, buildupBias: 1.16, tempo: .95, description: 'High creation through midfield control.' },
@@ -193,7 +288,7 @@ const TacticsView = (() => {
         App.toast('Tactic saved.'); renderTacticList(); renderTacticForm();
       } catch (e) { App.toast(e.message || 'Could not save tactic.', true); }
     });
-    try { tactics = await Api.get('/api/tactics'); } catch (e) { tactics = []; App.toast(e.message || 'Could not load custom tactics.', true); }
+    try { tactics = await Api.get('/api/tactics'); await setupLab(); } catch (e) { tactics = []; App.toast(e.message || 'Could not load custom tactics.', true); }
     renderTacticList(); renderTacticForm();
   }
 

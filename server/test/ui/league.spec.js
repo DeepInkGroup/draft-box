@@ -16,6 +16,11 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     const account = await response.json();
     await page.addInitScript((token) => sessionStorage.setItem('draftbox.token', token), account.token);
     await page.goto('/');
+    await expect(page.locator('#btnTactics')).toBeHidden();
+    await expect(page.locator('#btnAdmin')).toBeHidden();
+    await page.goto('/#tactics');
+    await expect(page.locator('#modeSingle')).toBeVisible();
+    await expect(page.locator('#tactics-view')).toHaveCount(0);
     await page.locator('#modeSingle').click();
     await expect(page.getByRole('heading', { name: 'League Games', exact: true })).toBeVisible();
     await page.locator('#singleWorldCup').click();
@@ -103,6 +108,7 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await page.locator('#leagueSquadBrowser summary').click();
   await page.locator('#btnSkipToTransfers').click();
   await expect(page.locator('#transferZone')).toContainText('Mid-season Transfer Window');
+  await expect(page.locator('#btnFinishLeague')).toBeHidden();
   await expect(page.locator('#leagueZone')).toContainText('Matchday 17 / 34');
   await expect(page.locator('#btnSkipToTransfers')).toBeHidden();
   await page.locator('#leagueSquadBrowser summary').click();
@@ -146,15 +152,12 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await expect(page.locator('#btnContinue')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferZone')).toBeHidden();
-  await page.evaluate(async (code) => {
-    const socket = App.ensureSocket();
-    socket.off('tournament:step');
-    for (let i = 0; i < 17; i++) await new Promise((resolve, reject) => {
-      socket.once('tournament:step', resolve);
-      socket.once('error:message', reject);
-      socket.emit('tournament:advance', { code });
-    });
-  }, code);
+  await expect(page.locator('#btnFinishLeague')).toBeVisible();
+  await page.locator('#btnFinishLeague').click();
+  await expect(page.locator('#seasonResults')).toContainText('306 matches');
+  await expect(page.locator('#seasonResults')).toContainText('Top Scorers');
+  await expect(page.locator('#seasonResults')).toContainText('Relegated');
+  await expect(page.locator('#btnFinishLeague')).toBeHidden();
   await page.reload();
   await expect(page.locator('#leagueZone')).toContainText('Matchday 34 / 34');
   await expect(page.locator('#leagueZone tbody .relegation-mark')).toHaveCount(2);

@@ -1420,3 +1420,36 @@ button.transfer-player-card { cursor: pointer; }
   .impact-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tactic-text-field:first-child, .tactic-text-field:nth-child(3) { grid-column: auto; }
 }
+.admin-page { display: grid; gap: 18px; }
+.admin-hero { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.admin-hero h1 { margin: 10px 0; }
+.admin-metrics { display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 12px; }
+.admin-metrics .card { margin: 0; display: grid; gap: 8px; }
+.admin-metrics span { color: var(--muted); text-transform: capitalize; }
+.admin-metrics b { font-size: 1.8rem; color: var(--accent); }
+.admin-filters { display: grid; grid-template-columns: repeat(auto-fit,minmax(145px,1fr)); gap: 12px; margin: 16px 0; }
+.admin-filters label, .tactic-lab-toolbar label { display: grid; gap: 7px; color: var(--muted); font-size: .85rem; min-width: 0; }
+.admin-filters input, .admin-filters select, .tactic-lab-toolbar select, #adminStatsClub, #tacticJSON { width: 100%; min-width: 0; padding: 10px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--ink); }
+.admin-player-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap: 12px; margin-bottom: 16px; }
+.admin-comparison { padding: 16px; background: var(--surface-2); border-radius: 10px; margin: 16px 0; }
+.tactic-lab-toolbar { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 18px; }
+.tactic-lab-toolbar .row { flex-wrap: wrap; }
+.tactic-lab-toolbar .row select { flex: 1; min-width: 130px; }
+.tactic-lab-toolbar details textarea { margin: 12px 0; resize: vertical; }
+#labResults { margin-top: 18px; }
+.table-scroll { overflow-x: auto; max-width: 100%; }
+.table-scroll table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+.table-scroll th, .table-scroll td { text-align: left; padding: 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.season-leaderboards { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; margin-top: 24px; }
+.admin-page .card, .tactic-editor-card, .season-leaderboards > section { min-width: 0; }
+@media (max-width:640px) {
+  .admin-hero { flex-direction: column; align-items: stretch; }
+  .admin-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .season-leaderboards { grid-template-columns: 1fr; }
+  .admin-player-grid { grid-template-columns: 1fr; }
+}
+.tactic-side-card, .tactics-page, .tactic-field-group { min-width: 0; }
+@media (max-width: 900px) {
+  #tactics-container.tactic-builder-shell { grid-template-columns: minmax(0,1fr); }
+}
+.tactic-field-group > *, .tactic-lab-toolbar > *, #labResults { min-width: 0; }

@@ -9,7 +9,7 @@ const { io } = require('socket.io-client');
 async function startServer(dbPath, cwd) {
   const child = spawn(process.execPath, [path.join(__dirname, '..', 'src', 'index.js')], {
     cwd,
-    env: { ...process.env, PORT: '0', DB_PATH: dbPath, JWT_SECRET: 'deployment-test-secret', CORS_ORIGIN: 'https://deepinkgroup.github.io' },
+    env: { ...process.env, PORT: '0', DB_PATH: dbPath, JWT_SECRET: 'deployment-test-secret', ADMIN_INITIAL_PASSWORD: 'test-admin-initial-password', CORS_ORIGIN: 'https://deepinkgroup.github.io' },
     stdio: ['ignore', 'pipe', 'pipe']
   });
   const stop = () => new Promise((resolve) => {
@@ -98,10 +98,45 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const owner = await request('/api/auth/register', { body: { username: 'host_test', email: 'host@example.test', password: 'test-password' }, status: 201 });
   const friend = await request('/api/auth/register', { body: { username: 'friend_test', email: 'friend@example.test', password: 'test-password' }, status: 201 });
   assert.equal((await request('/api/auth/me', { token: owner.token })).user.username, 'host_test');
-  assert.deepEqual(await request('/api/tactics', { token: owner.token }), []);
-  const tactic = await request('/api/tactics', { token: owner.token, body: { name: 'Deployment tactic' }, status: 201 });
+  const admin = await request('/api/auth/login', { body: { username: 'Admin', password: 'test-admin-initial-password' } });
+  assert.equal(admin.user.role, 'admin');
+  assert.equal((await request('/api/auth/me', { token: admin.token })).user.role, 'admin');
+  assert.equal(owner.user.role, 'user');
+  await request('/api/auth/register', { body: { username: 'admin', email: 'reserved@example.test', password: 'test-password' }, status: 400 });
+  const injection = await request('/api/auth/register', { body: { username: 'injection_test', email: 'injection@example.test', password: 'test-password', role: 'admin' }, status: 201 });
+  assert.equal(injection.user.role, 'user');
+  await request('/api/admin/overview', { status: 401 });
+  for (const route of ['/api/admin/overview', '/api/admin/players', '/api/admin/leagues', '/api/admin/leagues/missing', '/api/tactics', '/api/tactics/templates', '/api/tactics/1/versions']) await request(route, { token: owner.token, status: 403 });
+  for (const [route, method] of [['/api/tactics', 'POST'], ['/api/tactics/1', 'PUT'], ['/api/tactics/1', 'DELETE'], ['/api/tactics/preview', 'POST'], ['/api/tactics/1/restore', 'POST']]) await request(route, { token: injection.token, method, body: { name: 'Forbidden' }, status: 403 });
+  const jwt = require('jsonwebtoken');
+  const spoofed = jwt.sign({ id: owner.user.id, username: owner.user.username, role: 'admin' }, 'deployment-test-secret');
+  await request('/api/admin/overview', { token: spoofed, status: 403 });
+  const adminPlayers = await request('/api/admin/players', { token: admin.token });
+  assert.equal(adminPlayers.players.length, 510);
+  assert.equal(adminPlayers.clubs.length, 18);
+  assert.equal((await request('/api/admin/players?competition=worldcup', { token: admin.token })).players.length, 1248);
+  assert.equal((await request('/api/tactics/templates', { token: admin.token })).length, 12);
+  const tactic = await request('/api/tactics', { token: admin.token, body: { name: 'Deployment tactic', attack: 999, defense: -99, possession: 999, user_id: owner.user.id }, status: 201 });
   assert.equal(typeof tactic.id, 'number');
-  assert.equal((await request('/api/tactics', { token: owner.token })).length, 1);
+  assert.equal(tactic.user_id, admin.user.id);
+  assert.equal(tactic.version, 1);
+  assert.ok(tactic.attack <= 1.28 && tactic.defense >= .72 && tactic.possession <= 8);
+  const updated = await request('/api/tactics/' + tactic.id, { token: admin.token, method: 'PUT', body: { ...tactic, name: 'Updated tactic', attack: .9 } });
+  assert.equal(updated.version, 2);
+  await request('/api/tactics/' + tactic.id, { token: admin.token, method: 'PUT', body: { ...tactic, name: 'Stale' }, status: 409 });
+  const restored = await request('/api/tactics/' + tactic.id + '/restore', { token: admin.token, body: { version: 1 } });
+  assert.equal(restored.version, 3);
+  assert.equal(restored.name, tactic.name);
+  assert.equal((await request('/api/tactics/' + tactic.id + '/versions', { token: admin.token })).length, 3);
+  const analysis = await request('/api/tactics/preview', { token: admin.token, body: { tactic: { name: 'Lab test', attack: 1.15, defense: .85 }, clubCode: adminPlayers.clubs[0].code, opponentCode: adminPlayers.clubs[1].code, samples: 20, formation: '4-3-3' } });
+  assert.equal(analysis.samples, 20);
+  for (const stats of [analysis.candidate, analysis.baseline]) {
+    assert.equal(stats.wins + stats.draws + stats.losses, 20);
+    assert.ok(Number.isFinite(stats.xg) && stats.xg > 0);
+  }
+  assert.equal((await request('/api/tactics', { token: admin.token })).length, 1);
+  assert.equal((await request('/api/tactics/' + tactic.id + '/versions', { token: admin.token })).length, 3);
+  await request('/api/tactics/preview', { token: admin.token, body: { clubCode: 'invalid', opponentCode: 'invalid' }, status: 400 });
   const room = await request('/api/rooms', { token: owner.token, body: { name: 'Hosted multiplayer', humanSlotsMax: 2, pickTimeMs: 0 }, status: 201 });
 
   async function connect(token) {
@@ -168,6 +203,25 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.equal(league.teamCount, 18);
   assert.equal(league.matchdays, 34);
   const clubCode = league.teams[0].code;
+  const adminSocket = await connect(admin.token);
+  const adminSeason = await request('/api/rooms/singleplayer', { token: admin.token, body: { mode: 'league', leagueId: 'pgl', clubCode, squadMode: 'real', formation: '4-3-3' }, status: 201 });
+  ready = event(adminSocket, 'room:state'); adminSocket.emit('room:join', { code: adminSeason.code }); await ready;
+  ready = event(adminSocket, 'tournament:started');
+  adminSocket.emit('draft:setTacticalStyle', { code: adminSeason.code, tacticalStyle: 'custom:' + tactic.id }); await ready;
+  ready = event(adminSocket, 'league:midseason'); adminSocket.emit('league:skipToTransfers', { code: adminSeason.code });
+  const adminHalf = await ready;
+  const customMatch = adminHalf.step.matches.find((match) => match.aCode === clubCode || match.bCode === clubCode);
+  const customSide = customMatch.aCode === clubCode ? 'A' : 'B';
+  assert.equal(customMatch.tactical[customSide].custom, true);
+  assert.equal(customMatch.tactical[customSide].key, 'custom:' + tactic.id);
+  ready = event(adminSocket, 'league:transferState'); adminSocket.emit('league:transfer', { code: adminSeason.code, action: 'skip' });
+  assert.equal((await ready).transfers.phase, 'skipped');
+  ready = event(adminSocket, 'league:seasonFinished'); adminSocket.emit('league:finishSeason', { code: adminSeason.code });
+  const adminFinish = await ready;
+  assert.equal(adminFinish.viewedStep, 34);
+  assert.equal(adminFinish.step.seasonResults.matches, 306);
+  assert.equal(adminFinish.step.champion.code, adminFinish.league.table[0].code);
+
   await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'missing', clubCode }, status: 400 });
   await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode: 'IRN' }, status: 400 });
   await request('/api/rooms', { token: login.token, body: { mode: 'league', leagueId: 'pgl' }, status: 400 });
@@ -270,6 +324,12 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const realDraft = await ready;
   assert.equal(realDraft.myDraft.squad.length, 11);
   assert.ok(realDraft.myDraft.squad.every((player) => player.team === clubCode));
+  const customDenied = new Promise((resolve) => seasonSocket.once('error:message', resolve));
+  seasonSocket.emit('draft:setTacticalStyle', { code: real.code, tacticalStyle: 'custom:' + tactic.id });
+  assert.match((await customDenied).error, /custom tactic not found/);
+  const earlyFinish = new Promise((resolve) => seasonSocket.once('error:message', resolve));
+  seasonSocket.emit('league:finishSeason', { code: real.code });
+  assert.match((await earlyFinish).error, /active single-player/);
   ready = event(seasonSocket, 'tournament:started');
   seasonSocket.emit('draft:autoComplete', { code: real.code });
   await ready;
@@ -299,6 +359,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     action();
     assert.match((await error).error, pattern);
   }
+  await expectSocketError(() => seasonSocket.emit('league:finishSeason', { code: real.code }), /transfers/);
   await expectSocketError(() => seasonSocket.emit('tournament:advance', { code: real.code }), /transfer window/);
   await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'sign', picks: [] }), /replacement/);
   await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: [captain.id, captain.id] }), /different players/);
@@ -346,4 +407,33 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.ok(picks.every((pick) => humanXi.some((player) => player.id === pick.playerId)));
   await expectSocketError(() => seasonSocket.emit('league:skipToTransfers', { code: real.code }), /already passed/);
   await expectSocketError(() => seasonSocket.emit('league:transfer', { code: real.code, action: 'release', playerIds: picks.map((pick) => pick.playerId) }), /not open/);
+  const nonmember = await connect(friend.token);
+  const deniedFinish = new Promise((resolve) => nonmember.once('error:message', resolve));
+  nonmember.emit('league:finishSeason', { code: real.code });
+  assert.match((await deniedFinish).error, /not a member/);
+  ready = event(seasonSocket, 'league:seasonFinished');
+  seasonSocket.emit('league:finishSeason', { code: real.code });
+  const finished = await ready;
+  assert.equal(finished.stage, 'done');
+  assert.equal(finished.viewedStep, 34);
+  assert.equal(finished.step.seasonResults.matches, 306);
+  assert.equal(finished.step.seasonResults.relegated.length, 2);
+  assert.ok(finished.step.seasonResults.scorers.length > 0);
+  assert.equal(finished.step.myRecord.w + finished.step.myRecord.d + finished.step.myRecord.l, 34);
+  await expectSocketError(() => seasonSocket.emit('league:finishSeason', { code: real.code }), /active single-player/);
+  const fullReport = await request('/api/admin/leagues/' + real.code, { token: admin.token });
+  assert.equal(fullReport.league.matchday, 34);
+  assert.equal(fullReport.clubs.length, 18);
+  assert.equal(fullReport.results.matches, 306);
+  assert.ok((await request('/api/admin/leagues', { token: admin.token })).some((entry) => entry.code === real.code));
+  sockets.forEach((socket) => socket.disconnect());
+  await server.stop(); server = await startServer(dbPath, dir);
+  assert.equal((await request('/api/auth/login', { body: { username: 'Admin', password: 'test-admin-initial-password' } })).user.id, admin.user.id);
+  const finalSocket = await connect(login.token);
+  ready = event(finalSocket, 'room:state'); finalSocket.emit('room:join', { code: real.code });
+  assert.deepEqual((await ready).myStep.seasonResults, finished.step.seasonResults);
+  await request('/api/auth/change-password', { token: admin.token, body: { currentPassword: 'test-admin-initial-password', newPassword: 'changed-admin-password' } });
+  await server.stop(); server = await startServer(dbPath, dir);
+  await request('/api/auth/login', { body: { username: 'Admin', password: 'test-admin-initial-password' }, status: 401 });
+  assert.equal((await request('/api/auth/login', { body: { username: 'Admin', password: 'changed-admin-password' } })).user.role, 'admin');
 });

@@ -4,6 +4,7 @@ const App = (() => {
   const homeBtn = document.getElementById('btnHome');
   const profileBtn = document.getElementById('btnProfile');
   const tacticsBtn = document.getElementById('btnTactics');
+  const adminBtn = document.getElementById('btnAdmin');
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
   let profileStatsChart = null;
@@ -19,7 +20,8 @@ const App = (() => {
 
   function setHeader() {
     profileBtn.classList.toggle('hidden', !state.user);
-    tacticsBtn.classList.toggle('hidden', !state.user);
+    tacticsBtn.classList.toggle('hidden', state.user?.role !== 'admin');
+    adminBtn.classList.toggle('hidden', state.user?.role !== 'admin');
     homeBtn.classList.toggle('hidden', !state.user);
   }
 
@@ -78,8 +80,15 @@ const App = (() => {
   }
 
   function goTactics() {
+    if (state.user?.role !== 'admin') { toast('Custom Tactics requires admin access.', true); return goDashboard(); }
     location.hash = 'tactics';
     TacticsView.init(appEl);
+  }
+
+  function goAdmin() {
+    if (state.user?.role !== 'admin') { toast('Admin access required.', true); return goDashboard(); }
+    location.hash = 'admin';
+    AdminView.render(appEl);
   }
 
   function onAuthed(user, token) {
@@ -247,6 +256,7 @@ function renderStatsChart(stats) {
   async function init() {
     homeBtn.addEventListener('click', () => goDashboard());
     tacticsBtn.addEventListener('click', () => goTactics());
+    adminBtn.addEventListener('click', () => goAdmin());
 
     const settingsDialog = document.getElementById('settingsDialog');
     document.getElementById('btnSettings').addEventListener('click', () => {
@@ -473,10 +483,11 @@ function renderStatsChart(stats) {
     if (view === 'tournament' && code) return goTournament(code);
     if (view === 'history') return goMatchHistory();
     if (view === 'tactics') return goTactics();
+    if (view === 'admin') return goAdmin();
     goDashboard();
   }
 
-  return { state, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, ensureSocket, onSocket, toast };
+  return { state, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, goAdmin, ensureSocket, onSocket, toast };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());

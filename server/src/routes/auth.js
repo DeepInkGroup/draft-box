@@ -51,6 +51,7 @@ router.post('/register', (req, res) => {
   if (!USERNAME_RE.test(username)) {
     return res.status(400).json({ error: 'username must be 3-20 chars: letters, numbers, underscore' });
   }
+  if (String(username).toLowerCase() === 'admin') return res.status(400).json({ error: 'this username is reserved' });
   if (String(password).length < 6) {
     return res.status(400).json({ error: 'password must be at least 6 characters' });
   }
@@ -64,7 +65,7 @@ router.post('/register', (req, res) => {
     .prepare('INSERT INTO users (username, email, friend_code, password_hash) VALUES (?, ?, ?, ?)')
     .run(username, email, friendCode, hash);
 
-  const user = { id: Number(info.lastInsertRowid), username, friendCode };
+  const user = { id: Number(info.lastInsertRowid), username, friendCode, role: 'user' };
   const token = signToken(user);
   res.status(201).json({ token, user });
 });
@@ -78,13 +79,13 @@ router.post('/login', (req, res) => {
     return res.status(401).json({ error: 'invalid credentials' });
   }
 
-  const user = { id: row.id, username: row.username, friendCode: row.friend_code };
+  const user = { id: row.id, username: row.username, friendCode: row.friend_code, role: row.role };
   const token = signToken(user);
   res.json({ token, user });
 });
 
 router.get('/me', requireAuth, (req, res) => {
-  const row = db.prepare('SELECT id, username, email, friend_code AS friendCode, created_at FROM users WHERE id = ?').get(req.user.id);
+  const row = db.prepare('SELECT id, username, email, friend_code AS friendCode, role, created_at FROM users WHERE id = ?').get(req.user.id);
   if (!row) return res.status(404).json({ error: 'not found' });
   res.json({ user: row });
 });

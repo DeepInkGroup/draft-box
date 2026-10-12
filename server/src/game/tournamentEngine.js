@@ -747,6 +747,7 @@ function decorateStep(roomState, index, forUserId) {
   }
 
   if (raw.champion) {
+    if (t.kind === 'league') decorated.seasonResults = require('./leagueResults').seasonResults(t);
     decorated.myRecord = computeTeamRecord(t, myCode);
     decorated.myMatchAnalyses = computeMyMatchAnalyses(t, myCode);
     decorated.tournamentAwards = computeTournamentAwards(t);

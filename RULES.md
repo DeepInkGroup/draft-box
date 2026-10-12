@@ -154,6 +154,10 @@ Before halfway, **Simulate to Transfer Window** plays all remaining first-half f
 
 **Teams & Player Stats** lets you select any league club and inspect its formation, tactical style, starting XI, other roster members and released players, plus player profiles and statistics through your reached matchday. Statistics belong to the selected club and use the saved lineups that actually played.
 
+After completing or skipping transfers, **Finish Season & View Results** runs the remaining fixtures and saves their reports. The final screen includes the table, champion, relegated clubs, your record, awards and top-ten player leaderboards for goals, assists, saves and star moments. Best attack and best defense use actual goals scored and conceded.
+
+Custom Tactics is administrator-only. Normal players use the 12 built-in styles. Administrators can analyse the player database and seasons, create tactics from built-in templates, import/export JSON, duplicate tactics and restore saved versions. Each save creates a new version, and restoring preserves the earlier history. Match Lab tests current editor values in 20–100 matches per style against a Balanced baseline using the actual match engine. The starting XI and opponent remain fixed across the comparison, morale is neutral, and random samples vary. Experiments do not change saved game results. Saved and previewed tactics use the same server limits.
+
 Unfinished drafts and seasons appear under **Your League Seasons** on the dashboard. Reconnects restore the selected club, XI, matchday and results when the server's storage is retained. Completed seasons contribute to match history and career statistics. League Games is single player only for now; World Cup multiplayer remains available.
 
 ---

@@ -4,9 +4,9 @@ const apiBase = new URL(process.env.DRAFTBOX_API_BASE).origin;
 const pagesUrl = process.env.DRAFTBOX_PAGES_URL;
 const pagesOrigin = new URL(pagesUrl).origin;
 
-async function request(url, verify, options = {}) {
+async function request(url, verify, options = {}, attempts = 6) {
   let lastError;
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
     try {
       const response = await fetch(url, { ...options, signal: AbortSignal.timeout(30000) });
       assert.equal(response.status, 200, `${url}: HTTP ${response.status}`);
@@ -15,7 +15,7 @@ async function request(url, verify, options = {}) {
       return;
     } catch (error) {
       lastError = error;
-      if (attempt < 5) await new Promise((resolve) => setTimeout(resolve, 5000));
+      if (attempt < attempts - 1) await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   }
   throw lastError;
@@ -23,10 +23,12 @@ async function request(url, verify, options = {}) {
 
 (async () => {
   await request(apiBase + '/api/health', async (response) => {
-    assert.equal((await response.json()).ok, true);
+    const health = await response.json();
+    assert.equal(health.ok, true);
+    assert.equal(health.version, '2.0.0', 'Wait for the updated server deployment');
     const origin = response.headers.get('access-control-allow-origin');
     assert.ok(origin === '*' || origin === pagesOrigin, `Server CORS must allow ${pagesOrigin}; received ${origin}`);
-  }, { headers: { Origin: pagesOrigin } });
+  }, { headers: { Origin: pagesOrigin } }, 60);
   await request(apiBase + '/api/teams', async (response) => {
     assert.equal((await response.json()).teams.length, 48);
   });

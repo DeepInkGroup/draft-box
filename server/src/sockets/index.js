@@ -537,6 +537,29 @@ function registerSocketHandlers(io) {
       } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
+    socket.on('league:finishSeason', ({ code }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || !room.single_player || room.status !== 'league_stage') throw new Error('Finish season is only available in an active single-player league');
+        const state = rm.loadRoomState(room);
+        const member = state.members.get(socket.user.id);
+        if (!member) throw new Error('not a member of this league');
+        const t = state.tournament;
+        const transfers = transferSnapshot(t, socket.user.id, member.viewedStep);
+        if (!['complete', 'skipped'].includes(transfers.phase) || member.squad.length !== 11) throw new Error('Complete or skip mid-season transfers before finishing the season');
+        while (t.stage !== 'done') {
+          persistSimulatedTournamentStep(io, socket, code, room, state);
+          member.viewedStep = t.matchday;
+          rm.persistViewedStep(room.id, socket.user.id, member.viewedStep);
+        }
+        socket.emit('league:seasonFinished', {
+          step: tournamentEngine.decorateStep(state, member.viewedStep - 1, socket.user.id), viewedStep: member.viewedStep,
+          historyLength: tournamentEngine.historyLength(state), stage: t.stage,
+          league: leagueSnapshot(t, member.viewedStep), transfers: transferSnapshot(t, socket.user.id, member.viewedStep), spectator: false
+        });
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
+    });
+
     socket.on('league:transfer', ({ code, action, playerIds, picks }) => {
       try {
         const room = rm.getRoomByCode(code);

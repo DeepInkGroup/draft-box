@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
+const db = require('../db');
 
 function signToken(user) {
   return jwt.sign({ id: user.id, username: user.username }, config.jwtSecret, { expiresIn: '30d' });
@@ -22,4 +23,14 @@ function requireAuth(req, res, next) {
   next();
 }
 
-module.exports = { signToken, verifyToken, requireAuth };
+function isAdmin(userId) {
+  return db.prepare('SELECT role FROM users WHERE id = ?').get(userId)?.role === 'admin';
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.user) return requireAuth(req, res, () => requireAdmin(req, res, next));
+  if (!isAdmin(req.user.id)) return res.status(403).json({ error: 'admin access required' });
+  next();
+}
+
+module.exports = { signToken, verifyToken, requireAuth, requireAdmin, isAdmin };

@@ -1,6 +1,6 @@
 {
   "name": "draft-box-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Backend for Draft Box - World Cup player draft & league game",
   "type": "commonjs",
   "main": "src/index.js",

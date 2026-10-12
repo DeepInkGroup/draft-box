@@ -454,7 +454,7 @@ const DraftView = {
     }
 
     function renderTacticalStylePicker() {
-      if (!customTacticsLoaded) {
+      if (!customTacticsLoaded && App.state.user?.role === 'admin') {
         customTacticsLoaded = true;
         Api.get('/api/tactics').then((rows) => {
           customTactics = Array.isArray(rows) ? rows : [];

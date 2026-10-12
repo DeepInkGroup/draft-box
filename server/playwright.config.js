@@ -11,6 +11,6 @@ module.exports = defineConfig({
   use: { baseURL: 'http://127.0.0.1:4322', launchOptions: chrome && fs.existsSync(chrome) ? { executablePath: chrome } : {} },
   webServer: {
     command: 'node src/index.js', url: 'http://127.0.0.1:4322/api/health', reuseExistingServer: false,
-    env: { PORT: '4322', DB_PATH: path.join(os.tmpdir(), `draftbox-ui-${Date.now()}.sqlite`), JWT_SECRET: 'ui-test-secret' }
+    env: { PORT: '4322', DB_PATH: path.join(os.tmpdir(), `draftbox-ui-${Date.now()}.sqlite`), JWT_SECRET: 'ui-test-secret', ADMIN_INITIAL_PASSWORD: 'ui-admin-password' }
   }
 });

@@ -143,6 +143,18 @@ if (!columnExists('rooms', 'league_id')) {
 if (!columnExists('rooms', 'squad_mode')) {
   db.exec("ALTER TABLE rooms ADD COLUMN squad_mode TEXT NOT NULL DEFAULT 'draft';");
 }
+if (!columnExists('users', 'role')) {
+  db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';");
+}
+db.exec(`CREATE TABLE IF NOT EXISTS tactic_versions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tactic_id INTEGER NOT NULL REFERENCES custom_tactics(id) ON DELETE CASCADE,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  version INTEGER NOT NULL,
+  payload TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(tactic_id, version)
+);`);
 if (!columnExists('drafted_players', 'slot_code')) {
   db.exec(`ALTER TABLE drafted_players ADD COLUMN slot_code TEXT NOT NULL DEFAULT '';`);
 }
@@ -211,4 +223,5 @@ for (const user of usersWithoutFriendCode) setFriendCode.run(uniqueFriendCode(),
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_friend_code ON users(friend_code);`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_friendships_pair ON friendships(requester_id, addressee_id);`);
 
+require('./adminBootstrap')(db, uniqueFriendCode);
 module.exports = db;

@@ -3,6 +3,7 @@ const { ALL_TEAMS } = require('../data/teams');
 const { getPlayer, getLeague, teamsForRoom } = require('../data/competitions');
 const { isValidFormation, getSlots } = require('./formations');
 const { bestXI } = require('./botEngine');
+const { isAdmin } = require('../middleware/auth');
 const { normalizeStyle, isCustomStyleKey } = require('./tacticalStyles');
 
 const ALLOWED_TOURNAMENT_LENGTHS = ['full', 'blitz', 'quarter'];
@@ -140,7 +141,8 @@ function loadRoomState(roomRow) {
       if (d.slot_code) slots[d.slot_code] = entry;
       squad.push(entry);
     }
-    const tacticalStyle = normalizeStyle(row.tactical_style);
+    const storedStyle = normalizeStyle(row.tactical_style);
+    const tacticalStyle = isCustomStyleKey(storedStyle) && !isAdmin(row.user_id) ? 'balanced' : storedStyle;
     members.set(row.user_id, {
       userId: row.user_id,
       username: row.username,
@@ -193,6 +195,12 @@ function loadRoomState(roomRow) {
     pool,
     tournament: roomRow.tournament_state ? JSON.parse(roomRow.tournament_state) : null
   };
+  for (const slot of Object.values(state.tournament?.slotByCode || {})) {
+    if (slot.isHuman && isCustomStyleKey(slot.tacticalStyle) && !isAdmin(slot.userId)) {
+      slot.tacticalStyle = 'balanced';
+      slot.customTactic = null;
+    }
+  }
   activeRooms.set(roomRow.id, state);
   return state;
 }
@@ -228,6 +236,7 @@ function persistTacticalStyle(roomId, userId, tacticalStyle) {
 
 function customTacticForUser(userId, tacticalStyle) {
   if (!isCustomStyleKey(tacticalStyle)) return null;
+  if (!isAdmin(userId)) return null;
   const id = Number(String(tacticalStyle).slice('custom:'.length));
   if (!Number.isInteger(id) || id <= 0) return null;
   return db.prepare('SELECT * FROM custom_tactics WHERE id = ? AND user_id = ?').get(id, userId) || null;

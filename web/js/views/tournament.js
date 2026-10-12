@@ -80,6 +80,7 @@ const TournamentView = {
       if (!leagueTools.querySelector('#btnSkipToTransfers')) {
         const clubs = leagueState.table.slice().sort((a, b) => a.name.localeCompare(b.name));
         leagueTools.innerHTML = `<div class="league-skip"><button class="btn btn-primary" id="btnSkipToTransfers">Simulate to Transfer Window</button><p class="muted" id="leagueSkipNote">Simulate the remaining first-half fixtures and stop at mid-season transfers.</p></div>
+          <div class="league-finish" style="display:none"><button class="btn btn-primary" id="btnFinishLeague">Finish Season &amp; View Results</button><p class="muted">Play all remaining fixtures and see the champion, final standings, relegation and player awards.</p></div>
           <details id="leagueSquadBrowser"><summary>Teams &amp; Player Stats</summary><div class="field"><label for="leagueClubSelect">Club</label><select id="leagueClubSelect">${clubs.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>
           <p class="muted" id="leagueClubMeta"></p><div class="field"><label for="leaguePlayerSearch">Search players or positions</label><input id="leaguePlayerSearch" type="search" placeholder="Name, position or source club"/></div><div class="transfer-player-grid league-squad-players" id="leagueClubPlayers"></div></details>`;
         leagueTools.querySelector('#leagueClubSelect').value = clubs.find((club) => club.code !== myCode)?.code || clubs[0].code;
@@ -94,12 +95,22 @@ const TournamentView = {
           renderLeagueTools();
           socket.emit('league:skipToTransfers', { code });
         });
+        leagueTools.querySelector('#btnFinishLeague').addEventListener('click', () => {
+          if (advancePending || transferPending) return;
+          advancePending = true;
+          renderButton();
+          socket.emit('league:finishSeason', { code });
+        });
       }
       const button = leagueTools.querySelector('#btnSkipToTransfers');
       const halfway = Math.floor(leagueState.totalMatchdays / 2);
       leagueTools.querySelector('.league-skip').style.display = viewedStep < halfway && tournamentStage !== 'done' ? '' : 'none';
       button.disabled = advancePending || skipPending || transferPending;
       button.textContent = skipPending ? 'Simulating to Mid-season...' : 'Simulate to Transfer Window';
+      leagueTools.querySelector('.league-finish').style.display = tournamentStage !== 'done' && viewedStep >= halfway && ['complete', 'skipped'].includes(transferState?.phase) ? '' : 'none';
+      const finishButton = leagueTools.querySelector('#btnFinishLeague');
+      finishButton.disabled = advancePending || transferPending;
+      finishButton.textContent = advancePending ? 'Simulating Remaining Fixtures...' : 'Finish Season & View Results';
     }
 
     function transferPlayerHtml(player) {
@@ -922,7 +933,8 @@ const TournamentView = {
           ${myRecordCardHtml(step.myRecord)}
           ${matchAnalysisRecapHtml(step.myMatchAnalyses)}
           ${completedBracketHtml(step.completedBracket)}
-          ${tournamentAwardsHtml(step.tournamentAwards, step.tournamentSummary)}`;
+          ${tournamentAwardsHtml(step.tournamentAwards, step.tournamentSummary)}
+          ${seasonResultsHtml(step.seasonResults)}`;
         championZone.querySelector('#btnBackHome').addEventListener('click', () => App.goDashboard());
         championZone.querySelector('#btnViewHistoryFromChampion').addEventListener('click', () => App.goMatchHistory());
         const bracketBtn = championZone.querySelector('#btnToggleBracket');
@@ -1024,6 +1036,26 @@ const TournamentView = {
     App.onSocket('tournament:waiting', () => {
       advancePending = false;
       renderButton();
+    });
+
+    function seasonResultsHtml(results) {
+      if (!results) return '';
+      const escape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+      const leaderboard = (title, players, key) => `<section><h3>${title}</h3><div class="table-scroll"><table class="table"><thead><tr><th>Player</th><th>Club</th><th>Apps</th><th>${title === 'Top Scorers' ? 'Goals' : title === 'Top Creators' ? 'Assists' : title === 'Top Goalkeepers' ? 'Saves' : 'Star moments'}</th></tr></thead><tbody>${players.map((player) => `<tr><td>${escape(player.name)}${player.isStar ? ' ★' : ''}</td><td>${escape(player.club)}</td><td>${player.appearances}</td><td>${player[key]}</td></tr>`).join('') || '<tr><td colspan="4">No recorded events.</td></tr>'}</tbody></table></div></section>`;
+      return `<div class="card" id="seasonResults"><h2>Season Results</h2><p>${results.matchdays} matchdays · ${results.matches} matches · ${results.totalGoals} goals</p><p><b>Best attack:</b> ${escape(results.bestAttack.name)} (${results.bestAttack.gf} goals) · <b>Best defense:</b> ${escape(results.bestDefense.name)} (${results.bestDefense.ga} conceded)</p><p class="relegation-note"><b>↓ Relegated:</b> ${results.relegated.map((team) => escape(team.name)).join(' · ')}</p><div class="season-leaderboards">${leaderboard('Top Scorers', results.scorers, 'goals')}${leaderboard('Top Creators', results.creators, 'assists')}${leaderboard('Top Goalkeepers', results.goalkeepers, 'saves')}${leaderboard('Star Moments', results.stars, 'starMoments')}</div></div>`;
+    }
+
+    App.onSocket('league:seasonFinished', (payload) => {
+      advancePending = false;
+      lineupRevealShown = true;
+      leagueState = payload.league;
+      transferState = payload.transfers;
+      viewedStep = payload.viewedStep;
+      historyLength = payload.historyLength;
+      tournamentStage = payload.stage;
+      renderStep(payload.step);
+      if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
+      championZone.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     App.onSocket('league:midseason', (payload) => {
