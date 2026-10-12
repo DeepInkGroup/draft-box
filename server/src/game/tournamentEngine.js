@@ -3,6 +3,7 @@ const { bestBotSetup, teamStrength, prepareBotForMatch } = require('./botEngine'
 const { simulateMatch } = require('./matchSim');
 const { analyzeMatch, resultOutcome } = require('./matchAnalysis');
 const { normalizeStyle } = require('./tacticalStyles');
+const { startLeague, simulateLeagueStep } = require('./leagueEngine');
 
 const GROUP_LABELS = 'ABCDEFGHIJKL'.split('');
 const KNOCKOUT_LABEL = { r32: 'Round of 32', r16: 'Round of 16', qf: 'Quarter-Finals', sf: 'Semi-Finals', final: 'Final' };
@@ -59,6 +60,7 @@ function updateMorale(slot, myGoals, oppGoals, shootoutWon) {
 }
 
 function startTournament(roomState) {
+  if (roomState.mode === 'league') return startLeague(roomState);
   const members = Array.from(roomState.members.values());
   const humanCount = members.length;
   const length = roomState.tournamentLength || (roomState.blitzMode ? 'blitz' : 'full');
@@ -360,6 +362,7 @@ function playKnockoutRound(roomState) {
 // forward — see sockets/index.js's tournament:advance handler.
 function simulateNextStep(roomState) {
   const t = roomState.tournament;
+  if (t?.kind === 'league') return simulateLeagueStep(roomState, applyGroupResult);
   if (!t || t.stage === 'done') return null;
 
   if (t.stage === 'group') {
@@ -502,7 +505,7 @@ function computeMyMatchAnalyses(t, myCode) {
       const outcome = resultOutcome(m, mySide);
       return {
         stage: m.stage,
-        label: m.stage === 'group' ? `Group ${m.group}` : (KNOCKOUT_LABEL[m.stage] || m.stage),
+        label: m.stage === 'league' ? `Matchday ${m.matchday}` : m.stage === 'group' ? `Group ${m.group}` : (KNOCKOUT_LABEL[m.stage] || m.stage),
         opponentName: displayName(oppCode),
         score: `${myGoals} - ${oppGoals}`,
         outcome,
@@ -550,7 +553,7 @@ function computeTournamentAwards(t) {
       const scorerKey = `${teamCode}|${e.player}`;
       if (e.type === 'goal') {
         goals.set(scorerKey, (goals.get(scorerKey) || 0) + 1);
-        if (m.stage !== 'group') knockoutGoals.set(scorerKey, (knockoutGoals.get(scorerKey) || 0) + 1);
+        if (!['group', 'league'].includes(m.stage)) knockoutGoals.set(scorerKey, (knockoutGoals.get(scorerKey) || 0) + 1);
         if (e.assistBy) {
           const aKey = `${teamCode}|${e.assistBy}`;
           assists.set(aKey, (assists.get(aKey) || 0) + 1);
@@ -714,6 +717,12 @@ function decorateStep(roomState, index, forUserId) {
   }
 
   const decorated = { index: raw.index, type: raw.type, label: raw.label, matches };
+  if (raw.type === 'league') {
+    decorated.leagueName = t.leagueName;
+    decorated.matchday = raw.matchday;
+    decorated.totalMatchdays = raw.totalMatchdays;
+    decorated.leagueTable = raw.leagueTable;
+  }
 
   if (raw.type === 'group') {
     decorated.matchday = raw.matchday;

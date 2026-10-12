@@ -1,5 +1,6 @@
 const db = require('../db');
-const { allPlayerIds, getPlayer, ALL_TEAMS } = require('../data/teams');
+const { ALL_TEAMS } = require('../data/teams');
+const { getPlayer, getLeague, teamsForRoom } = require('../data/competitions');
 const { isValidFormation, getSlots } = require('./formations');
 const { normalizeStyle, isCustomStyleKey } = require('./tacticalStyles');
 
@@ -19,9 +20,9 @@ function normalizeRerolls(n) {
 // Optional creator-chosen restriction on which nations can appear in the draft reveal.
 // null/empty means unrestricted (all 48 teams eligible) — the default. At least 4 valid
 // team codes are required if the creator opts in, so every position group stays reachable.
-function normalizeAllowedTeams(codes) {
+function normalizeAllowedTeams(codes, validCodes = VALID_TEAM_CODES) {
   if (!Array.isArray(codes) || codes.length === 0) return null;
-  const valid = [...new Set(codes.filter((c) => VALID_TEAM_CODES.has(c)))];
+  const valid = [...new Set(codes.filter((c) => validCodes.has(c)))];
   if (valid.length < 4) throw new Error('pick at least 4 teams to restrict the draft pool');
   return valid;
 }
@@ -54,22 +55,26 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null }) {
+  if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
+  const league = mode === 'league' ? getLeague(leagueId) : null;
+  if (mode === 'league' && !league) throw new Error('league is not available');
+  if (mode === 'league' && !singlePlayer) throw new Error('League Games is currently single player only');
   const code = uniqueCode();
-  const cappedSlots = Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
+  const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const length = normalizeTournamentLength(tournamentLength);
-  const teams = normalizeAllowedTeams(allowedTeams);
+  const teams = normalizeAllowedTeams(allowedTeams, league ? new Set(league.teams.map((team) => team.code)) : VALID_TEAM_CODES);
   const sharedDraft = sharedDraftMode && !singlePlayer;
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, status)
-       VALUES (?, ?, ?, 'worldcup', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
-      code, name || `Room ${code}`, creatorId, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
+      code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -86,16 +91,26 @@ function getMembers(roomId) {
   return db.prepare('SELECT * FROM room_members WHERE room_id = ? ORDER BY joined_at ASC').all(roomId);
 }
 
-function joinRoom(roomRow, user, formation) {
+function listUserLeagues(userId) {
+  return db.prepare(`SELECT r.code, r.name, r.status, r.league_id, m.country_code, r.tournament_state
+    FROM rooms r JOIN room_members m ON m.room_id = r.id
+    WHERE m.user_id = ? AND r.mode = 'league' AND r.status != 'finished' ORDER BY r.id DESC`).all(userId)
+    .map((row) => ({ code: row.code, status: row.status, leagueName: getLeague(row.league_id)?.name || row.name,
+      clubName: getLeague(row.league_id)?.teams.find((club) => club.code === row.country_code)?.name || '',
+      matchday: row.tournament_state ? JSON.parse(row.tournament_state).matchday || 0 : 0 }));
+}
+
+function joinRoom(roomRow, user, formation, clubCode = null) {
   if (roomRow.status !== 'lobby') throw new Error('this room has already started');
   const members = getMembers(roomRow.id);
   const already = members.find((m) => m.user_id === user.id);
   if (already) return already;
   if (members.length >= roomRow.human_slots_max) throw new Error('room is full');
+  if (roomRow.mode === 'league' && !getLeague(roomRow.league_id)?.teams.some((team) => team.code === clubCode)) throw new Error('choose a club from the selected league');
   const fm = isValidFormation(formation) ? formation : '4-3-3';
   db.prepare(
-    `INSERT INTO room_members (room_id, user_id, username, formation) VALUES (?, ?, ?, ?)`
-  ).run(roomRow.id, user.id, user.username, fm);
+    `INSERT INTO room_members (room_id, user_id, username, formation, country_code) VALUES (?, ?, ?, ?, ?)`
+  ).run(roomRow.id, user.id, user.username, fm, roomRow.mode === 'league' ? clubCode : null);
   return db.prepare('SELECT * FROM room_members WHERE room_id = ? AND user_id = ?').get(roomRow.id, user.id);
 }
 
@@ -128,6 +143,7 @@ function loadRoomState(roomRow) {
       userId: row.user_id,
       username: row.username,
       formation: row.formation,
+      clubCode: roomRow.mode === 'league' ? row.country_code : null,
       slots,
       squad,
       draftComplete: !!row.draft_complete,
@@ -151,11 +167,13 @@ function loadRoomState(roomRow) {
 
   const allDraftedGlobally = db.prepare('SELECT player_id FROM drafted_players WHERE room_id = ?').all(roomRow.id);
   const drafted = new Set(allDraftedGlobally.map((r) => r.player_id));
-  const pool = new Set(allPlayerIds().filter((id) => !drafted.has(id)));
+  const pool = new Set(teamsForRoom({ mode: roomRow.mode, leagueId: roomRow.league_id }).flatMap((team) => team.players.map((player) => player.id)).filter((id) => !drafted.has(id)));
 
   const state = {
     roomId: roomRow.id,
     code: roomRow.code,
+    mode: roomRow.mode,
+    leagueId: roomRow.league_id || null,
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
     singlePlayer: !!roomRow.single_player,
@@ -260,6 +278,9 @@ function lobbySnapshot(roomRow) {
   const allReady = members.length > 0 && members.every((m) => !!m.draft_complete && !!m.tactical_style_locked && (!captainEnabled || !!m.captain_slot));
   return {
     code: roomRow.code,
+    mode: roomRow.mode,
+    leagueId: roomRow.league_id || null,
+    leagueName: getLeague(roomRow.league_id)?.name || null,
     spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,
     status: roomRow.status,
@@ -280,6 +301,7 @@ function lobbySnapshot(roomRow) {
       userId: m.user_id,
       username: m.username,
       formation: m.formation,
+      clubCode: roomRow.mode === 'league' ? m.country_code : null,
       draftComplete: !!m.draft_complete,
       eliminated: !!m.eliminated,
       captainSlot: m.captain_slot || null,
@@ -294,6 +316,7 @@ module.exports = {
   getRoomRow,
   getRoomByCode,
   getMembers,
+  listUserLeagues,
   joinRoom,
   setFormation,
   loadRoomState,

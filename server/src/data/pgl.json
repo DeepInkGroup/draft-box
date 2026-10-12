@@ -1,0 +1,4741 @@
+{
+  "id": "pgl",
+  "name": "Persian Gulf League",
+  "country": "Iran",
+  "teams": [
+    {
+      "id": "pgl-persepolis",
+      "code": "PGL-PERSEPOLIS",
+      "name": "Persepolis",
+      "players": [
+        {
+          "id": "pgl-persepolis-1",
+          "name": "Payam Niazmand",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-persepolis-2",
+          "name": "Amirreza Rafiei",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-3",
+          "name": "Mohammad Gandomi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-4",
+          "name": "Mohammadhossein Kanaani Zadegan",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-persepolis-5",
+          "name": "Seyed Abolfazl Jalali",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-6",
+          "name": "Dániel Gera",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM, RW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-7",
+          "name": "Majid Eidi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-8",
+          "name": "Hossein Abarghouei",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-9",
+          "name": "Danial Iri",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-10",
+          "name": "Mohammadmehdi Zare",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-11",
+          "name": "Alireza Homaeifard",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-12",
+          "name": "Oston Urunov",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "LW, CAM, RW, CM",
+          "overall": 77,
+          "isStar": true
+        },
+        {
+          "id": "pgl-persepolis-13",
+          "name": "Yasin Salmani",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CAM, CM, LM, LW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-14",
+          "name": "Mohammad Khodabandehlo",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CM, CDM, CAM, LM",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-15",
+          "name": "Marko Bakić",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CM, CAM, CDM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-16",
+          "name": "Pouya Pourali",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-17",
+          "name": "Pouria Latififar",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CM, CAM, CDM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-18",
+          "name": "Amirhossein Mahmoudi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "LW, LM, RM, RW",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-19",
+          "name": "Ali Alipour",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "ST, CF, RW",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-persepolis-20",
+          "name": "Igor Sergeev",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-21",
+          "name": "Mohammad Omri",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "MF",
+          "rawPos": "CAM, RW, LW, CF",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-22",
+          "name": "Thievy Bifouma",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "RW, LW, CAM, RM",
+          "overall": 74,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-23",
+          "name": "Mehdi Tikdari",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "RW, RM, RB, RWB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-24",
+          "name": "Mohammadmehdi Mohebi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "RW, LW, CAM, ST",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-25",
+          "name": "Pouria Shahrabadi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-persepolis-26",
+          "name": "Mohammadhossein Sadeghi",
+          "team": "PGL-PERSEPOLIS",
+          "pos": "FW",
+          "rawPos": "LW, LM, RW, ST",
+          "overall": 66,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 70
+    },
+    {
+      "id": "pgl-esteghlal",
+      "code": "PGL-ESTEGHLAL",
+      "name": "Esteghlal",
+      "players": [
+        {
+          "id": "pgl-esteghlal-1",
+          "name": "Habib Farabbasi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-2",
+          "name": "Aria Hosseinifard",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-3",
+          "name": "Saleh Hardani",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 74,
+          "isStar": true
+        },
+        {
+          "id": "pgl-esteghlal-4",
+          "name": "Saman Fallah",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-5",
+          "name": "Aref Aghasi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-6",
+          "name": "Rustam Ashurmatov",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 72,
+          "isStar": true
+        },
+        {
+          "id": "pgl-esteghlal-7",
+          "name": "Hossein Goudarzi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-8",
+          "name": "Saman Touranian",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-9",
+          "name": "Abolfazl Zoleykhaei",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "LB, CB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-10",
+          "name": "Alireza Mohebali",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-11",
+          "name": "Rouzbeh Cheshmi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CDM, CB",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-12",
+          "name": "Mehran Ahmadi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CM, CDM, RM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-13",
+          "name": "Esmaeil Gholizadeh",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CAM, RW, LW, CM",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-14",
+          "name": "Abolfazl Zamani",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-15",
+          "name": "Amirmohammad Razzaghinia",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 73,
+          "isStar": true
+        },
+        {
+          "id": "pgl-esteghlal-16",
+          "name": "Mohammadmehdi Ghaedi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CAM, CM, LM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-17",
+          "name": "Jasir Asani",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "RW, RM, LW, CF",
+          "overall": 78,
+          "isStar": true
+        },
+        {
+          "id": "pgl-esteghlal-18",
+          "name": "Jaloliddin Masharipov",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "LW, CAM, LM",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-19",
+          "name": "Alireza Koushki",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-20",
+          "name": "Saeid Saharkhizan",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-21",
+          "name": "Mohammadreza Azadi",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-22",
+          "name": "Mohammadhossein Eslami",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "MF",
+          "rawPos": "CAM, RW, LW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-23",
+          "name": "Hesam Eskandari",
+          "team": "PGL-ESTEGHLAL",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 68
+    },
+    {
+      "id": "pgl-kheybar",
+      "code": "PGL-KHEYBAR",
+      "name": "Kheybar",
+      "players": [
+        {
+          "id": "pgl-kheybar-1",
+          "name": "Ehsan Moradian",
+          "team": "PGL-KHEYBAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-2",
+          "name": "Mohammadreza Dinarvand",
+          "team": "PGL-KHEYBAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-3",
+          "name": "Farshad Mohammadi Mehr",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-4",
+          "name": "Sajjad Danaei Baghaki",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "RB, RM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-5",
+          "name": "Taha Shariati",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-6",
+          "name": "Aboozar Safarzadeh",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-7",
+          "name": "Sobhan Pasandideh",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-8",
+          "name": "Erfan Ghahremani",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-9",
+          "name": "Masoud Mohebi",
+          "team": "PGL-KHEYBAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-10",
+          "name": "Hamidreza Taherkhani",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CAM, LW, RW",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-11",
+          "name": "Esmaeil Babaei",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-12",
+          "name": "Mehran Amiri",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-13",
+          "name": "Fardin Yousefi",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-14",
+          "name": "Morteza Khorasani",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-15",
+          "name": "Arian Maali",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-16",
+          "name": "Amirreza Najafpour",
+          "team": "PGL-KHEYBAR",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-17",
+          "name": "Mehdi Abdi",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-18",
+          "name": "Hossein Shenani",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "LW, RW, LM, RM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-19",
+          "name": "Issa Moradi",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-20",
+          "name": "Mehrdad Ghanbari",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "LW, ST, LM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-21",
+          "name": "Alireza Maleki",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, RW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-22",
+          "name": "Ali Khanzadi",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "RW, LW, ST",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-23",
+          "name": "Amirreza Teymouri",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-24",
+          "name": "Hamid Haji Aghaei",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, CAM",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-25",
+          "name": "Hamidreza Zarouni",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-kheybar-26",
+          "name": "Amirhossein Farsi",
+          "team": "PGL-KHEYBAR",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-gol-gohar",
+      "code": "PGL-GOL-GOHAR",
+      "name": "Gol Gohar",
+      "players": [
+        {
+          "id": "pgl-gol-gohar-1",
+          "name": "Mohammadreza Akhbari",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 70,
+          "isStar": true
+        },
+        {
+          "id": "pgl-gol-gohar-2",
+          "name": "Farzin Garousian",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-3",
+          "name": "Mehdi Amini",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-4",
+          "name": "Soroush Yarandi",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 55,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-5",
+          "name": "Mojtaba Najjarian",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-6",
+          "name": "Masih Zahedi",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-7",
+          "name": "Ehsan Hosseini",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-8",
+          "name": "Pedram Ghazipour",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-9",
+          "name": "Amir Jafari",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-10",
+          "name": "Milad Kor",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-11",
+          "name": "Soheil Sahraei",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-12",
+          "name": "Amirmohammad Khamar",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "RB, CB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-13",
+          "name": "Ali Hassani",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-14",
+          "name": "Amir Mahan Afrouziani",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-15",
+          "name": "Alireza Alizadeh",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-16",
+          "name": "Ahmadreza Zendeh Rouh",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-17",
+          "name": "Ali Asghar Ashouri",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-18",
+          "name": "Louis Ben Houssein",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-19",
+          "name": "Erfan Masoumi",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-20",
+          "name": "Mehdi Goudarzi",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-21",
+          "name": "Mohammadreza Bordbar",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-22",
+          "name": "Alireza Ehsanifar",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-23",
+          "name": "Amirmohammad Badavar",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CM, RM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-24",
+          "name": "Mohammadhossein Jamali",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-25",
+          "name": "Siamak Nemati",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "MF",
+          "rawPos": "RM, RW, RB, CAM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-26",
+          "name": "Majid Aliyari",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "ST, CF, LW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-27",
+          "name": "Mohammad Alinejad",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "LW, RW, LM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-28",
+          "name": "Amin Kazemian",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "RW, LW, ST",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-29",
+          "name": "Jérémie Musangu",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-30",
+          "name": "Mojtaba Fakhrian",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-31",
+          "name": "Ali Asghar Sheikh-ol-eslami",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-32",
+          "name": "Amirmohammad Rezaei",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "CF, ST",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-33",
+          "name": "Parsa Kafafi",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-34",
+          "name": "Benyamin Alipour",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "RW, LW",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-gol-gohar-35",
+          "name": "Omid Alishah",
+          "team": "PGL-GOL-GOHAR",
+          "pos": "FW",
+          "rawPos": "LW, LM, ST, RW",
+          "overall": 70,
+          "isStar": true
+        }
+      ],
+      "baseOverall": 63
+    },
+    {
+      "id": "pgl-aluminium-arak",
+      "code": "PGL-ALUMINIUM-ARAK",
+      "name": "Aluminium Arak",
+      "players": [
+        {
+          "id": "pgl-aluminium-arak-1",
+          "name": "Mohammad Khalifeh",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 71,
+          "isStar": true
+        },
+        {
+          "id": "pgl-aluminium-arak-2",
+          "name": "Abolfazl Hashemi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-3",
+          "name": "Mehdi Tayefeh",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-4",
+          "name": "Amirhossein Amini",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-5",
+          "name": "Amirmohammad Houshmand",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-6",
+          "name": "Seyed Mehran Mousavi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-7",
+          "name": "Sina Shahabbasi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-8",
+          "name": "Younes Akbarpour",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-9",
+          "name": "Sasan Jafarikia",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "RB, CB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-10",
+          "name": "Bahram Goudarzi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-11",
+          "name": "Mehdi Mahdavi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-12",
+          "name": "Taha Mohebipour",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "RB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-13",
+          "name": "Abolfazl Soukhtanlou",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-14",
+          "name": "Amirmehdi Abdoli",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-15",
+          "name": "Saeid Sadeghi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "RM, LM, CAM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-16",
+          "name": "Mahmoud Motlaghzadeh",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-17",
+          "name": "Amir Nouri",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-18",
+          "name": "Mansour Bagheri",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-19",
+          "name": "Hamed Bahiraei",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-20",
+          "name": "Ali Vatandoust",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "LM, CM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-21",
+          "name": "Abolfazl Ghanbari",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-22",
+          "name": "Samir Hoboubati",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-23",
+          "name": "Sobhan Kamalvand",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-24",
+          "name": "Mohammadreza Hosseini",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "RW, RM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-25",
+          "name": "Shervin Bozorg",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-26",
+          "name": "Reza Jabireh",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST, CF, RW",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-27",
+          "name": "Amirali Sadeghi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-28",
+          "name": "Sasan Hosseini",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-29",
+          "name": "Mohammadmehdi Khodayarifard",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST, RW",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-30",
+          "name": "Amirhossein Amanipour",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-31",
+          "name": "Abbas Kahrizi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "MF",
+          "rawPos": "LM, LW, RM, RW",
+          "overall": 70,
+          "isStar": true
+        },
+        {
+          "id": "pgl-aluminium-arak-32",
+          "name": "Ali Latifi",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-33",
+          "name": "Erfan Khodadadian",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "RW, LW",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-aluminium-arak-34",
+          "name": "Omid Ghareh Chamaghloo",
+          "team": "PGL-ALUMINIUM-ARAK",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 56,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-foolad",
+      "code": "PGL-FOOLAD",
+      "name": "Foolad",
+      "players": [
+        {
+          "id": "pgl-foolad-1",
+          "name": "Utkir Yusupov",
+          "team": "PGL-FOOLAD",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-2",
+          "name": "Hamed Lak",
+          "team": "PGL-FOOLAD",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 72,
+          "isStar": true
+        },
+        {
+          "id": "pgl-foolad-3",
+          "name": "Mohsen Forouzan",
+          "team": "PGL-FOOLAD",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-4",
+          "name": "Alireza Nazi",
+          "team": "PGL-FOOLAD",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-5",
+          "name": "Ramin Rezaeian",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 76,
+          "isStar": true
+        },
+        {
+          "id": "pgl-foolad-6",
+          "name": "Mohammad Ghoreishi",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-7",
+          "name": "Abolfazl Razzaghpour",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-8",
+          "name": "Arman Akvan",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-9",
+          "name": "Milad Badragheh",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-10",
+          "name": "Mohammad Ali Kazemi",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "RB, CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-11",
+          "name": "Alireza Amirkhani",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-12",
+          "name": "Amin Saedi",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-13",
+          "name": "Arash Akbarzadeh",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-14",
+          "name": "Soheil Sarkari",
+          "team": "PGL-FOOLAD",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-15",
+          "name": "Milad Sarlak",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-16",
+          "name": "Omid Hamedifar",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-17",
+          "name": "Amirhossein Joulani",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-18",
+          "name": "Ghasem Latifi",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-19",
+          "name": "Amir Moavi",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-20",
+          "name": "Vahid Amiri",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "LM, LW, CF, LB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-21",
+          "name": "Mehrdad Mohammadi",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "RW, LW, ST",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-22",
+          "name": "Sasan Ansari",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "ST, CF, CAM, RW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-23",
+          "name": "Farshad Ahmadzadeh",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "RM, RW, CAM, LM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-24",
+          "name": "Matheus Costa",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-25",
+          "name": "Ehsan Mahroughi",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-26",
+          "name": "Arshia Bagheri",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "LW, RW",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-27",
+          "name": "Yousef Mazraeh",
+          "team": "PGL-FOOLAD",
+          "pos": "MF",
+          "rawPos": "LM, LW, CAM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-foolad-28",
+          "name": "Abolfazl Zadeh Attar",
+          "team": "PGL-FOOLAD",
+          "pos": "FW",
+          "rawPos": "ST, RW, LW",
+          "overall": 62,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 65
+    },
+    {
+      "id": "pgl-tractor",
+      "code": "PGL-TRACTOR",
+      "name": "Tractor",
+      "players": [
+        {
+          "id": "pgl-tractor-1",
+          "name": "Alireza Beiranvand",
+          "team": "PGL-TRACTOR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-tractor-2",
+          "name": "Parsa Jafari",
+          "team": "PGL-TRACTOR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-3",
+          "name": "Erfan Najjari",
+          "team": "PGL-TRACTOR",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-4",
+          "name": "Sadegh Moharrami",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-5",
+          "name": "Danial Esmaeilifar",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 73,
+          "isStar": true
+        },
+        {
+          "id": "pgl-tractor-6",
+          "name": "Mohammad Daneshgar",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-7",
+          "name": "Shoja Khalilzadeh",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-8",
+          "name": "Milad Zakipour",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-9",
+          "name": "Mohammad Naderi",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-10",
+          "name": "Farshad Faraji",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-11",
+          "name": "Mehdi Shiri",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "RB, RWB, CDM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-12",
+          "name": "Saeid Karimazar",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-13",
+          "name": "Erfan Darvish Aali",
+          "team": "PGL-TRACTOR",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-14",
+          "name": "Mehdi Torabi",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "LM, LW, CAM, RM",
+          "overall": 74,
+          "isStar": true
+        },
+        {
+          "id": "pgl-tractor-15",
+          "name": "Odiljon Hamrobekov",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-16",
+          "name": "Seyed Mehdi Hosseini",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-17",
+          "name": "Tibor Halilović",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-18",
+          "name": "Igor Postonjski",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-19",
+          "name": "Hadi Habibinezhad",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "LW, LM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-20",
+          "name": "Amirmohammad Mahmoudi",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-21",
+          "name": "Amirali Khorrami",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-22",
+          "name": "Morteza Fazeli",
+          "team": "PGL-TRACTOR",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-23",
+          "name": "Shahriyar Moghanlou",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-24",
+          "name": "Amirhossein Hosseinzadeh",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "ST, LW, RW, CAM",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-tractor-25",
+          "name": "Tomislav Štrkalj",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-26",
+          "name": "Mehdi Hashemnejad",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-27",
+          "name": "Masoud Zaer Kazemeini",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-28",
+          "name": "Karrar Nemari",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-tractor-29",
+          "name": "Aliakbar Saghebi",
+          "team": "PGL-TRACTOR",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 56,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 67
+    },
+    {
+      "id": "pgl-fajr-sepasi",
+      "code": "PGL-FAJR-SEPASI",
+      "name": "Fajr Sepasi",
+      "players": [
+        {
+          "id": "pgl-fajr-sepasi-1",
+          "name": "Alireza Rezaei",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-2",
+          "name": "Ali Gholamzadeh",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-3",
+          "name": "Erfan Esfandiari",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-4",
+          "name": "Alireza Mokarram Akbarabadi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 55,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-5",
+          "name": "Mohammadhossein Moradmand",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-6",
+          "name": "Shahin Tavakoli",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-7",
+          "name": "Majid Nasiri",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-8",
+          "name": "Mohammadali Faramarzi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-9",
+          "name": "Ali Helichi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-10",
+          "name": "Amir Shabani",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-11",
+          "name": "Meysam Moradi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "RB, RM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-12",
+          "name": "Mahan Ahmadzadeh",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-13",
+          "name": "Arshia Vosoughifard",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-14",
+          "name": "Sina Norouzi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-15",
+          "name": "Abolfazl Moradi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "DF",
+          "rawPos": "LB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-16",
+          "name": "Masoud Rigi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-17",
+          "name": "Saeid Mehri",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-18",
+          "name": "Hossein Nokhodkar",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "LM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-19",
+          "name": "Mehdi Yousefi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-20",
+          "name": "Mohammadreza Moslemi Javid",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-21",
+          "name": "Mehdi Rezaei",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-22",
+          "name": "Alireza Afkham",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-23",
+          "name": "Mehdi Bahraminejad",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-24",
+          "name": "Ehsan Pahlavan",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "MF",
+          "rawPos": "LM, RM, CAM, LW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-25",
+          "name": "Peyman Babaei",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "ST, CF, RW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-26",
+          "name": "Mehdi Sharifi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-27",
+          "name": "Yadegar Rostami",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "ST, CAM, RW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-28",
+          "name": "Soheil Fadakar",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-29",
+          "name": "Hossein Shahabi",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "LW, RW, ST",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-fajr-sepasi-30",
+          "name": "Farnam Arab",
+          "team": "PGL-FAJR-SEPASI",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 63,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 63
+    },
+    {
+      "id": "pgl-malavan",
+      "code": "PGL-MALAVAN",
+      "name": "Malavan",
+      "players": [
+        {
+          "id": "pgl-malavan-1",
+          "name": "Afshar Sedaghat",
+          "team": "PGL-MALAVAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-2",
+          "name": "Farzad Tayebipour",
+          "team": "PGL-MALAVAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-3",
+          "name": "Behnam Barzay",
+          "team": "PGL-MALAVAN",
+          "pos": "DF",
+          "rawPos": "RB, RM, RW",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-4",
+          "name": "Mohammad Tayebi",
+          "team": "PGL-MALAVAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-5",
+          "name": "Amirreza Afsordeh",
+          "team": "PGL-MALAVAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-6",
+          "name": "Farzin Moamelegari",
+          "team": "PGL-MALAVAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-7",
+          "name": "Mohammadhossein Rafiei",
+          "team": "PGL-MALAVAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-8",
+          "name": "Ghaem Eslamikhah",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM, LM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-9",
+          "name": "Sina Khadempour",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CDM, CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-10",
+          "name": "Mahyar Zahmatkesh",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CDM, CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-11",
+          "name": "Mohammad Papi",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "RM, LM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-12",
+          "name": "Amirmohammad Nesaei",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM, RM, LM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-13",
+          "name": "Erfan Shahriyari",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-14",
+          "name": "Mehdi Moughari",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-15",
+          "name": "Zargham Saadavi",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-16",
+          "name": "Jafar Hosseinpour",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-17",
+          "name": "Farhan Jafari",
+          "team": "PGL-MALAVAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-18",
+          "name": "Issa Alekasir",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-19",
+          "name": "Mohammadreza Abbasi",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-20",
+          "name": "Hossein Sadeghi",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-21",
+          "name": "Alireza Ramezani",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-22",
+          "name": "Mahan Sadeghi",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "LW, LM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-malavan-23",
+          "name": "Reza Marzban",
+          "team": "PGL-MALAVAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 68,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 63
+    },
+    {
+      "id": "pgl-paykan",
+      "code": "PGL-PAYKAN",
+      "name": "Paykan",
+      "players": [
+        {
+          "id": "pgl-paykan-1",
+          "name": "Hossein Pourhamidi",
+          "team": "PGL-PAYKAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-2",
+          "name": "Armin Abbasi",
+          "team": "PGL-PAYKAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-3",
+          "name": "Saeb Mohebi",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-4",
+          "name": "Milad Bagheri",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-5",
+          "name": "Amirhossein Gholami",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-6",
+          "name": "Behzad Salami",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-7",
+          "name": "Aydin Fathi",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-8",
+          "name": "Nima Ahmadi",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "RB, CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-9",
+          "name": "Ali Dehghan",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-10",
+          "name": "Amirali Madadizadeh",
+          "team": "PGL-PAYKAN",
+          "pos": "DF",
+          "rawPos": "LB, CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-11",
+          "name": "Reza Shekari",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CAM, LW, RW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-12",
+          "name": "Farshid Bagheri",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM, CB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-13",
+          "name": "Saman Nariman Jahan",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CAM, RM, LM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-14",
+          "name": "Mohammad Hosseini",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-15",
+          "name": "Mehdi Najafi",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-16",
+          "name": "Ehsan Hadian",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "RM, CM",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-17",
+          "name": "Amirreza Alimoradi",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-18",
+          "name": "Ilia Karami",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-19",
+          "name": "Arian Radinkia",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-20",
+          "name": "Ali Asghar Aarabi",
+          "team": "PGL-PAYKAN",
+          "pos": "FW",
+          "rawPos": "LW, RW, ST",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-21",
+          "name": "Sajjad Ashouri",
+          "team": "PGL-PAYKAN",
+          "pos": "FW",
+          "rawPos": "RW, CAM, LM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-22",
+          "name": "Farid Amiri",
+          "team": "PGL-PAYKAN",
+          "pos": "MF",
+          "rawPos": "LM, LB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-23",
+          "name": "Erfan Jamshidi",
+          "team": "PGL-PAYKAN",
+          "pos": "FW",
+          "rawPos": "ST, LW",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-24",
+          "name": "Hojjat Ahmadi",
+          "team": "PGL-PAYKAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-paykan-25",
+          "name": "Mohammad Pourmohammadi",
+          "team": "PGL-PAYKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-sepahan",
+      "code": "PGL-SEPAHAN",
+      "name": "Sepahan",
+      "players": [
+        {
+          "id": "pgl-sepahan-1",
+          "name": "Seyed Hossein Hosseini",
+          "team": "PGL-SEPAHAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 73,
+          "isStar": true
+        },
+        {
+          "id": "pgl-sepahan-2",
+          "name": "Amirmehdi Maghsoudi",
+          "team": "PGL-SEPAHAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-3",
+          "name": "Ehsan Haj Safi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM, CDM",
+          "overall": 72,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-4",
+          "name": "Mohammadamin Hazbavi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 71,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-5",
+          "name": "Armin Sohrabian",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-6",
+          "name": "Aria Yousefi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 72,
+          "isStar": true
+        },
+        {
+          "id": "pgl-sepahan-7",
+          "name": "Hadi Mohammadi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-8",
+          "name": "Esmaeil Falamarzi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-9",
+          "name": "Yasin Jorjani",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-10",
+          "name": "Mohammadreza Sharghi",
+          "team": "PGL-SEPAHAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-11",
+          "name": "Ricardo Alves",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM, CDM",
+          "overall": 75,
+          "isStar": true
+        },
+        {
+          "id": "pgl-sepahan-12",
+          "name": "Omid Noorafkan",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CDM, LB, CM",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-13",
+          "name": "Mohammad Karimi",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-14",
+          "name": "Ali Karimi",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-15",
+          "name": "Arash Rezavand",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-16",
+          "name": "Gholamreza Sabet Imani",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-17",
+          "name": "Saeid Vasei",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM, RM, LM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-18",
+          "name": "Aref Haji Eydi",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-19",
+          "name": "Abbas Habibi",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-20",
+          "name": "Mahan Akbarzadeh",
+          "team": "PGL-SEPAHAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-21",
+          "name": "Kaveh Rezaei",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-22",
+          "name": "Mehdi Limouchi",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "LW, LM, RW, ST",
+          "overall": 70,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-23",
+          "name": "Reza Jafari",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST, RW",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-24",
+          "name": "Mohammadmehdi Lotfi",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-25",
+          "name": "Ali Khodadadi",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-26",
+          "name": "Kasra Taheri",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 72,
+          "isStar": true
+        },
+        {
+          "id": "pgl-sepahan-27",
+          "name": "Amirhossein Jalalivand",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-28",
+          "name": "Mohammad Askari",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "LW, RW, LM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-29",
+          "name": "Amirreza Jeddi",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-30",
+          "name": "Aria Shafieidoust",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "LW, LM, RW, RM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sepahan-31",
+          "name": "Mohammadtaha Alami",
+          "team": "PGL-SEPAHAN",
+          "pos": "FW",
+          "rawPos": "CF, ST",
+          "overall": 56,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 66
+    },
+    {
+      "id": "pgl-zob-ahan",
+      "code": "PGL-ZOB-AHAN",
+      "name": "Zob Ahan",
+      "players": [
+        {
+          "id": "pgl-zob-ahan-1",
+          "name": "Hassan Pourhamidi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-2",
+          "name": "Davoud Noushi Soufiani",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-3",
+          "name": "Ashkan Rashedi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-4",
+          "name": "Ali Shojaei",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-5",
+          "name": "Seyed Mohammad Hosseini",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-6",
+          "name": "Amirhossein Rangarz Jeddi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-7",
+          "name": "Arash Ghaderi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-8",
+          "name": "Ali Azadmanesh",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-9",
+          "name": "Shahin Taherkhani",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-10",
+          "name": "Saeid Karimi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-11",
+          "name": "Abolfazl Hosseinifard",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-12",
+          "name": "Hesam Nafari",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-13",
+          "name": "Farshid Esmaeili",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM, LM",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-14",
+          "name": "Kamal Kamyabinia",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-15",
+          "name": "Jalaleddin Alimohammadi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-16",
+          "name": "Mahmoud Ghaedrahmati",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-17",
+          "name": "Nima Entezari",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-18",
+          "name": "Amin Jahankohan",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-19",
+          "name": "Pouya Mokhtari",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-20",
+          "name": "Behnam Teymourian",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-21",
+          "name": "Rahman Jafari",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-22",
+          "name": "Mohammadjavad Mohammadi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST, RW, LW",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-23",
+          "name": "Sobhan Khaghani",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-24",
+          "name": "Alireza Kazemi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "LW, RW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-25",
+          "name": "Aria Barzegar",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-26",
+          "name": "Omid Latifi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST, LW, RW",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-27",
+          "name": "Mohammad Hadi Baghban",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-28",
+          "name": "Ali Eslami",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-29",
+          "name": "Arash Mortazavi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "RW, LW",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-zob-ahan-30",
+          "name": "Mohammadali Khaledi",
+          "team": "PGL-ZOB-AHAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 56,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 63
+    },
+    {
+      "id": "pgl-sanat-naft-abadan",
+      "code": "PGL-SANAT-NAFT-ABADAN",
+      "name": "Sanat Naft Abadan",
+      "players": [
+        {
+          "id": "pgl-sanat-naft-abadan-1",
+          "name": "Ahmad Gohari",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-2",
+          "name": "Parsa Afzali",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-3",
+          "name": "Milad Fakhreddini",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-4",
+          "name": "Meysam Teymouri",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-5",
+          "name": "Meysam Tohidast",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-6",
+          "name": "Mohammad Aghajanpour",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB, CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-7",
+          "name": "Ali Abdollahzadeh",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-8",
+          "name": "Reza Yazdandoost",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-9",
+          "name": "Matin Karimzadeh",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-10",
+          "name": "Yousef Vakia",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-11",
+          "name": "Reza Aliari",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-12",
+          "name": "Alireza Khoshkafa",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-13",
+          "name": "Mohammadhossein Fallah",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-14",
+          "name": "Hossein Sangargir",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-15",
+          "name": "Mehrdad Hedayatian",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB, LM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-16",
+          "name": "Mostafa Nayejpour",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-17",
+          "name": "Fayyaz Mirdoraghi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-18",
+          "name": "Meysam Davoudpour",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-19",
+          "name": "Mohammadreza Yousefi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-20",
+          "name": "Milad Kamandani",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM, LM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-21",
+          "name": "Mahan Kakoularimi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-22",
+          "name": "Amirhossein Koulian",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-23",
+          "name": "Taleb Reykani",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CAM, LM, CM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-24",
+          "name": "Mohammadreza Gobeishavi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-25",
+          "name": "Moslem Mojadami",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-26",
+          "name": "Ali Taheran",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-27",
+          "name": "Khashayar Zebarjad",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-28",
+          "name": "Mohammad Abbasi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CM, RM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-29",
+          "name": "Abolfazl Babadi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "RM, LM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-30",
+          "name": "Aghil Talili",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-31",
+          "name": "Abolfazl Bachari",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-32",
+          "name": "Mohammadhossein Bouazar",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-33",
+          "name": "Eric Bagneama",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-34",
+          "name": "Yousef Key Shams",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-35",
+          "name": "Behrouz Barani",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-36",
+          "name": "Mohsen Seyfi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST, RW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-37",
+          "name": "Saman Mehrabizadeh",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-38",
+          "name": "Amir Alidadi",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-39",
+          "name": "Mohammadhossein Baseri",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-sanat-naft-abadan-40",
+          "name": "Sajjad Ammarlou",
+          "team": "PGL-SANAT-NAFT-ABADAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 59,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-mes-shahr-babak",
+      "code": "PGL-MES-SHAHR-BABAK",
+      "name": "Mes Shahr Babak",
+      "players": [
+        {
+          "id": "pgl-mes-shahr-babak-1",
+          "name": "Aydin Ghavidel",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-2",
+          "name": "Mohammadsadegh Naderpour",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-3",
+          "name": "Fariborz Gerami",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-4",
+          "name": "Pouria Gholami",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "RB, RWB, RM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-5",
+          "name": "Mohsen Sefid Choghaei",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "RB, RM, RW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-6",
+          "name": "Mohsen Tarhani",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "RB, LB, CB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-7",
+          "name": "Mohammad Azhir",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-8",
+          "name": "Mehdi Mohammadi",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-9",
+          "name": "Aliakbar Karbalaei",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-10",
+          "name": "Amin Abbasi",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-11",
+          "name": "Zobeir Niknafs",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-12",
+          "name": "Sajjad Jafari",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-13",
+          "name": "Majid Tajik",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-14",
+          "name": "Mohammadreza Raoufimanesh",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-15",
+          "name": "Alireza Enayatzadeh",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-16",
+          "name": "Mohammad Jannia",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-17",
+          "name": "Mohammadjavad Pouravaz",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-18",
+          "name": "Alireza Valizadeh",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-19",
+          "name": "Omid Nafez",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "FW",
+          "rawPos": "ST, RW, LW",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-20",
+          "name": "Mojtaba Hasheminasab",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "FW",
+          "rawPos": "RW, LW, ST",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-mes-shahr-babak-21",
+          "name": "Aref Ghezel",
+          "team": "PGL-MES-SHAHR-BABAK",
+          "pos": "FW",
+          "rawPos": "ST, LW",
+          "overall": 62,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 63
+    },
+    {
+      "id": "pgl-shams-azar-qazvin",
+      "code": "PGL-SHAMS-AZAR-QAZVIN",
+      "name": "Shams Azar Qazvin",
+      "players": [
+        {
+          "id": "pgl-shams-azar-qazvin-1",
+          "name": "Mehrshad Asadi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-2",
+          "name": "Adib Zarei",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-3",
+          "name": "Mohammad Nejadmehdi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-4",
+          "name": "Amir Taher",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-5",
+          "name": "Mohammadreza Rezaei",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-6",
+          "name": "Ali Rezaei",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-7",
+          "name": "Mohammadreza Torabi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-8",
+          "name": "Amirhossein Chegini",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-9",
+          "name": "Mehdi Hosseini",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-10",
+          "name": "Amirreza Karami",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-11",
+          "name": "Mohammadjavad Azadeh",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-12",
+          "name": "Amirmohammad Mohkamkar",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CAM, RM, LM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-13",
+          "name": "Ahmad Nassiri",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-14",
+          "name": "Mehrdad Aghamohammadi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-15",
+          "name": "Ali Jolokhani",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-16",
+          "name": "Kianoush Moazzami",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST, RM, CM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-17",
+          "name": "Mohammad Kiani",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-18",
+          "name": "Mohammad Sadra Ezzatkhah",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-19",
+          "name": "Mehdi Mamizadeh",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "RW, LW, CAM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-20",
+          "name": "Milad Sourgi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "LW, RW, CAM",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-21",
+          "name": "Mohammadreza Mohammadi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-22",
+          "name": "Mohammadmehdi Mansouri",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-23",
+          "name": "Sina Moazzamitabar",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST, RW",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-24",
+          "name": "Ahoura Zand",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-25",
+          "name": "Armin Ebrahimi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-shams-azar-qazvin-26",
+          "name": "Parsa Rahimi",
+          "team": "PGL-SHAMS-AZAR-QAZVIN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 55,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 61
+    },
+    {
+      "id": "pgl-nassaji-mazandaran",
+      "code": "PGL-NASSAJI-MAZANDARAN",
+      "name": "Nassaji Mazandaran",
+      "players": [
+        {
+          "id": "pgl-nassaji-mazandaran-1",
+          "name": "Alireza Jafarpour",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 67,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-2",
+          "name": "Omid Amiri",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-3",
+          "name": "Behrouz Norouzifard",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-4",
+          "name": "Houman Rabiezadeh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 68,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-5",
+          "name": "Mohammad Abolfazl Kouhi",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB, LB",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-6",
+          "name": "Mehdi Tahmasebi",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "CB, RB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-7",
+          "name": "Mohammad Hosseinzadeh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-8",
+          "name": "Alireza Arasteh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "CB, LB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-9",
+          "name": "Amir Masoud Sarabadani",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM, CDM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-10",
+          "name": "Sadegh Albousobih",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-11",
+          "name": "Ali Nassiri",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-12",
+          "name": "Ahmadreza Mohammadnezhad",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CAM, LM, RM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-13",
+          "name": "Pouria Rezazadeh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-14",
+          "name": "Ario Mahdavikia",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "LM, LB, RM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-15",
+          "name": "Mohammadamin Balesh Zarian",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-16",
+          "name": "Javad Aghaeipour",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "ST, CF, RW",
+          "overall": 69,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-17",
+          "name": "Fardin Najafi",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "ST, CF, RW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-18",
+          "name": "Afshin Sadeghi",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "RW, LW, ST",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-19",
+          "name": "Nima Aftari Jelodar",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-20",
+          "name": "Kourosh Ezhdehakosh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "CF, ST, CAM, CM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-21",
+          "name": "Moeid Imeri",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-nassaji-mazandaran-22",
+          "name": "Yaghoub Barajeeh",
+          "team": "PGL-NASSAJI-MAZANDARAN",
+          "pos": "DF",
+          "rawPos": "RB, RM, CB",
+          "overall": 65,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-esteghlal-khuzestan",
+      "code": "PGL-ESTEGHLAL-KHUZESTAN",
+      "name": "Esteghlal Khuzestan",
+      "players": [
+        {
+          "id": "pgl-esteghlal-khuzestan-1",
+          "name": "Mohammadjavad Kia",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-2",
+          "name": "Mohammadamin Rezaei",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-3",
+          "name": "Omid Afshin",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-4",
+          "name": "Abolfazl Jamei",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-5",
+          "name": "Amirhossein Mombaini",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-6",
+          "name": "Mohammadmehdi Ahmadi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "LB, LWB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-7",
+          "name": "Mohammadreza Mehdizadeh",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-8",
+          "name": "Farzad Jafari",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-9",
+          "name": "Mohammad Soltanimehr",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB, CDM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-10",
+          "name": "Mohammad Ahle Shakheh",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-11",
+          "name": "Aram Abbasi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-12",
+          "name": "Abolfazl Soleimani",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-13",
+          "name": "Nima Andarz",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-14",
+          "name": "Alireza Karami",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-15",
+          "name": "Seyed Mehdi Mousavi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-16",
+          "name": "Vesam Saki",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "DF",
+          "rawPos": "LB, CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-17",
+          "name": "Hamid Bouhamdan",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-18",
+          "name": "Mojtaba Haghdoost",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "LW, LM",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-19",
+          "name": "Mohammad Sharifi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-20",
+          "name": "Mohammadhossein Zavari",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-21",
+          "name": "Mohammadreza Fallahian",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-22",
+          "name": "Erfan Sazgari",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CM, RM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-23",
+          "name": "Omid Mohammadi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-24",
+          "name": "Morteza Fazeli",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-25",
+          "name": "Aref Rostami",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST, LW",
+          "overall": 70,
+          "isStar": true
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-26",
+          "name": "Mohammad Ghanbari",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "RW, LW, RM",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-27",
+          "name": "Amirhossein Farhadi",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "LW, RW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-28",
+          "name": "Arman Mardani",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-29",
+          "name": "Amir Savaed",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-30",
+          "name": "Mohammadreza Mehdizadeh",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-31",
+          "name": "Amirmohammad Simanpour",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-esteghlal-khuzestan-32",
+          "name": "Javad Zargan",
+          "team": "PGL-ESTEGHLAL-KHUZESTAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 58,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    },
+    {
+      "id": "pgl-chadormalu-ardakan",
+      "code": "PGL-CHADORMALU-ARDAKAN",
+      "name": "Chadormalu Ardakan",
+      "players": [
+        {
+          "id": "pgl-chadormalu-ardakan-1",
+          "name": "Edson Marden",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 70,
+          "isStar": true
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-2",
+          "name": "Hojjat Sedghi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-3",
+          "name": "Amirhossein Asiabanpour",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "GK",
+          "rawPos": "GK",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-4",
+          "name": "Aref Gholami",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-5",
+          "name": "Alireza Arta",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-6",
+          "name": "Sirous Sadeghian",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-7",
+          "name": "Saeid Mohammadifard",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "RB, RWB",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-8",
+          "name": "Mohammadreza Hosseini",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "LB, CB",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-9",
+          "name": "Mohammad Zarei",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-10",
+          "name": "Amirhossein Kalbasi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 57,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-11",
+          "name": "Mobin Ghoughchi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "DF",
+          "rawPos": "CB",
+          "overall": 56,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-12",
+          "name": "Reza Mahmoudabadi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CAM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-13",
+          "name": "Reza Dehghan",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "LM, CM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-14",
+          "name": "Mohammadhossein Khosravi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CDM, CM",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-15",
+          "name": "Diego Torres",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CM, CAM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-16",
+          "name": "Aghil Anafcheh",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CM, CDM",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-17",
+          "name": "Mohammadtaha Farahani",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-18",
+          "name": "Seyed Ali Kamali Jelodar",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "RM, LM",
+          "overall": 62,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-19",
+          "name": "Alireza Safari",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 60,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-20",
+          "name": "Reza Bahaan",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "MF",
+          "rawPos": "CM",
+          "overall": 58,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-21",
+          "name": "Reza Mirzaei",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "RW, RM, RB",
+          "overall": 66,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-22",
+          "name": "Mohammad Amin Asadi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST, CF",
+          "overall": 65,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-23",
+          "name": "René Bobe",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 70,
+          "isStar": true
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-24",
+          "name": "Pouria Bali Lashak",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "LW, RW",
+          "overall": 64,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-25",
+          "name": "Sajjad Mashhadi",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 63,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-26",
+          "name": "Mohammadtaha Tabatabaei",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-27",
+          "name": "Amir Eslamtalab",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "LW, RW",
+          "overall": 61,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-28",
+          "name": "Abolfazl Eisalou",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 59,
+          "isStar": false
+        },
+        {
+          "id": "pgl-chadormalu-ardakan-29",
+          "name": "Ilia Negahdari",
+          "team": "PGL-CHADORMALU-ARDAKAN",
+          "pos": "FW",
+          "rawPos": "ST",
+          "overall": 58,
+          "isStar": false
+        }
+      ],
+      "baseOverall": 62
+    }
+  ]
+}

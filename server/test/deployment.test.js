@@ -55,7 +55,7 @@ function event(socket, name) {
   });
 }
 
-test('hosted app supports accounts, multiplayer, a full solo tournament and persistent SQLite', { timeout: 90000 }, async (t) => {
+test('hosted app supports multiplayer, World Cup, a complete PGL season and persistent SQLite', { timeout: 90000 }, async (t) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'draftbox-test-'));
   let server;
   const sockets = [];
@@ -158,4 +158,93 @@ test('hosted app supports accounts, multiplayer, a full solo tournament and pers
   ready = event(resumedSocket, 'room:state');
   resumedSocket.emit('room:join', { code: solo.code });
   assert.equal((await ready).tournamentStage, 'done');
+
+  const catalog = await request('/api/leagues');
+  assert.deepEqual(catalog.leagues.map((league) => league.id), ['pgl']);
+  const league = catalog.leagues[0];
+  assert.equal(league.teamCount, 18);
+  assert.equal(league.matchdays, 34);
+  const clubCode = league.teams[0].code;
+  await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'missing', clubCode }, status: 400 });
+  await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode: 'IRN' }, status: 400 });
+  await request('/api/rooms', { token: login.token, body: { mode: 'league', leagueId: 'pgl' }, status: 400 });
+  const season = await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode, formation: '4-3-3', pickTimeMs: 0 }, status: 201 });
+  assert.equal(season.mode, 'league');
+  assert.equal(season.members[0].clubCode, clubCode);
+  ready = event(resumedSocket, 'room:state');
+  resumedSocket.emit('room:join', { code: season.code });
+  assert.equal((await ready).poolRemaining, 510);
+  ready = event(resumedSocket, 'draft:reveal');
+  resumedSocket.emit('draft:reveal', { code: season.code });
+  const reveal = await ready;
+  assert.ok(reveal.team.code.startsWith('PGL-'));
+  assert.ok(reveal.players.every((player) => player.id.startsWith('pgl-')));
+  const { playerFitsSlot } = require('../src/game/formations');
+  const manualPlayer = reveal.players.find((player) => player.available);
+  const manualSlot = reveal.openSlots.find((slot) => playerFitsSlot(manualPlayer, slot));
+  ready = event(resumedSocket, 'draft:picked');
+  resumedSocket.emit('draft:pick', { code: season.code, playerId: manualPlayer.id, slotCode: manualSlot.code });
+  assert.equal((await ready).player.id, manualPlayer.id);
+  ready = event(resumedSocket, 'tournament:started');
+  resumedSocket.emit('draft:autoComplete', { code: season.code });
+  await ready;
+  ready = event(resumedSocket, 'room:state');
+  resumedSocket.emit('room:join', { code: season.code });
+  const initial = await ready;
+  assert.equal(initial.tournamentStage, 'league');
+  assert.equal(initial.myLineup.code, clubCode);
+  assert.equal(initial.myLineup.xi.length, 11);
+  assert.ok(initial.myLineup.xi.every((player) => player.id.startsWith('pgl-')));
+  assert.equal(initial.league.table.length, 18);
+  assert.equal(initial.league.totalMatchdays, 34);
+  const leagueResults = [];
+  let seasonSocket = resumedSocket;
+  for (let matchday = 1; matchday <= 34; matchday++) {
+    ready = event(seasonSocket, 'tournament:step');
+    seasonSocket.emit('tournament:advance', { code: season.code });
+    const result = await ready;
+    assert.equal(result.step.matchday, matchday);
+    assert.equal(result.step.matches.length, 9);
+    assert.equal(result.spectator, false);
+    assert.ok(result.step.leagueTable.every((row) => row.played === matchday && row.pts === row.w * 3 + row.d && row.played === row.w + row.d + row.l));
+    leagueResults.push(...result.step.matches);
+    if (matchday === 5) {
+      const savedTable = result.step.leagueTable;
+      sockets.forEach((socket) => socket.disconnect());
+      await server.stop();
+      server = await startServer(dbPath, dir);
+      seasonSocket = await connect(login.token);
+      ready = event(seasonSocket, 'room:state');
+      seasonSocket.emit('room:join', { code: season.code });
+      const restored = await ready;
+      assert.equal(restored.viewedStep, 5);
+      assert.deepEqual(restored.myStep.leagueTable, savedTable);
+      assert.equal(restored.myLineup.code, clubCode);
+      assert.deepEqual(restored.myLineup.xi, initial.myLineup.xi);
+      const active = await request('/api/rooms', { token: login.token });
+      assert.ok(active.leagues.some((entry) => entry.code === season.code && entry.matchday === 5));
+      assert.deepEqual((await request('/api/rooms', { token: friend.token })).leagues, []);
+    }
+    if (matchday === 34) {
+      assert.equal(result.stage, 'done');
+      assert.equal(result.step.champion.code, result.step.leagueTable[0].code);
+      assert.equal(result.step.myRecord.w + result.step.myRecord.d + result.step.myRecord.l, 34);
+      assert.deepEqual(result.step.completedBracket, []);
+    }
+  }
+  assert.equal(leagueResults.length, 306);
+  const orderedPairs = new Set(leagueResults.map((match) => `${match.aCode}:${match.bCode}`));
+  assert.equal(orderedPairs.size, 306);
+  assert.ok(leagueResults.every((match) => !match.wentToPenalties && !match.wentToExtraTime));
+  assert.equal((await request(`/api/rooms/${season.code}`, { token: login.token })).status, 'finished');
+  assert.equal((await request('/api/rooms', { token: login.token })).leagues.length, 0);
+  const history = await request('/api/auth/me/matches', { token: login.token });
+  assert.equal(history.tournaments.find((entry) => entry.roomCode === season.code).matches.length, 34);
+  ready = event(seasonSocket, 'room:rematchReady');
+  seasonSocket.emit('room:rematch', { code: season.code });
+  const rematch = await ready;
+  const newSeason = await request(`/api/rooms/${rematch.newCode}`, { token: login.token });
+  assert.equal(newSeason.mode, 'league');
+  assert.equal(newSeason.leagueId, 'pgl');
+  assert.equal(newSeason.members[0].clubCode, clubCode);
 });

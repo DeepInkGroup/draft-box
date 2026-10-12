@@ -2,9 +2,11 @@ const express = require('express');
 const { requireAuth } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const { openSlots } = require('../game/draftEngine');
+const { getLeague } = require('../data/competitions');
 
 const router = express.Router();
 router.use(requireAuth);
+router.get('/', (req, res) => res.json({ leagues: rm.listUserLeagues(req.user.id) }));
 
 function serializeRoom(roomRow) {
   const snap = rm.lobbySnapshot(roomRow);
@@ -22,6 +24,7 @@ router.post('/', (req, res) => {
   try {
     const room = rm.createRoom({
       name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
+      mode: req.body?.mode || 'worldcup', leagueId: req.body?.leagueId,
       showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled,
       tournamentLength, allowedTeams, rerollsAllowed, spoilerMode: !!spoilerMode,
       sharedDraftMode: !!sharedDraftMode
@@ -36,20 +39,26 @@ router.post('/', (req, res) => {
 router.post('/singleplayer', (req, res) => {
   const { showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed } = req.body || {};
   try {
+    const mode = req.body?.mode || 'worldcup';
+    const leagueId = req.body?.leagueId;
+    const clubCode = req.body?.clubCode;
+    const league = mode === 'league' ? getLeague(leagueId) : null;
+    if (mode === 'league' && (!league || !league.teams.some((team) => team.code === clubCode))) throw new Error('choose an available league and club');
     const room = rm.createRoom({
-      name: `${req.user.username}'s Solo Run`,
+      name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
+      mode, leagueId,
       creatorId: req.user.id,
       humanSlotsMax: 1,
       singlePlayer: true,
       showOverall: showOverall !== false,
       pickTimeMs,
       captainEnabled: !!captainEnabled,
-      tournamentLength,
+      tournamentLength: mode === 'league' ? 'full' : tournamentLength,
       allowedTeams,
       rerollsAllowed,
       spoilerMode: false
     });
-    rm.joinRoom(room, req.user, req.body?.formation);
+    rm.joinRoom(room, req.user, req.body?.formation, clubCode);
     rm.setRoomStatus(room.id, 'drafting');
     const updated = rm.getRoomRow(room.id);
     res.status(201).json(serializeRoom(updated));

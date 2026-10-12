@@ -259,6 +259,7 @@ router.get('/me/matches', requireAuth, (req, res) => {
       const oppName = oppSlot ? oppSlot.name : 'Unknown';
       matches.push({
         stage: m.stage,
+        matchday: m.matchday || null,
         group: m.group || null,
         opponent: oppName,
         opponentIsHuman: !!(oppSlot && oppSlot.isHuman),
@@ -276,6 +277,8 @@ router.get('/me/matches', requireAuth, (req, res) => {
     tournaments.push({
       roomCode: row.code,
       roomName: row.name,
+      mode: t.kind === 'league' ? 'league' : 'worldcup',
+      competitionName: t.leagueName || 'World Cup',
       date: row.created_at,
       countryName: myName,
       champion: t.champion === myCode,

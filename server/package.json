@@ -11,7 +11,8 @@
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
     "test": "node --test test/*.test.js",
-    "gen:data": "node src/data/generate-teams-from-txt.js"
+    "test:ui": "playwright test",
+    "gen:data": "node src/data/generate-teams-from-txt.js && node src/data/generate-pgl.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -22,6 +23,7 @@
     "socket.io": "^4.7.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "socket.io-client": "^4.8.4"
   }
 }

@@ -1,6 +1,6 @@
 const TournamentView = {
   async render(container, code) {
-    container.innerHTML = `<div class="card center muted">Loading the World Cup...</div>`;
+    container.innerHTML = `<div class="card center muted">Loading your competition...</div>`;
 
     const socket = App.ensureSocket();
 
@@ -14,10 +14,14 @@ const TournamentView = {
     let advanceReady = null;
     let isSpectator = false;
     let advancePending = false;
+    let isLeague = false;
+    let leagueName = '';
+    let leagueState = null;
 
     container.innerHTML = `
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
+      <div class="card" id="leagueZone" style="display:none;"></div>
       <div class="card" id="liveZone" style="display:none;"></div>
       <div class="card" id="stepCard"></div>
       <div class="card center" id="continueZone">
@@ -35,6 +39,19 @@ const TournamentView = {
     const btnContinue = container.querySelector('#btnContinue');
     const newPing = container.querySelector('#newPing');
     const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
+    const leagueZone = container.querySelector('#leagueZone');
+
+    function renderLeagueTable() {
+      if (!leagueState) return;
+      leagueZone.style.display = '';
+      const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
+      leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name}</h3><span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
+        ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
+        <div class="league-table-scroll"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
+          <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
+          <tbody>${leagueState.table.map((row) => `<tr class="${row.code === myCode ? 'human' : ''}"><td>${row.rank}</td><td>${row.name}${row.code === myCode ? ' · You' : ''}</td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`).join('')}</tbody>
+        </table></div><p class="muted league-table-note league-table-hint">Swipe the table to see all stats.</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
+    }
 
     function scoreText(m) {
       let s = `${m.goalsA} - ${m.goalsB}`;
@@ -63,6 +80,7 @@ const TournamentView = {
     // underneath it doesn't add anything once a real person is playing it. Bot-controlled
     // slots still show the nation's name, since there's no username to fall back to.
     function nameTag(name, isHuman, username) {
+      if (isLeague) return name;
       return isHuman ? username : name;
     }
 
@@ -245,7 +263,7 @@ const TournamentView = {
       } else if (advanceReady && isSpectator && Number(advanceReady.requiredMemberCount) > 0) {
         btnContinue.style.display = 'none';
       } else {
-        btnContinue.textContent = me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
+        btnContinue.textContent = isLeague ? '▶ Play Next Matchday' : me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
         btnContinue.disabled = advancePending || !!(me && me.ready);
       }
       renderAdvanceReady();
@@ -433,7 +451,7 @@ const TournamentView = {
 
       stepCard.innerHTML = `
         <h3 class="center">You're representing ${lineup.countryName}!</h3>
-        <p class="muted center">${lineup.formation} &middot; OVR ${avgOverall}</p>
+        <p class="muted center">${isLeague ? `${leagueName} &middot; ${leagueState.totalMatchdays} matchdays &middot; ` : ''}${lineup.formation} &middot; OVR ${avgOverall}</p>
         <div id="lineupPitch"></div>
         <div class="lineup-predictions">
           <div class="lineup-prediction-stat wide">
@@ -448,7 +466,7 @@ const TournamentView = {
           </div>
           ${predictionIdeas.length ? `<div class="lineup-prediction-ideas wide">${predictionIdeas.map((idea) => `<span>${idea}</span>`).join('')}</div>` : ''}
         </div>
-        <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">Enter the World Cup</button>
+        <button class="btn btn-primary btn-block" id="btnEnterTournament" style="margin-top:16px;">${isLeague ? 'Enter the League' : 'Enter the World Cup'}</button>
       `;
       Pitch.render(stepCard.querySelector('#lineupPitch'), slotDefs, (slot) => {
         const p = bySlot[slot.code];
@@ -667,16 +685,17 @@ const TournamentView = {
     }
 
     function renderStep(step) {
+      renderLeagueTable();
       if (tournamentStage === 'done') {
         stagePill.parentElement.style.display = 'none';
       } else {
         stagePill.parentElement.style.display = '';
-        stagePill.textContent = STAGE_LABEL[tournamentStage] || tournamentStage;
+        stagePill.textContent = isLeague ? leagueName : STAGE_LABEL[tournamentStage] || tournamentStage;
       }
       newResultsPing = false;
 
       if (!step) {
-        stepCard.innerHTML = `<p class="muted center">The World Cup draw is complete. Click below to kick off Matchday 1.</p>`;
+        stepCard.innerHTML = `<p class="muted center">${isLeague ? 'Your league fixtures are ready.' : 'The World Cup draw is complete.'} Click below to kick off Matchday 1.</p>`;
         championZone.innerHTML = '';
         renderButton();
         return;
@@ -746,17 +765,17 @@ const TournamentView = {
       });
 
       if (step.champion) {
-        const championTitle = step.champion.isHuman ? step.champion.username : step.champion.name;
-        const championSub = step.champion.isHuman ? step.champion.name : 'Bot-controlled nation';
+        const championTitle = isLeague ? step.champion.name : step.champion.isHuman ? step.champion.username : step.champion.name;
+        const championSub = step.champion.isHuman ? (isLeague ? step.champion.username : step.champion.name) : (isLeague ? 'Bot-controlled club' : 'Bot-controlled nation');
         championZone.innerHTML = `
           <div class="champion-banner">
-            <div class="champion-label">World Cup Champion</div>
+            <div class="champion-label">${isLeague ? leagueName : 'World Cup'} Champion</div>
             <h2>${championTitle}</h2>
             <p class="champion-team-name">${championSub}</p>
             <div class="row" style="margin-top:16px;justify-content:center;">
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
               <button class="btn btn-ghost" id="btnViewHistoryFromChampion">My Match History</button>
-              ${isCreator ? '<button class="btn btn-ghost" id="btnNewRoom">Start New Room</button>' : ''}
+              ${isCreator ? `<button class="btn btn-ghost" id="btnNewRoom">${isLeague ? 'Start New Season' : 'Start New Room'}</button>` : ''}
               ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
@@ -775,7 +794,7 @@ const TournamentView = {
           });
         }
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
-        if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard('create'));
+        if (newRoomBtn) newRoomBtn.addEventListener('click', () => isLeague ? DashboardView.renderLeagueSelect(container) : App.goDashboard('create'));
         const rematchBtn = championZone.querySelector('#btnRematch');
         if (rematchBtn) rematchBtn.addEventListener('click', () => {
           rematchBtn.disabled = true;
@@ -794,6 +813,9 @@ const TournamentView = {
       if (s.stage === 'lobby') return App.goLobby(code);
       if (s.stage !== 'tournament') return;
       advancePending = false;
+      isLeague = s.mode === 'league';
+      leagueName = s.leagueName || '';
+      leagueState = s.league || null;
       viewedStep = s.viewedStep || 0;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
@@ -810,6 +832,7 @@ const TournamentView = {
 
     App.onSocket('tournament:step', (payload) => {
       advancePending = false;
+      leagueState = payload.league || leagueState;
       viewedStep = payload.viewedStep;
       historyLength = payload.historyLength;
       tournamentStage = payload.stage;

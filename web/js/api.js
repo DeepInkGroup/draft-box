@@ -50,6 +50,8 @@ const Api = (() => {
     careerStats: () => request('/api/auth/me/career'),
     matchHistory: () => request('/api/auth/me/matches'),
     teams: () => request('/api/teams'),
+    leagues: () => request('/api/leagues'),
+    activeLeagues: () => request('/api/rooms'),
 
     createRoom: (opts) => request('/api/rooms', { method: 'POST', body: opts }),
     createSingleplayer: (opts) => request('/api/rooms/singleplayer', { method: 'POST', body: opts }),

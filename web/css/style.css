@@ -137,6 +137,24 @@ a { color: var(--accent-strong); }
 .mode-card:hover { border-color: var(--accent); transform: translateY(-2px); }
 .mode-card h3 { margin: 0 0 6px; font-family: 'Bebas Neue', 'Segoe UI', sans-serif; font-size: 1.6rem; font-weight: 400; letter-spacing: .03em; color: var(--accent-strong); }
 .mode-card p { margin: 0; font-size: .85rem; }
+.single-player-modes .mode-card { width: 100%; text-align: left; color: inherit; font: inherit; }
+.league-table-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.league-table-heading h3 { margin: 0; }
+.league-table-scroll { overflow-x: auto; margin-top: 14px; }
+.league-table { min-width: 620px; }
+.league-table td:nth-child(2), .league-table th:nth-child(2) { min-width: 170px; text-align: left; }
+.league-table-note { font-size: .8rem; margin-bottom: 0; }
+.league-table-hint { display: none; }
+@media (max-width: 640px) {
+  .league-table-hint { display: block; }
+  .league-table th:first-child, .league-table td:first-child { position: sticky; left: 0; min-width: 28px; background: var(--surface); z-index: 1; }
+  .league-table th:nth-child(2), .league-table td:nth-child(2) { position: sticky; left: 28px; background: var(--surface); z-index: 1; }
+  .league-table th:last-child, .league-table td:last-child { position: sticky; right: 0; min-width: 36px; background: var(--surface); z-index: 2; box-shadow: -8px 0 10px var(--surface); }
+}
+.league-resume-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; flex-wrap: wrap; }
+.league-resume-row + .league-resume-row { border-top: 1px solid var(--border); }
+.league-resume-row p { margin: 4px 0 0; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 .code-display {
   font-size: 2.2rem;

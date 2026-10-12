@@ -30,6 +30,12 @@ async function request(url, verify, options = {}) {
   await request(apiBase + '/api/teams', async (response) => {
     assert.equal((await response.json()).teams.length, 48);
   });
+  await request(apiBase + '/api/leagues', async (response) => {
+    const pgl = (await response.json()).leagues.find((league) => league.id === 'pgl');
+    assert.ok(pgl, 'Persian Gulf League must be available');
+    assert.equal(pgl.teamCount, 18);
+    assert.equal(pgl.matchdays, 34);
+  });
   await request(apiBase + '/', async (response) => {
     assert.match(await response.text(), /Draft Box/);
   });

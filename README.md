@@ -4,12 +4,23 @@ A real-time multiplayer football **draft** game (not a fantasy league!). Players
 
 Full game design & rules: **[RULES.md](RULES.md)**
 
-- 🌍 World Cup mode only for now (2026 field: 48 teams, 12 groups of 4, top 2 + best 8 thirds advance to Round of 32)
+- 🌍 World Cup mode (2026 field: 48 teams, 12 groups of 4, top 2 + best 8 thirds advance to Round of 32)
+- ⚽ Single Player → League Games: choose the Persian Gulf League (Iran), select a club, draft a league XI, and play a home-and-away season
 - 🔑 Create a room → get a 6-character code → friends join with it (up to 32 human-controlled slots, configurable)
 - 🎲 Draft: each round reveals one random real team's full squad; pick one available player; picks are shared/contested room-wide
 - 🤖 Single-player mode: draft alone against 47 bot-controlled countries
 - 📊 Simple statistical match simulation (Poisson goals from squad overall)
 - 👻 Eliminated players become spectators for the rest of the room's tournament
+
+## League Games
+
+The PGL roster comes directly from **[PGL-Players.txt](PGL-Players.txt)**: all 18 supplied clubs and 510 players, including their ratings, exact positions and `*` star markers. This is the game's supplied roster, rather than a claim about current official league membership.
+
+Choose **Single Player → League Games → Persian Gulf League**, then your club and draft settings. Draft an XI using only that league's players, lock your tactics, and represent your chosen club against the other clubs' bot squads. The season has **34 matchdays and 306 matches**: each club faces every other club once at home and once away. Draws remain draws; there are no knockout rounds. A win earns 3 points, a draw 1. Standings use points, goal difference, then goals scored; exact ties use club name for a stable game order. The top club at the end wins the title.
+
+The dashboard's **Your League Seasons** section resumes unfinished drafts and seasons. Match history and career totals include completed league seasons. A rematch keeps the league and selected club and starts a fresh draft. Persistence follows the hosting storage limits below.
+
+`server/src/data/competitions.js` is the league registry, `generate-pgl.js` validates and imports the source list, and `leagueEngine.js` builds fixtures and tracks the season. Additional leagues can be registered independently of the UI. League multiplayer is currently disabled at the server boundary; club assignments are stored per participant so it can be added later.
 
 ## Architecture
 
@@ -38,6 +49,7 @@ To regenerate the bundled player data or run integration checks:
 ```bash
 npm run gen:data
 npm test
+npm run test:ui           # browser checks; use npx playwright install chromium first if needed
 ```
 
 If you serve `web/` separately, enter `http://localhost:4321` in its server settings.

@@ -44,3 +44,24 @@ jobs:
           curl -fsS http://localhost:4321/api/health | grep -q '"ok":true'
           curl -fsS http://localhost:4321/ | grep -q 'Draft Box'
           curl -fsS http://localhost:4321/js/config.js | grep -q 'DEFAULT_API_BASE'
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: server
+      - run: npx playwright install --with-deps chromium
+        working-directory: server
+      - run: npm run test:ui
+        working-directory: server
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: league-browser-results
+          path: server/test-results

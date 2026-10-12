@@ -2,6 +2,7 @@ const { verifyToken } = require('../middleware/auth');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
+const { leagueSnapshot } = require('../game/leagueEngine');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey } = require('../game/tacticalStyles');
 const {
@@ -51,8 +52,8 @@ function startTournamentNow(io, roomRow, roomState) {
   if (!latestRoomRow || latestRoomRow.status !== 'drafting') return false;
   for (const member of roomState.members.values()) clearPickTimer(member);
   tournamentEngine.startTournament(roomState);
-  rm.setRoomStatus(roomRow.id, 'group_stage');
-  roomState.status = 'group_stage';
+  roomState.status = roomState.mode === 'league' ? 'league_stage' : 'group_stage';
+  rm.setRoomStatus(roomRow.id, roomState.status);
   rm.persistTournamentSnapshot(roomState);
   // Deliberately no results payload here: every member pulls the tournament's
   // steps at their own pace via tournament:advance once they land on the view.
@@ -68,7 +69,7 @@ function maybeStartTournament(io, roomRow, roomState) {
     return startTournamentNow(io, roomRow, roomState);
   } catch (error) {
     console.error(`Could not start tournament for room ${roomRow.code}:`, error);
-    io.to(channelName(roomRow.code)).emit('error:message', { error: 'the World Cup could not start; please try again' });
+    io.to(channelName(roomRow.code)).emit('error:message', { error: 'the competition could not start; please try again' });
     return false;
   }
 }
@@ -213,6 +214,7 @@ function registerSocketHandlers(io) {
           viewedStep,
           historyLength,
           tournamentStage: state.tournament.stage,
+          league: leagueSnapshot(state.tournament, viewedStep),
           spectator: !!member.eliminated,
           advanceReady: state.spoilerMode ? advanceReadySnapshot(state) : null
         });
@@ -244,6 +246,8 @@ function registerSocketHandlers(io) {
       const allowedTeams = roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null;
       const newRoom = rm.createRoom({
         name: roomRow.name,
+        mode: roomRow.mode,
+        leagueId: roomRow.league_id,
         creatorId: roomRow.creator_id,
         humanSlotsMax: roomRow.human_slots_max,
         singlePlayer: !!roomRow.single_player,
@@ -257,7 +261,7 @@ function registerSocketHandlers(io) {
         sharedDraftMode: !!roomRow.shared_draft_mode
       });
       for (const m of members) {
-        rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation);
+        rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation, m.country_code);
       }
       if (newRoom.single_player) rm.setRoomStatus(newRoom.id, 'drafting');
       io.to(channelName(roomRow.code)).emit('room:rematchReady', { newCode: newRoom.code });
@@ -448,7 +452,7 @@ function registerSocketHandlers(io) {
     // "new results available" ping until they click their own button.
     socket.on('tournament:advance', ({ code }) => {
       const roomRow = rm.getRoomByCode(code);
-      if (!roomRow || !['group_stage', 'knockout', 'finished'].includes(roomRow.status)) {
+      if (!roomRow || !['group_stage', 'league_stage', 'knockout', 'finished'].includes(roomRow.status)) {
         return socket.emit('error:message', { error: 'tournament is not active for this room' });
       }
       const state = rm.loadRoomState(roomRow);
@@ -492,6 +496,7 @@ function registerSocketHandlers(io) {
           viewedStep: member.viewedStep,
           historyLength: tournamentEngine.historyLength(state),
           stage: t.stage,
+          league: leagueSnapshot(t, member.viewedStep),
           spectator: !!member.eliminated
         });
       } catch (e) {

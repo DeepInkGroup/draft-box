@@ -138,9 +138,13 @@ Single Player also includes an experimental **Auto Draft** option. When enabled 
 
 ---
 
-## 8. Current Scope: World Cup Only
+## 8. League Games (Single Player)
 
-Right now only "World Cup" mode is active (with the real 2026 World Cup teams and players). A "club league" mode is on the roadmap and will be added later.
+**Single Player → League Games** opens a league selector. The first available league is **Persian Gulf League (Iran)**, using all 18 clubs and 510 players in the supplied `PGL-Players.txt` roster. Choose a club to represent, then draft 11 players from randomly revealed clubs in that league. Formation, timer, ratings, captain, reroll and tactical style options work as in the World Cup draft.
+
+The chosen club uses your drafted XI; other clubs use their bot-selected real squads from the same supplied list. Play a home-and-away round robin: 34 matchdays, 9 matches per matchday, 306 matches overall. There are no eliminations, extra time, penalties or knockout rounds. Win = 3 points, draw = 1 point, loss = 0. The table ranks clubs by points, goal difference and goals scored, with club name as a deterministic fallback for exact ties. The table leader after the final matchday is champion.
+
+Unfinished drafts and seasons appear under **Your League Seasons** on the dashboard. Reconnects restore the selected club, XI, matchday and results when the server's storage is retained. Completed seasons contribute to match history and career statistics. League Games is single player only for now; World Cup multiplayer remains available.
 
 ---
 

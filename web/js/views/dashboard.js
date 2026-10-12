@@ -18,12 +18,12 @@ const DashboardView = {
     container.innerHTML = `
       <div class="card center">
         <h2>Draft Box</h2>
-        <p class="muted">Currently the only active mode. Club league mode is coming soon.</p>
+        <p class="muted">Draft your XI. Take on the World Cup or a club league season.</p>
       </div>
       <div class="mode-grid">
         <div class="mode-card" id="modeSingle">
           <h3>Single Player</h3>
-          <p class="muted">Draft alone, then take on 47 bot-controlled countries.</p>
+          <p class="muted">Choose World Cup or League Games and compete against bots.</p>
         </div>
         <div class="mode-card" id="modeCreate">
           <h3>Create Room</h3>
@@ -34,10 +34,20 @@ const DashboardView = {
           <p class="muted">Already have a code? Jump into a friend's room.</p>
         </div>
       </div>
+      <div id="activeLeagueSeasons"></div>
     `;
-    container.querySelector('#modeSingle').addEventListener('click', () => this.renderSingleplayer(container));
+    container.querySelector('#modeSingle').addEventListener('click', () => this.renderSingleplayerMenu(container));
     container.querySelector('#modeCreate').addEventListener('click', () => this.renderCreateRoom(container));
     container.querySelector('#modeJoin').addEventListener('click', () => this.renderJoinRoom(container));
+    const resume = container.querySelector('#activeLeagueSeasons');
+    Api.activeLeagues().then(({ leagues }) => {
+      if (!container.contains(resume) || !leagues.length) return;
+      resume.innerHTML = `<div class="card"><h3>Your League Seasons</h3>${leagues.map((season) => `<div class="league-resume-row"><div><b>${season.clubName}</b><p class="muted">${season.leagueName} · ${season.status === 'drafting' ? 'Draft in progress' : `Matchday ${season.matchday}`}</p></div><button class="btn btn-primary btn-sm" data-resume="${season.code}">Resume</button></div>`).join('')}</div>`;
+      resume.querySelectorAll('[data-resume]').forEach((button) => button.addEventListener('click', () => {
+        const season = leagues.find((entry) => entry.code === button.dataset.resume);
+        season.status === 'drafting' ? App.goDraft(season.code) : App.goTournament(season.code);
+      }));
+    }).catch(() => { /* The main game choices remain available if resume loading fails. */ });
   },
 
   backButton() {
@@ -228,12 +238,44 @@ const DashboardView = {
     ];
   },
 
-  async renderSingleplayer(container) {
+  renderSingleplayerMenu(container) {
+    container.innerHTML = `
+      ${this.backButton()}
+      <div class="card center"><h3>Single Player</h3><p class="muted">Choose your competition.</p></div>
+      <div class="mode-grid single-player-modes">
+        <button class="mode-card" id="singleWorldCup"><h3>World Cup</h3><p class="muted">Draft from national teams and take on the 48-team tournament.</p></button>
+        <button class="mode-card" id="singleLeague"><h3>League Games</h3><p class="muted">Choose a league and club. Draft your XI and chase the title across a full season.</p></button>
+      </div>`;
+    this.wireBack(container);
+    container.querySelector('#singleWorldCup').addEventListener('click', () => this.renderSingleplayer(container));
+    container.querySelector('#singleLeague').addEventListener('click', () => this.renderLeagueSelect(container));
+  },
+
+  async renderLeagueSelect(container) {
+    container.innerHTML = `${this.backButton()}<div class="card"><h3>League Games</h3><p class="muted">Choose your league. Single player is available now.</p><div id="leaguePicker">Loading leagues...</div></div>`;
+    container.querySelector('#btnBack').addEventListener('click', () => this.renderSingleplayerMenu(container));
+    const picker = container.querySelector('#leaguePicker');
+    try {
+      const { leagues } = await Api.leagues();
+      if (!leagues.length) { picker.textContent = 'No leagues are available yet.'; return; }
+      picker.innerHTML = `<div class="field"><label for="leagueSelect">League</label><select id="leagueSelect">${leagues.map((league) => `<option value="${league.id}">${league.name} (${league.country})</option>`).join('')}</select></div>
+        <p class="muted" id="leagueDetails"></p><button class="btn btn-primary btn-block" id="btnSelectLeague">Choose League</button>`;
+      const select = picker.querySelector('#leagueSelect');
+      const selected = () => leagues.find((league) => league.id === select.value);
+      const describe = () => { const league = selected(); picker.querySelector('#leagueDetails').textContent = `${league.teamCount} clubs · ${league.matchdays} matchdays · home and away`; };
+      select.addEventListener('change', describe);
+      describe();
+      picker.querySelector('#btnSelectLeague').addEventListener('click', () => this.renderSingleplayer(container, selected()));
+    } catch (error) { picker.textContent = error.message; }
+  },
+
+  async renderSingleplayer(container, league = null) {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
-        <h3>Single Player</h3>
-        <p class="muted">Jump straight into the draft and compete in the World Cup against 47 bot teams.</p>
+        <h3>${league ? 'League Games — ' + league.name : 'Single Player — World Cup'}</h3>
+        <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
+        ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
         <div id="spTimer" style="margin-bottom:16px;"></div>
@@ -241,19 +283,19 @@ const DashboardView = {
         <div id="spRatings" style="margin-bottom:16px;"></div>
         <div class="field"><label>Team Captain</label></div>
         <div id="spCaptain" style="margin-bottom:16px;"></div>
-        <div class="field"><label>Tournament Length</label></div>
+        ${league ? '' : `<div class="field"><label>Tournament Length</label></div>
         <div id="spLength" style="margin-bottom:16px;"></div>
         <div class="field"><label>Restrict Draft Teams (optional)</label></div>
-        <div id="spTeams" style="margin-bottom:16px;"></div>
+        <div id="spTeams" style="margin-bottom:16px;"></div>`}
         <div class="field"><label>Rerolls (skip a revealed team)</label></div>
         <div id="spRerolls" style="margin-bottom:16px;"></div>
         <div class="field"><label>Experimental Auto Draft</label></div>
         <div id="spAutoDraft" style="margin-bottom:16px;"></div>
-        <button id="btnSingleplayer" class="btn btn-primary btn-block">Start Single Player</button>
+        <button id="btnSingleplayer" class="btn btn-primary btn-block">${league ? 'Start League Draft' : 'Start Single Player'}</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
     `;
-    this.wireBack(container);
+    container.querySelector('#btnBack').addEventListener('click', () => league ? this.renderLeagueSelect(container) : this.renderSingleplayerMenu(container));
     const errorBox = container.querySelector('#dashError');
     const showErr = (e) => { errorBox.textContent = e.message; errorBox.classList.remove('hidden'); };
 
@@ -261,15 +303,20 @@ const DashboardView = {
     const spTimer = ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
     const spRatings = ToggleGroup.render(container.querySelector('#spRatings'), { options: this.ratingsOptions(), selected: true });
     const spCaptain = ToggleGroup.render(container.querySelector('#spCaptain'), { options: this.captainOptions(), selected: false });
-    const spLength = ToggleGroup.render(container.querySelector('#spLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
-    const spTeams = await this.renderTeamPicker(container.querySelector('#spTeams'));
+    const spLength = league ? { value: 'full' } : ToggleGroup.render(container.querySelector('#spLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
+    const spTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
     const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
+      const startButton = container.querySelector('#btnSingleplayer');
+      if (startButton.disabled) return;
       if (spTeams.count > 0 && spTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
       try {
+        startButton.disabled = true;
         const room = await Api.createSingleplayer({
+          mode: league ? 'league' : 'worldcup', leagueId: league?.id,
+          clubCode: league ? container.querySelector('#spClub').value : undefined,
           formation: spFormation.value, showOverall: spRatings.value, pickTimeMs: spTimer.value,
           captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value,
           rerollsAllowed: spRerolls.value
@@ -277,7 +324,7 @@ const DashboardView = {
         if (spAutoDraft.value) sessionStorage.setItem(`draftbox.autoDraft.${room.code}`, '1');
         else sessionStorage.removeItem(`draftbox.autoDraft.${room.code}`);
         App.goDraft(room.code);
-      } catch (e) { showErr(e); }
+      } catch (e) { showErr(e); startButton.disabled = false; }
     });
   },
 

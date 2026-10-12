@@ -1,4 +1,4 @@
-const { ALL_TEAMS, getTeam } = require('../data/teams');
+const { teamsForRoom, getTeam } = require('../data/competitions');
 const { getSlots, isValidFormation, POSITION_GROUPS, playerFitsSlot } = require('./formations');
 
 const MAX_REROLL_ATTEMPTS = 300;
@@ -149,8 +149,8 @@ function revealForMember(roomState, userId) {
 
   const availableSlots = openSlots(member);
   const teamPool = roomState.allowedTeams
-    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
-    : ALL_TEAMS;
+    ? teamsForRoom(roomState).filter((t) => roomState.allowedTeams.includes(t.code))
+    : teamsForRoom(roomState);
   const candidates = teamPool.filter((t) => !member.seenTeams.has(t.code));
   const pool = roomState.pool;
   const hideOverall = !roomState.showOverall;
@@ -211,15 +211,15 @@ function nextSharedDraftMember(roomState, currentUserId, team, picked) {
 
 function firstPickableSharedMember(roomState) {
   const teamPool = roomState.allowedTeams
-    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
-    : ALL_TEAMS;
+    ? teamsForRoom(roomState).filter((t) => roomState.allowedTeams.includes(t.code))
+    : teamsForRoom(roomState);
   return sharedDraftMemberOrder(roomState).find((m) => teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, m))) || null;
 }
 
 function nextPickableSharedStarter(roomState, previousStarterId) {
   const teamPool = roomState.allowedTeams
-    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
-    : ALL_TEAMS;
+    ? teamsForRoom(roomState).filter((t) => roomState.allowedTeams.includes(t.code))
+    : teamsForRoom(roomState);
   const fullRotation = rotateAfter(Array.from(roomState.members.values()), previousStarterId);
   return fullRotation.find((member) => !isDraftComplete(member)
     && teamPool.some((team) => sharedTeamCanSupplyMember(roomState, team, member))) || null;
@@ -255,8 +255,8 @@ function ensureSharedDraftState(roomState) {
   state.turnUserId = turnMember ? turnMember.userId : null;
 
   const teamPool = roomState.allowedTeams
-    ? ALL_TEAMS.filter((t) => roomState.allowedTeams.includes(t.code))
-    : ALL_TEAMS;
+    ? teamsForRoom(roomState).filter((t) => roomState.allowedTeams.includes(t.code))
+    : teamsForRoom(roomState);
   if (turnMember && !teamPool.some((t) => sharedTeamCanSupplyMember(roomState, t, turnMember))) {
     turnMember = firstPickableSharedMember(roomState) || turnMember;
     state.turnUserId = turnMember.userId;

@@ -39,7 +39,7 @@ const MatchHistoryView = {
         acc[m.outcome] += 1;
         acc.gf += m.myGoals;
         acc.ga += m.oppGoals;
-        if (m.stage !== 'group') acc.knockouts += 1;
+        if (!['group', 'league'].includes(m.stage)) acc.knockouts += 1;
         if (m.opponentIsHuman) acc.humans += 1;
         acc.bestRank = Math.max(acc.bestRank, stageRank[m.stage] || 0);
         return acc;
@@ -47,6 +47,7 @@ const MatchHistoryView = {
     }
 
     function bestStage(matches) {
+      if (matches.some((match) => match.stage === 'league')) return `${matches.length} league matches`;
       const best = matches.reduce((pick, m) => (stageRank[m.stage] || 0) > (stageRank[pick] || 0) ? m.stage : pick, 'group');
       return STAGE_HISTORY_LABEL[best] || best;
     }
@@ -84,8 +85,8 @@ const MatchHistoryView = {
     }
 
     function matchRow(m, ti, mi) {
-      const stageLabel = m.group ? `Group ${m.group}` : (STAGE_HISTORY_LABEL[m.stage] || m.stage);
-      const knockout = m.stage !== 'group';
+      const stageLabel = m.stage === 'league' ? `Matchday ${m.matchday}` : m.group ? `Group ${m.group}` : (STAGE_HISTORY_LABEL[m.stage] || m.stage);
+      const knockout = !['group', 'league'].includes(m.stage);
       return `
         <div class="match-row match-row-clickable history-match-row" data-ti="${ti}" data-mi="${mi}" data-outcome="${m.outcome}" data-knockout="${knockout ? '1' : '0'}">
           <div class="match-team"><span class="match-team-name">vs ${m.opponent}${m.opponentIsHuman ? ' <span class="player-chip">human</span>' : ''}</span></div>
@@ -136,7 +137,7 @@ const MatchHistoryView = {
         <div class="myteam-card history-tournament-card" style="margin-bottom:14px;">
           <div class="myteam-header">
             <span>${tour.countryName}${tour.champion ? ' - Champion' : ''}</span>
-            <span class="badge">${tour.roomName} &middot; ${dateLabel(tour.date)}</span>
+            <span class="badge">${tour.competitionName || tour.roomName} &middot; ${dateLabel(tour.date)}</span>
           </div>
           <div class="history-tour-summary">
             <span>${r.w}-${r.d}-${r.l} record</span><span>${r.gf}-${r.ga} goals</span><span>${bestStage(tour.matches)}</span>

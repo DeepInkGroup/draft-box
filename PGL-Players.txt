@@ -1,0 +1,564 @@
+------------------------------------------------------------
+1) Persepolis:
+
+1- Payam Niazmand (GK) - 75 - *
+2- Amirreza Rafiei (GK) - 67
+3- Mohammad Gandomi (GK) - 58
+4- Mohammadhossein Kanaani Zadegan (CB) - 75 - *
+5- Seyed Abolfazl Jalali (LB, LWB, LM) - 72
+6- Dániel Gera (RB, RWB, RM, RW) - 67
+7- Majid Eidi (RB, RWB, RM) - 70
+8- Hossein Abarghouei (CB, CDM) - 68
+9- Danial Iri (CB) - 70
+10- Mohammadmehdi Zare (CB) - 72
+11- Alireza Homaeifard (LB, LWB) - 63
+12- Oston Urunov (LW, CAM, RW, CM) - 77 - *
+13- Yasin Salmani (CAM, CM, LM, LW) - 67
+14- Mohammad Khodabandehlo (CM, CDM, CAM, LM) - 71
+15- Marko Bakić (CM, CAM, CDM) - 70
+16- Pouya Pourali (CDM, CM) - 70
+17- Pouria Latififar (CM, CAM, CDM) - 69
+18- Amirhossein Mahmoudi (LW, LM, RM, RW) - 70
+19- Ali Alipour (ST, CF, RW) - 75 - *
+20- Igor Sergeev (ST, CF) - 72
+21- Mohammad Omri (CAM, RW, LW, CF) - 70
+22- Thievy Bifouma (RW, LW, CAM, RM) - 74
+23- Mehdi Tikdari (RW, RM, RB, RWB) - 70
+24- Mohammadmehdi Mohebi (RW, LW, CAM, ST) - 72
+25- Pouria Shahrabadi (ST, CF) - 67
+26- Mohammadhossein Sadeghi (LW, LM, RW, ST) - 66
+------------------------------------------------------------
+2) Esteghlal:
+
+1- Habib Farabbasi (GK) - 68
+2- Aria Hosseinifard (GK) - 61
+3- Saleh Hardani (RB, RWB, RM) - 74 - *
+4- Saman Fallah (CB) - 70
+5- Aref Aghasi (CB) - 71
+6- Rustam Ashurmatov (CB) - 72 - *
+7- Hossein Goudarzi (LB, LWB) - 70
+8- Saman Touranian (RB, RWB) - 66
+9- Abolfazl Zoleykhaei (LB, CB) - 60
+10- Alireza Mohebali (CB, RB) - 58
+11- Rouzbeh Cheshmi (CDM, CB) - 69
+12- Mehran Ahmadi (CM, CDM, RM) - 69
+13- Esmaeil Gholizadeh (CAM, RW, LW, CM) - 71
+14- Abolfazl Zamani (CM, CDM) - 63
+15- Amirmohammad Razzaghinia (CDM, CM) - 73 - *
+16- Mohammadmehdi Ghaedi (CAM, CM, LM) - 60
+17- Jasir Asani (RW, RM, LW, CF) - 78 - *
+18- Jaloliddin Masharipov (LW, CAM, LM) - 71
+19- Alireza Koushki (LW, RW, CAM) - 69
+20- Saeid Saharkhizan (ST, CF) - 72
+21- Mohammadreza Azadi (ST, CF) - 69
+22- Mohammadhossein Eslami (CAM, RW, LW) - 69
+23- Hesam Eskandari (ST) - 60
+------------------------------------------------------------
+3) Kheybar:
+
+1- Ehsan Moradian (GK) - 61
+2- Mohammadreza Dinarvand (GK) - 67
+3- Farshad Mohammadi Mehr (RB, RWB) - 65
+4- Sajjad Danaei Baghaki (RB, RM) - 63
+5- Taha Shariati (CB, CDM) - 63
+6- Aboozar Safarzadeh (CB, LB) - 64
+7- Sobhan Pasandideh (LB, LWB) - 62
+8- Erfan Ghahremani (CB) - 61
+9- Masoud Mohebi (CB) - 66
+10- Hamidreza Taherkhani (CAM, LW, RW) - 66
+11- Esmaeil Babaei (CM, CDM) - 64
+12- Mehran Amiri (CM, CDM) - 63
+13- Fardin Yousefi (CDM, CM) - 62
+14- Morteza Khorasani (CAM, CM) - 61
+15- Arian Maali (CM, CAM) - 57
+16- Amirreza Najafpour (CM) - 56
+17- Mehdi Abdi (ST, CF) - 65
+18- Hossein Shenani (LW, RW, LM, RM) - 65
+19- Issa Moradi (ST, CF) - 68
+20- Mehrdad Ghanbari (LW, ST, LM) - 67
+21- Alireza Maleki (ST, RW) - 61
+22- Ali Khanzadi (RW, LW, ST) - 63
+23- Amirreza Teymouri (ST, CF) - 59
+24- Hamid Haji Aghaei (ST, CAM) - 59
+25- Hamidreza Zarouni (ST, CF) - 58
+26- Amirhossein Farsi (ST) - 57
+------------------------------------------------------------
+4) Gol Gohar:
+
+1- Mohammadreza Akhbari (GK) - 70 - *
+2- Farzin Garousian (GK) - 68
+3- Mehdi Amini (GK) - 58
+4- Soroush Yarandi (GK) - 55
+5- Mojtaba Najjarian (RB, RWB) - 67
+6- Masih Zahedi (CB) - 67
+7- Ehsan Hosseini (CB, LB) - 67
+8- Pedram Ghazipour (LB, LWB) - 65
+9- Amir Jafari (LB, LWB) - 63
+10- Milad Kor (CB) - 62
+11- Soheil Sahraei (CB, RB) - 67
+12- Amirmohammad Khamar (RB, CB) - 60
+13- Ali Hassani (CB) - 58
+14- Amir Mahan Afrouziani (CB) - 56
+15- Alireza Alizadeh (CDM, CM) - 69
+16- Ahmadreza Zendeh Rouh (CDM, CM) - 68
+17- Ali Asghar Ashouri (CAM, CM) - 68
+18- Louis Ben Houssein (CM, CAM) - 64
+19- Erfan Masoumi (CDM, CM) - 66
+20- Mehdi Goudarzi (CM, CAM) - 64
+21- Mohammadreza Bordbar (CDM, CM) - 62
+22- Alireza Ehsanifar (CM, CAM) - 59
+23- Amirmohammad Badavar (CM, RM) - 58
+24- Mohammadhossein Jamali (CM, CDM) - 57
+25- Siamak Nemati (RM, RW, RB, CAM) - 65
+26- Majid Aliyari (ST, CF, LW) - 69
+27- Mohammad Alinejad (LW, RW, LM) - 68
+28- Amin Kazemian (RW, LW, ST) - 68
+29- Jérémie Musangu (ST, CF) - 65
+30- Mojtaba Fakhrian (ST, CF) - 66
+31- Ali Asghar Sheikh-ol-eslami (ST) - 60
+32- Amirmohammad Rezaei (CF, ST) - 58
+33- Parsa Kafafi (ST) - 57
+34- Benyamin Alipour (RW, LW) - 56
+35- Omid Alishah (LW, LM, ST, RW) - 70 - *
+------------------------------------------------------------
+5) Aluminium Arak:
+
+1- Mohammad Khalifeh (GK) - 71 - *
+2- Abolfazl Hashemi (GK) - 59
+3- Mehdi Tayefeh (GK) - 58
+4- Amirhossein Amini (GK) - 56
+5- Amirmohammad Houshmand (CB, RB) - 66
+6- Seyed Mehran Mousavi (CB) - 66
+7- Sina Shahabbasi (CB) - 65
+8- Younes Akbarpour (LB, LWB) - 64
+9- Sasan Jafarikia (RB, CB) - 62
+10- Bahram Goudarzi (LB, LWB) - 69
+11- Mehdi Mahdavi (CB) - 58
+12- Taha Mohebipour (RB) - 57
+13- Abolfazl Soukhtanlou (CB) - 57
+14- Amirmehdi Abdoli (CB) - 56
+15- Saeid Sadeghi (RM, LM, CAM) - 67
+16- Mahmoud Motlaghzadeh (CDM, CM) - 65
+17- Amir Nouri (CM, CDM) - 64
+18- Mansour Bagheri (CM, CAM) - 64
+19- Hamed Bahiraei (CDM, CM) - 64
+20- Ali Vatandoust (LM, CM) - 63
+21- Abolfazl Ghanbari (CM, CDM) - 62
+22- Samir Hoboubati (CM, CAM) - 60
+23- Sobhan Kamalvand (CM) - 58
+24- Mohammadreza Hosseini (RW, RM, CAM) - 64
+25- Shervin Bozorg (ST) - 67
+26- Reza Jabireh (ST, CF, RW) - 66
+27- Amirali Sadeghi (LW, RW, CAM) - 65
+28- Sasan Hosseini (ST, CF) - 65
+29- Mohammadmehdi Khodayarifard (ST, RW) - 60
+30- Amirhossein Amanipour (ST) - 59
+31- Abbas Kahrizi (LM, LW, RM, RW) - 70 - *
+32- Ali Latifi (ST) - 57
+33- Erfan Khodadadian (RW, LW) - 56
+34- Omid Ghareh Chamaghloo (ST) - 56
+------------------------------------------------------------
+6) Foolad:
+
+1- Utkir Yusupov (GK) - 68
+2- Hamed Lak (GK) - 72 - *
+3- Mohsen Forouzan (GK) - 65
+4- Alireza Nazi (GK) - 58
+5- Ramin Rezaeian (RB, RWB, RM) - 76 - *
+6- Mohammad Ghoreishi (CB) - 66
+7- Abolfazl Razzaghpour (LB, LWB, LM) - 69
+8- Arman Akvan (CB) - 66
+9- Milad Badragheh (CB, CDM) - 67
+10- Mohammad Ali Kazemi (RB, CB) - 64
+11- Alireza Amirkhani (CB) - 61
+12- Amin Saedi (CB, LB) - 59
+13- Arash Akbarzadeh (CB) - 58
+14- Soheil Sarkari (LB, LWB) - 57
+15- Milad Sarlak (CDM, CM) - 68
+16- Omid Hamedifar (CDM, CM) - 67
+17- Amirhossein Joulani (CM, CAM) - 66
+18- Ghasem Latifi (CM, CDM) - 59
+19- Amir Moavi (CAM, CM) - 57
+20- Vahid Amiri (LM, LW, CF, LB) - 66
+21- Mehrdad Mohammadi (RW, LW, ST) - 68
+22- Sasan Ansari (ST, CF, CAM, RW) - 69
+23- Farshad Ahmadzadeh (RM, RW, CAM, LM) - 70
+24- Matheus Costa (ST, CF) - 66
+25- Ehsan Mahroughi (ST, CF) - 69
+26- Arshia Bagheri (LW, RW) - 59
+27- Yousef Mazraeh (LM, LW, CAM) - 66
+28- Abolfazl Zadeh Attar (ST, RW, LW) - 62
+------------------------------------------------------------
+7) Tractor:
+
+1- Alireza Beiranvand (GK) - 75 - *
+2- Parsa Jafari (GK) - 66
+3- Erfan Najjari (GK) - 57
+4- Sadegh Moharrami (RB, RWB) - 69
+5- Danial Esmaeilifar (RB, RWB, RM) - 73 - *
+6- Mohammad Daneshgar (CB) - 71
+7- Shoja Khalilzadeh (CB) - 70
+8- Milad Zakipour (LB, LWB, LM) - 69
+9- Mohammad Naderi (LB, LWB) - 70
+10- Farshad Faraji (CB, RB) - 68
+11- Mehdi Shiri (RB, RWB, CDM) - 67
+12- Saeid Karimazar (LB, LWB) - 63
+13- Erfan Darvish Aali (CB) - 59
+14- Mehdi Torabi (LM, LW, CAM, RM) - 74 - *
+15- Odiljon Hamrobekov (CDM, CM) - 71
+16- Seyed Mehdi Hosseini (CM, CDM) - 67
+17- Tibor Halilović (CM, CAM) - 70
+18- Igor Postonjski (CDM, CM) - 70
+19- Hadi Habibinezhad (LW, LM ,CM) - 68
+20- Amirmohammad Mahmoudi (CAM, CM) - 58
+21- Amirali Khorrami (CM) - 58
+22- Morteza Fazeli (CM) - 56
+23- Shahriyar Moghanlou (ST, CF) - 71
+24- Amirhossein Hosseinzadeh (ST, LW, RW, CAM) - 75 - *
+25- Tomislav Štrkalj (ST) - 71
+26- Mehdi Hashemnejad (RW, LW, RM) - 69
+27- Masoud Zaer Kazemeini (RW, LW, RM) - 67
+28- Karrar Nemari (ST) - 57
+29- Aliakbar Saghebi (ST, CF) - 56
+------------------------------------------------------------
+8) Fajr Sepasi:
+
+1- Alireza Rezaei (GK) - 64
+2- Ali Gholamzadeh (GK) - 65
+3- Erfan Esfandiari (GK) - 60
+4- Alireza Mokarram Akbarabadi (GK) - 55
+5- Mohammadhossein Moradmand (CB) - 67
+6- Shahin Tavakoli (CB) - 66
+7- Majid Nasiri (CB) - 65
+8- Mohammadali Faramarzi (LB, LWB) - 63
+9- Ali Helichi (RB, RWB) - 63
+10- Amir Shabani (CB) - 62
+11- Meysam Moradi (RB, RM) - 61
+12- Mahan Ahmadzadeh (CB, LB) - 59
+13- Arshia Vosoughifard (CB) - 57
+14- Sina Norouzi (CB, RB) - 56
+15- Abolfazl Moradi (LB) - 56
+16- Masoud Rigi (CDM, CM) - 68
+17- Saeid Mehri (CM, CAM) - 68
+18- Hossein Nokhodkar (LM, CAM) - 64
+19- Mehdi Yousefi (CM) - 62
+20- Mohammadreza Moslemi Javid (CM, CDM) - 61
+21- Mehdi Rezaei (CM, CAM) - 60
+22- Alireza Afkham (CM) - 57
+23- Mehdi Bahraminejad (CAM, CM) - 57
+24- Ehsan Pahlavan (LM, RM, CAM, LW) - 67
+25- Peyman Babaei (ST, CF, RW) - 65
+26- Mehdi Sharifi (ST, CF) - 65
+27- Yadegar Rostami (ST, CAM, RW) - 68
+28- Soheil Fadakar (ST, CF) - 64
+29- Hossein Shahabi (LW, RW, ST) - 67
+30- Farnam Arab (ST) - 63
+------------------------------------------------------------
+9) Malavan:
+
+1- Afshar Sedaghat (GK) - 61
+2- Farzad Tayebipour (GK) - 63
+3- Behnam Barzay (RB, RM, RW) - 65
+4- Mohammad Tayebi (CB) - 64
+5- Amirreza Afsordeh (CB) - 63
+6- Farzin Moamelegari (LB, LWB) - 65
+7- Mohammadhossein Rafiei (CB) - 58
+8- Ghaem Eslamikhah (CM, CAM, LM) - 68
+9- Sina Khadempour (CDM, CB) - 65
+10- Mahyar Zahmatkesh (CDM, CB) - 64
+11- Mohammad Papi (RM, LM, CM) - 64
+12- Amirmohammad Nesaei (CM, RM, LM) - 63
+13- Erfan Shahriyari (CM, CAM) - 62
+14- Mehdi Moughari (CM) - 60
+15- Zargham Saadavi (CDM, CM) - 58
+16- Jafar Hosseinpour (CM) - 57
+17- Farhan Jafari (CM, CAM) - 67
+18- Issa Alekasir (ST, CF) - 66
+19- Mohammadreza Abbasi (RW, LW, RM) - 65
+20- Hossein Sadeghi (LW, RW, CAM) - 64
+21- Alireza Ramezani (ST, CF) - 64
+22- Mahan Sadeghi (LW, LM) - 65
+23- Reza Marzban (ST) - 68
+------------------------------------------------------------
+10) Paykan:
+
+1- Hossein Pourhamidi (GK) - 68
+2- Armin Abbasi (GK) - 58
+3- Saeb Mohebi (CB) - 65
+4- Milad Bagheri (CB) - 64
+5- Amirhossein Gholami (LB, LWB) - 63
+6- Behzad Salami (CB, CDM) - 62
+7- Aydin Fathi (CB) - 58
+8- Nima Ahmadi (RB, CB) - 58
+9- Ali Dehghan (CB) - 57
+10- Amirali Madadizadeh (LB, CB) - 57
+11- Reza Shekari (CAM, LW, RW) - 68
+12- Farshid Bagheri (CDM, CM, CB) - 67
+13- Saman Nariman Jahan (CAM, RM, LM) - 66
+14- Mohammad Hosseini (CM, CDM) - 63
+15- Mehdi Najafi (CM, CAM) - 60
+16- Ehsan Hadian (RM, CM) - 59
+17- Amirreza Alimoradi (CDM, CM) - 57
+18- Ilia Karami (CM) - 56
+19- Arian Radinkia (CAM, CM) - 56
+20- Ali Asghar Aarabi (LW, RW, ST) - 67
+21- Sajjad Ashouri (RW, CAM, LM) - 66
+22- Farid Amiri (LM, LB) - 63
+23- Erfan Jamshidi (ST, LW) - 60
+24- Hojjat Ahmadi (ST, CF) - 64
+25- Mohammad Pourmohammadi (ST) - 57
+------------------------------------------------------------
+11) Sepahan:
+
+1- Seyed Hossein Hosseini (GK) - 73 - *
+2- Amirmehdi Maghsoudi (GK) - 56
+3- Ehsan Haj Safi (LB, LWB, LM, CDM) - 72
+4- Mohammadamin Hazbavi (CB) - 71
+5- Armin Sohrabian (CB, LB) - 68
+6- Aria Yousefi (RB, RWB, RM) - 72 - *
+7- Hadi Mohammadi (CB) - 69
+8- Esmaeil Falamarzi (CB) - 58
+9- Yasin Jorjani (CB, RB) - 64
+10- Mohammadreza Sharghi (LB, LWB) - 56
+11- Ricardo Alves (CM, CAM, CDM) - 75 - *
+12- Omid Noorafkan (CDM, LB, CM) - 70
+13- Mohammad Karimi (CDM, CM) - 68
+14- Ali Karimi (CM, CDM) - 69
+15- Arash Rezavand (CM, CAM) - 69
+16- Gholamreza Sabet Imani (CM, CDM) - 66
+17- Saeid Vasei (CAM, CM, RM, LM) - 65
+18- Aref Haji Eydi (CDM, CM) - 69
+19- Abbas Habibi (CM, CAM) - 65
+20- Mahan Akbarzadeh (CM) - 57
+21- Kaveh Rezaei (ST, CF) - 69
+22- Mehdi Limouchi (LW, LM, RW, ST) - 70
+23- Reza Jafari (ST, RW) - 67
+24- Mohammadmehdi Lotfi (LW, RW, CAM) - 68
+25- Ali Khodadadi (ST, CF) - 65
+26- Kasra Taheri (ST, CF) - 72 - *
+27- Amirhossein Jalalivand (ST) - 60
+28- Mohammad Askari (LW, RW, LM) - 66
+29- Amirreza Jeddi (ST) - 58
+30- Aria Shafieidoust (LW, LM, RW, RM) - 64
+31- Mohammadtaha Alami (CF, ST) - 56
+------------------------------------------------------------
+12) Zob Ahan:
+
+1- Hassan Pourhamidi (GK) - 63
+2- Davoud Noushi Soufiani (GK) - 65
+3- Ashkan Rashedi (GK) - 57
+4- Ali Shojaei (LB, LWB, LM) - 67
+5- Seyed Mohammad Hosseini (CB) - 64
+6- Amirhossein Rangarz Jeddi (RB, RWB) - 65
+7- Arash Ghaderi (CB, CDM) - 65
+8- Ali Azadmanesh (RB, RWB, RM) - 66
+9- Shahin Taherkhani (CB) - 65
+10- Saeid Karimi (CB) - 65
+11- Abolfazl Hosseinifard (CB) - 59
+12- Hesam Nafari (CB) - 58
+13- Farshid Esmaeili (CAM, CM, LM) - 68
+14- Kamal Kamyabinia (CDM, CM) - 66
+15- Jalaleddin Alimohammadi (CM, CDM) - 66
+16- Mahmoud Ghaedrahmati (CM, CAM) - 67
+17- Nima Entezari (CDM, CM) - 66
+18- Amin Jahankohan (CM, CDM) - 65
+19- Pouya Mokhtari (CM, CAM) - 63
+20- Behnam Teymourian (CM, CAM) - 63
+21- Rahman Jafari (ST, CF) - 66
+22- Mohammadjavad Mohammadi (ST, RW, LW) - 68
+23- Sobhan Khaghani (RW, LW, RM) - 65
+24- Alireza Kazemi (LW, RW) - 63
+25- Aria Barzegar (ST, CF) - 62
+26- Omid Latifi (ST, LW, RW) - 62
+27- Mohammad Hadi Baghban (ST) - 59
+28- Ali Eslami (ST, CF) - 58
+29- Arash Mortazavi (RW, LW) - 57
+30- Mohammadali Khaledi (ST) - 56
+------------------------------------------------------------
+13) Sanat Naft Abadan:
+
+1- Ahmad Gohari (GK) - 68
+2- Parsa Afzali (GK) - 58
+3- Milad Fakhreddini (RB, RWB) - 66
+4- Meysam Teymouri (LB, LWB) - 67
+5- Meysam Tohidast (CB) - 65
+6- Mohammad Aghajanpour (RB, RWB, CB) - 65
+7- Ali Abdollahzadeh (CB, CDM) - 63
+8- Reza Yazdandoost (CB) - 63
+9- Matin Karimzadeh (LB, LWB, LM) - 64
+10- Yousef Vakia (RB, RWB) - 62
+11- Reza Aliari (CB, LB) - 61
+12- Alireza Khoshkafa (CB) - 61
+13- Mohammadhossein Fallah (LB, LWB, LW) - 61
+14- Hossein Sangargir (RB, RWB) - 64
+15- Mehrdad Hedayatian (LB, LWB, LM) - 61
+16- Mostafa Nayejpour (CB) - 63
+17- Fayyaz Mirdoraghi (CB) - 62
+18- Meysam Davoudpour (CB) - 61
+19- Mohammadreza Yousefi (CB) - 60
+20- Milad Kamandani (CM, CAM, LM) - 63
+21- Mahan Kakoularimi (CB) - 58
+22- Amirhossein Koulian (CB) - 56
+23- Taleb Reykani (CAM, LM, CM) - 65
+24- Mohammadreza Gobeishavi (CM, CAM) - 64
+25- Moslem Mojadami (CDM, CM) - 64
+26- Ali Taheran (CDM, CM) - 64
+27- Khashayar Zebarjad (CAM, CM) - 64
+28- Mohammad Abbasi (CM, RM) - 62
+29- Abolfazl Babadi (RM, LM) - 61
+30- Aghil Talili (CM) - 60
+31- Abolfazl Bachari (CM, CDM) - 59
+32- Mohammadhossein Bouazar (CAM, CM) - 57
+33- Eric Bagneama (ST, CF) - 67
+34- Yousef Key Shams (ST, CF) - 63
+35- Behrouz Barani (RW, LW, RM) - 63
+36- Mohsen Seyfi (ST, RW) - 63
+37- Saman Mehrabizadeh (ST, CF) - 62
+38- Amir Alidadi (ST, CF) - 61
+39- Mohammadhossein Baseri (ST) - 60
+40- Sajjad Ammarlou (ST) - 59
+------------------------------------------------------------
+14) Mes Shahr Babak:
+
+1- Aydin Ghavidel (GK) - 62
+2- Mohammadsadegh Naderpour (GK) - 61
+3- Fariborz Gerami (CB) - 66
+4- Pouria Gholami (RB, RWB, RM) - 64
+5- Mohsen Sefid Choghaei (RB, RM, RW) - 64
+6- Mohsen Tarhani (RB, LB, CB) - 63
+7- Mohammad Azhir (CB) - 63
+8- Mehdi Mohammadi (CB, LB) - 62
+9- Aliakbar Karbalaei (CB) - 61
+10- Amin Abbasi (CB) - 60
+11- Zobeir Niknafs (CDM, CM) - 67
+12- Sajjad Jafari (CM, CDM) - 65
+13- Majid Tajik (CM, CAM) - 64
+14- Mohammadreza Raoufimanesh (CM, CDM) - 61
+15- Alireza Enayatzadeh (CM, CAM) - 66
+16- Mohammad Jannia (CM) - 58
+17- Mohammadjavad Pouravaz (ST, CF) - 65
+18- Alireza Valizadeh (LW, RW, CAM) - 64
+19- Omid Nafez (ST, RW, LW) - 63
+20- Mojtaba Hasheminasab (RW, LW, ST) - 61
+21- Aref Ghezel (ST, LW) - 62
+------------------------------------------------------------
+15) Shams Azar Qazvin:
+
+1- Mehrshad Asadi (GK) - 61
+2- Adib Zarei (GK) - 67
+3- Mohammad Nejadmehdi (CB) - 66
+4- Amir Taher (LB, LWB) - 64
+5- Mohammadreza Rezaei (CB) - 62
+6- Ali Rezaei (CB, RB) - 61
+7- Mohammadreza Torabi (CB, LB) - 60
+8- Amirhossein Chegini (RB, RWB) - 58
+9- Mehdi Hosseini (CB) - 57
+10- Amirreza Karami (CB) - 56
+11- Mohammadjavad Azadeh (CDM, CM) - 65
+12- Amirmohammad Mohkamkar (CAM, RM, LM) - 64
+13- Ahmad Nassiri (CM, CDM) - 63
+14- Mehrdad Aghamohammadi (CM, CAM) - 58
+15- Ali Jolokhani (CM, CDM) - 57
+16- Kianoush Moazzami (ST, RM, CM) - 63
+17- Mohammad Kiani (CM) - 56
+18- Mohammad Sadra Ezzatkhah (CM) - 56
+19- Mehdi Mamizadeh (RW, LW, CAM) - 65
+20- Milad Sourgi (LW, RW, CAM) - 67
+21- Mohammadreza Mohammadi (ST, CF) - 64
+22- Mohammadmehdi Mansouri (ST) - 60
+23- Sina Moazzamitabar (ST, RW) - 59
+24- Ahoura Zand (ST) - 57
+25- Armin Ebrahimi (ST) - 56
+26- Parsa Rahimi (ST) - 55
+------------------------------------------------------------
+16) Nassaji Mazandaran:
+
+1- Alireza Jafarpour (GK) - 67
+2- Omid Amiri (GK) - 58
+3- Behrouz Norouzifard (CB) - 65
+4- Houman Rabiezadeh (CB) - 68
+5- Mohammad Abolfazl Kouhi (RB, RWB, LB) - 63
+6- Mehdi Tahmasebi (CB, RB) - 60
+7- Mohammad Hosseinzadeh (CB, LB) - 58
+8- Alireza Arasteh (CB, LB) - 57
+9- Amir Masoud Sarabadani (CAM, CM, CDM) - 66
+10- Sadegh Albousobih (CDM, CM) - 64
+11- Ali Nassiri (CM, CAM) - 63
+12- Ahmadreza Mohammadnezhad (CAM, LM, RM) - 60
+13- Pouria Rezazadeh (CM, CDM) - 58
+14- Ario Mahdavikia (LM, LB, RM) - 58
+15- Mohammadamin Balesh Zarian (CDM, CM) - 57
+16- Javad Aghaeipour (ST, CF, RW) - 69
+17- Fardin Najafi (ST, CF, RW) - 64
+18- Afshin Sadeghi (RW, LW, ST) - 61
+19- Nima Aftari Jelodar (ST, CF) - 59
+20- Kourosh Ezhdehakosh (CF, ST, CAM, CM) - 63
+21- Moeid Imeri (ST, CF) - 57
+22- Yaghoub Barajeeh (RB, RM, CB) - 65
+------------------------------------------------------------
+17) Esteghlal Khuzestan:
+
+1- Mohammadjavad Kia (GK) - 64
+2- Mohammadamin Rezaei (GK) - 62
+3- Omid Afshin (GK) - 61
+4- Abolfazl Jamei (GK) - 57
+5- Amirhossein Mombaini (GK) - 56
+6- Mohammadmehdi Ahmadi (LB, LWB) - 65
+7- Mohammadreza Mehdizadeh (CB) - 64
+8- Farzad Jafari (RB, RWB) - 64
+9- Mohammad Soltanimehr (CB, CDM) - 65
+10- Mohammad Ahle Shakheh (CB) - 65
+11- Aram Abbasi (CB) - 64
+12- Abolfazl Soleimani (CB) - 64
+13- Nima Andarz (RB, RWB) - 66
+14- Alireza Karami (CB) - 59
+15- Seyed Mehdi Mousavi (CB) - 57
+16- Vesam Saki (LB, CB) - 56
+17- Hamid Bouhamdan (CDM, CM) - 66
+18- Mojtaba Haghdoost (LW, LM) - 66
+19- Mohammad Sharifi (CM, CDM) - 65
+20- Mohammadhossein Zavari (CAM, CM) - 65
+21- Mohammadreza Fallahian (CM, CDM) - 64
+22- Erfan Sazgari (CM, RM) - 60
+23- Omid Mohammadi (CM) - 58
+24- Morteza Fazeli (CM) - 57
+25- Aref Rostami (ST, LW) - 70 - *
+26- Mohammad Ghanbari (RW, LW, RM) - 65
+27- Amirhossein Farhadi (LW, RW) - 64
+28- Arman Mardani (ST, CF) - 62
+29- Amir Savaed (ST, CF) - 61
+30- Mohammadreza Mehdizadeh (ST) - 60
+31- Amirmohammad Simanpour (ST) - 59
+32- Javad Zargan (ST) - 58
+------------------------------------------------------------
+18) Chadormalu Ardakan:
+
+1- Edson Marden (GK) - 70 - *
+2- Hojjat Sedghi (GK) - 62
+3- Amirhossein Asiabanpour (GK) - 57
+4- Aref Gholami (CB) - 66
+5- Alireza Arta (CB) - 66
+6- Sirous Sadeghian (CB) - 64
+7- Saeid Mohammadifard (RB, RWB) - 64
+8- Mohammadreza Hosseini (LB, CB) - 61
+9- Mohammad Zarei (CB) - 60
+10- Amirhossein Kalbasi (CB) - 57
+11- Mobin Ghoughchi (CB) - 56
+12- Reza Mahmoudabadi (CAM, CM) - 64
+13- Reza Dehghan (LM, CM) - 63
+14- Mohammadhossein Khosravi (CDM, CM) - 64
+15- Diego Torres (CM, CAM) - 63
+16- Aghil Anafcheh (CM, CDM) - 63
+17- Mohammadtaha Farahani (CM) - 62
+18- Seyed Ali Kamali Jelodar (RM, LM) - 62
+19- Alireza Safari (CM) - 60
+20- Reza Bahaan (CM) - 58
+21- Reza Mirzaei (RW, RM, RB) - 66
+22- Mohammad Amin Asadi (ST, CF) - 65
+23- René Bobe (ST) - 70 - *
+24- Pouria Bali Lashak (LW, RW) - 64
+25- Sajjad Mashhadi (ST) - 63
+26- Mohammadtaha Tabatabaei (ST) - 61
+27- Amir Eslamtalab (LW, RW) - 61
+28- Abolfazl Eisalou (ST) - 59
+29- Ilia Negahdari (ST) - 58

@@ -137,6 +137,9 @@ function columnExists(table, column) {
 if (!columnExists('rooms', 'show_overall')) {
   db.exec(`ALTER TABLE rooms ADD COLUMN show_overall INTEGER NOT NULL DEFAULT 1;`);
 }
+if (!columnExists('rooms', 'league_id')) {
+  db.exec('ALTER TABLE rooms ADD COLUMN league_id TEXT;');
+}
 if (!columnExists('drafted_players', 'slot_code')) {
   db.exec(`ALTER TABLE drafted_players ADD COLUMN slot_code TEXT NOT NULL DEFAULT '';`);
 }
