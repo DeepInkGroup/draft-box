@@ -3,6 +3,8 @@ const { bestBotSetup, teamStrength, prepareBotForMatch } = require('./botEngine'
 const { simulateMatch } = require('./matchSim');
 const { normalizeStyle } = require('./tacticalStyles');
 const { ensureTransferWindow, transfersPending } = require('./leagueTransfers');
+const { transferSettings } = require('./leagueSettings');
+const { recoverCohesion } = require('./leagueCohesion');
 
 function createFixtures(codes) {
   if (codes.length < 2 || new Set(codes).size !== codes.length) throw new Error('a league needs distinct clubs');
@@ -55,6 +57,7 @@ function startLeague(roomState) {
   }
   roomState.tournament = {
     kind: 'league', leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
+    transferSettings: transferSettings(roomState.transferEnabled, roomState.transferLimit),
     fixtures: createFixtures(league.teams.map((club) => club.code)), matchday: 0,
     matchLog: [], history: [], champion: null, bracket: {}
   };
@@ -79,6 +82,8 @@ function simulateLeagueStep(roomState, applyResult) {
       lineups: { A: a.xi.map((player) => ({ ...player })), B: b.xi.map((player) => ({ ...player })) } };
     if (result.goalsA !== result.goalsB) match.winnerCode = result.goalsA > result.goalsB ? a.code : b.code;
     applyResult(t, a.code, b.code, result);
+    recoverCohesion(a);
+    recoverCohesion(b);
     t.matchLog.push(match);
     matches.push(match);
   }

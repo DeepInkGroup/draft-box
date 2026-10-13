@@ -149,6 +149,8 @@ if (!columnExists('users', 'role')) {
 for (const column of ['last_login_at', 'last_seen_at']) {
   if (!columnExists('users', column)) db.exec(`ALTER TABLE users ADD COLUMN ${column} TEXT;`);
 }
+if (!columnExists('rooms', 'transfer_enabled')) db.exec('ALTER TABLE rooms ADD COLUMN transfer_enabled INTEGER NOT NULL DEFAULT 1;');
+if (!columnExists('rooms', 'transfer_limit')) db.exec('ALTER TABLE rooms ADD COLUMN transfer_limit INTEGER NOT NULL DEFAULT 2;');
 db.exec(`CREATE TABLE IF NOT EXISTS tactic_versions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tactic_id INTEGER NOT NULL REFERENCES custom_tactics(id) ON DELETE CASCADE,

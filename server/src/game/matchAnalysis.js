@@ -180,6 +180,8 @@ function pressureStory(myPressure, oppPressure) {
 }
 function chemistryStory(myChem, oppChem) {
   if (!myChem || !oppChem) return '';
+  const settling = myChem.rosterCohesion;
+  if (settling?.penaltyPercent > 0) return `New signings are still settling in: team coordination reduced attack and defense by ${settling.penaltyPercent}% in this match. Recovery progress before kickoff: ${settling.matchesPlayed}/${settling.recoveryMatches} matches. ${settling.matchesRemaining} matches, including this one, remain before full coordination returns.`;
   const diff = myChem.multiplier - oppChem.multiplier;
   const detail = `Chemistry multiplier ${fmt1(myChem.multiplier * 100)} vs ${fmt1(oppChem.multiplier * 100)}, with ${myChem.outOfPosition || 0} out-of-position pick${(myChem.outOfPosition || 0) === 1 ? '' : 's'}.`;
   if (diff >= 0.025) return `The XI fit together better than the opponent: ${detail}`;

@@ -1,6 +1,7 @@
 const { getLeague, getTeam } = require('../data/competitions');
 const { statsByPlayer } = require('./leagueTransfers');
 const { TACTICAL_STYLES } = require('./tacticalStyles');
+const { cohesionAtMatchday } = require('./leagueCohesion');
 
 function clubSquadSnapshot(roomState, userId, clubCode) {
   const member = roomState.members.get(userId);
@@ -22,6 +23,6 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
     stats: stats.get(player.id) || { appearances: 0, goals: 0, assists: 0, saves: 0, yellowCards: 0, redCards: 0, starMoments: 0 }
   })).sort((a, b) => Number(xi.has(b.id)) - Number(xi.has(a.id)) || b.overall - a.overall || a.name.localeCompare(b.name));
   return { code: clubCode, name: slot.name, formation: slot.formation, tacticalStyle: slot.customTactic?.name || TACTICAL_STYLES[slot.tacticalStyle]?.label || 'Balanced',
-    isHuman: slot.isHuman, username: slot.username || null, matchday, players };
+    isHuman: slot.isHuman, username: slot.username || null, matchday, players, cohesion: cohesionAtMatchday(slot, matchday) };
 }
 module.exports = { clubSquadSnapshot };

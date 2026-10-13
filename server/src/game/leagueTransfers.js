@@ -1,9 +1,12 @@
 const { getLeague, getTeam } = require('../data/competitions');
 const { getSlots, playerFitsSlot } = require('./formations');
 const { teamStrength } = require('./botEngine');
+const { settingsForSeason } = require('./leagueSettings');
+const { startCohesionRecovery, cohesionAtMatchday } = require('./leagueCohesion');
 
 function ensureTransferWindow(t) {
-  if (t.kind !== 'league' || t.stage === 'done') return null;
+  if (t.kind !== 'league' || !settingsForSeason(t).enabled) return null;
+  if (t.stage === 'done') return t.transferWindow || null;
   const opensAfter = Math.floor(t.fixtures.length / 2);
   if (!t.transferWindow && t.matchday >= opensAfter) {
     t.transferWindow = { opensAfter, users: Object.fromEntries(Object.values(t.slotByCode).filter((team) => team.isHuman)
@@ -41,11 +44,14 @@ function statsByPlayer(t, clubCode = null, throughMatchday = Infinity) {
 
 function transferSnapshot(t, userId, viewedStep) {
   if (t.kind !== 'league') return null;
+  const settings = settingsForSeason(t);
+  const team = Object.values(t.slotByCode).find((slot) => slot.isHuman && slot.userId === userId);
+  const common = { opensAfter: Math.floor(t.fixtures.length / 2), ...settings, cohesion: cohesionAtMatchday(team, viewedStep) };
+  if (!settings.enabled) return { ...common, phase: 'disabled' };
   const window = ensureTransferWindow(t);
   const progress = window?.users[userId];
   const opensAfter = Math.floor(t.fixtures.length / 2);
-  if (!progress || viewedStep < opensAfter) return { phase: 'closed', opensAfter };
-  const team = Object.values(t.slotByCode).find((slot) => slot.isHuman && slot.userId === userId);
+  if (!progress || viewedStep < opensAfter) return { ...common, phase: 'closed' };
   const stats = statsByPlayer(t);
   const profile = (player, status) => ({ ...player, clubName: getTeam(player.team)?.name || player.team, status,
     stats: stats.get(player.id) || { appearances: 0, goals: 0, assists: 0, saves: 0, yellowCards: 0, redCards: 0, starMoments: 0 } });
@@ -55,7 +61,7 @@ function transferSnapshot(t, userId, viewedStep) {
     .filter((player) => !used.has(player.id) && !released.has(player.id))
     .map((player) => ({ ...profile(player, 'Available'), eligibleSlots: progress.vacancies.filter((slot) => playerFitsSlot(player, slot)).map((slot) => slot.code) }))
     .filter((player) => player.eligibleSlots.length).sort((a, b) => b.overall - a.overall || a.name.localeCompare(b.name)) : [];
-  return { phase: progress.phase, opensAfter, squad: team.xi.map((player) => profile(player, 'In your XI')),
+  return { ...common, phase: progress.phase, opensAfter, squad: team.xi.map((player) => profile(player, 'In your XI')),
     outgoing: progress.outgoing.map((player) => profile(player, 'Released')), vacancies: progress.vacancies,
     incoming: (progress.incoming || []).map((player) => profile(player, 'Signed')), market };
 }
@@ -68,6 +74,7 @@ function transfersPending(t) {
 // Validate on a copy; the caller commits this plan and the roster atomically.
 function planTransfer(tournament, userId, action, payload = {}) {
   const t = structuredClone(tournament);
+  const limit = settingsForSeason(t).maxChanges;
   const window = ensureTransferWindow(t);
   const progress = window?.users[userId];
   const team = Object.values(t.slotByCode || {}).find((slot) => slot.isHuman && slot.userId === userId);
@@ -80,7 +87,7 @@ function planTransfer(tournament, userId, action, payload = {}) {
     progress.phase = 'skipped';
   } else if (action === 'release') {
     const ids = payload.playerIds;
-    if (progress.phase !== 'release' || !Array.isArray(ids) || ids.length < 1 || ids.length > 2 || new Set(ids).size !== ids.length) throw new Error('release one or two different players first (maximum 2)');
+    if (progress.phase !== 'release' || !Array.isArray(ids) || ids.length < 1 || ids.length > limit || new Set(ids).size !== ids.length) throw new Error(`release different players first (minimum 1, maximum ${limit})`);
     const outgoing = ids.map((id) => team.xi.find((player) => player.id === id));
     if (outgoing.some((player) => !player)) throw new Error('you can only release players from your XI');
     progress.outgoing = outgoing.map((player) => ({ ...player }));
@@ -89,7 +96,7 @@ function planTransfer(tournament, userId, action, payload = {}) {
     progress.phase = 'sign';
   } else if (action === 'sign') {
     const picks = payload.picks;
-    if (progress.phase !== 'sign' || !Array.isArray(picks) || picks.length !== progress.vacancies.length || picks.length < 1 || picks.length > 2 || new Set(picks.map((pick) => pick?.playerId)).size !== picks.length || new Set(picks.map((pick) => pick?.slotCode)).size !== picks.length) throw new Error('choose a different replacement for each vacant position');
+    if (progress.phase !== 'sign' || !Array.isArray(picks) || picks.length !== progress.vacancies.length || picks.length < 1 || picks.length > limit || new Set(picks.map((pick) => pick?.playerId)).size !== picks.length || new Set(picks.map((pick) => pick?.slotCode)).size !== picks.length) throw new Error('choose a different replacement for each vacant position');
     const market = transferSnapshot(t, userId, t.matchday).market;
     const incoming = picks.map((pick) => {
       const player = market.find((candidate) => candidate.id === pick?.playerId);
@@ -102,6 +109,7 @@ function planTransfer(tournament, userId, action, payload = {}) {
     team.xi.sort((a, b) => getSlots(team.formation).findIndex((slot) => slot.code === a.slotCode) - getSlots(team.formation).findIndex((slot) => slot.code === b.slotCode));
     progress.incoming = incoming;
     progress.phase = 'complete';
+    startCohesionRecovery(team, incoming.length, t.matchday);
   } else throw new Error('invalid transfer action');
   team.strength = teamStrength(team.xi);
   return t;

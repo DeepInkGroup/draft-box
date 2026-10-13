@@ -49,6 +49,7 @@ router.post('/singleplayer', (req, res) => {
     const room = rm.createRoom({
       name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
       mode, leagueId, squadMode,
+      transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
       creatorId: req.user.id,
       humanSlotsMax: 1,
       singlePlayer: true,

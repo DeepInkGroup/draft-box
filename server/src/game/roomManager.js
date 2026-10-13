@@ -3,6 +3,7 @@ const { ALL_TEAMS } = require('../data/teams');
 const { getPlayer, getLeague, teamsForRoom } = require('../data/competitions');
 const { isValidFormation, getSlots } = require('./formations');
 const { bestXI } = require('./botEngine');
+const { transferSettings } = require('./leagueSettings');
 const { isAdmin } = require('../middleware/auth');
 const { normalizeStyle, isCustomStyleKey } = require('./tacticalStyles');
 
@@ -57,12 +58,13 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft' }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2 }) {
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
   if (mode === 'league' && !singlePlayer) throw new Error('League Games is currently single player only');
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
+  const transfers = transferSettings(transferEnabled, transferLimit);
   const code = uniqueCode();
   const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
   const length = normalizeTournamentLength(tournamentLength);
@@ -71,13 +73,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -179,6 +181,8 @@ function loadRoomState(roomRow) {
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
     squadMode: roomRow.squad_mode || 'draft',
+    transferEnabled: roomRow.transfer_enabled !== 0,
+    transferLimit: roomRow.transfer_limit ?? 2,
     status: roomRow.status,
     humanSlotsMax: roomRow.human_slots_max,
     singlePlayer: !!roomRow.single_player,
@@ -323,6 +327,8 @@ function lobbySnapshot(roomRow) {
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
     squadMode: roomRow.squad_mode || 'draft',
+    transferEnabled: roomRow.transfer_enabled !== 0,
+    transferLimit: roomRow.transfer_limit ?? 2,
     leagueName: getLeague(roomRow.league_id)?.name || null,
     spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,

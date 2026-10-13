@@ -276,7 +276,7 @@ const DashboardView = {
         <h3>${league ? 'League Games — ' + league.name : 'Single Player — World Cup'}</h3>
         <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
         ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
-        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><p class="muted">A transfer window opens halfway through the season. Release one or two players, then choose their replacements.</p>` : ''}
+        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div class="field"><label for="spTransfers">Transfer window</label><select id="spTransfers"><option value="open">Open</option><option value="closed">Closed</option></select></div><div class="field"><label for="spTransferLimit">Maximum player changes</label><select id="spTransferLimit"><option value="0">0 - no transfers</option><option value="1">1 player</option><option value="2" selected>2 players</option><option value="3">3 players</option></select></div><p id="spTransferNote" class="muted">The window opens halfway through the season. Release up to 2 players, then sign replacements. New signings briefly reduce coordination, recovering over four matches.</p></section>` : ''}
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
         <div id="spTimer" style="margin-bottom:16px;"></div>
@@ -308,6 +308,14 @@ const DashboardView = {
     const spTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
     const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
+    if (league) {
+      const window = container.querySelector('#spTransfers'), limit = container.querySelector('#spTransferLimit');
+      const update = () => {
+        limit.disabled = window.value === 'closed';
+        container.querySelector('#spTransferNote').textContent = window.value === 'closed' || limit.value === '0' ? 'Transfers are disabled for this season. Your XI stays together throughout the league.' : `At mid-season, change up to ${limit.value} player${limit.value === '1' ? '' : 's'}. Release them first, then sign replacements. Coordination recovers over four matches.`;
+      };
+      window.onchange = update; limit.onchange = update; update();
+    }
     const squadMode = league ? container.querySelector('#spSquadMode') : null;
     if (squadMode) squadMode.addEventListener('change', () => {
       const real = squadMode.value === 'real';
@@ -328,6 +336,8 @@ const DashboardView = {
         const room = await Api.createSingleplayer({
           mode: league ? 'league' : 'worldcup', leagueId: league?.id,
           squadMode: squadMode?.value || 'draft',
+          transferEnabled: league ? container.querySelector('#spTransfers').value === 'open' : undefined,
+          transferLimit: league ? Number(container.querySelector('#spTransferLimit').value) : undefined,
           clubCode: league ? container.querySelector('#spClub').value : undefined,
           formation: spFormation.value, showOverall: spRatings.value, pickTimeMs: spTimer.value,
           captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value,

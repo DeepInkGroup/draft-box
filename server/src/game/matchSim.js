@@ -1,4 +1,5 @@
 const { computeTeamRatings, computeChemistry } = require('./ratings');
+const { cohesionSnapshot } = require('./leagueCohesion');
 const { getProfile, getSlots, getStyleSynergy } = require('./formations');
 const { TACTICAL_STYLES, normalizeStyle, baseStyleKey, matchupEdge } = require('./tacticalStyles');
 
@@ -771,8 +772,14 @@ function simulateMatch(teamA, teamB, { knockout = false, stage = 'group', morale
   const engineSignal = aiVsAi ? 1.2 : 1;
   const ratingsA = computeTeamRatings(teamA.xi, teamA.formation);
   const ratingsB = computeTeamRatings(teamB.xi, teamB.formation);
-  const chemA = computeChemistry(teamA.xi, teamA.formation);
-  const chemB = computeChemistry(teamB.xi, teamB.formation);
+  const matchChemistry = (team) => {
+    const base = computeChemistry(team.xi, team.formation);
+    if (stage !== 'league') return base;
+    const cohesion = cohesionSnapshot(team);
+    return { ...base, baseMultiplier: base.multiplier, rosterCohesion: cohesion, multiplier: base.multiplier * cohesion.multiplier };
+  };
+  const chemA = matchChemistry(teamA);
+  const chemB = matchChemistry(teamB);
   ratingsA.attack *= chemA.multiplier;
   ratingsA.defense *= chemA.multiplier;
   ratingsB.attack *= chemB.multiplier;

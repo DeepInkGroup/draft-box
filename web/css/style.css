@@ -1593,3 +1593,9 @@ button.transfer-player-card { cursor: pointer; }
   .admin-users-table td[data-label="Account"], .admin-users-table td[data-label="Email"], .admin-users-table td[data-label="Last seen"] { grid-column: 1/-1; }
   .admin-users-table td:last-child { align-self: end; justify-self: end; }
 }
+.league-transfer-options { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin: 18px 0; background: var(--surface-2); }
+.league-season-settings { color: var(--muted); margin-bottom: 16px; font-size: .8rem; }
+.league-cohesion { border: 1px solid #7c5cff44; border-radius: 10px; background: #7c5cff0a; padding: 16px; margin-bottom: 18px; }
+.league-cohesion b { color: #c4b0ff; }
+.league-cohesion p { color: var(--muted); font-size: .85rem; line-height: 1.5; }
+.league-cohesion progress { width: 100%; height: 8px; accent-color: var(--accent); }

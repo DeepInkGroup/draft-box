@@ -69,7 +69,7 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
   });
 }
 
-for (const transferCount of [1, 2]) {
+for (const transferCount of [1, 2, 3]) {
 test(`real squad with ${transferCount} transfer(s) and relegation markers works on mobile`, async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors = [];
@@ -86,6 +86,7 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await page.locator('#singleLeague').click();
   await page.locator('#btnSelectLeague').click();
   await page.locator('#spSquadMode').selectOption('real');
+  await page.locator('#spTransferLimit').selectOption(String(transferCount));
   await page.locator('#btnSingleplayer').click();
   await expect(page.locator('#squadProgress')).toContainText('11');
   const code = (await page.url()).split('/').pop();
@@ -126,22 +127,22 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await page.locator('[data-release]').nth(0).click();
   await expect(page.locator('#btnReleasePlayers')).toBeEnabled();
   await expect(page.locator('#btnReleasePlayers')).toHaveText('Release 1 Player');
-  if (transferCount === 2) {
-    await page.locator('[data-release]').nth(1).click();
-    await page.locator('[data-release]').nth(2).click();
-    await expect(page.locator('[data-release].selected')).toHaveCount(2);
-    await expect(page.locator('#btnReleasePlayers')).toHaveText('Release 2 Players');
-  }
+  for (let i = 1; i < transferCount; i++) await page.locator('[data-release]').nth(i).click();
+  await page.locator('[data-release]').nth(transferCount).click();
+  await expect(page.locator('[data-release].selected')).toHaveCount(transferCount);
+  await expect(page.locator('#btnReleasePlayers')).toHaveText(`Release ${transferCount} Player${transferCount === 1 ? '' : 's'}`);
   await page.locator('#btnReleasePlayers').click();
   await expect(page.locator('#transferPick0')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferPick0')).toBeVisible();
   const first = await page.locator('#transferPick0 option').nth(1).getAttribute('value');
   await page.locator('#transferPick0').selectOption(first);
-  if (transferCount === 2) {
-    const second = await page.locator('#transferPick1 option').evaluateAll((options, first) => options.find((option) => option.value && option.value !== first).value, first);
-    await page.locator('#transferPick1').selectOption(second);
-  } else await expect(page.locator('#transferPick1')).toHaveCount(0);
+  const chosen = [first];
+  for (let i = 1; i < transferCount; i++) {
+    const next = await page.locator('#transferPick' + i + ' option').evaluateAll((options, chosen) => options.find(option => option.value && !chosen.includes(option.value)).value, chosen);
+    chosen.push(next); await page.locator('#transferPick' + i).selectOption(next);
+  }
+  await expect(page.locator('#transferPick' + transferCount)).toHaveCount(0);
   await expect(page.locator('#transferProfile0')).toContainText('OVR');
   await expect(page.locator('#transferProfile0')).toContainText('Available');
   await expect(page.locator('#transferProfile0')).toContainText('Assists');
@@ -152,9 +153,12 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await expect(page.locator('#btnContinue')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferZone')).toBeHidden();
+  await expect(page.locator('#leagueCohesion')).toContainText(`−${transferCount * 1.5}%`);
+  await expect(page.locator('#leagueCohesion')).toContainText('0/4 matches');
   await expect(page.locator('#btnFinishLeague')).toBeVisible();
   await page.locator('#btnFinishLeague').click();
-  await expect(page.locator('#seasonResults')).toContainText('306 matches');
+  await expect(page.locator('#seasonResults')).toContainText('306 matches', { timeout: 15000 });
+  await expect(page.locator('#leagueCohesion')).toContainText('Fully Settled');
   await expect(page.locator('#seasonResults')).toContainText('Top Scorers');
   await expect(page.locator('#seasonResults')).toContainText('Relegated');
   await expect(page.locator('#btnFinishLeague')).toBeHidden();
@@ -165,4 +169,34 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await expect(page.locator('#leagueZone tbody tr').nth(17).locator('.relegation-mark')).toHaveAttribute('aria-label', 'Relegated');
   expect(errors).toEqual([]);
 });
+}
+for (const setting of [{ enabled: 'closed', limit: '3' }, { enabled: 'open', limit: '0' }]) {
+ test(`league with transfers ${setting.enabled} and limit ${setting.limit} stays playable`, async ({ page, request }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.route('https://cdn.socket.io/**', route=>route.fulfill({path:path.join(__dirname,'..','..','node_modules/socket.io/client-dist/socket.io.min.js'),contentType:'application/javascript'}));
+  await page.route('https://fonts.googleapis.com/**',route=>route.abort());
+  await page.route('https://fonts.gstatic.com/**',route=>route.abort());
+  await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const username=`off_${setting.limit}_${Date.now().toString().slice(-7)}`;
+  const account=await(await request.post('/api/auth/register',{data:{username,email:username+'@example.test',password:'test-password'}})).json();
+  await page.addInitScript(token=>sessionStorage.setItem('draftbox.token',token),account.token);
+  await page.goto('/');await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();
+  await page.locator('#spTransferLimit').selectOption(setting.limit);await page.locator('#spTransfers').selectOption(setting.enabled);
+  await expect(page.locator('#spTransferNote')).toContainText('disabled');
+  if(setting.enabled==='closed')await expect(page.locator('#spTransferLimit')).toBeDisabled();
+  await page.locator('#spSquadMode').selectOption('real');await page.locator('#btnSingleplayer').click();
+  await page.locator('#btnLockTacticalStyle').click();await page.locator('#btnEnterTournament').click();
+  await expect(page.locator('#leagueTransferRules')).toContainText('Transfers closed');
+  await expect(page.locator('#btnFinishLeague')).toBeHidden();
+  await expect(page.locator('#btnSkipToTransfers')).toHaveText('Simulate to Mid-season');
+  await page.locator('#btnSkipToTransfers').click();
+  await expect(page.locator('#leagueZone')).toContainText('Matchday 17 / 34');
+  await expect(page.locator('#transferZone')).toBeHidden();await expect(page.locator('#btnFinishLeague')).toBeVisible();
+  await page.reload();await expect(page.locator('#leagueTransferRules')).toContainText('Transfers closed');
+  await page.locator('#btnFinishLeague').click();await expect(page.locator('#seasonResults')).toContainText('306 matches', { timeout: 15000 });
+  await expect(page.locator('#leagueCohesion')).toBeHidden();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+  expect(errors).toEqual([]);
+ });
 }
