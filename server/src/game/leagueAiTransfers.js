@@ -1,4 +1,4 @@
-const { getLeague } = require('../data/competitions');
+const { getLeague, ratedPlayer } = require('../data/competitions');
 const { getSlots, playerFitsSlot } = require('./formations');
 const { teamStrength } = require('./botEngine');
 const { startCohesionRecovery } = require('./leagueCohesion');
@@ -8,7 +8,7 @@ function rosterPlayer(player) {
   return { ...profile };
 }
 function ensureClubRosters(t) {
-  if (!t.clubRosters) t.clubRosters = Object.fromEntries(getLeague(t.leagueId).teams.map(club => [club.code, club.players.map(rosterPlayer)]));
+  if (!t.clubRosters) t.clubRosters = Object.fromEntries(getLeague(t.leagueId).teams.map(club => [club.code, club.players.map(player => rosterPlayer(ratedPlayer(player,t)))]));
   return t.clubRosters;
 }
 function runAiTransfers(t, windowType = 'midseason', random = Math.random) {

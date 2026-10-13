@@ -342,6 +342,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   for (const transferLimit of [-1, 4, 1.5, '3', null]) await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode, transferLimit }, status: 400 });
   for (const endTransferLimit of [-1,4,1.5,'3',null]) await request('/api/rooms/singleplayer', {token:login.token,body:{mode:'league',leagueId:'pgl',clubCode,endTransferLimit},status:400});
   for (const option of ['endTransferEnabled','endAiTransfers']) await request('/api/rooms/singleplayer',{token:login.token,body:{mode:'league',leagueId:'pgl',clubCode,[option]:'on'},status:400});
+  await request('/api/rooms/singleplayer',{token:login.token,body:{mode:'worldcup',pglRatingBoost:true},status:400});
+  await request('/api/rooms/singleplayer',{token:login.token,body:{mode:'league',leagueId:'pgl',clubCode,pglRatingBoost:'true'},status:400});
   const real = await request('/api/rooms/singleplayer', { token: login.token, body: { mode: 'league', leagueId: 'pgl', clubCode, squadMode: 'real', formation: '4-3-3', captainEnabled: true, transferLimit: 3 }, status: 201 });
   assert.equal(real.squadMode, 'real');
   assert.equal(real.transferLimit, 3);
@@ -486,8 +488,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     assert.equal(rematchConfig.transferEnabled, false); assert.equal(rematchConfig.transferLimit, transferConfig.transferLimit);
   }
   for (const bad of [{midseasonTactics:'yes'},{aiTransfers:1}]) await request('/api/rooms/singleplayer',{token:login.token,body:{mode:'league',leagueId:'pgl',clubCode,...bad},status:400});
-  const career = await request('/api/rooms/singleplayer', { token: login.token, body: { mode:'league',leagueId:'pgl',clubCode,squadMode:'real',midseasonTactics:true,aiTransfers:true,transferLimit:2,endTransferEnabled:true,endTransferLimit:3,endAiTransfers:false }, status:201 });
-  assert.equal(career.midseasonTactics,true); assert.equal(career.aiTransfers,true);
+  const career = await request('/api/rooms/singleplayer', { token: login.token, body: { mode:'league',leagueId:'pgl',clubCode,squadMode:'real',midseasonTactics:true,aiTransfers:true,transferLimit:2,endTransferEnabled:true,endTransferLimit:3,endAiTransfers:false,pglRatingBoost:true }, status:201 });
+  assert.equal(career.midseasonTactics,true); assert.equal(career.aiTransfers,true);assert.equal(career.pglRatingBoost,true);
   const careerSocket = await connect(login.token);
   async function careerEvent(name,eventName,body) { const promise=event(careerSocket,eventName);careerSocket.emit(name,{code:career.code,...body});return promise; }
   async function careerError(name,body,pattern) { const promise=new Promise(resolve=>careerSocket.once('error:message',resolve));careerSocket.emit(name,{code:career.code,...body});assert.match((await promise).error,pattern); }
@@ -495,6 +497,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   await careerEvent('draft:autoComplete','tournament:started',{});
   await careerError('league:tactics',{action:'change',tacticalStyle:'counter'},/Reach mid-season/);
   const half = await careerEvent('league:skipToTransfers','league:midseason',{});
+  const basePlayer = require('../src/data/competitions').getPlayer;
+  assert.ok(half.transfers.squad.every(player=>player.overall===basePlayer(player.id).overall+10));
   assert.equal(half.transfers.tactics.phase,'choose');assert.ok(half.transfers.log.some(entry=>entry.type==='ai'));
   const initialDeals=half.transfers.log;
   const outsider = await connect(friend.token);
@@ -521,6 +525,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.equal(continuation.newCode,repeat.newCode);assert.equal(continuation.seasonNumber,2);
   const nextMeta=await request('/api/rooms/'+continuation.newCode,{token:login.token});
   assert.equal(nextMeta.status,'league_stage');assert.equal(nextMeta.midseasonTactics,true);assert.equal(nextMeta.aiTransfers,true);
+  assert.equal(nextMeta.pglRatingBoost,true);
   assert.equal(nextMeta.endTransferEnabled,true);assert.equal(nextMeta.endTransferLimit,3);assert.equal(nextMeta.endAiTransfers,false);
   const nextReport=await request('/api/admin/leagues/'+continuation.newCode,{token:admin.token});
   for(const club of nextReport.clubs) {
@@ -542,6 +547,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const resumeCareer=await connect(login.token);
   promise=event(resumeCareer,'room:state');resumeCareer.emit('room:join',{code:continuation.newCode});
   const endRestored=await promise;assert.equal(endRestored.league.seasonNumber,2);
+  assert.ok(endRestored.transfers.market.every(player=>player.overall===basePlayer(player.id).overall+10));
   assert.deepEqual(endRestored.transfers.market,endOffers.market);assert.equal(endRestored.transfers.windowType,'endseason');
   promise=event(resumeCareer,'league:transferState');resumeCareer.emit('league:transfer',{code:continuation.newCode,action:'sign',picks:endOffers.vacancies.map(slot=>({slotCode:slot.code,playerId:endOffers.market.find(player=>player.eligibleSlots.includes(slot.code)).id}))});
   const endSigned=(await promise).transfers;assert.equal(endSigned.squad.length,11);assert.equal(endSigned.cohesion.penaltyPercent,4.5);assert.equal(endSigned.log.length,3);

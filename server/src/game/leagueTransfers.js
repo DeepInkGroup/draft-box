@@ -1,4 +1,4 @@
-const { getLeague, getTeam } = require('../data/competitions');
+const { getLeague, getTeam, ratedPlayer } = require('../data/competitions');
 const { getSlots, playerFitsSlot } = require('./formations');
 const { teamStrength } = require('./botEngine');
 const { settingsForSeason } = require('./leagueSettings');
@@ -147,7 +147,7 @@ function planTransfer(tournament, userId, action, payload = {}) {
       const vacancy = progress.vacancies.find((slot) => slot.code === pick?.slotCode);
       if (!player || !vacancy || !player.eligibleSlots.includes(vacancy.code)) throw new Error('choose an available league player who fits each vacant position');
       const source = getLeague(t.leagueId).teams.flatMap((club) => club.players).find((candidate) => candidate.id === player.id);
-      return { ...source, slotCode: vacancy.code, isCaptain: !!vacancy.isCaptain };
+      return { ...ratedPlayer(source,t), slotCode: vacancy.code, isCaptain: !!vacancy.isCaptain };
     });
     team.xi.push(...incoming);
     team.xi.sort((a, b) => getSlots(team.formation).findIndex((slot) => slot.code === a.slotCode) - getSlots(team.formation).findIndex((slot) => slot.code === b.slotCode));

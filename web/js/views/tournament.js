@@ -216,7 +216,7 @@ const TournamentView = {
       if (!leagueState) return;
       leagueZone.style.display = '';
       const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
-      leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3><span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
+      leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3>${leagueState.pglRatingBoost ? '<span class="badge">All players +10 OVR</span>' : ''}<span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
         ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
         <div class="league-table-scroll"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>

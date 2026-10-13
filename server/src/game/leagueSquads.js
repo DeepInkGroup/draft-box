@@ -1,4 +1,4 @@
-const { getLeague, getTeam } = require('../data/competitions');
+const { getLeague, getTeam, ratedClub } = require('../data/competitions');
 const { statsByPlayer } = require('./leagueTransfers');
 const { TACTICAL_STYLES } = require('./tacticalStyles');
 const { cohesionAtMatchday } = require('./leagueCohesion');
@@ -8,7 +8,7 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
   const t = roomState.tournament;
   if (!member) throw new Error('not a member of this league');
   if (roomState.mode !== 'league' || t?.kind !== 'league') throw new Error('start the league season to view team statistics');
-  const club = getLeague(t.leagueId)?.teams.find((team) => team.code === clubCode);
+  const club = ratedClub(getLeague(t.leagueId)?.teams.find((team) => team.code === clubCode),t);
   const slot = t.slotByCode[clubCode];
   if (!club || !slot) throw new Error('club is not part of this league');
   const matchday = Math.min(member.viewedStep, t.matchday);

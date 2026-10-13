@@ -1609,18 +1609,80 @@ button.transfer-player-card { cursor: pointer; }
 @media (max-width:640px) { .league-deals { grid-template-columns: minmax(0,1fr); } }
 
 /* League setup and fixed transfer offers */
-.toggle-option { font: inherit; color: var(--text); }
+.toggle-option { font: inherit; color: var(--ink); }
 .toggle-option:focus-visible, .transfer-offer-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .toggle-option:disabled { cursor: not-allowed; opacity: .4; }
 .league-transfer-options h3 { margin-top: 0; }
 .league-transfer-options .field { margin: 18px 0 8px; }
-.transfer-limit-toggle .toggle-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.transfer-limit-toggle .toggle-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .transfer-offer-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .transfer-offer-group { min-width: 0; }
 .transfer-sign-grid { grid-template-columns: 1fr; }
 .transfer-offer-card { width: 100%; min-width: 0; text-align: left; }
 .transfer-offer-choice { display: block; margin-top: 12px; font-weight: 700; color: var(--accent-strong); }
 @media (max-width: 520px) {
-  .transfer-limit-toggle .toggle-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .transfer-limit-toggle .toggle-group { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .transfer-offer-options { grid-template-columns: 1fr; }
+}
+
+/* Touch layouts: phones, portrait tablets and landscape tablets */
+html { -webkit-text-size-adjust: 100%; }
+body { min-height: 100dvh; }
+button, a, summary { touch-action: manipulation; }
+input, select, textarea { max-width: 100%; }
+.app, .card, .league-tools, .transfer-window, .field, .row > * { min-width: 0; }
+.league-table-scroll, .table-scroll { max-width: 100%; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.league-table-heading { flex-wrap: wrap; gap: 10px; }
+.league-table-heading h3 { flex: 1 1 240px; overflow-wrap: anywhere; }
+.transfer-player-card h4, .transfer-player-card .player-name { overflow-wrap: anywhere; }
+.dialog { max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); }
+.dialog-form { min-width: 0; }
+@media (max-width: 1100px) {
+  .app { padding-left: max(18px, env(safe-area-inset-left)); padding-right: max(18px, env(safe-area-inset-right)); }
+  .topbar { padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); }
+  .formation-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .formation-btn { min-height: 44px; padding: 10px 4px; }
+  .btn, .toggle-option, summary { min-height: 44px; }
+  input, select, textarea { font-size: 16px; min-height: 44px; }
+  .topbar-actions .btn { min-width: 44px; min-height: 44px; }
+  .transfer-player-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .dialog-actions { flex-wrap: wrap; }
+  .dialog-actions .btn { flex: 1 1 150px; }
+}
+@media (min-width: 641px) and (max-width: 1100px) {
+  .tactical-style-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .player-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .league-transfer-options { padding: 20px; }
+}
+@media (max-width: 640px) {
+  .app { padding: 14px max(12px, env(safe-area-inset-right)) max(32px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left)); }
+  .topbar { align-items: center; gap: 8px; padding-top: max(10px, env(safe-area-inset-top)); }
+  .brand { font-size: 1.1rem; }
+  .topbar-actions { gap: 2px; flex-wrap: nowrap; }
+  .topbar-actions .btn { padding: 8px; }
+  .card { padding: 14px; }
+  .formation-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .formation-btn { font-size: .75rem; }
+  #spFormation .pitch { max-width: 260px; }
+  .transfer-offer-options, .transfer-player-grid, .season-leaderboards { grid-template-columns: minmax(0, 1fr); }
+  .league-transfer-options { padding: 14px; }
+  .league-transfer-options .toggle-option { padding: 12px 8px; }
+  .toggle-sub { line-height: 1.4; }
+  .transfer-player-card { padding: 14px; }
+  .transfer-player-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .transfer-player-head b { min-width: 0; overflow-wrap: anywhere; }
+  .transfer-player-head .badge { flex-shrink: 0; }
+  .dialog { width: calc(100vw - 24px); padding: 0; }
+  .dialog-form { padding: 16px; }
+  #profileDialog.dialog-wide { max-height: calc(100dvh - 24px); }
+  #profileDialog .dialog-form { max-height: calc(100dvh - 24px); }
+}
+@media (max-width: 360px) {
+  .topbar { padding-left: 8px; padding-right: 8px; flex-wrap: wrap; }
+  .topbar-actions { margin-left: auto; max-width: 100%; }
+  .brand { font-size: 1rem; }
+  .topbar-actions .btn { min-width: 44px; padding: 8px 6px; }
+  .formation-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card { padding: 12px; }
+  .lineup-predictions, .engine-metric-grid, .engine-factor-list { grid-template-columns: minmax(0,1fr); }
 }

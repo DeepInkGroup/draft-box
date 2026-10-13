@@ -153,6 +153,7 @@ if (!columnExists('rooms', 'transfer_enabled')) db.exec('ALTER TABLE rooms ADD C
 if (!columnExists('rooms', 'transfer_limit')) db.exec('ALTER TABLE rooms ADD COLUMN transfer_limit INTEGER NOT NULL DEFAULT 2;');
 if (!columnExists('rooms', 'end_transfer_enabled')) db.exec('ALTER TABLE rooms ADD COLUMN end_transfer_enabled INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'end_transfer_limit')) db.exec('ALTER TABLE rooms ADD COLUMN end_transfer_limit INTEGER NOT NULL DEFAULT 2;');
+if (!columnExists('rooms', 'pgl_rating_boost')) db.exec('ALTER TABLE rooms ADD COLUMN pgl_rating_boost INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'end_ai_transfers')) db.exec('ALTER TABLE rooms ADD COLUMN end_ai_transfers INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'midseason_tactics')) db.exec('ALTER TABLE rooms ADD COLUMN midseason_tactics INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'ai_transfers')) db.exec('ALTER TABLE rooms ADD COLUMN ai_transfers INTEGER NOT NULL DEFAULT 0;');

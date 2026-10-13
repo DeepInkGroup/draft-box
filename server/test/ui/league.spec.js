@@ -34,6 +34,9 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     await expect(page.locator('#leagueSelect')).toHaveValue('pgl');
     await expect(page.locator('#leagueDetails')).toContainText('18 clubs');
     await page.locator('#btnSelectLeague').click();
+    await expect(page.locator('#spTransferLimit button')).toHaveCount(3);
+    await expect(page.locator('#spEndTransferLimit button')).toHaveCount(3);
+    await expect(page.locator('#spTransferLimit [data-value="0"]')).toHaveCount(0);
     await expect(page.locator('#spSquadMode button[data-value="draft"]')).toHaveAttribute('aria-pressed', 'true');
     expect(await page.locator('#spSquadMode').evaluate(el => !!(document.querySelector('#spAutoDraft').compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
     await page.screenshot({path: `test-results/league-setup-${viewport.width}.png`,fullPage:true});
@@ -178,7 +181,7 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   expect(errors).toEqual([]);
 });
 }
-for (const setting of [{ enabled: 'closed', limit: '3' }, { enabled: 'open', limit: '0' }]) {
+for (const setting of [{ enabled: 'closed', limit: '3' }, { enabled: 'closed', limit: '1' }]) {
  test(`league with transfers ${setting.enabled} and limit ${setting.limit} stays playable`, async ({ page, request }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const errors=[];page.on('pageerror',e=>errors.push(e.message));

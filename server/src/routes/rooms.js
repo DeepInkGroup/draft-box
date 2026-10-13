@@ -48,7 +48,7 @@ router.post('/singleplayer', (req, res) => {
     if (mode === 'league' && (!league || !league.teams.some((team) => team.code === clubCode))) throw new Error('choose an available league and club');
     const room = rm.createRoom({
       name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
-      mode, leagueId, squadMode,
+      mode, leagueId, squadMode, pglRatingBoost: req.body?.pglRatingBoost,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
       midseasonTactics: req.body?.midseasonTactics, aiTransfers: req.body?.aiTransfers,
       endTransferEnabled: req.body?.endTransferEnabled, endTransferLimit: req.body?.endTransferLimit, endAiTransfers: req.body?.endAiTransfers,

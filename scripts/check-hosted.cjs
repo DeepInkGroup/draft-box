@@ -44,12 +44,13 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.matchdays, 34);
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);
-    assert.deepEqual(pgl.transferOptions, { min: 0, max: 3, default: 2, canDisable: true });
+    assert.deepEqual(pgl.transferOptions, { min: 1, max: 3, default: 2, canDisable: true });
     assert.equal(pgl.midseasonTacticsAvailable, true);
     assert.equal(pgl.aiTransfersAvailable, true);
     assert.equal(pgl.continuousSeasons, true);
     assert.equal(pgl.endSeasonTransfersAvailable, true);
     assert.equal(pgl.transferOfferCount, 2);
+    assert.equal(pgl.pglRatingBoostAvailable, true);
   }, {}, 60);
   await request(apiBase + '/', async (response) => {
     assert.match(await response.text(), /Draft Box/);

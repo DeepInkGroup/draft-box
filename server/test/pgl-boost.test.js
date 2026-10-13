@@ -1,0 +1,44 @@
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const { getLeague, getPlayer, ratedPlayer, teamsForRoom } = require('../src/data/competitions');
+const { bestXI, teamStrength } = require('../src/game/botEngine');
+const { computeTeamRatings } = require('../src/game/ratings');
+const { startLeague } = require('../src/game/leagueEngine');
+const { currentRevealForMember, pickPlayer } = require('../src/game/draftEngine');
+const { getSlots } = require('../src/game/formations');
+const { planTransfer, transferSnapshot } = require('../src/game/leagueTransfers');
+const { runAiTransfers } = require('../src/game/leagueAiTransfers');
+test('PGL boost adds exactly ten to every player and powers the draft, AI, ratings and transfers', () => {
+  const league = getLeague('pgl'), original = JSON.stringify(league);
+  const options = {mode:'league', leagueId:'pgl', pglRatingBoost:true};
+  for (const player of teamsForRoom(options).flatMap(club => club.players)) {
+    assert.equal(player.overall, getPlayer(player.id).overall + 10);
+    assert.equal(ratedPlayer(player, options).overall, player.overall);
+  }
+  const club = league.teams[0], xi = bestXI(club), boosted = xi.map(player => ratedPlayer(player, options));
+  assert.ok(Math.abs(teamStrength(boosted) - teamStrength(xi) - 10) < 1e-10);
+  const baseRatings = computeTeamRatings(xi,'4-3-3'), ratings = computeTeamRatings(boosted,'4-3-3');
+  for (const key of ['attack','defense','overall']) assert.ok(Math.abs(ratings[key] - baseRatings[key] - 10) < 1e-9);
+  const member = {userId:1,clubCode:club.code,username:'coach',squad:[],formation:'4-3-3',slots:Object.fromEntries(getSlots('4-3-3').map(slot => [slot.code,null])),currentReveal:club.code,tacticalStyle:'balanced',tacticalStyleLocked:true};
+  const state = {...options,showOverall:true,transferEnabled:true,transferLimit:3,aiTransfers:true,pool:new Set(league.teams.flatMap(club => club.players.map(player => player.id))),members:new Map([[1,member]])};
+  const revealed = currentRevealForMember(state,1);
+  assert.ok(revealed.players.every(player => player.overall === getPlayer(player.id).overall + 10));
+  const pick = xi[0]; pickPlayer(state,1,pick.id,pick.slotCode);
+  assert.equal(member.squad[0].overall, pick.overall + 10);
+  member.squad = boosted;
+  const t = startLeague(state);
+  const verify = player => assert.equal(player.overall, getPlayer(player.id).overall + 10);
+  Object.values(t.slotByCode).flatMap(team => team.xi).forEach(verify);
+  Object.values(t.clubRosters).flat().forEach(verify);
+  t.matchday = 17; runAiTransfers(t);
+  t.transferLog.forEach(entry => {verify(entry.player);verify(entry.exchangedPlayer);});
+  const next = planTransfer(t,1,'release',{playerIds:boosted.slice(0,3).map(player => player.id)});
+  const signing = transferSnapshot(next,1,17);signing.market.forEach(verify);
+  const complete = planTransfer(next,1,'sign',{picks:signing.vacancies.map(slot => ({slotCode:slot.code,playerId:signing.market.find(player => player.eligibleSlots.includes(slot.code)).id}))});
+  transferSnapshot(complete,1,17).squad.forEach(verify);
+  assert.equal(JSON.stringify(league),original);
+  const baseline = teamsForRoom({mode:'league',leagueId:'pgl',pglRatingBoost:false});
+  assert.deepEqual(baseline,league.teams);
+  const world = teamsForRoom({mode:'worldcup',pglRatingBoost:true});
+  assert.ok(world[0].players.every(player => player.overall === getPlayer(player.id).overall));
+});

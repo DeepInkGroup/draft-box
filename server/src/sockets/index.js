@@ -259,7 +259,7 @@ function registerSocketHandlers(io) {
         name: roomRow.name,
         mode: roomRow.mode,
         leagueId: roomRow.league_id,
-        squadMode: roomRow.squad_mode,
+        squadMode: roomRow.squad_mode, pglRatingBoost: !!roomRow.pgl_rating_boost,
         transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
         midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
         endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
