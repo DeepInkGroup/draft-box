@@ -45,6 +45,9 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);
     assert.deepEqual(pgl.transferOptions, { min: 0, max: 3, default: 2, canDisable: true });
+    assert.equal(pgl.midseasonTacticsAvailable, true);
+    assert.equal(pgl.aiTransfersAvailable, true);
+    assert.equal(pgl.continuousSeasons, true);
   }, {}, 60);
   await request(apiBase + '/', async (response) => {
     assert.match(await response.text(), /Draft Box/);

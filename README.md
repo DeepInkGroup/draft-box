@@ -28,6 +28,12 @@ The standings mark the bottom two clubs with **↓** arrows: **Relegation zone**
 
 Open **Teams & Player Stats** during the season to select any club, search its players and inspect its formation, tactical style, starting XI, roster/released status, positions, ratings, stars and recorded statistics. Statistics are counted for the selected club through the matchday you have reached; unplayed roster members show zero appearances.
 
+**Mid-season tactic changes** can be enabled during league creation. At halfway, choose one of the 12 built-in styles or keep your current tactic. This choice works even when player transfers are closed; the second half waits until you decide. Changing tactics affects future matches only.
+
+**AI team transfers** is a separate setup option, available when transfers are open and the limit is above zero. At halfway, AI clubs look for compatible upgrades by exchanging a starting player for another AI club's reserve. Both clubs keep complete XIs and each AI club participates in at most the selected number of deals. AI teams protect your club and players, and changed AI XIs receive the same four-match coordination recovery. The searchable **Transfer Center** shows AI exchanges and your completed signings with players, clubs, ratings and the matchday. Clubs can keep their squads when no suitable upgrade exists.
+
+After a completed season, **Continue to Next Season** keeps your XI, captain, formation, chosen tactic, AI squads and league settings. Standings, fixtures, morale, season statistics and mid-season choices reset. Each season has a separate saved room and retains its results; **Previous Seasons** lets you review earlier seasons. Continue for as many seasons as you wish. The same 18 supplied clubs remain available; promotion/relegation between divisions is not simulated. **Create New League** starts a separate league from setup.
+
 There are **12 built-in tactical styles**, including **Vertical Tiki-Taka**, **Overlapping Fullbacks** and **Catenaccio**. The picker uses the same modifiers and formation-fit data as the match engine, with strengths, trade-offs, risk, pressure and matchup guidance. Formation-fit modifiers are deterministic; match results remain sampled normally.
 
 The dashboard's **Your League Seasons** section resumes unfinished drafts and seasons. Match history and career totals include completed league seasons. A rematch keeps the league, club, squad mode and transfer settings, with a fresh XI and transfer window. Persistence follows the hosting storage limits below.

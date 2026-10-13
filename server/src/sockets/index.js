@@ -6,6 +6,7 @@ const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { leagueSnapshot } = require('../game/leagueEngine');
 const { transferSnapshot, planTransfer } = require('../game/leagueTransfers');
+const { planTacticChange } = require('../game/leagueMidseason');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey, tacticalCatalog } = require('../game/tacticalStyles');
 const {
@@ -260,6 +261,7 @@ function registerSocketHandlers(io) {
         leagueId: roomRow.league_id,
         squadMode: roomRow.squad_mode,
         transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
+        midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
         creatorId: roomRow.creator_id,
         humanSlotsMax: roomRow.human_slots_max,
         singlePlayer: !!roomRow.single_player,
@@ -554,7 +556,7 @@ function registerSocketHandlers(io) {
         if (!member) throw new Error('not a member of this league');
         const t = state.tournament;
         const transfers = transferSnapshot(t, socket.user.id, member.viewedStep);
-        if (member.viewedStep < Math.floor(t.fixtures.length / 2) || !['complete', 'skipped', 'disabled'].includes(transfers.phase) || member.squad.length !== 11) throw new Error('Complete or skip mid-season transfers before finishing the season');
+        if (member.viewedStep < Math.floor(t.fixtures.length / 2) || !['complete', 'skipped', 'disabled'].includes(transfers.phase) || transfers.tactics?.phase === 'choose' || member.squad.length !== 11) throw new Error('Choose or keep tactics and complete or skip mid-season transfers before finishing the season');
         while (t.stage !== 'done') {
           persistSimulatedTournamentStep(io, socket, code, room, state);
           member.viewedStep = t.matchday;
@@ -566,6 +568,28 @@ function registerSocketHandlers(io) {
           league: leagueSnapshot(t, member.viewedStep), transfers: transferSnapshot(t, socket.user.id, member.viewedStep), spectator: false
         });
       } catch (error) { socket.emit('error:message', { error: error.message }); }
+    });
+
+    socket.on('league:tactics', ({ code, action, tacticalStyle }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || !room.single_player || room.status !== 'league_stage') throw new Error('The mid-season tactic window is not open');
+        const state = rm.loadRoomState(room), member = state.members.get(socket.user.id);
+        if (!member) throw new Error('Not a member of this league');
+        if (member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('Reach mid-season before changing tactics');
+        const next = planTacticChange(state.tournament,socket.user.id,action,tacticalStyle);
+        rm.persistLeagueTactic(state,socket.user.id,next);
+        socket.emit('league:transferState',{ transfers: transferSnapshot(next,socket.user.id,member.viewedStep) });
+      } catch (error) { socket.emit('error:message',{ error: error.message }); }
+    });
+
+    socket.on('league:nextSeason', ({ code }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room) throw new Error('League not found');
+        const next = rm.continueLeagueSeason(room,socket.user.id);
+        socket.emit('league:nextSeasonReady',{ newCode: next.code, seasonNumber: next.season_number });
+      } catch (error) { socket.emit('error:message',{ error: error.message }); }
     });
 
     socket.on('league:transfer', ({ code, action, playerIds, picks }) => {

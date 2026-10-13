@@ -50,6 +50,7 @@ router.post('/singleplayer', (req, res) => {
       name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
       mode, leagueId, squadMode,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
+      midseasonTactics: req.body?.midseasonTactics, aiTransfers: req.body?.aiTransfers,
       creatorId: req.user.id,
       humanSlotsMax: 1,
       singlePlayer: true,

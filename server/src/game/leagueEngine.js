@@ -5,6 +5,8 @@ const { normalizeStyle } = require('./tacticalStyles');
 const { ensureTransferWindow, transfersPending } = require('./leagueTransfers');
 const { transferSettings } = require('./leagueSettings');
 const { recoverCohesion } = require('./leagueCohesion');
+const { ensureTacticWindow, tacticsPending } = require('./leagueMidseason');
+const { runAiTransfers, ensureClubRosters } = require('./leagueAiTransfers');
 
 function createFixtures(codes) {
   if (codes.length < 2 || new Set(codes).size !== codes.length) throw new Error('a league needs distinct clubs');
@@ -58,16 +60,22 @@ function startLeague(roomState) {
   roomState.tournament = {
     kind: 'league', leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
     transferSettings: transferSettings(roomState.transferEnabled, roomState.transferLimit),
+    midseasonTactics: !!roomState.midseasonTactics, aiTransfers: !!roomState.aiTransfers,
+    seasonNumber: roomState.seasonNumber || 1, transferLog: [],
     fixtures: createFixtures(league.teams.map((club) => club.code)), matchday: 0,
     matchLog: [], history: [], champion: null, bracket: {}
   };
   roomState.tournament.initialTable = rankTable(roomState.tournament);
+  ensureClubRosters(roomState.tournament);
+  roomState.tournament.initialClubRosters = structuredClone(roomState.tournament.clubRosters);
+  roomState.tournament.initialXIs = Object.fromEntries(Object.values(slotByCode).map(team => [team.code, structuredClone(team.xi)]));
   return roomState.tournament;
 }
 
 function simulateLeagueStep(roomState, applyResult) {
   const t = roomState.tournament;
   if (!t || t.stage === 'done') return null;
+  if (tacticsPending(t)) throw new Error('Choose or keep your mid-season tactic before the next matchday');
   if (transfersPending(t)) throw new Error('complete or skip the mid-season transfer window before the next matchday');
   const matches = [];
   for (const fixture of t.fixtures[t.matchday]) {
@@ -88,6 +96,8 @@ function simulateLeagueStep(roomState, applyResult) {
     matches.push(match);
   }
   t.matchday++;
+  ensureTacticWindow(t);
+  runAiTransfers(t);
   ensureTransferWindow(t);
   const table = rankTable(t);
   if (t.matchday === t.fixtures.length) {
@@ -105,7 +115,7 @@ function simulateLeagueStep(roomState, applyResult) {
 function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
   const table = viewedStep > 0 ? t.history[viewedStep - 1]?.leagueTable : t.initialTable;
-  return { name: t.leagueName, matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
+  return { name: t.leagueName, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
     nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => ({ ...fixture, aName: t.slotByCode[fixture.aCode].name, bName: t.slotByCode[fixture.bCode].name })) };
 }
 module.exports = { createFixtures, rankTable, startLeague, simulateLeagueStep, leagueSnapshot };

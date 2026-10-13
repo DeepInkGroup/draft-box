@@ -55,7 +55,7 @@ function event(socket, name) {
   });
 }
 
-test('hosted app supports multiplayer, World Cup, a complete PGL season and persistent SQLite', { timeout: 90000 }, async (t) => {
+test('hosted app supports multiplayer, World Cup, a complete PGL season and persistent SQLite', { timeout: 150000 }, async (t) => {
   const dir = await mkdtemp(path.join(os.tmpdir(), 'draftbox-test-'));
   let server;
   const sockets = [];
@@ -483,6 +483,63 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     const rematchConfig = await request('/api/rooms/' + (await ready).newCode, { token: login.token });
     assert.equal(rematchConfig.transferEnabled, false); assert.equal(rematchConfig.transferLimit, transferConfig.transferLimit);
   }
+  for (const bad of [{midseasonTactics:'yes'},{aiTransfers:1}]) await request('/api/rooms/singleplayer',{token:login.token,body:{mode:'league',leagueId:'pgl',clubCode,...bad},status:400});
+  const career = await request('/api/rooms/singleplayer', { token: login.token, body: { mode:'league',leagueId:'pgl',clubCode,squadMode:'real',midseasonTactics:true,aiTransfers:true,transferLimit:2 }, status:201 });
+  assert.equal(career.midseasonTactics,true); assert.equal(career.aiTransfers,true);
+  const careerSocket = await connect(login.token);
+  async function careerEvent(name,eventName,body) { const promise=event(careerSocket,eventName);careerSocket.emit(name,{code:career.code,...body});return promise; }
+  async function careerError(name,body,pattern) { const promise=new Promise(resolve=>careerSocket.once('error:message',resolve));careerSocket.emit(name,{code:career.code,...body});assert.match((await promise).error,pattern); }
+  await careerEvent('room:join','room:state',{});
+  await careerEvent('draft:autoComplete','tournament:started',{});
+  await careerError('league:tactics',{action:'change',tacticalStyle:'counter'},/Reach mid-season/);
+  const half = await careerEvent('league:skipToTransfers','league:midseason',{});
+  assert.equal(half.transfers.tactics.phase,'choose');assert.ok(half.transfers.log.some(entry=>entry.type==='ai'));
+  const initialDeals=half.transfers.log;
+  const outsider = await connect(friend.token);
+  let denied = new Promise(resolve=>outsider.once('error:message',resolve));outsider.emit('league:tactics',{code:career.code,action:'keep'});assert.match((await denied).error,/Not a member/);
+  await careerError('league:nextSeason',{},/Finish your/);
+  await careerError('league:tactics',{action:'change',tacticalStyle:'custom:1'},/built-in/);
+  const keptSquad=await careerEvent('league:transfer','league:transferState',{action:'skip'});
+  assert.equal(keptSquad.transfers.tactics.phase,'choose');
+  await careerError('league:finishSeason',{},/tactics/);
+  const applied=await careerEvent('league:tactics','league:transferState',{action:'change',tacticalStyle:'counter'});
+  assert.equal(applied.transfers.tactics.current,'counter');assert.equal(applied.transfers.tactics.phase,'complete');
+  await careerError('league:tactics',{action:'change',tacticalStyle:'vertical'},/not open/);
+  const afterChange=await careerEvent('tournament:advance','tournament:step',{});
+  const match=afterChange.step.matches.find(match=>match.aCode===clubCode||match.bCode===clubCode);
+  assert.equal(match.tactical[match.aCode===clubCode?'A':'B'].key,'counter');
+  assert.deepEqual(afterChange.transfers.log,initialDeals);
+  const beforeReport=await request('/api/admin/leagues/'+career.code,{token:admin.token});
+  const completedCareer=await careerEvent('league:finishSeason','league:seasonFinished',{});
+  const oldReport=await request('/api/admin/leagues/'+career.code,{token:admin.token});
+  assert.equal(completedCareer.viewedStep,34);
+  denied=new Promise(resolve=>outsider.once('error:message',resolve));outsider.emit('league:nextSeason',{code:career.code});assert.match((await denied).error,/Finish your/);
+  const continuation=await careerEvent('league:nextSeason','league:nextSeasonReady',{});
+  const repeat=await careerEvent('league:nextSeason','league:nextSeasonReady',{});
+  assert.equal(continuation.newCode,repeat.newCode);assert.equal(continuation.seasonNumber,2);
+  const nextMeta=await request('/api/rooms/'+continuation.newCode,{token:login.token});
+  assert.equal(nextMeta.status,'league_stage');assert.equal(nextMeta.midseasonTactics,true);assert.equal(nextMeta.aiTransfers,true);
+  const nextReport=await request('/api/admin/leagues/'+continuation.newCode,{token:admin.token});
+  for(const club of nextReport.clubs) {
+    const priorClub=oldReport.clubs.find(prior=>prior.code===club.code);
+    assert.deepEqual(club.players.filter(player=>player.status==='Starting XI').map(player=>player.id),priorClub.players.filter(player=>player.status==='Starting XI').map(player=>player.id));
+    assert.ok(club.players.every(player=>player.stats.appearances===0));
+  }
+  let promise=event(careerSocket,'room:state');careerSocket.emit('room:join',{code:continuation.newCode});
+  const nextState=await promise;
+  assert.equal(nextState.league.seasonNumber,2);assert.equal(nextState.league.matchday,0);
+  assert.equal(nextState.league.previousSeasons.length,1);assert.equal(nextState.transfers.log.length,0);
+  assert.equal(nextState.transfers.tactics.phase,'closed');assert.ok(nextState.league.table.every(row=>row.played===0));
+  const oldAfter=await request('/api/admin/leagues/'+career.code,{token:admin.token});assert.deepEqual(oldAfter,oldReport);
+  sockets.forEach(socket=>socket.disconnect());await server.stop();server=await startServer(dbPath,dir);
+  const resumeCareer=await connect(login.token);
+  promise=event(resumeCareer,'room:state');resumeCareer.emit('room:join',{code:continuation.newCode});
+  assert.equal((await promise).league.seasonNumber,2);
+  promise=event(resumeCareer,'league:midseason');resumeCareer.emit('league:skipToTransfers',{code:continuation.newCode});await promise;
+  promise=event(resumeCareer,'league:transferState');resumeCareer.emit('league:tactics',{code:continuation.newCode,action:'keep'});assert.equal((await promise).transfers.tactics.current,'counter');
+  promise=event(resumeCareer,'league:transferState');resumeCareer.emit('league:transfer',{code:continuation.newCode,action:'skip'});await promise;
+  promise=event(resumeCareer,'league:seasonFinished');resumeCareer.emit('league:finishSeason',{code:continuation.newCode});await promise;
+  promise=event(resumeCareer,'league:nextSeasonReady');resumeCareer.emit('league:nextSeason',{code:continuation.newCode});assert.equal((await promise).seasonNumber,3);
   await request('/api/auth/change-password', { token: admin.token, body: { currentPassword: 'test-admin-initial-password', newPassword: 'changed-admin-password' } });
   await server.stop(); server = await startServer(dbPath, dir);
   await request('/api/auth/login', { body: { username: 'Admin', password: 'test-admin-initial-password' }, status: 401 });

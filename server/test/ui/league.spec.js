@@ -200,3 +200,52 @@ for (const setting of [{ enabled: 'closed', limit: '3' }, { enabled: 'open', lim
   expect(errors).toEqual([]);
  });
 }
+for (const width of [1280,390]) {
+ test(`league tactics, AI transfer center and continuing seasons at ${width}px`, { timeout: 90000 }, async ({page,request})=>{
+  await page.setViewportSize({width,height:900});const errors=[];page.on('pageerror',error=>errors.push(error.message));
+  await page.route('https://cdn.socket.io/**',route=>route.fulfill({path:path.join(__dirname,'..','..','node_modules/socket.io/client-dist/socket.io.min.js'),contentType:'application/javascript'}));
+  await page.route('https://fonts.googleapis.com/**',route=>route.abort());await page.route('https://fonts.gstatic.com/**',route=>route.abort());await page.route('https://cdn.jsdelivr.net/**',route=>route.abort());
+  const username=`career_${width}_${Date.now().toString().slice(-6)}`;
+  const account=await(await request.post('/api/auth/register',{data:{username,email:username+'@example.test',password:'test-password'}})).json();
+  await page.addInitScript(token=>sessionStorage.setItem('draftbox.token',token),account.token);
+  await page.goto('/');await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();
+  await page.locator('#spMidseasonTactics').selectOption('on');await page.locator('#spAiTransfers').selectOption('on');
+  await page.locator('#spSquadMode').selectOption('real');await page.locator('#btnSingleplayer').click();
+  await page.locator('#btnLockTacticalStyle').click();await page.locator('#btnEnterTournament').click();
+  const oldCode=page.url().split('/').pop();
+  await expect(page.locator('#leagueZone')).toContainText('Season 1');
+  await page.locator('#leagueTransferLog summary').click();await expect(page.locator('#leagueDealRows')).toContainText('mid-season');
+  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonTacticsZone')).toBeVisible();
+  await expect(page.locator('#leagueDealRows')).toContainText('AI exchange');
+  const firstDeal=await page.locator('#leagueDealRows h4').first().textContent();
+  await page.locator('#leagueDealSearch').fill(firstDeal.split('OVR')[0].trim());await expect(page.locator('#leagueDealRows .league-deal')).toHaveCount(1);
+  await page.locator('#leagueDealSearch').fill('');
+  if(width===390) {
+   await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();
+   const id=await page.locator('#transferPick0 option').nth(1).getAttribute('value');await page.locator('#transferPick0').selectOption(id);await page.locator('#btnSignPlayers').click();
+   await expect(page.locator('#leagueDealRows')).toContainText('Your signing');
+  } else await page.locator('#btnSkipTransfers').click();
+  await expect(page.locator('#continueZone')).toBeHidden();await expect(page.locator('#btnFinishLeague')).toBeHidden();
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth)).toBe(false);
+  await page.screenshot({path:`test-results/league-midseason-${width}.png`,fullPage:true});
+  await page.locator('#midseasonStyle').selectOption('counter');await page.locator('#btnChangeLeagueTactic').click();
+  await expect(page.locator('#midseasonTacticsZone')).toBeHidden();await expect(page.locator('#btnFinishLeague')).toBeVisible();
+  await page.reload();await expect(page.locator('#midseasonTacticsZone')).toBeHidden();
+  const headers={Authorization:`Bearer ${account.token}`};
+  expect((await(await request.get('/api/rooms/'+oldCode,{headers})).json()).members[0].tacticalStyle).toBe('counter');
+  await page.locator('#btnFinishLeague').click();await expect(page.locator('#seasonResults')).toContainText('306 matches',{timeout:20000});
+  const clubCode=(await(await request.get('/api/rooms/'+oldCode,{headers})).json()).members[0].clubCode;
+  const oldSquad=(await(await request.get('/api/rooms/'+oldCode+'/clubs/'+clubCode,{headers})).json()).players.filter(player=>player.status==='Starting XI').map(player=>player.id);
+  await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#leagueZone')).toContainText('Season 2');await expect(page.locator('#leagueZone')).toContainText('Matchday 0 / 34');
+  const nextCode=page.url().split('/').pop();expect(nextCode).not.toBe(oldCode);
+  await expect(page.locator('#leagueSeasonHistoryZone')).toContainText('Season 1');
+  const nextSquad=(await(await request.get('/api/rooms/'+nextCode+'/clubs/'+clubCode,{headers})).json()).players.filter(player=>player.status==='Starting XI').map(player=>player.id);
+  expect(nextSquad).toEqual(oldSquad);
+  await page.reload();await expect(page.locator('#leagueZone')).toContainText('Season 2');
+  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonStyle')).toHaveValue('counter');
+  await page.locator('#btnKeepLeagueTactic').click();await page.locator('#btnSkipTransfers').click();
+  await page.locator('#btnFinishLeague').click();await expect(page.locator('#seasonResults')).toContainText('306 matches',{timeout:20000});
+  await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#leagueZone')).toContainText('Season 3');
+  expect(errors).toEqual([]);
+ });
+}

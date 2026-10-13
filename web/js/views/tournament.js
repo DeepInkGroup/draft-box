@@ -20,6 +20,9 @@ const TournamentView = {
     let transferState = null;
     let transferPending = false;
     let skipPending = false;
+    let tacticPending = false;
+    let nextSeasonPending = false;
+    let midseasonStyle = null;
     let clubRoster = null;
     let clubRequest = 0;
     const releaseSelection = new Set();
@@ -28,6 +31,9 @@ const TournamentView = {
       <div id="championZone"></div>
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
       <div class="card transfer-window" id="transferZone" style="display:none;"></div>
+      <div class="card" id="midseasonTacticsZone" style="display:none;"></div>
+      <div class="card" id="leagueTransferLogZone" style="display:none;"></div>
+      <div class="card" id="leagueSeasonHistoryZone" style="display:none;"></div>
       <div class="card league-tools" id="leagueTools" style="display:none;"></div>
       <div class="card" id="leagueZone" style="display:none;"></div>
       <div class="card" id="liveZone" style="display:none;"></div>
@@ -49,6 +55,9 @@ const TournamentView = {
     const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
     const leagueZone = container.querySelector('#leagueZone');
     const transferZone = container.querySelector('#transferZone');
+    const tacticsZone = container.querySelector('#midseasonTacticsZone');
+    const logZone = container.querySelector('#leagueTransferLogZone');
+    const seasonHistoryZone = container.querySelector('#leagueSeasonHistoryZone');
     const leagueTools = container.querySelector('#leagueTools');
 
     async function loadClubSquad() {
@@ -76,6 +85,12 @@ const TournamentView = {
 
     function renderLeagueTools() {
       if (!isLeague || !leagueState) return;
+      renderMidseasonTactics();
+      renderTransferLog();
+      const seasons = leagueState.previousSeasons || [];
+      seasonHistoryZone.style.display = seasons.length ? '' : 'none';
+      seasonHistoryZone.innerHTML = seasons.length ? `<details><summary>Previous Seasons</summary>${seasons.map(season => `<div class="league-season-history"><span>Season ${season.seasonNumber} · Champion: ${escapeLeagueText(season.champion)} · Your position: ${season.position}</span><button class="btn btn-ghost btn-sm" data-season-code="${season.roomCode}">View Results</button></div>`).join('')}</details>` : '';
+      seasonHistoryZone.querySelectorAll('[data-season-code]').forEach(button => button.onclick = () => App.goTournament(button.dataset.seasonCode));
       leagueTools.style.display = '';
       if (!leagueTools.querySelector('#btnSkipToTransfers')) {
         const clubs = leagueState.table.slice().sort((a, b) => a.name.localeCompare(b.name));
@@ -113,10 +128,38 @@ const TournamentView = {
       const panel = leagueTools.querySelector('#leagueCohesion');
       panel.classList.toggle('hidden', !cohesion?.changedPlayers);
       if (cohesion?.changedPlayers) panel.innerHTML = cohesion.matchesRemaining ? `<b>Team Coordination · Settling In</b><p>${cohesion.changedPlayers} new signing${cohesion.changedPlayers === 1 ? '' : 's'} · Attack and defense currently −${cohesion.penaltyPercent}%. Recovery: ${cohesion.matchesPlayed}/${cohesion.recoveryMatches} matches played.</p><progress max="${cohesion.recoveryMatches}" value="${cohesion.matchesPlayed}" aria-label="Team coordination recovery"></progress>` : '<b>Team Coordination · Fully Settled</b><p>Your new signings have settled in. The temporary transfer penalty has ended.</p>';
-      leagueTools.querySelector('.league-finish').style.display = tournamentStage !== 'done' && viewedStep >= halfway && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
+      leagueTools.querySelector('.league-finish').style.display = tournamentStage !== 'done' && viewedStep >= halfway && transferState?.tactics?.phase !== 'choose' && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
       const finishButton = leagueTools.querySelector('#btnFinishLeague');
       finishButton.disabled = advancePending || transferPending;
       finishButton.textContent = advancePending ? 'Simulating Remaining Fixtures...' : 'Finish Season & View Results';
+    }
+
+    const escapeLeagueText = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
+    function renderMidseasonTactics() {
+      const choice = transferState?.tactics;
+      tacticsZone.style.display = choice?.phase === 'choose' ? '' : 'none';
+      if (choice?.phase !== 'choose') { midseasonStyle = null; return; }
+      if (!midseasonStyle) midseasonStyle = choice.current;
+      tacticsZone.innerHTML = `<h3>Mid-season Tactics</h3><p class="muted">Choose a tactic for the second half, or keep your current plan. Your first-half results remain unchanged.</p><div class="field"><label for="midseasonStyle">Tactical Style</label><select id="midseasonStyle" ${tacticPending ? 'disabled' : ''}>${choice.styles.map(style => `<option value="${style.key}">${style.label}</option>`).join('')}</select></div><p class="muted" id="midseasonStyleDescription"></p><div class="dialog-actions"><button class="btn btn-ghost" id="btnKeepLeagueTactic" ${tacticPending ? 'disabled' : ''}>Keep Current Tactic</button><button class="btn btn-primary" id="btnChangeLeagueTactic" ${tacticPending ? 'disabled' : ''}>Apply Tactic</button></div>`;
+      const select = tacticsZone.querySelector('#midseasonStyle'); select.value = midseasonStyle;
+      const describe = () => { midseasonStyle = select.value; tacticsZone.querySelector('#midseasonStyleDescription').textContent = choice.styles.find(style => style.key === select.value)?.desc || ''; };
+      select.onchange = describe; describe();
+      const send = (action) => { if (tacticPending) return; tacticPending = true; renderMidseasonTactics(); socket.emit('league:tactics',{ code, action, tacticalStyle: midseasonStyle }); };
+      tacticsZone.querySelector('#btnKeepLeagueTactic').onclick = () => send('keep');
+      tacticsZone.querySelector('#btnChangeLeagueTactic').onclick = () => send('change');
+    }
+    function renderTransferLog() {
+      if (!transferState) return;
+      const entries = transferState.log || [];
+      logZone.style.display = transferState.aiEnabled || entries.length ? '' : 'none';
+      if (!logZone.querySelector('#leagueTransferLog')) {
+        logZone.innerHTML = `<details id="leagueTransferLog"><summary>Transfer Center <span class="badge" id="leagueDealCount"></span></summary><p class="muted">Completed mid-season deals, including AI player exchanges.</p><div class="field"><label for="leagueDealSearch">Search players or clubs</label><input type="search" id="leagueDealSearch" placeholder="Player or club name"></div><div class="league-deals" id="leagueDealRows"></div></details>`;
+        logZone.querySelector('#leagueDealSearch').oninput = renderTransferLog;
+      }
+      logZone.querySelector('#leagueDealCount').textContent = `${entries.length} deals`;
+      const query = logZone.querySelector('#leagueDealSearch').value.trim().toLowerCase();
+      const matches = entries.filter(entry => `${entry.player.name} ${entry.fromName} ${entry.toName} ${entry.exchangedPlayer?.name || ''} ${entry.releasedPlayer?.name || ''}`.toLowerCase().includes(query));
+      logZone.querySelector('#leagueDealRows').innerHTML = matches.map(entry => `<article class="league-deal"><span class="badge">${entry.type === 'ai' ? 'AI exchange' : 'Your signing'} · MD ${entry.matchday}</span><h4>${escapeLeagueText(entry.player.name)} <span class="muted">OVR ${entry.player.overall}</span></h4><p>${escapeLeagueText(entry.fromName)} → ${escapeLeagueText(entry.toName)}</p>${entry.exchangedPlayer ? `<p class="muted">In exchange: ${escapeLeagueText(entry.exchangedPlayer.name)} (OVR ${entry.exchangedPlayer.overall}) → ${escapeLeagueText(entry.fromName)}</p>` : entry.releasedPlayer ? `<p class="muted">Released: ${escapeLeagueText(entry.releasedPlayer.name)}</p>` : ''}</article>`).join('') || `<p class="muted">${query ? 'No deals match this search.' : viewedStep < Math.floor(leagueState.totalMatchdays / 2) ? 'Transfers will appear at mid-season.' : 'No completed transfers in this window.'}</p>`;
     }
 
     function transferPlayerHtml(player) {
@@ -191,7 +234,7 @@ const TournamentView = {
       if (!leagueState) return;
       leagueZone.style.display = '';
       const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
-      leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name}</h3><span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
+      leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3><span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
         ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
         <div class="league-table-scroll"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
@@ -397,7 +440,7 @@ const TournamentView = {
 
     function renderButton() {
       renderLeagueTools();
-      if (transferState && ['release', 'sign'].includes(transferState.phase)) {
+      if (transferState && (['release', 'sign'].includes(transferState.phase) || transferState.tactics?.phase === 'choose')) {
         continueZone.style.display = 'none';
         return;
       }
@@ -932,7 +975,8 @@ const TournamentView = {
             <div class="row" style="margin-top:16px;justify-content:center;">
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
               <button class="btn btn-ghost" id="btnViewHistoryFromChampion">My Match History</button>
-              ${isCreator ? `<button class="btn btn-ghost" id="btnNewRoom">${isLeague ? 'Start New Season' : 'Start New Room'}</button>` : ''}
+              ${isCreator ? `<button class="btn btn-ghost" id="btnNewRoom">${isLeague ? 'Create New League' : 'Start New Room'}</button>` : ''}
+              ${isCreator && isLeague ? '<button class="btn btn-primary" id="btnNextLeagueSeason">Continue to Next Season</button>' : ''}
               ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
@@ -951,6 +995,8 @@ const TournamentView = {
             bracketBtn.textContent = bracketRecap.classList.contains('hidden') ? 'Show Full Bracket' : 'Hide Full Bracket';
           });
         }
+        const nextSeasonBtn = championZone.querySelector('#btnNextLeagueSeason');
+        if (nextSeasonBtn) nextSeasonBtn.onclick = () => { if (nextSeasonPending) return; nextSeasonPending = true; nextSeasonBtn.disabled = true; nextSeasonBtn.textContent = 'Preparing Next Season...'; socket.emit('league:nextSeason',{ code }); };
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
         if (newRoomBtn) newRoomBtn.addEventListener('click', () => isLeague ? DashboardView.renderLeagueSelect(container) : App.goDashboard('create'));
         const rematchBtn = championZone.querySelector('#btnRematch');
@@ -985,6 +1031,7 @@ const TournamentView = {
       isCreator = s.creatorId === App.state.user.id;
       if (s.myLineup) myCode = s.myLineup.code;
       renderLeagueTools();
+      if (isLeague) renderLeagueTable();
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
         renderLineupReveal(s.myLineup);
       } else {
@@ -1078,17 +1125,23 @@ const TournamentView = {
       (transferState.phase === 'disabled' ? leagueZone : transferZone).scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
+    App.onSocket('league:nextSeasonReady', (payload) => App.goTournament(payload.newCode));
+
     App.onSocket('league:transferState', (payload) => {
+      const signing = transferPending;
       transferPending = false;
+      tacticPending = false;
       transferState = payload.transfers;
       releaseSelection.clear();
       renderTransfers();
       renderButton();
       if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
-      if (transferState.phase === 'complete') App.toast(`${transferState.incoming.length === 1 ? 'One player' : `${transferState.incoming.length} players`} signed. Your XI is complete.`, false);
+      if (signing && transferState.phase === 'complete') App.toast(`${transferState.incoming.length === 1 ? 'One player' : `${transferState.incoming.length} players`} signed. Your XI is complete.`, false);
     });
 
     App.onSocket('error:message', (e) => {
+      tacticPending = false; nextSeasonPending = false;
+      const nextButton = championZone.querySelector('#btnNextLeagueSeason'); if (nextButton) { nextButton.disabled = false; nextButton.textContent = 'Continue to Next Season'; }
       advancePending = false;
       skipPending = false;
       renderLeagueTools();

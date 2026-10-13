@@ -3,6 +3,8 @@ const { getSlots, playerFitsSlot } = require('./formations');
 const { teamStrength } = require('./botEngine');
 const { settingsForSeason } = require('./leagueSettings');
 const { startCohesionRecovery, cohesionAtMatchday } = require('./leagueCohesion');
+const { tacticSnapshot } = require('./leagueMidseason');
+const { ensureClubRosters, rosterPlayer } = require('./leagueAiTransfers');
 
 function ensureTransferWindow(t) {
   if (t.kind !== 'league' || !settingsForSeason(t).enabled) return null;
@@ -46,7 +48,9 @@ function transferSnapshot(t, userId, viewedStep) {
   if (t.kind !== 'league') return null;
   const settings = settingsForSeason(t);
   const team = Object.values(t.slotByCode).find((slot) => slot.isHuman && slot.userId === userId);
-  const common = { opensAfter: Math.floor(t.fixtures.length / 2), ...settings, cohesion: cohesionAtMatchday(team, viewedStep) };
+  const common = { opensAfter: Math.floor(t.fixtures.length / 2), ...settings, cohesion: cohesionAtMatchday(team, viewedStep),
+    tactics: tacticSnapshot(t, userId, viewedStep), aiEnabled: !!t.aiTransfers,
+    log: (t.transferLog || []).filter(entry => entry.matchday <= viewedStep).map(entry => ({ ...entry, fromName: t.slotByCode[entry.from]?.name || 'Free agents', toName: t.slotByCode[entry.to]?.name || 'Free agents' })) };
   if (!settings.enabled) return { ...common, phase: 'disabled' };
   const window = ensureTransferWindow(t);
   const progress = window?.users[userId];
@@ -57,8 +61,11 @@ function transferSnapshot(t, userId, viewedStep) {
     stats: stats.get(player.id) || { appearances: 0, goals: 0, assists: 0, saves: 0, yellowCards: 0, redCards: 0, starMoments: 0 } });
   const used = new Set(Object.values(t.slotByCode).filter((slot) => slot.isHuman).flatMap((slot) => slot.xi.map((player) => player.id)));
   const released = new Set(progress.outgoing.map((player) => player.id));
-  const market = progress.phase === 'sign' ? getLeague(t.leagueId).teams.flatMap((club) => club.players)
-    .filter((player) => !used.has(player.id) && !released.has(player.id))
+  const aiStarters = new Set(t.aiTransfers ? Object.values(t.slotByCode).filter(slot => !slot.isHuman).flatMap(slot => slot.xi.map(player => player.id)) : []);
+  const pool = t.aiTransfers ? Object.values(ensureClubRosters(t)).flat().concat(t.freeAgents || []) : getLeague(t.leagueId).teams.flatMap(club => club.players);
+  const uniquePool = [...new Map(pool.map(player => [player.id, player])).values()];
+  const market = progress.phase === 'sign' ? uniquePool
+    .filter((player) => !used.has(player.id) && !released.has(player.id) && !aiStarters.has(player.id))
     .map((player) => ({ ...profile(player, 'Available'), eligibleSlots: progress.vacancies.filter((slot) => playerFitsSlot(player, slot)).map((slot) => slot.code) }))
     .filter((player) => player.eligibleSlots.length).sort((a, b) => b.overall - a.overall || a.name.localeCompare(b.name)) : [];
   return { ...common, phase: progress.phase, opensAfter, squad: team.xi.map((player) => profile(player, 'In your XI')),
@@ -109,6 +116,18 @@ function planTransfer(tournament, userId, action, payload = {}) {
     team.xi.sort((a, b) => getSlots(team.formation).findIndex((slot) => slot.code === a.slotCode) - getSlots(team.formation).findIndex((slot) => slot.code === b.slotCode));
     progress.incoming = incoming;
     progress.phase = 'complete';
+    for (let index = 0; index < incoming.length; index++) {
+      const player = incoming[index], outgoing = progress.outgoing.find(entry => entry.slotCode === player.slotCode);
+      const rosterOwner = Object.entries(t.clubRosters || {}).find(([,roster]) => roster.some(entry => entry.id === player.id))?.[0];
+      const owner = t.aiTransfers ? rosterOwner || null : player.team;
+      (t.transferLog ||= []).push({ type: 'human', matchday: t.matchday, from: owner, to: team.code, player: rosterPlayer(player), releasedPlayer: rosterPlayer(outgoing) });
+      if (t.aiTransfers) {
+        const rosters = ensureClubRosters(t);
+        for (const code of Object.keys(rosters)) rosters[code] = rosters[code].filter(entry => entry.id !== player.id && (code !== team.code || entry.id !== outgoing.id));
+        rosters[team.code].push(rosterPlayer(player));
+        t.freeAgents = (t.freeAgents || []).filter(entry => entry.id !== player.id).concat(rosterPlayer(outgoing));
+      }
+    }
     startCohesionRecovery(team, incoming.length, t.matchday);
   } else throw new Error('invalid transfer action');
   team.strength = teamStrength(team.xi);
