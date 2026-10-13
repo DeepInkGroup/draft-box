@@ -2,15 +2,16 @@
 const ToggleGroup = {
   render(container, { options, selected, onChange } = {}) {
     let current = selected !== undefined ? selected : options[0].value;
+    let disabled = false;
 
     function renderAll() {
       container.innerHTML = `
         <div class="toggle-group">
           ${options.map((o, i) => `
-            <div class="toggle-option ${o.value === current ? 'selected' : ''}" data-idx="${i}">
+            <button type="button" class="toggle-option ${o.value === current ? 'selected' : ''}" data-idx="${i}" data-value="${o.value}" aria-pressed="${o.value === current}" ${disabled ? 'disabled' : ''}>
               <div class="toggle-title">${o.title}</div>
               <div class="toggle-sub">${o.sub || ''}</div>
-            </div>
+            </button>
           `).join('')}
         </div>
       `;
@@ -24,6 +25,6 @@ const ToggleGroup = {
     }
 
     renderAll();
-    return { get value() { return current; } };
+    return { get value() { return current; }, setDisabled(value) { disabled = !!value; renderAll(); } };
   }
 };

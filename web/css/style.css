@@ -1607,3 +1607,20 @@ button.transfer-player-card { cursor: pointer; }
 #leagueTransferLog summary { cursor: pointer; font-weight: 700; }
 #leagueDealCount { margin-left: 8px; }
 @media (max-width:640px) { .league-deals { grid-template-columns: minmax(0,1fr); } }
+
+/* League setup and fixed transfer offers */
+.toggle-option { font: inherit; color: var(--text); }
+.toggle-option:focus-visible, .transfer-offer-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.toggle-option:disabled { cursor: not-allowed; opacity: .4; }
+.league-transfer-options h3 { margin-top: 0; }
+.league-transfer-options .field { margin: 18px 0 8px; }
+.transfer-limit-toggle .toggle-group { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.transfer-offer-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.transfer-offer-group { min-width: 0; }
+.transfer-sign-grid { grid-template-columns: 1fr; }
+.transfer-offer-card { width: 100%; min-width: 0; text-align: left; }
+.transfer-offer-choice { display: block; margin-top: 12px; font-weight: 700; color: var(--accent-strong); }
+@media (max-width: 520px) {
+  .transfer-limit-toggle .toggle-group { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .transfer-offer-options { grid-template-columns: 1fr; }
+}

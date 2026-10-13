@@ -1,5 +1,9 @@
 const { test, expect } = require('@playwright/test');
 const path = require('node:path');
+async function choose(page, id, value) {
+  value = ({ open: 'true', closed: 'false', on: 'true', off: 'false' })[value] || String(value);
+  await page.locator('#' + id + ' button[data-value="' + value + '"]').click();
+}
 
 for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
   test(`single-player league flow and saved season at ${viewport.width}px`, async ({ page, request }) => {
@@ -30,11 +34,13 @@ for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 
     await expect(page.locator('#leagueSelect')).toHaveValue('pgl');
     await expect(page.locator('#leagueDetails')).toContainText('18 clubs');
     await page.locator('#btnSelectLeague').click();
-    await expect(page.locator('#spSquadMode')).toHaveValue('draft');
-    await page.locator('#spSquadMode').selectOption('real');
+    await expect(page.locator('#spSquadMode button[data-value="draft"]')).toHaveAttribute('aria-pressed', 'true');
+    expect(await page.locator('#spSquadMode').evaluate(el => !!(document.querySelector('#spAutoDraft').compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
+    await page.screenshot({path: `test-results/league-setup-${viewport.width}.png`,fullPage:true});
+    await choose(page, 'spSquadMode', 'real');
     await expect(page.locator('#spAutoDraft')).toBeHidden();
     await expect(page.locator('#btnSingleplayer')).toHaveText('Use Real Club Squad');
-    await page.locator('#spSquadMode').selectOption('draft');
+    await choose(page, 'spSquadMode', 'draft');
     await expect(page.locator('#spClub option')).toHaveCount(18);
     await page.locator('#spClub').selectOption({ label: 'Persepolis' });
     await page.locator('#spAutoDraft').getByText('Auto', { exact: true }).click();
@@ -85,8 +91,8 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await page.locator('#modeSingle').click();
   await page.locator('#singleLeague').click();
   await page.locator('#btnSelectLeague').click();
-  await page.locator('#spSquadMode').selectOption('real');
-  await page.locator('#spTransferLimit').selectOption(String(transferCount));
+  await choose(page, 'spSquadMode', 'real');
+  await choose(page, 'spTransferLimit', String(transferCount));
   await page.locator('#btnSingleplayer').click();
   await expect(page.locator('#squadProgress')).toContainText('11');
   const code = (await page.url()).split('/').pop();
@@ -135,17 +141,19 @@ test(`real squad with ${transferCount} transfer(s) and relegation markers works 
   await expect(page.locator('#transferPick0')).toBeVisible();
   await page.reload();
   await expect(page.locator('#transferPick0')).toBeVisible();
-  const first = await page.locator('#transferPick0 option').nth(1).getAttribute('value');
-  await page.locator('#transferPick0').selectOption(first);
-  const chosen = [first];
-  for (let i = 1; i < transferCount; i++) {
-    const next = await page.locator('#transferPick' + i + ' option').evaluateAll((options, chosen) => options.find(option => option.value && !chosen.includes(option.value)).value, chosen);
-    chosen.push(next); await page.locator('#transferPick' + i).selectOption(next);
+  const offers = await page.locator('[data-offer-slot]').evaluateAll(buttons => buttons.map(button => button.dataset.player));
+  expect(offers).toHaveLength(transferCount * 2);
+  await page.reload();
+  await expect(page.locator('[data-offer-slot]')).toHaveCount(transferCount * 2);
+  expect(await page.locator('[data-offer-slot]').evaluateAll(buttons => buttons.map(button => button.dataset.player))).toEqual(offers);
+  for (let i = 0; i < transferCount; i++) {
+    await expect(page.locator('#transferPick' + i + ' button')).toHaveCount(2);
+    await page.locator('#transferPick' + i + ' button').first().click();
   }
   await expect(page.locator('#transferPick' + transferCount)).toHaveCount(0);
-  await expect(page.locator('#transferProfile0')).toContainText('OVR');
-  await expect(page.locator('#transferProfile0')).toContainText('Available');
-  await expect(page.locator('#transferProfile0')).toContainText('Assists');
+  await expect(page.locator('#transferPick0')).toContainText('OVR');
+  await expect(page.locator('#transferPick0')).toContainText('Available');
+  await expect(page.locator('#transferPick0')).toContainText('Assists');
   expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)).toBe(false);
   await page.screenshot({ path: `test-results/transfers-${transferCount}-mobile.png`, fullPage: true });
   await page.locator('#btnSignPlayers').click();
@@ -182,10 +190,10 @@ for (const setting of [{ enabled: 'closed', limit: '3' }, { enabled: 'open', lim
   const account=await(await request.post('/api/auth/register',{data:{username,email:username+'@example.test',password:'test-password'}})).json();
   await page.addInitScript(token=>sessionStorage.setItem('draftbox.token',token),account.token);
   await page.goto('/');await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();
-  await page.locator('#spTransferLimit').selectOption(setting.limit);await page.locator('#spTransfers').selectOption(setting.enabled);
-  await expect(page.locator('#spTransferNote')).toContainText('disabled');
-  if(setting.enabled==='closed')await expect(page.locator('#spTransferLimit')).toBeDisabled();
-  await page.locator('#spSquadMode').selectOption('real');await page.locator('#btnSingleplayer').click();
+  await choose(page, 'spTransferLimit', setting.limit);await choose(page, 'spTransfers', setting.enabled);
+  await expect(page.locator('#spTransferNote')).toContainText('closed');
+  if(setting.enabled==='closed')await expect(page.locator('#spTransferLimit button').first()).toBeDisabled();
+  await choose(page, 'spSquadMode', 'real');await page.locator('#btnSingleplayer').click();
   await page.locator('#btnLockTacticalStyle').click();await page.locator('#btnEnterTournament').click();
   await expect(page.locator('#leagueTransferRules')).toContainText('Transfers closed');
   await expect(page.locator('#btnFinishLeague')).toBeHidden();
@@ -209,8 +217,9 @@ for (const width of [1280,390]) {
   const account=await(await request.post('/api/auth/register',{data:{username,email:username+'@example.test',password:'test-password'}})).json();
   await page.addInitScript(token=>sessionStorage.setItem('draftbox.token',token),account.token);
   await page.goto('/');await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();
-  await page.locator('#spMidseasonTactics').selectOption('on');await page.locator('#spAiTransfers').selectOption('on');
-  await page.locator('#spSquadMode').selectOption('real');await page.locator('#btnSingleplayer').click();
+  if(width===390) { await choose(page,'spEndTransfers','open'); await choose(page,'spEndTransferLimit',3); await choose(page,'spEndAiTransfers','on'); }
+  await choose(page, 'spMidseasonTactics', 'on');await choose(page, 'spAiTransfers', 'on');
+  await choose(page, 'spSquadMode', 'real');await page.locator('#btnSingleplayer').click();
   await page.locator('#btnLockTacticalStyle').click();await page.locator('#btnEnterTournament').click();
   const oldCode=page.url().split('/').pop();
   await expect(page.locator('#leagueZone')).toContainText('Season 1');
@@ -222,7 +231,7 @@ for (const width of [1280,390]) {
   await page.locator('#leagueDealSearch').fill('');
   if(width===390) {
    await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();
-   const id=await page.locator('#transferPick0 option').nth(1).getAttribute('value');await page.locator('#transferPick0').selectOption(id);await page.locator('#btnSignPlayers').click();
+   await page.locator('#transferPick0 button').first().click();await page.locator('#btnSignPlayers').click();
    await expect(page.locator('#leagueDealRows')).toContainText('Your signing');
   } else await page.locator('#btnSkipTransfers').click();
   await expect(page.locator('#continueZone')).toBeHidden();await expect(page.locator('#btnFinishLeague')).toBeHidden();
@@ -241,9 +250,28 @@ for (const width of [1280,390]) {
   await expect(page.locator('#leagueSeasonHistoryZone')).toContainText('Season 1');
   const nextSquad=(await(await request.get('/api/rooms/'+nextCode+'/clubs/'+clubCode,{headers})).json()).players.filter(player=>player.status==='Starting XI').map(player=>player.id);
   expect(nextSquad).toEqual(oldSquad);
+  if(width===390) {
+    await expect(page.locator('#transferZone')).toContainText('End-of-season Transfer Window');
+    await expect(page.locator('#btnSkipToTransfers')).toBeDisabled();
+    await page.locator('#leagueTransferLog summary').click();
+    await expect(page.locator('#leagueDealRows')).toContainText('End-of-season');
+    await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();
+    await expect(page.locator('#transferPick0 button')).toHaveCount(2);
+    await page.screenshot({path:'test-results/end-season-offers-mobile.png',fullPage:true});
+    await page.reload();await expect(page.locator('#transferPick0 button')).toHaveCount(2);
+    await page.locator('#transferPick0 button').last().click();await page.locator('#btnSignPlayers').click();
+    await expect(page.locator('#transferZone')).toBeHidden();
+    await expect(page.locator('#leagueCohesion')).toContainText('0/4 matches');
+    await expect(page.locator('#btnSkipToTransfers')).toBeEnabled();
+  } else await expect(page.locator('#transferZone')).toBeHidden();
   await page.reload();await expect(page.locator('#leagueZone')).toContainText('Season 2');
   await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonStyle')).toHaveValue('counter');
-  await page.locator('#btnKeepLeagueTactic').click();await page.locator('#btnSkipTransfers').click();
+  await page.locator('#btnKeepLeagueTactic').click();
+  if(width===390) {
+    await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();
+    await expect(page.locator('#btnSignPlayers')).toBeDisabled();
+    await page.locator('#transferPick0 button').first().click();await page.locator('#btnSignPlayers').click();
+  } else await page.locator('#btnSkipTransfers').click();
   await page.locator('#btnFinishLeague').click();await expect(page.locator('#seasonResults')).toContainText('306 matches',{timeout:20000});
   await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#leagueZone')).toContainText('Season 3');
   expect(errors).toEqual([]);

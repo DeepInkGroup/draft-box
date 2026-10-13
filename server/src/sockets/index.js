@@ -262,6 +262,7 @@ function registerSocketHandlers(io) {
         squadMode: roomRow.squad_mode,
         transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
         midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
+        endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
         creatorId: roomRow.creator_id,
         humanSlotsMax: roomRow.human_slots_max,
         singlePlayer: !!roomRow.single_player,
@@ -599,7 +600,7 @@ function registerSocketHandlers(io) {
         const state = rm.loadRoomState(room);
         const member = state.members.get(socket.user.id);
         if (!member) throw new Error('not a member of this league');
-        if (member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('view the first half of the season before making transfers');
+        if (!(state.tournament.endTransferWindow && state.tournament.matchday === 0) && member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('view the first half of the season before making transfers');
         const next = planTransfer(state.tournament, socket.user.id, action, { playerIds, picks });
         rm.persistLeagueRoster(state, socket.user.id, next);
         socket.emit('league:transferState', { transfers: transferSnapshot(next, socket.user.id, member.viewedStep) });

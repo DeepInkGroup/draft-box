@@ -48,7 +48,8 @@ test('AI deals preserve ownership, protect humans, keep full XIs and apply recov
   for(const entry of t.transferLog) {
    assert.equal(entry.type,'ai');assert.notEqual(entry.from,human.code);assert.notEqual(entry.to,human.code);
    assert.equal(starters.has(entry.player.id),false);
-   assert.ok(entry.player.overall>entry.exchangedPlayer.overall);
+   assert.equal(entry.offeredPlayerIds.length,2);
+   assert.ok(entry.offeredPlayerIds.includes(entry.player.id));
    involved[entry.from]=(involved[entry.from]||0)+1;involved[entry.to]=(involved[entry.to]||0)+1;
    assert.ok(t.clubRosters[entry.to].some(player=>player.id===entry.player.id));
    assert.ok(!t.clubRosters[entry.from].some(player=>player.id===entry.player.id));

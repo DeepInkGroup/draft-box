@@ -48,6 +48,8 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.midseasonTacticsAvailable, true);
     assert.equal(pgl.aiTransfersAvailable, true);
     assert.equal(pgl.continuousSeasons, true);
+    assert.equal(pgl.endSeasonTransfersAvailable, true);
+    assert.equal(pgl.transferOfferCount, 2);
   }, {}, 60);
   await request(apiBase + '/', async (response) => {
     assert.match(await response.text(), /Draft Box/);

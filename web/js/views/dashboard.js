@@ -276,8 +276,6 @@ const DashboardView = {
         <h3>${league ? 'League Games — ' + league.name : 'Single Player — World Cup'}</h3>
         <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
         ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
-        ${league ? `<div class="field"><label for="spSquadMode">Squad Mode</label><select id="spSquadMode"><option value="draft">Draft Style — build an XI from league clubs</option><option value="real">Real Club Squad — play with your club's players</option></select></div><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div class="field"><label for="spTransfers">Transfer window</label><select id="spTransfers"><option value="open">Open</option><option value="closed">Closed</option></select></div><div class="field"><label for="spTransferLimit">Maximum player changes</label><select id="spTransferLimit"><option value="0">0 - no transfers</option><option value="1">1 player</option><option value="2" selected>2 players</option><option value="3">3 players</option></select></div><div class="field"><label for="spAiTransfers">AI team transfers</label><select id="spAiTransfers"><option value="off">Disabled</option><option value="on">Enabled - AI clubs can trade at mid-season</option></select></div><p id="spTransferNote" class="muted">The window opens halfway through the season. Release up to 2 players, then sign replacements. New signings briefly reduce coordination, recovering over four matches.</p></section>` : ''}
-        ${league ? `<div class="field"><label for="spMidseasonTactics">Mid-season tactic changes</label><select id="spMidseasonTactics"><option value="off">Disabled - keep your season tactic</option><option value="on">Enabled - choose or keep a tactic at halfway</option></select></div>` : ''}
         <div id="spFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
         <div id="spTimer" style="margin-bottom:16px;"></div>
@@ -293,6 +291,7 @@ const DashboardView = {
         <div id="spRerolls" style="margin-bottom:16px;"></div>
         <div class="field"><label>Experimental Auto Draft</label></div>
         <div id="spAutoDraft" style="margin-bottom:16px;"></div>
+        ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id="spSquadMode"></div></section><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div class="field"><label>Transfer window</label></div><div id="spTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="spTransferLimit" class="transfer-limit-toggle"></div><div class="field"><label>AI team transfers</label></div><div id="spAiTransfers"></div><p id="spTransferNote" class="muted"></p></section><section class="league-transfer-options"><h3>Mid-season Tactics</h3><div id="spMidseasonTactics"></div></section><section class="league-transfer-options"><h3>End-of-season Transfers</h3><div class="field"><label>Transfer window</label></div><div id="spEndTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="spEndTransferLimit" class="transfer-limit-toggle"></div><div class="field"><label>AI team transfers</label></div><div id="spEndAiTransfers"></div><p id="spEndTransferNote" class="muted"></p></section>` : ''}
         <button id="btnSingleplayer" class="btn btn-primary btn-block">${league ? 'Start League Draft' : 'Start Single Player'}</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -309,25 +308,33 @@ const DashboardView = {
     const spTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
     const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
+    let squadMode = null, midTransfers = null, endTransfers = null, midTactics = null;
     if (league) {
-      const window = container.querySelector('#spTransfers'), limit = container.querySelector('#spTransferLimit');
-      const update = () => {
-        limit.disabled = window.value === 'closed';
-        container.querySelector('#spAiTransfers').disabled = window.value === 'closed' || limit.value === '0';
-        container.querySelector('#spTransferNote').textContent = window.value === 'closed' || limit.value === '0' ? 'Transfers are disabled for this season. Your XI stays together throughout the league.' : `At mid-season, change up to ${limit.value} player${limit.value === '1' ? '' : 's'}. Release them first, then sign replacements. Coordination recovers over four matches.`;
+      const transferControls = (prefix, end) => {
+        const update = () => {
+          limit.setDisabled(!window.value);
+          ai.setDisabled(!window.value || limit.value === 0);
+          container.querySelector('#' + prefix + 'TransferNote').textContent = !window.value || limit.value === 0 ? 'This transfer window is closed.' : (end ? 'Before the next season begins' : 'At mid-season') + ', release 1 to ' + limit.value + ' players, then choose from two random offers per position. Coordination recovers over four matches.';
+        };
+        const window = ToggleGroup.render(container.querySelector('#' + prefix + 'Transfers'), { options: [{ value: true, title: 'Open', sub: 'Allow player changes' }, { value: false, title: 'Closed', sub: 'Keep the squad together' }], selected: !end, onChange: update });
+        const limit = ToggleGroup.render(container.querySelector('#' + prefix + 'TransferLimit'), { options: [0, 1, 2, 3].map(value => ({ value, title: String(value), sub: value === 0 ? 'No transfers' : value + (value === 1 ? ' player' : ' players') })), selected: 2, onChange: update });
+        const ai = ToggleGroup.render(container.querySelector('#' + prefix + 'AiTransfers'), { options: [{value: false, title: 'Disabled', sub: 'AI squads stay together'}, {value: true, title: 'Enabled', sub: 'AI clubs can trade players'}], selected: false });
+        update();
+        return { window, limit, ai };
       };
-      window.onchange = update; limit.onchange = update; update();
+      midTransfers = transferControls('sp', false);
+      endTransfers = transferControls('spEnd', true);
+      midTactics = ToggleGroup.render(container.querySelector('#spMidseasonTactics'), { options: [{ value: false, title: 'Disabled', sub: 'Keep your season tactic' }, { value: true, title: 'Enabled', sub: 'Choose or keep a tactic at halfway' }], selected: false });
+      squadMode = ToggleGroup.render(container.querySelector('#spSquadMode'), { options: [{ value: 'draft', title: 'Draft Style', sub: 'Build an XI from league clubs' }, { value: 'real', title: 'Real Club Squad', sub: "Play with your club's players" }], selected: 'draft', onChange: value => {
+        const real = value === 'real';
+        for (const id of ['spTimer', 'spRerolls', 'spAutoDraft']) {
+          const option = container.querySelector('#' + id);
+          option.classList.toggle('hidden', real);
+          option.previousElementSibling.classList.toggle('hidden', real);
+        }
+        container.querySelector('#btnSingleplayer').textContent = real ? 'Use Real Club Squad' : 'Start League Draft';
+      } });
     }
-    const squadMode = league ? container.querySelector('#spSquadMode') : null;
-    if (squadMode) squadMode.addEventListener('change', () => {
-      const real = squadMode.value === 'real';
-      for (const id of ['spTimer', 'spRerolls', 'spAutoDraft']) {
-        const option = container.querySelector('#' + id);
-        option.classList.toggle('hidden', real);
-        option.previousElementSibling.classList.toggle('hidden', real);
-      }
-      container.querySelector('#btnSingleplayer').textContent = real ? 'Use Real Club Squad' : 'Start League Draft';
-    });
 
     container.querySelector('#btnSingleplayer').addEventListener('click', async () => {
       const startButton = container.querySelector('#btnSingleplayer');
@@ -338,10 +345,11 @@ const DashboardView = {
         const room = await Api.createSingleplayer({
           mode: league ? 'league' : 'worldcup', leagueId: league?.id,
           squadMode: squadMode?.value || 'draft',
-          transferEnabled: league ? container.querySelector('#spTransfers').value === 'open' : undefined,
-          transferLimit: league ? Number(container.querySelector('#spTransferLimit').value) : undefined,
-          midseasonTactics: league ? container.querySelector('#spMidseasonTactics').value === 'on' : undefined,
-          aiTransfers: league ? container.querySelector('#spAiTransfers').value === 'on' : undefined,
+          transferEnabled: midTransfers?.window.value,
+          transferLimit: midTransfers?.limit.value,
+          midseasonTactics: midTactics?.value,
+          aiTransfers: midTransfers?.ai.value,
+          endTransferEnabled: endTransfers?.window.value, endTransferLimit: endTransfers?.limit.value, endAiTransfers: endTransfers?.ai.value,
           clubCode: league ? container.querySelector('#spClub').value : undefined,
           formation: spFormation.value, showOverall: spRatings.value, pickTimeMs: spTimer.value,
           captainEnabled: spCaptain.value, tournamentLength: spLength.value, allowedTeams: spTeams.value,

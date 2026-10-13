@@ -51,6 +51,7 @@ router.post('/singleplayer', (req, res) => {
       mode, leagueId, squadMode,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
       midseasonTactics: req.body?.midseasonTactics, aiTransfers: req.body?.aiTransfers,
+      endTransferEnabled: req.body?.endTransferEnabled, endTransferLimit: req.body?.endTransferLimit, endAiTransfers: req.body?.endAiTransfers,
       creatorId: req.user.id,
       humanSlotsMax: 1,
       singlePlayer: true,

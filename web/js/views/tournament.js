@@ -26,6 +26,7 @@ const TournamentView = {
     let clubRoster = null;
     let clubRequest = 0;
     const releaseSelection = new Set();
+    const offerSelection = new Map();
 
     container.innerHTML = `
       <div id="championZone"></div>
@@ -120,10 +121,10 @@ const TournamentView = {
       const button = leagueTools.querySelector('#btnSkipToTransfers');
       const halfway = Math.floor(leagueState.totalMatchdays / 2);
       leagueTools.querySelector('.league-skip').style.display = viewedStep < halfway && tournamentStage !== 'done' ? '' : 'none';
-      button.disabled = advancePending || skipPending || transferPending;
+      button.disabled = advancePending || skipPending || transferPending || (transferState?.windowType === 'endseason' && ['release', 'sign'].includes(transferState.phase));
       button.textContent = skipPending ? 'Simulating to Mid-season...' : transferState?.phase === 'disabled' ? 'Simulate to Mid-season' : 'Simulate to Transfer Window';
-      leagueTools.querySelector('#leagueSkipNote').textContent = transferState?.phase === 'disabled' ? 'Simulate the remaining first-half fixtures. Transfers are closed for this season.' : 'Simulate the remaining first-half fixtures and stop at mid-season transfers.';
-      leagueTools.querySelector('#leagueTransferRules').textContent = transferState?.enabled === false ? 'Transfers closed for this season' : `Mid-season transfers - Maximum ${transferState?.maxChanges ?? 2} player changes`;
+      leagueTools.querySelector('#leagueSkipNote').textContent = transferState?.windowType === 'endseason' && ['release', 'sign'].includes(transferState.phase) ? 'Complete or skip end-of-season transfers before playing the new season.' : transferState?.phase === 'disabled' ? 'Simulate the remaining first-half fixtures. Transfers are closed for this season.' : 'Simulate the remaining first-half fixtures and stop at mid-season transfers.';
+      leagueTools.querySelector('#leagueTransferRules').textContent = transferState?.enabled === false ? 'Transfers closed for this season' : `${transferState?.windowType === 'endseason' ? 'End-of-season' : 'Mid-season'} transfers - Maximum ${transferState?.maxChanges ?? 2} player changes`;
       const cohesion = transferState?.cohesion;
       const panel = leagueTools.querySelector('#leagueCohesion');
       panel.classList.toggle('hidden', !cohesion?.changedPlayers);
@@ -153,13 +154,13 @@ const TournamentView = {
       const entries = transferState.log || [];
       logZone.style.display = transferState.aiEnabled || entries.length ? '' : 'none';
       if (!logZone.querySelector('#leagueTransferLog')) {
-        logZone.innerHTML = `<details id="leagueTransferLog"><summary>Transfer Center <span class="badge" id="leagueDealCount"></span></summary><p class="muted">Completed mid-season deals, including AI player exchanges.</p><div class="field"><label for="leagueDealSearch">Search players or clubs</label><input type="search" id="leagueDealSearch" placeholder="Player or club name"></div><div class="league-deals" id="leagueDealRows"></div></details>`;
+        logZone.innerHTML = `<details id="leagueTransferLog"><summary>Transfer Center <span class="badge" id="leagueDealCount"></span></summary><p class="muted">Completed mid-season and end-of-season deals, including AI player exchanges.</p><div class="field"><label for="leagueDealSearch">Search players or clubs</label><input type="search" id="leagueDealSearch" placeholder="Player or club name"></div><div class="league-deals" id="leagueDealRows"></div></details>`;
         logZone.querySelector('#leagueDealSearch').oninput = renderTransferLog;
       }
       logZone.querySelector('#leagueDealCount').textContent = `${entries.length} deals`;
       const query = logZone.querySelector('#leagueDealSearch').value.trim().toLowerCase();
       const matches = entries.filter(entry => `${entry.player.name} ${entry.fromName} ${entry.toName} ${entry.exchangedPlayer?.name || ''} ${entry.releasedPlayer?.name || ''}`.toLowerCase().includes(query));
-      logZone.querySelector('#leagueDealRows').innerHTML = matches.map(entry => `<article class="league-deal"><span class="badge">${entry.type === 'ai' ? 'AI exchange' : 'Your signing'} · MD ${entry.matchday}</span><h4>${escapeLeagueText(entry.player.name)} <span class="muted">OVR ${entry.player.overall}</span></h4><p>${escapeLeagueText(entry.fromName)} → ${escapeLeagueText(entry.toName)}</p>${entry.exchangedPlayer ? `<p class="muted">In exchange: ${escapeLeagueText(entry.exchangedPlayer.name)} (OVR ${entry.exchangedPlayer.overall}) → ${escapeLeagueText(entry.fromName)}</p>` : entry.releasedPlayer ? `<p class="muted">Released: ${escapeLeagueText(entry.releasedPlayer.name)}</p>` : ''}</article>`).join('') || `<p class="muted">${query ? 'No deals match this search.' : viewedStep < Math.floor(leagueState.totalMatchdays / 2) ? 'Transfers will appear at mid-season.' : 'No completed transfers in this window.'}</p>`;
+      logZone.querySelector('#leagueDealRows').innerHTML = matches.map(entry => `<article class="league-deal"><span class="badge">${entry.type === 'ai' ? 'AI exchange' : 'Your signing'} · MD ${entry.windowType === 'endseason' ? '0 / End-of-season' : entry.matchday}</span><h4>${escapeLeagueText(entry.player.name)} <span class="muted">OVR ${entry.player.overall}</span></h4><p>${escapeLeagueText(entry.fromName)} → ${escapeLeagueText(entry.toName)}</p>${entry.exchangedPlayer ? `<p class="muted">In exchange: ${escapeLeagueText(entry.exchangedPlayer.name)} (OVR ${entry.exchangedPlayer.overall}) → ${escapeLeagueText(entry.fromName)}</p>` : entry.releasedPlayer ? `<p class="muted">Released: ${escapeLeagueText(entry.releasedPlayer.name)}</p>` : ''}</article>`).join('') || `<p class="muted">${query ? 'No deals match this search.' : viewedStep < Math.floor(leagueState.totalMatchdays / 2) ? 'Transfers will appear at mid-season.' : 'No completed transfers in this window.'}</p>`;
     }
 
     function transferPlayerHtml(player) {
@@ -182,7 +183,7 @@ const TournamentView = {
       transferZone.style.display = open ? '' : 'none';
       if (!open) return;
       if (transferState.phase === 'release') {
-        transferZone.innerHTML = `<h3>Mid-season Transfer Window</h3><p class="muted">First release 1 to ${transferState.maxChanges ?? 2} players from your XI (maximum ${transferState.maxChanges ?? 2}). Then choose a replacement for each vacant position. The season pauses until your XI is complete.</p>
+        transferZone.innerHTML = `<h3>${transferState.windowType === 'endseason' ? 'End-of-season' : 'Mid-season'} Transfer Window</h3><p class="muted">First release 1 to ${transferState.maxChanges ?? 2} players from your XI (maximum ${transferState.maxChanges ?? 2}). Then choose a replacement for each vacant position. The season pauses until your XI is complete.</p>
           <p id="releaseCount">${releaseSelection.size} selected · maximum ${transferState.maxChanges ?? 2}</p>
           <div class="transfer-player-grid">${transferState.squad.map((player) => `<button class="transfer-player-card ${releaseSelection.has(player.id) ? 'selected' : ''}" data-release="${player.id}" aria-pressed="${releaseSelection.has(player.id)}" ${transferPending ? 'disabled' : ''}>${transferPlayerHtml(player)}</button>`).join('')}</div>
           <div class="dialog-actions"><button class="btn btn-ghost" id="btnSkipTransfers" ${transferPending ? 'disabled' : ''}>Keep Current Squad</button><button class="btn btn-primary" id="btnReleasePlayers" ${releaseSelection.size === 0 || transferPending ? 'disabled' : ''}>${releaseSelection.size ? `Release ${releaseSelection.size} Player${releaseSelection.size === 1 ? '' : 's'}` : 'Release Players'}</button></div>`;
@@ -197,35 +198,16 @@ const TournamentView = {
       } else {
         const count = transferState.vacancies.length;
         const playerLabel = count === 1 ? '1 Player' : `${count} Players`;
-        transferZone.innerHTML = `<h3>Transfer Window — Sign ${playerLabel}</h3><p class="muted">${count === 1 ? 'One player has' : `${count} players have`} been released. Choose one replacement for each vacant position to restore your XI.</p>
-          <details><summary>Released players</summary><div class="transfer-player-grid">${transferState.outgoing.map((player) => `<article class="transfer-player-card">${transferPlayerHtml(player)}</article>`).join('')}</div></details>
-          <div class="transfer-sign-grid">${transferState.vacancies.map((slot, index) => `<div><div class="field"><label for="transferPick${index}">${slot.label} (${slot.code})${slot.isCaptain ? ' — Captain' : ''}</label><input type="search" id="transferSearch${index}" placeholder="Search player or club" aria-label="Search ${slot.code} replacements" ${transferPending ? 'disabled' : ''}/><select id="transferPick${index}" ${transferPending ? 'disabled' : ''}><option value="">Choose a replacement</option>${transferState.market.filter((player) => player.eligibleSlots.includes(slot.code)).map((player) => `<option value="${player.id}">${player.name} · ${player.clubName} · ${player.rawPos} · OVR ${player.overall}${player.isStar ? ' ★' : ''}</option>`).join('')}</select></div><div id="transferProfile${index}" class="transfer-player-card hidden"></div></div>`).join('')}</div>
-          <button class="btn btn-primary btn-block" id="btnSignPlayers" disabled>Sign ${playerLabel} &amp; Continue Season</button><p class="error-text hidden" id="transferError"></p>`;
-        const validate = () => {
-          const ids = transferState.vacancies.map((slot, index) => transferZone.querySelector('#transferPick' + index).value);
-          const duplicate = ids.filter(Boolean).length !== new Set(ids.filter(Boolean)).size;
-          transferZone.querySelector('#btnSignPlayers').disabled = transferPending || ids.some((id) => !id) || duplicate;
-          const error = transferZone.querySelector('#transferError');
-          error.textContent = duplicate ? 'Choose different players for each position.' : '';
-          error.classList.toggle('hidden', !error.textContent);
-        };
-        transferState.vacancies.forEach((slot, index) => {
-          const select = transferZone.querySelector('#transferPick' + index);
-          select.addEventListener('change', () => {
-            const player = transferState.market.find((entry) => entry.id === select.value);
-            const profile = transferZone.querySelector('#transferProfile' + index);
-            profile.classList.toggle('hidden', !player);
-            profile.innerHTML = player ? transferPlayerHtml(player) : '';
-            validate();
-          });
-          transferZone.querySelector('#transferSearch' + index).addEventListener('input', (event) => {
-            const query = event.target.value.trim().toLowerCase();
-            for (const option of select.options) option.hidden = !!option.value && !option.textContent.toLowerCase().includes(query);
-          });
+        transferZone.innerHTML = `<h3>Transfer Window - Sign ${playerLabel}</h3><p class="muted">Choose one of two random players for each vacant position. Offers stay fixed when you reload. Ratings do not affect which players are offered.</p>
+          <details><summary>Released players</summary><div class="transfer-player-grid">${transferState.outgoing.map(player => `<article class="transfer-player-card">${transferPlayerHtml(player)}</article>`).join('')}</div></details>
+          <div class="transfer-sign-grid">${transferState.vacancies.map((slot, index) => `<section id="transferPick${index}" class="transfer-offer-group"><h4>${slot.label} (${slot.code})${slot.isCaptain ? ' - Captain' : ''}</h4><div class="transfer-offer-options">${transferState.market.filter(player => player.eligibleSlots.includes(slot.code)).map(player => `<button type="button" class="transfer-player-card transfer-offer-card ${offerSelection.get(slot.code) === player.id ? 'selected' : ''}" data-offer-slot="${slot.code}" data-player="${player.id}" aria-pressed="${offerSelection.get(slot.code) === player.id}" ${transferPending ? 'disabled' : ''}>${transferPlayerHtml(player)}<span class="transfer-offer-choice">${offerSelection.get(slot.code) === player.id ? 'Selected' : 'Choose Player'}</span></button>`).join('')}</div></section>`).join('')}</div>
+          <button class="btn btn-primary btn-block" id="btnSignPlayers" ${transferPending || transferState.vacancies.some(slot => !offerSelection.has(slot.code)) ? 'disabled' : ''}>Sign ${playerLabel} &amp; Continue Season</button>`;
+        transferZone.querySelectorAll('[data-offer-slot]').forEach(button => button.onclick = () => {
+          offerSelection.set(button.dataset.offerSlot, button.dataset.player);
+          renderTransfers();
         });
-        transferZone.querySelector('#btnSignPlayers').addEventListener('click', () => {
-          const picks = transferState.vacancies.map((slot, index) => ({ slotCode: slot.code, playerId: transferZone.querySelector('#transferPick' + index).value }));
-          sendTransfer('sign', { picks });
+        transferZone.querySelector('#btnSignPlayers').onclick = () => sendTransfer('sign', {
+          picks: transferState.vacancies.map(slot => ({ slotCode: slot.code, playerId: offerSelection.get(slot.code) }))
         });
       }
     }
@@ -1032,7 +1014,7 @@ const TournamentView = {
       if (s.myLineup) myCode = s.myLineup.code;
       renderLeagueTools();
       if (isLeague) renderLeagueTable();
-      if (viewedStep === 0 && s.myLineup && !lineupRevealShown) {
+      if (viewedStep === 0 && s.myLineup && !lineupRevealShown && transferState?.windowType !== 'endseason') {
         renderLineupReveal(s.myLineup);
       } else {
         renderStep(s.myStep || null);
@@ -1131,6 +1113,7 @@ const TournamentView = {
       const signing = transferPending;
       transferPending = false;
       tacticPending = false;
+      if (transferState?.phase !== 'sign' || payload.transfers.phase !== 'sign') offerSelection.clear();
       transferState = payload.transfers;
       releaseSelection.clear();
       renderTransfers();

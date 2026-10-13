@@ -61,6 +61,7 @@ function startLeague(roomState) {
     kind: 'league', leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
     transferSettings: transferSettings(roomState.transferEnabled, roomState.transferLimit),
     midseasonTactics: !!roomState.midseasonTactics, aiTransfers: !!roomState.aiTransfers,
+    endTransferSettings: transferSettings(roomState.endTransferEnabled ?? false, roomState.endTransferLimit ?? 2), endAiTransfers: !!roomState.endAiTransfers,
     seasonNumber: roomState.seasonNumber || 1, transferLog: [],
     fixtures: createFixtures(league.teams.map((club) => club.code)), matchday: 0,
     matchLog: [], history: [], champion: null, bracket: {}
@@ -76,7 +77,7 @@ function simulateLeagueStep(roomState, applyResult) {
   const t = roomState.tournament;
   if (!t || t.stage === 'done') return null;
   if (tacticsPending(t)) throw new Error('Choose or keep your mid-season tactic before the next matchday');
-  if (transfersPending(t)) throw new Error('complete or skip the mid-season transfer window before the next matchday');
+  if (transfersPending(t)) throw new Error(`complete or skip the ${t.matchday === 0 ? 'end-of-season' : 'mid-season'} transfer window before the next matchday`);
   const matches = [];
   for (const fixture of t.fixtures[t.matchday]) {
     const a = t.slotByCode[fixture.aCode];
