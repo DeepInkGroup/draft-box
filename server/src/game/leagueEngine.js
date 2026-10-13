@@ -58,7 +58,7 @@ function startLeague(roomState) {
     standings[club.code] = { played: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
   }
   roomState.tournament = {
-    kind: 'league', pglRatingBoost: !!roomState.pglRatingBoost, leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
+    kind: 'league', resultsOnly: !!roomState.resultsOnly, pglRatingBoost: !!roomState.pglRatingBoost, leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
     transferSettings: transferSettings(roomState.transferEnabled, roomState.transferLimit),
     midseasonTactics: !!roomState.midseasonTactics, aiTransfers: !!roomState.aiTransfers,
     endTransferSettings: transferSettings(roomState.endTransferEnabled ?? false, roomState.endTransferLimit ?? 2), endAiTransfers: !!roomState.endAiTransfers,
@@ -116,7 +116,7 @@ function simulateLeagueStep(roomState, applyResult) {
 function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
   const table = viewedStep > 0 ? t.history[viewedStep - 1]?.leagueTable : t.initialTable;
-  return { name: t.leagueName, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
+  return { name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
     nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => ({ ...fixture, aName: t.slotByCode[fixture.aCode].name, bName: t.slotByCode[fixture.bCode].name })) };
 }
 module.exports = { createFixtures, rankTable, startLeague, simulateLeagueStep, leagueSnapshot };

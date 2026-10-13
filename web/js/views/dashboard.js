@@ -293,6 +293,7 @@ const DashboardView = {
         <div id="spAutoDraft" style="margin-bottom:16px;"></div>
         ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id="spSquadMode"></div></section><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div class="field"><label>Transfer window</label></div><div id="spTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="spTransferLimit" class="transfer-limit-toggle"></div><div class="field"><label>AI team transfers</label></div><div id="spAiTransfers"></div><p id="spTransferNote" class="muted"></p></section><section class="league-transfer-options"><h3>Mid-season Tactics</h3><div id="spMidseasonTactics"></div></section><section class="league-transfer-options"><h3>End-of-season Transfers</h3><div class="field"><label>Transfer window</label></div><div id="spEndTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="spEndTransferLimit" class="transfer-limit-toggle"></div><div class="field"><label>AI team transfers</label></div><div id="spEndAiTransfers"></div><p id="spEndTransferNote" class="muted"></p></section>` : ''}
         ${league?.id === 'pgl' ? `<section class="league-transfer-options"><h3>PGL Overall Boost</h3><div id="spRatingBoost"></div><p class="muted">Give every league player +10 Overall, including your squad, AI clubs and transfer candidates. Team ratings and match calculations use the boosted values.</p></section>` : ''}
+        ${league ? `<section class="league-transfer-options"><h3>Match Experience</h3><div id="spResultsOnly"></div><p class="muted">Results Only plays fixtures automatically without live commentary or match controls. It pauses only at transfer or tactic windows you enabled, then resumes automatically.</p></section>` : ''}
         <button id="btnSingleplayer" class="btn btn-primary btn-block">${league ? 'Start League Draft' : 'Start Single Player'}</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -309,7 +310,7 @@ const DashboardView = {
     const spTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#spTeams'));
     const spRerolls = ToggleGroup.render(container.querySelector('#spRerolls'), { options: this.rerollOptions(), selected: 0 });
     const spAutoDraft = ToggleGroup.render(container.querySelector('#spAutoDraft'), { options: this.autoDraftOptions(), selected: false });
-    let squadMode = null, midTransfers = null, endTransfers = null, midTactics = null, ratingBoost = null;
+    let squadMode = null, midTransfers = null, endTransfers = null, midTactics = null, ratingBoost = null, resultsOnly = null;
     if (league) {
       const transferControls = (prefix, end) => {
         const update = () => {
@@ -324,6 +325,7 @@ const DashboardView = {
         return { window, limit, ai };
       };
       if (league.id === 'pgl') ratingBoost = ToggleGroup.render(container.querySelector('#spRatingBoost'), { options: [{value:false,title:'Original Ratings',sub:'Use supplied player ratings'}, {value:true,title:'+10 Overall',sub:'Boost all PGL players'}], selected:false });
+      resultsOnly = ToggleGroup.render(container.querySelector('#spResultsOnly'), {options:[{value:false,title:'Live Match',sub:'Watch commentary and match updates'},{value:true,title:'Results Only',sub:'Play automatically and show final scores'}],selected:false});
       midTransfers = transferControls('sp', false);
       endTransfers = transferControls('spEnd', true);
       midTactics = ToggleGroup.render(container.querySelector('#spMidseasonTactics'), { options: [{ value: false, title: 'Disabled', sub: 'Keep your season tactic' }, { value: true, title: 'Enabled', sub: 'Choose or keep a tactic at halfway' }], selected: false });
@@ -346,7 +348,7 @@ const DashboardView = {
         startButton.disabled = true;
         const room = await Api.createSingleplayer({
           mode: league ? 'league' : 'worldcup', leagueId: league?.id,
-          squadMode: squadMode?.value || 'draft', pglRatingBoost: ratingBoost?.value,
+          squadMode: squadMode?.value || 'draft', pglRatingBoost: ratingBoost?.value, resultsOnly: resultsOnly?.value,
           transferEnabled: midTransfers?.window.value,
           transferLimit: midTransfers?.limit.value,
           midseasonTactics: midTactics?.value,

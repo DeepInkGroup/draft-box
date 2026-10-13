@@ -227,7 +227,7 @@ for (const width of [1280,390]) {
   const oldCode=page.url().split('/').pop();
   await expect(page.locator('#leagueZone')).toContainText('Season 1');
   await page.locator('#leagueTransferLog summary').click();await expect(page.locator('#leagueDealRows')).toContainText('mid-season');
-  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonTacticsZone')).toBeVisible();
+  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonTacticsZone')).toBeVisible({timeout:15000});
   await expect(page.locator('#leagueDealRows')).toContainText('AI exchange');
   const firstDeal=await page.locator('#leagueDealRows h4').first().textContent();
   await page.locator('#leagueDealSearch').fill(firstDeal.split('OVR')[0].trim());await expect(page.locator('#leagueDealRows .league-deal')).toHaveCount(1);

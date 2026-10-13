@@ -1686,3 +1686,73 @@ input, select, textarea { max-width: 100%; }
   .card { padding: 12px; }
   .lineup-predictions, .engine-metric-grid, .engine-factor-list { grid-template-columns: minmax(0,1fr); }
 }
+
+/* Club browser: clear summaries, squad filters and compact player profiles */
+.club-browser { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 12px; }
+.club-browser-hint { display: block; font-size: .78rem; font-weight: 400; color: var(--muted); margin-top: 6px; }
+.club-picker { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: end; margin-top: 12px; }
+.club-picker .field { margin: 0; }
+.club-picker-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.club-picker-actions .btn { min-height: 44px; }
+.club-overview-heading { display: flex; align-items: center; gap: 14px; margin: 20px 0; }
+.club-overview-heading > div { min-width: 0; }
+.club-overview-heading h3 { margin: 0 0 6px; overflow-wrap: anywhere; }
+.club-overview-heading p { margin: 0; color: var(--muted); font-size: .85rem; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.club-monogram { width: 52px; height: 52px; flex-shrink: 0; display: grid; place-items: center; border: 1px solid #7c5cff55; border-radius: 14px; background: var(--accent-soft); color: var(--accent-strong); font-weight: 800; }
+.club-overview-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.club-overview-metrics > div { min-width: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.club-overview-metrics span { display: block; font-size: .72rem; color: var(--muted); margin-bottom: 8px; }
+.club-overview-metrics b { font-size: 1.2rem; }
+.club-top-player { font-size: .85rem; padding: 12px 0; }
+.club-player-filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; padding: 16px; border: 1px solid var(--border); background: #ffffff02; border-radius: 10px; }
+.club-player-filters .field { margin: 0; min-width: 0; }
+.club-player-filters .club-search { grid-column: 1/-1; }
+.club-player-list-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 18px; color: var(--muted); font-size: .8rem; }
+#leagueClubPlayers { max-height: none; padding-right: 0; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.club-player-card { padding: 16px; border-radius: 12px; }
+.club-starter { border-top: 2px solid #7c5cff99; }
+.club-player-header { display: flex; align-items: center; gap: 10px; }
+.club-player-header > div { min-width: 0; flex: 1; }
+.club-player-header h4 { margin: 0 0 4px; font-size: .9rem; overflow-wrap: anywhere; }
+.club-player-header .muted { font-size: .72rem; }
+.club-position { flex-shrink: 0; width: 35px; height: 35px; border-radius: 9px; display: grid; place-items: center; font-size: .7rem; font-weight: 800; }
+.club-position-gk { background: #facc1520; color: #fde047; }
+.club-position-df { background: #3b82f620; color: #93c5fd; }
+.club-position-mf { background: #22c55e20; color: #86efac; }
+.club-position-fw { background: #f0455a20; color: #fda4af; }
+.club-overall { flex-shrink: 0; font-size: 1.15rem; font-weight: 800; color: var(--accent-strong); text-align: center; }
+.club-overall small { display: block; font-size: .58rem; font-weight: 500; color: var(--muted); margin-top: 3px; }
+.club-player-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 8px; }
+.club-player-card .club-source { margin: 8px 0; font-size: .72rem; overflow-wrap: anywhere; }
+.club-player-stats { border-top: 1px solid var(--border); padding-top: 12px; grid-template-columns: repeat(4,minmax(0,1fr)); }
+.club-player-stats dt { font-size: .66rem; }
+.club-player-stats dd { font-size: .95rem; }
+.club-empty { grid-column: 1/-1; text-align: center; padding: 32px 16px; border: 1px dashed var(--border); border-radius: 12px; }
+.club-empty p { color: var(--muted); font-size: .85rem; }
+.league-auto-status { padding: 16px; border: 1px solid #7c5cff55; background: var(--accent-soft); border-radius: 10px; line-height: 1.5; font-size: .85rem; }
+.score-round-picker { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 20px; }
+.score-round-picker select { min-height: 44px; background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); border-radius: 8px; padding: 10px; }
+.result-only-row { grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); }
+.result-only-row > span:last-child { text-align: right; }
+.result-only-row > span { overflow-wrap: anywhere; }
+@media (max-width: 760px) {
+  .club-picker { grid-template-columns: minmax(0,1fr); }
+  .club-picker-actions { justify-content: space-between; }
+  .club-picker-actions .btn { flex: 1; padding: 10px 8px; }
+  #leagueClubPlayers { grid-template-columns: minmax(0,1fr); }
+}
+@media (max-width: 480px) {
+  .club-overview-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .club-overview-metrics > div { padding: 12px; }
+  .club-player-filters { grid-template-columns: repeat(2,minmax(0,1fr)); padding: 12px; gap: 10px; }
+  .club-player-filters .field:last-child { grid-column: 1/-1; }
+  .club-player-stats { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .club-player-list-heading { flex-wrap: wrap; }
+  .club-player-card { padding: 14px; }
+}
+
+#leagueScoreResults .matchlog { max-height: none; }
+
+.club-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; font-size: .78rem; color: var(--muted); }
+.club-player-filters, .club-browser { scroll-margin-top: 90px; }
+@media(max-width:480px) { .club-pagination .btn { flex: 1; padding: 10px 8px; font-size: .78rem; } .club-pagination > span { order: 3; width: 100%; text-align: center; } }

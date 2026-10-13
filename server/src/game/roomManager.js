@@ -58,13 +58,14 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false, resultsOnly = false }) {
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
   if (mode === 'league' && !singlePlayer) throw new Error('League Games is currently single player only');
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   if (typeof pglRatingBoost !== 'boolean' || (pglRatingBoost && (mode !== 'league' || leagueId !== 'pgl'))) throw new Error('Overall boost is available only for the Persian Gulf League');
+  if (typeof resultsOnly !== 'boolean' || (resultsOnly && (mode !== 'league' || !singlePlayer))) throw new Error('Results-only mode is available only in single-player leagues');
   const transfers = transferSettings(transferEnabled, transferLimit);
   const endTransfers = transferSettings(endTransferEnabled, endTransferLimit);
   if (typeof midseasonTactics !== 'boolean' || typeof aiTransfers !== 'boolean' || typeof endAiTransfers !== 'boolean') throw new Error('League options must be enabled or disabled');
@@ -76,13 +77,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, results_only, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -183,7 +184,7 @@ function loadRoomState(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
-    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost,
+    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
     midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
@@ -350,7 +351,7 @@ function continueLeagueSeason(previous, userId) {
       next = createRoom({ name: `${prior.leagueName} - Season ${(previous.season_number || 1) + 1}`, creatorId: userId, mode: 'league', leagueId: previous.league_id,
         squadMode: previous.squad_mode, singlePlayer: true, showOverall: !!previous.show_overall, pickTimeMs: previous.pick_time_ms,
         captainEnabled: !!previous.captain_enabled, transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit ?? 2,
-        midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, rerollsAllowed: previous.rerolls_allowed });
+        midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, rerollsAllowed: previous.rerolls_allowed });
       db.prepare('UPDATE rooms SET season_number = ?, previous_season_id = ? WHERE id = ?').run((previous.season_number || 1) + 1,previous.id,next.id);
       for (const member of priorState.members.values()) {
         const team = Object.values(prior.slotByCode).find(team => team.isHuman && team.userId === member.userId);
@@ -399,7 +400,7 @@ function lobbySnapshot(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
-    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost,
+    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
     midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,

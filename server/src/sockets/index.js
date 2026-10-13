@@ -4,6 +4,7 @@ const activity = require('../userActivity');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
+const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep } = require('../game/leagueAutoplay');
 const { leagueSnapshot } = require('../game/leagueEngine');
 const { transferSnapshot, planTransfer } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
@@ -219,7 +220,8 @@ function registerSocketHandlers(io) {
         socket.emit('room:state', {
           stage: 'tournament',
           ...lobbySnapshot(roomRow),
-          myStep: visibleStepIndex >= 0 ? tournamentEngine.decorateStep(state, visibleStepIndex, socket.user.id) : null,
+          myStep: visibleStepIndex >= 0 ? (state.resultsOnly ? resultsOnlyStep(state.tournament,tournamentEngine.decorateStep(state,visibleStepIndex,socket.user.id)) : tournamentEngine.decorateStep(state,visibleStepIndex,socket.user.id)) : null,
+          results: state.resultsOnly ? leagueScoreResults(state.tournament,viewedStep) : null,
           myLineup,
           viewedStep,
           historyLength,
@@ -259,7 +261,7 @@ function registerSocketHandlers(io) {
         name: roomRow.name,
         mode: roomRow.mode,
         leagueId: roomRow.league_id,
-        squadMode: roomRow.squad_mode, pglRatingBoost: !!roomRow.pgl_rating_boost,
+        squadMode: roomRow.squad_mode, pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
         transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
         midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
         endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
@@ -475,6 +477,7 @@ function registerSocketHandlers(io) {
       const member = state.members.get(socket.user.id);
       if (!member) return socket.emit('error:message', { error: 'not a member of this room' });
       const t = state.tournament;
+      if (state.resultsOnly) return socket.emit('error:message', { error: 'Results-only leagues play fixtures automatically' });
 
       try {
         let currentHistoryLength = tournamentEngine.historyLength(state);
@@ -519,6 +522,28 @@ function registerSocketHandlers(io) {
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
+    });
+
+    socket.on('league:autoplay', ({ code }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || !['league_stage','finished'].includes(room.status)) throw new Error('Start a results-only league first');
+        const state = rm.loadRoomState(room);
+        playAutomaticLeague(state,socket.user.id,() => {
+          persistSimulatedTournamentStep(io,socket,code,room,state);
+          const member = state.members.get(socket.user.id);
+          member.viewedStep = state.tournament.matchday;
+          rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
+        });
+        const t = state.tournament, member = state.members.get(socket.user.id);
+        rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
+        socket.emit('league:autoResults', {
+          step: resultsOnlyStep(t,tournamentEngine.decorateStep(state,member.viewedStep-1,socket.user.id)),
+          results: leagueScoreResults(t,member.viewedStep), viewedStep: member.viewedStep,
+          historyLength: tournamentEngine.historyLength(state), stage: t.stage,
+          league: leagueSnapshot(t,member.viewedStep), transfers: transferSnapshot(t,socket.user.id,member.viewedStep)
+        });
+      } catch (error) { socket.emit('error:message',{ error: error.message }); }
     });
 
     socket.on('league:skipToTransfers', ({ code }) => {
