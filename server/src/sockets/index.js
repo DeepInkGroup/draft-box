@@ -524,7 +524,7 @@ function registerSocketHandlers(io) {
       }
     });
 
-    socket.on('league:autoplay', ({ code }) => {
+    socket.on('league:autoplay', ({ code, afterMatchday }) => {
       try {
         const room = rm.getRoomByCode(code);
         if (!room || !['league_stage','finished'].includes(room.status)) throw new Error('Start a results-only league first');
@@ -534,7 +534,7 @@ function registerSocketHandlers(io) {
           const member = state.members.get(socket.user.id);
           member.viewedStep = state.tournament.matchday;
           rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
-        });
+        },afterMatchday);
         const t = state.tournament, member = state.members.get(socket.user.id);
         rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
         socket.emit('league:autoResults', {

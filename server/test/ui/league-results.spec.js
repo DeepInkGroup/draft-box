@@ -14,6 +14,22 @@ for(const {width,windows} of [{width:390,windows:false},{width:768,windows:true}
         const zone=document.querySelector('#liveZone');if(zone&&zone.style.display==='block')window.__liveShown=true;
       }).observe(document.documentElement,{attributes:true,subtree:true,attributeFilter:['style']}));
     });
+    // Control only the result-display delay; keep Socket.io heartbeat timers real.
+    await page.addInitScript(realFirstDelay=>{
+      const nativeSet=window.setTimeout.bind(window), nativeClear=window.clearTimeout.bind(window), timers=new Map();
+      let first=true;window.__resultDelays=[];
+      window.setTimeout=(callback,delay,...args)=>{
+        if(delay===2000 && typeof callback==='function' && callback.toString().includes('requestAutomaticResults')) {
+          window.__resultDelays.push(delay);
+          const real=realFirstDelay && first;first=false;
+          const id=nativeSet(()=>{timers.delete(id);callback(...args);},real?delay:2147483647);
+          timers.set(id,()=>{nativeClear(id);timers.delete(id);callback(...args);});return id;
+        }
+        return nativeSet(callback,delay,...args);
+      };
+      window.clearTimeout=id=>{timers.delete(id);nativeClear(id);};
+      window.__advanceResultTimer=()=>{const advance=timers.values().next().value;if(!advance)throw Error('No pending result timer');advance();};
+    },width===390);
     await page.goto('/');await expect(page.locator('#modeSingle')).toBeVisible();
     await page.evaluate(()=>{
       const socket=App.ensureSocket(),emit=socket.emit;window.__gameCommands=[];window.__liveShown=false;
@@ -27,17 +43,32 @@ for(const {width,windows} of [{width:390,windows:false},{width:768,windows:true}
     } else await page.locator('#spTransfers [data-value="false"]').click();
     await page.locator('#btnSingleplayer').click();await expect(page.locator('#squadProgress')).toContainText('11');
     const code=page.url().split('/').pop();await page.locator('#btnLockTacticalStyle').click();
-    await expect(page.locator('#leagueZone')).toContainText(windows?'Matchday 17 / 34':'Matchday 34 / 34',{timeout:15000});
+    const advanceThrough=async(from,end)=>{
+      for(let day=from;day<=end;day++) {
+        await expect(page.locator('#leagueZone')).toContainText('Matchday '+day+' / 34',{timeout:15000});
+        await expect(page.locator('#stepCard h3')).toContainText('Matchday '+day);
+        await expect(page.locator('#leagueResultMatchday')).toHaveValue(String(day));
+        await expect(page.locator('.my-fixture')).toHaveCount(1);
+        if(day<end)await page.evaluate(()=>window.__advanceResultTimer());
+      }
+    };
+    await expect(page.locator('#leagueZone')).toContainText('Matchday 1 / 34',{timeout:15000});
+    if(width===390) {
+      await page.waitForTimeout(2100);await expect(page.locator('#leagueZone')).toContainText('Matchday 2 / 34');
+      await advanceThrough(2,3);
+    } else await advanceThrough(1,3);
+    const commands=await page.evaluate(()=>window.__gameCommands);expect(commands).toContain('league:autoplay');expect(commands).not.toContain('tournament:advance');
+    await page.reload();await expect(page.locator('#leagueZone')).toContainText('Matchday 3 / 34');
+    await page.evaluate(()=>window.__advanceResultTimer());await advanceThrough(4,windows?17:34);
     await expect(page.locator('#btnEnterTournament')).toHaveCount(0);await expect(page.locator('#continueZone')).toBeHidden();
     await expect(page.locator('#btnSkipToTransfers')).toBeHidden();await expect(page.locator('#btnFinishLeague')).toBeHidden();
     await expect(page.locator('#liveZone')).toBeHidden();await expect(page.locator('#stepCard .match-report')).toHaveCount(0);
-    const commands=await page.evaluate(()=>window.__gameCommands);
-    expect(commands).toContain('league:autoplay');expect(commands).not.toContain('tournament:advance');
     if(windows) {
       await expect(page.locator('#transferZone')).toBeVisible();await expect(page.locator('#midseasonTacticsZone')).toBeVisible();
       await page.reload();await expect(page.locator('#leagueZone')).toContainText('Matchday 17 / 34');
       await page.locator('#btnKeepLeagueTactic').click();await expect(page.locator('#transferZone')).toBeVisible();
       await page.locator('#btnSkipTransfers').click();
+      await advanceThrough(18,34);
     }
     await expect(page.locator('#seasonResults')).toContainText('306 matches',{timeout:15000});
     await expect(page.locator('#leagueResultMatchday option')).toHaveCount(34);
@@ -67,7 +98,7 @@ for(const {width,windows} of [{width:390,windows:false},{width:768,windows:true}
     if(windows) {
       await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#transferZone')).toContainText('End-of-season');
       await expect(page.locator('#leagueZone')).toContainText('Matchday 0 / 34');await expect(page.locator('#continueZone')).toBeHidden();
-      await page.locator('#btnSkipTransfers').click();await expect(page.locator('#leagueZone')).toContainText('Matchday 17 / 34',{timeout:15000});
+      await page.locator('#btnSkipTransfers').click();await advanceThrough(1,17);
     }
     expect(await page.evaluate(()=>window.__liveShown)).toBe(false);expect(errors).toEqual([]);
   });

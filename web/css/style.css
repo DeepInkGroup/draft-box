@@ -1756,3 +1756,25 @@ input, select, textarea { max-width: 100%; }
 .club-pagination { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-top: 18px; font-size: .78rem; color: var(--muted); }
 .club-player-filters, .club-browser { scroll-margin-top: 90px; }
 @media(max-width:480px) { .club-pagination .btn { flex: 1; padding: 10px 8px; font-size: .78rem; } .club-pagination > span { order: 3; width: 100%; text-align: center; } }
+
+/* Compact phone standings avoid overlapping frozen columns. */
+.league-table-toggle { display: none; }
+.my-fixture { border: 1px solid var(--accent); background: var(--accent-soft); }
+#stepCard { scroll-margin-top: 90px; }
+@media (max-width:640px) {
+  .league-table-toggle { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; }
+  .league-table-scroll .league-table th, .league-table-scroll .league-table td { position: static; min-width: 0; box-shadow: none; white-space: normal; }
+  .league-table-scroll:not(.league-full-stats) { overflow-x: visible; }
+  .league-table-scroll:not(.league-full-stats) .league-table { width: 100%; min-width: 0; table-layout: fixed; }
+  .league-table-scroll:not(.league-full-stats) .league-table th,
+  .league-table-scroll:not(.league-full-stats) .league-table td { padding: 9px 4px; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):first-child { width: 28px; text-align: center; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(2) { width: auto; min-width: 0; overflow-wrap: anywhere; line-height: 1.45; text-align: left; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(3) { width: 30px; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(9),
+  .league-table-scroll:not(.league-full-stats) :is(th,td):last-child { width: 38px; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(n+4):nth-child(-n+8) { display: none; }
+  .league-full-stats .league-table { min-width: 620px; table-layout: auto; }
+  .league-full-stats .league-table :is(th,td):nth-child(2) { min-width: 150px; }
+  .league-full-stats .league-table-hint { display: block; }
+}

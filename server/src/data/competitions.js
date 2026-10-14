@@ -29,7 +29,7 @@ function leagueCatalog() {
   return Array.from(LEAGUES.values()).map((league) => ({
     id: league.id, name: league.name, country: league.country, singlePlayerOnly: true,
     squadModes: ['draft', 'real'], pglRatingBoostAvailable: league.id === 'pgl', transferOptions: { min: 1, max: 3, default: 2, canDisable: true },
-    resultsOnlyAvailable: true, squadBrowserVersion: 2, midseasonTacticsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,
+    resultsOnlyAvailable: true, resultsOnlyVersion: 2, standingsLayoutVersion: 2, squadBrowserVersion: 2, midseasonTacticsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,
     transferWindowAfterMatchday: league.teams.length - (league.teams.length % 2 ? 0 : 1),
     teamCount: league.teams.length, matchdays: 2 * (league.teams.length - (league.teams.length % 2 ? 0 : 1)),
     teams: league.teams.map(({ code, name, players, baseOverall }) => ({ code, name, playerCount: players.length, baseOverall }))

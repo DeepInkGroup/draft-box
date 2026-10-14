@@ -30,6 +30,8 @@ const TournamentView = {
     let resultRounds = [];
     let resultMatchday = null;
     let hasJoinedRoom = false;
+    let automaticTimer = null;
+    let leagueFullStats = false;
     const releaseSelection = new Set();
     const offerSelection = new Map();
 
@@ -125,16 +127,30 @@ const TournamentView = {
       leagueTools.querySelector('#leagueClearFilters').disabled = !query && position==='all' && status==='all' && sort==='squad';
       leagueTools.querySelector('#leagueClubPlayers').innerHTML = players.length ? players.slice((clubPage-1)*12,clubPage*12).map(player => `<article class="transfer-player-card club-player-card ${player.status==='Starting XI' ? 'club-starter' : ''}"><div class="club-player-header"><span class="club-position club-position-${player.pos.toLowerCase()}">${player.pos}</span><div><h4>${escapeLeagueText(player.name)}</h4><span class="muted">${escapeLeagueText(player.rawPos || player.pos)}${player.slotCode ? ' / ' + escapeLeagueText(player.slotCode) : ''}</span></div><span class="club-overall">${player.overall}<small>OVR</small></span></div><div class="club-player-badges"><span class="badge">${player.status==='Club roster' ? 'Club roster / Reserve' : player.status}</span>${player.isStar ? '<span class="badge">Star</span>' : ''}${player.isCaptain ? '<span class="badge">Captain</span>' : ''}</div><p class="club-source">Source club: ${escapeLeagueText(player.clubName)}</p><dl class="transfer-player-stats club-player-stats">${[['Apps',player.stats.appearances],['Goals',player.stats.goals],['Assists',player.stats.assists],['Saves',player.stats.saves],['Yellow',player.stats.yellowCards],['Red',player.stats.redCards],['Star moments',player.stats.starMoments]].map(([label,value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl></article>`).join('') : '<div class="club-empty"><b>No matching players</b><p>Try another name, position or squad filter. Clear filters to see the full club.</p></div>';
     }
+    function automaticResultsReady() {
+      return resultsOnly && container.contains(leagueTools) && App.state.roomCode===code && tournamentStage!=='done' && !advancePending && socket.connected && !['release','sign'].includes(transferState?.phase) && transferState?.tactics?.phase!=='choose';
+    }
+    function clearAutomaticTimer() {
+      if (automaticTimer!==null) clearTimeout(automaticTimer);
+      automaticTimer=null;
+    }
     function requestAutomaticResults() {
-      if (!resultsOnly || !container.contains(leagueTools) || App.state.roomCode!==code || tournamentStage==='done' || advancePending || !socket.connected || ['release','sign'].includes(transferState?.phase) || transferState?.tactics?.phase==='choose') return;
-      advancePending=true;renderButton();socket.emit('league:autoplay',{code});
+      clearAutomaticTimer();
+      if (!automaticResultsReady()) return;
+      advancePending=true;renderButton();socket.emit('league:autoplay',{code,afterMatchday:viewedStep});
+    }
+    function scheduleAutomaticResults() {
+      clearAutomaticTimer();
+      if (!automaticResultsReady()) return;
+      automaticTimer=setTimeout(()=>{automaticTimer=null;requestAutomaticResults();},2000);
     }
     function renderScoreRounds() {
       const target=stepCard.querySelector('#leagueScoreResults');
       if (!target || !resultRounds.length) return;
       if (!resultRounds.some(round => round.matchday===resultMatchday)) resultMatchday=resultRounds[resultRounds.length-1].matchday;
       const round=resultRounds.find(round => round.matchday===resultMatchday);
-      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${round.matches.map(match => `<div class="match-row result-only-row"><span>${escapeLeagueText(match.aName)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${escapeLeagueText(match.bName)}</span></div>`).join('')}</div>`;
+      const matches=round.matches.slice().sort((a,b)=>Number(b.aCode===myCode || b.bCode===myCode)-Number(a.aCode===myCode || a.bCode===myCode));
+      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${escapeLeagueText(match.aName)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${escapeLeagueText(match.bName)}</span></div>`).join('')}</div>`;
       target.querySelector('#leagueResultMatchday').onchange=event => {resultMatchday=Number(event.target.value);renderScoreRounds();};
     }
 
@@ -197,7 +213,7 @@ const TournamentView = {
       const finishButton = leagueTools.querySelector('#btnFinishLeague');
       const autoStatus=leagueTools.querySelector('#leagueAutoStatus');
       autoStatus.style.display=resultsOnly && tournamentStage!=='done' ? '' : 'none';
-      autoStatus.textContent=advancePending ? 'Playing fixtures automatically. Final results will appear when ready.' : 'Results-only mode: complete your enabled transfer or tactic choices. Matches then resume automatically.';
+      autoStatus.textContent=advancePending ? 'Preparing the next final result...' : automaticResultsReady() ? 'Next matchday follows automatically in 2 seconds.' : 'Complete your enabled transfer or tactic choices. Matches then resume automatically.';
       finishButton.disabled = advancePending || transferPending;
       finishButton.textContent = advancePending ? 'Simulating Remaining Fixtures...' : 'Finish Season & View Results';
     }
@@ -281,18 +297,21 @@ const TournamentView = {
 
     function renderLeagueTable() {
       if (!leagueState) return;
+      const previousScroll=leagueZone.querySelector('.league-table-scroll')?.scrollLeft || 0;
       leagueZone.style.display = '';
       const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
       leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3>${leagueState.pglRatingBoost ? '<span class="badge">All players +10 OVR</span>' : ''}<span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
         ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
-        <div class="league-table-scroll"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
+        <button class="btn btn-ghost league-table-toggle" id="leagueTableToggleStats" aria-pressed="${leagueFullStats}">${leagueFullStats ? 'Compact standings' : 'Show all stats'}</button><div class="league-table-scroll ${leagueFullStats ? 'league-full-stats' : ''}"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th>#</th><th>Club</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
           <tbody>${leagueState.table.map((row, index) => {
             const bottomTwo = index >= leagueState.table.length - 2;
             const status = leagueState.matchday === leagueState.totalMatchdays ? 'Relegated' : 'Relegation zone';
             return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td>${row.name}${row.code === myCode ? ' · You' : ''}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
           }).join('')}</tbody>
-        </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">Swipe the table to see all stats.</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
+        </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">P = Played / GD = Goal difference / Pts = Points. Use Show all stats for the full table.</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
+      leagueZone.querySelector('.league-table-scroll').scrollLeft=leagueFullStats ? previousScroll : 0;
+      leagueZone.querySelector('#leagueTableToggleStats').onclick=()=>{leagueFullStats=!leagueFullStats;renderLeagueTable();};
     }
 
     function scoreText(m) {
@@ -1007,7 +1026,7 @@ const TournamentView = {
         ${groupFinalHtml}
       `;
       if (resultsOnly) {
-        stepCard.innerHTML='<h3>Match Results</h3><div id="leagueScoreResults"></div>';
+        stepCard.innerHTML='<h3>Match Results - Matchday '+viewedStep+'</h3><div id="leagueScoreResults"></div>';
         renderScoreRounds();
       }
       stepCard.querySelectorAll('.match-row-clickable').forEach((row) => {
@@ -1070,6 +1089,8 @@ const TournamentView = {
       if (s.stage === 'drafting') return App.goDraft(code);
       if (s.stage === 'lobby') return App.goLobby(code);
       if (s.stage !== 'tournament') return;
+      clearAutomaticTimer();
+      const firstJoin=!hasJoinedRoom;
       advancePending = false;
       isLeague = s.mode === 'league';
       hasJoinedRoom=true;resultsOnly=isLeague && !!s.resultsOnly;resultRounds=s.results || [];
@@ -1085,6 +1106,7 @@ const TournamentView = {
       isSpectator = !!s.spectator;
       isCreator = s.creatorId === App.state.user.id;
       if (s.myLineup) myCode = s.myLineup.code;
+      if (resultsOnly) stagePill.parentElement.after(stepCard);
       renderLeagueTools();
       if (isLeague) renderLeagueTable();
       if (viewedStep === 0 && s.myLineup && !lineupRevealShown && transferState?.windowType !== 'endseason' && !resultsOnly) {
@@ -1092,7 +1114,8 @@ const TournamentView = {
       } else {
         renderStep(s.myStep || null);
       }
-      requestAutomaticResults();
+      if(resultsOnly && firstJoin)stepCard.scrollIntoView({block:'start'});
+      if(viewedStep===0)requestAutomaticResults();else scheduleAutomaticResults();
     });
 
     App.onSocket('tournament:step', (payload) => {
@@ -1190,6 +1213,7 @@ const TournamentView = {
       resultRounds=payload.results;resultMatchday=null;liveZone.style.display='none';
       renderStep(payload.step);
       if(leagueTools.querySelector('#leagueSquadBrowser')?.open)loadClubSquad();
+      scheduleAutomaticResults();
     });
     App.onSocket('connect',()=>{if(hasJoinedRoom && container.contains(leagueTools) && App.state.roomCode===code) socket.emit('room:join',{code});});
 
@@ -1210,6 +1234,7 @@ const TournamentView = {
     });
 
     App.onSocket('error:message', (e) => {
+      clearAutomaticTimer();
       tacticPending = false; nextSeasonPending = false;
       const nextButton = championZone.querySelector('#btnNextLeagueSeason'); if (nextButton) { nextButton.disabled = false; nextButton.textContent = 'Continue to Next Season'; }
       advancePending = false;

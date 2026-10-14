@@ -4,15 +4,16 @@ const { tacticsPending } = require('./leagueMidseason');
 function managementPending(t) {
   return transfersPending(t) || tacticsPending(t);
 }
-// Run normal rounds, with the caller saving each one. Never choose a transfer or
-// tactic on the user's behalf. A repeated request cannot replay saved matches.
-function playAutomaticLeague(state, userId, saveRound) {
+// Return one completed matchday at a time so the browser can present each result.
+// An expected cursor prevents delayed or duplicate requests from skipping ahead.
+function playAutomaticLeague(state, userId, saveRound, afterMatchday) {
   if (state.mode !== 'league' || !state.singlePlayer || !state.resultsOnly || state.tournament?.kind !== 'league') throw new Error('Automatic results are only available in results-only single-player leagues');
   const member = state.members.get(userId);
   if (!member) throw new Error('Not a member of this league');
   const t = state.tournament;
+  if (afterMatchday !== undefined && (!Number.isInteger(afterMatchday) || afterMatchday < 0)) throw new Error('Invalid matchday cursor');
   let rounds = 0;
-  while (t.stage !== 'done' && !managementPending(t)) {
+  if ((afterMatchday === undefined || afterMatchday === t.matchday) && t.stage !== 'done' && !managementPending(t)) {
     saveRound();
     rounds++;
   }
