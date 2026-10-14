@@ -56,7 +56,7 @@ const Api = (() => {
 
     createRoom: (opts) => request('/api/rooms', { method: 'POST', body: opts }),
     createSingleplayer: (opts) => request('/api/rooms/singleplayer', { method: 'POST', body: opts }),
-    joinRoom: (code, formation) => request(`/api/rooms/${code}/join`, { method: 'POST', body: { formation } }),
+    joinRoom: (code, formation, clubCode) => request(`/api/rooms/${code}/join`, { method: 'POST', body: { formation, clubCode } }),
     setFormation: (code, formation) => request(`/api/rooms/${code}/formation`, { method: 'POST', body: { formation } }),
     startDraft: (code) => request(`/api/rooms/${code}/start`, { method: 'POST' }),
     getRoom: (code) => request(`/api/rooms/${code}`),

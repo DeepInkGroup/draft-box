@@ -6,7 +6,7 @@ const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep } = require('../game/leagueAutoplay');
 const { leagueSnapshot } = require('../game/leagueEngine');
-const { transferSnapshot, planTransfer } = require('../game/leagueTransfers');
+const { transferSnapshot, planTransfer, transfersPending } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey, tacticalCatalog } = require('../game/tacticalStyles');
@@ -241,7 +241,7 @@ function registerSocketHandlers(io) {
       if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
       if (roomRow.creator_id !== socket.user.id) return socket.emit('error:message', { error: 'only the room creator can start the draft' });
       if (roomRow.status !== 'lobby') return socket.emit('error:message', { error: 'room already started' });
-      rm.setRoomStatus(roomRow.id, 'drafting');
+      try { rm.startRoomDraft(roomRow); } catch (error) { return socket.emit('error:message', { error: error.message }); }
       io.to(channelName(roomRow.code)).emit('room:started', {});
     });
 
@@ -486,6 +486,7 @@ function registerSocketHandlers(io) {
         if (spoilerMode) ensureAdvanceReady(state);
 
         if (member.viewedStep >= currentHistoryLength) {
+          if (t.kind === 'league' && transfersPending(t)) throw new Error('Waiting for all players to complete or skip the transfer window');
           if (t.stage === 'done') {
             return socket.emit('error:message', { error: 'the tournament has already finished' });
           }
@@ -614,7 +615,9 @@ function registerSocketHandlers(io) {
         const room = rm.getRoomByCode(code);
         if (!room) throw new Error('League not found');
         const next = rm.continueLeagueSeason(room,socket.user.id);
-        socket.emit('league:nextSeasonReady',{ newCode: next.code, seasonNumber: next.season_number });
+        const payload = { newCode: next.code, seasonNumber: next.season_number };
+        io.to(channelName(code)).emit('league:nextSeasonReady', payload);
+        if (!socket.rooms.has(channelName(code))) socket.emit('league:nextSeasonReady', payload);
       } catch (error) { socket.emit('error:message',{ error: error.message }); }
     });
 
@@ -628,7 +631,12 @@ function registerSocketHandlers(io) {
         if (!(state.tournament.endTransferWindow && state.tournament.matchday === 0) && member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('view the first half of the season before making transfers');
         const next = planTransfer(state.tournament, socket.user.id, action, { playerIds, picks });
         rm.persistLeagueRoster(state, socket.user.id, next);
-        socket.emit('league:transferState', { transfers: transferSnapshot(next, socket.user.id, member.viewedStep) });
+        socket.emit('league:transferState', { userId: socket.user.id, transfers: transferSnapshot(next, socket.user.id, member.viewedStep) });
+        for (const client of io.sockets.sockets.values()) {
+          if (client.id === socket.id || !client.rooms.has(channelName(code))) continue;
+          const viewer = state.members.get(client.user.id);
+          if (viewer) client.emit('league:transferState', { userId: socket.user.id, transfers: transferSnapshot(next, client.user.id, viewer.viewedStep) });
+        }
       } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 

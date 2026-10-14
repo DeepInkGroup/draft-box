@@ -3,9 +3,9 @@ const HelpViews = (() => {
   const rules = [
     ['start', 'Getting started', 'Your first game', [
       ['Choose how to play', 'Select Single Player for a solo World Cup or League Games season. Multiplayer lets you create a room or join friends with a room code.'],
-      ['Build your game plan', 'Choose a formation, review the lobby rules, then build your squad. Lock your tactical style when your lineup is ready. If captain selection is enabled, choose a captain before entering the competition.'],
+      ['Build your game plan', 'Choose a formation, review the lobby rules, then build your squad. Single-player leagues have no pick timer. Lock your tactical style when your lineup is ready. If captain selection is enabled, choose a captain before entering the competition.'],
       ['Continue an existing season', 'Your league progress is saved. Open your active league from the dashboard to continue where you left off.'],
-      ['Room settings', 'A multiplayer room supports up to 32 human players. The host sets the draft rules and tournament length before starting. Check the lobby settings so everyone knows what to expect.']
+      ['Room settings', 'World Cup rooms support up to 32 human players; PGL rooms support up to 18, with a different club for each player. The host sets the draft rules and tournament length before starting. Check the lobby settings so everyone knows what to expect.']
     ]],
     ['draft', 'Drafting', 'Build a balanced XI', [
       ['How player picks work', 'Teams are revealed during drafting. Choose an available player and a slot in your formation. Fill all 11 positions, paying attention to natural roles as well as overall ratings.'],
@@ -20,11 +20,11 @@ const HelpViews = (() => {
       ['Elimination and awards', 'An eliminated player can spectate the rest of the tournament. The final screen includes the champion, bracket and player awards such as Golden Ball, Golden Boot, Creator Award and Golden Glove.']
     ]],
     ['league', 'League Games', 'Manage more than one season', [
-      ['Persian Gulf League and squad modes', 'PGL is currently available in single player. The league has 18 clubs and 34 matchdays. Choose Real Club Squads to use club players, or Draft Style to build your own XI. The optional PGL boost gives every player +10 overall.'],
+      ['Persian Gulf League and squad modes', 'PGL is available in single player and multiplayer. The league has 18 clubs and 34 matchdays. Choose Real Club Squads to use club players, or Draft Style to build your own XI. The optional PGL boost gives every player +10 overall.'],
       ['Mid-season transfers', 'In the lobby, choose Open or Closed transfers. An open window allows up to 1, 2 or 3 changes, depending on the selected limit. You may release fewer players than the limit. Release your selected players first, then choose a replacement for each empty slot from two randomly offered candidates.'],
       ['Team chemistry after transfers', 'Changing players briefly reduces team coordination and performance. Chemistry recovers gradually over the next few matches. Replacing more players creates more disruption, so weigh immediate upgrades against settling time.'],
-      ['Tactics at the halfway point', 'Enable Mid-season Tactics in the lobby to change your tactical style during the mid-season break. If disabled, the season continues with your locked style.'],
-      ['AI and end-of-season transfers', 'The lobby lets you allow AI clubs to make transfers when a window opens. The transfer section records team changes. End-of-season transfers have their own Open or Closed setting and 1–3 player limit.'],
+      ['Tactics at the halfway point', 'In single player, enable Mid-season Tactics in the lobby to change your tactical style during the mid-season break. Multiplayer league styles stay locked for the season. If disabled, the season continues with your locked style.'],
+      ['AI and end-of-season transfers', 'The lobby lets you allow AI clubs to make transfers when a window opens in single player. Multiplayer league lobbies omit AI transfer and mid-season tactic options. Each player completes or skips their own transfers before the next matchday. The transfer section records team changes. End-of-season transfers have their own Open or Closed setting and 1–3 player limit.'],
       ['Results only and season shortcuts', 'Results only runs matches automatically with no live commentary or manual match decisions. Results appear matchday by matchday until the mid-season break and then the end. The season shortcuts take you to transfers or complete the season.'],
       ['Standings, awards and another season', 'Standings show points and the bottom two clubs with a relegation arrow. Teams & Player Stats lets you inspect other squads. At the end, review the table, player awards and season results, then choose another season if you want to continue.']
     ]],

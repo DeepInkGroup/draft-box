@@ -196,7 +196,7 @@ const DraftView = {
     function renderWaitingZone() {
       if (!iAmReady) { waitingZone.innerHTML = ''; return; }
       if (singlePlayer || (spoilerMode && allReady)) {
-        waitingZone.innerHTML = `<p class="muted center">Your draft is complete! Starting the World Cup...</p>`;
+        waitingZone.innerHTML = `<p class="muted center">Your draft is complete! Starting the competition...</p>`;
         return;
       }
       if (!allReady) {

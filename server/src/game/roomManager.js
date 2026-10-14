@@ -62,7 +62,7 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
-  if (mode === 'league' && !singlePlayer) throw new Error('League Games is currently single player only');
+  if (league && !singlePlayer) { midseasonTactics = false; aiTransfers = false; endAiTransfers = false; }
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   if (typeof pglRatingBoost !== 'boolean' || (pglRatingBoost && (mode !== 'league' || leagueId !== 'pgl'))) throw new Error('Overall boost is available only for the Persian Gulf League');
   if (typeof resultsOnly !== 'boolean' || (resultsOnly && (mode !== 'league' || !singlePlayer))) throw new Error('Results-only mode is available only in single-player leagues');
@@ -70,10 +70,10 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const endTransfers = transferSettings(endTransferEnabled, endTransferLimit);
   if (typeof midseasonTactics !== 'boolean' || typeof aiTransfers !== 'boolean' || typeof endAiTransfers !== 'boolean') throw new Error('League options must be enabled or disabled');
   const code = uniqueCode();
-  const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(32, Number(humanSlotsMax) || 32));
-  const length = normalizeTournamentLength(tournamentLength);
+  const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(league ? league.teams.length : 32, Math.floor(Number(humanSlotsMax) || 32)));
+  const length = league ? 'full' : normalizeTournamentLength(tournamentLength);
   const teams = normalizeAllowedTeams(allowedTeams, league ? new Set(league.teams.map((team) => team.code)) : VALID_TEAM_CODES);
-  const sharedDraft = sharedDraftMode && !singlePlayer;
+  const sharedDraft = sharedDraftMode && !singlePlayer && squadMode !== 'real';
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
@@ -82,7 +82,7 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
-      normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
+      league && singlePlayer ? 0 : normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
       teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
@@ -116,11 +116,33 @@ function joinRoom(roomRow, user, formation, clubCode = null) {
   if (already) return already;
   if (members.length >= roomRow.human_slots_max) throw new Error('room is full');
   if (roomRow.mode === 'league' && !getLeague(roomRow.league_id)?.teams.some((team) => team.code === clubCode)) throw new Error('choose a club from the selected league');
+  if (roomRow.mode === 'league' && members.some(member => member.country_code === clubCode)) throw new Error('this club is already taken; choose another club');
   const fm = isValidFormation(formation) ? formation : '4-3-3';
   db.prepare(
     `INSERT INTO room_members (room_id, user_id, username, formation, country_code) VALUES (?, ?, ?, ?, ?)`
   ).run(roomRow.id, user.id, user.username, fm, roomRow.mode === 'league' ? clubCode : null);
   return db.prepare('SELECT * FROM room_members WHERE room_id = ? AND user_id = ?').get(roomRow.id, user.id);
+}
+
+function startRoomDraft(roomRow) {
+  if (roomRow.status !== 'lobby') throw new Error('room already started');
+  const members = getMembers(roomRow.id);
+  if (!members.length) throw new Error('at least one player must join first');
+  const squads = roomRow.squad_mode === 'real' ? members.map(member => {
+    const club = teamsForRoom({ mode: roomRow.mode, leagueId: roomRow.league_id, pglRatingBoost: !!roomRow.pgl_rating_boost }).find(team => team.code === member.country_code);
+    const xi = club && bestXI(club, member.formation);
+    if (!xi || xi.length !== 11) throw new Error('a selected club cannot field an XI in that formation');
+    return { member, xi };
+  }) : [];
+  runTransaction(() => {
+    for (const { member, xi } of squads) {
+      db.prepare('DELETE FROM drafted_players WHERE room_id = ? AND user_id = ?').run(roomRow.id, member.user_id);
+      for (const player of xi) persistPick(roomRow.id, member.user_id, player, player.team, player.slotCode);
+      markMemberDraftComplete(roomRow.id, member.user_id);
+    }
+    setRoomStatus(roomRow.id, 'drafting');
+  });
+  activeRooms.delete(roomRow.id);
 }
 
 function setFormation(roomRow, userId, formation) {
@@ -341,7 +363,8 @@ function persistLeagueTactic(roomState, userId, tournament) {
 }
 
 function continueLeagueSeason(previous, userId) {
-  if (previous.mode !== 'league' || !previous.single_player || previous.status !== 'finished' || previous.creator_id !== userId) throw new Error('Finish your single-player league season before continuing');
+  if (previous.mode !== 'league' || previous.status !== 'finished') throw new Error('Finish your league season before continuing');
+  if (previous.creator_id !== userId) throw new Error('Only the host can continue a finished league season');
   if (previous.next_season_id) return getRoomRow(previous.next_season_id);
   const priorState = loadRoomState(previous), prior = priorState.tournament;
   if (prior?.stage !== 'done') throw new Error('The season has not finished');
@@ -349,7 +372,7 @@ function continueLeagueSeason(previous, userId) {
   try {
     runTransaction(() => {
       next = createRoom({ name: `${prior.leagueName} - Season ${(previous.season_number || 1) + 1}`, creatorId: userId, mode: 'league', leagueId: previous.league_id,
-        squadMode: previous.squad_mode, singlePlayer: true, showOverall: !!previous.show_overall, pickTimeMs: previous.pick_time_ms,
+        squadMode: previous.squad_mode, singlePlayer: !!previous.single_player, humanSlotsMax: previous.human_slots_max, spoilerMode: !!previous.spoiler_mode, showOverall: !!previous.show_overall, pickTimeMs: previous.pick_time_ms,
         captainEnabled: !!previous.captain_enabled, transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit ?? 2,
         midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, rerollsAllowed: previous.rerolls_allowed });
       db.prepare('UPDATE rooms SET season_number = ?, previous_season_id = ? WHERE id = ?').run((previous.season_number || 1) + 1,previous.id,next.id);
@@ -379,7 +402,8 @@ function continueLeagueSeason(previous, userId) {
       t.initialXIs = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, structuredClone(team.xi)]));
       const ownCode = Object.values(prior.slotByCode).find(team => team.userId === userId)?.code;
       t.previousSeasons = (prior.previousSeasons || []).concat({ seasonNumber: prior.seasonNumber || 1, roomCode: previous.code,
-        champion: prior.slotByCode[prior.champion].name, position: rankTable(prior).find(team => team.code === ownCode)?.rank });
+        champion: prior.slotByCode[prior.champion].name, position: rankTable(prior).find(team => team.code === ownCode)?.rank,
+        positions: Object.fromEntries(rankTable(prior).map(team => [team.code, team.rank])) });
       state.status = 'league_stage';
       setRoomStatus(next.id,state.status); persistTournamentSnapshot(state);
       db.prepare('UPDATE rooms SET next_season_id = ? WHERE id = ?').run(next.id,previous.id);
@@ -407,6 +431,7 @@ function lobbySnapshot(roomRow) {
     endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
     seasonNumber: roomRow.season_number || 1,
     leagueName: getLeague(roomRow.league_id)?.name || null,
+    leagueClubs: roomRow.mode === 'league' ? getLeague(roomRow.league_id).teams.map(({ code, name }) => ({ code, name })) : null,
     spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,
     status: roomRow.status,
@@ -456,6 +481,7 @@ module.exports = {
   persistDraftFormation,
   persistSlotMoves,
   setRoomStatus,
+  startRoomDraft,
   persistTournamentSnapshot,
   initializeRealSquad,
   persistLeagueRoster,

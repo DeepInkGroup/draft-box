@@ -48,6 +48,10 @@ async function request(url, verify, options = {}, attempts = 6) {
     const pgl = (await response.json()).leagues.find((league) => league.id === 'pgl');
     assert.ok(pgl, 'Persian Gulf League must be available');
     assert.equal(pgl.teamCount, 18);
+    assert.equal(pgl.singlePlayerOnly, false);
+    assert.equal(pgl.multiplayerVersion, 1);
+    assert.equal(pgl.multiplayerMaxPlayers, 18);
+    assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: false, resultsOnly: false, humanTransfers: true, continuousSeasons: true });
     assert.equal(pgl.matchdays, 34);
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);

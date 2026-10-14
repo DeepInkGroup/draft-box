@@ -32,6 +32,11 @@ function windowSettings(t) {
 function availablePlayers(t, progress) {
   const used = new Set(Object.values(t.slotByCode).filter(team => team.isHuman || t.aiTransfers || t.endAiTransfers).flatMap(team => team.xi.map(player => player.id)));
   const released = new Set(progress.outgoing.map(player => player.id));
+  for (const window of [t.transferWindow, t.endTransferWindow]) for (const other of Object.values(window?.users || {})) {
+    if (!['release', 'sign'].includes(other.phase) || other === progress) continue;
+    for (const player of other.outgoing || []) used.add(player.id);
+    for (const id of Object.values(other.offers || {}).flat()) used.add(id);
+  }
   return [...new Map(Object.values(ensureClubRosters(t)).flat().concat(t.freeAgents || []).map(player => [player.id, player])).values()]
     .filter(player => !used.has(player.id) && !released.has(player.id));
 }
@@ -89,11 +94,14 @@ function transferSnapshot(t, userId, viewedStep) {
   const settings = windowSettings(t);
   const team = Object.values(t.slotByCode).find((slot) => slot.isHuman && slot.userId === userId);
   const end = !!t.endTransferWindow && t.matchday === 0;
+  const window = ensureTransferWindow(t);
+  const waitingFor = viewedStep >= (window?.opensAfter ?? Infinity) ? Object.entries(window?.users || {})
+    .filter(([id, progress]) => Number(id) !== Number(userId) && ['release', 'sign'].includes(progress.phase))
+    .map(([id]) => { const club = Object.values(t.slotByCode).find(slot => slot.isHuman && slot.userId === Number(id)); return { userId: Number(id), username: club.username, clubName: club.name }; }) : [];
   const common = { windowType: end ? 'endseason' : 'midseason', opensAfter: end ? 0 : Math.floor(t.fixtures.length / 2), ...settings, cohesion: cohesionAtMatchday(team, viewedStep),
-    tactics: tacticSnapshot(t, userId, viewedStep), aiEnabled: !!(t.aiTransfers || t.endAiTransfers),
+    waitingFor, tactics: tacticSnapshot(t, userId, viewedStep), aiEnabled: !!(t.aiTransfers || t.endAiTransfers),
     log: (t.transferLog || []).filter(entry => entry.matchday <= viewedStep).map(entry => ({ ...entry, fromName: t.slotByCode[entry.from]?.name || 'Free agents', toName: t.slotByCode[entry.to]?.name || 'Free agents' })) };
   if (!settings.enabled) return { ...common, phase: 'disabled' };
-  const window = ensureTransferWindow(t);
   const progress = window?.users[userId];
   const opensAfter = window?.opensAfter ?? Math.floor(t.fixtures.length / 2);
   if (!progress || viewedStep < opensAfter) return { ...common, phase: 'closed' };

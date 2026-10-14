@@ -46,7 +46,11 @@ There are **12 built-in tactical styles**, including **Vertical Tiki-Taka**, **O
 
 The dashboard's **Your League Seasons** section resumes unfinished drafts and seasons. Match history and career totals include completed league seasons. A rematch keeps the league, club, squad mode and transfer settings, with a fresh XI and transfer window. Persistence follows the hosting storage limits below.
 
-`server/src/data/competitions.js` is the league registry, `generate-pgl.js` validates and imports the source list, and `leagueEngine.js` builds fixtures and tracks the season. Additional leagues can be registered independently of the UI. League multiplayer is currently disabled at the server boundary; club assignments are stored per participant so it can be added later.
+**Multiplayer League Games** is available through **Create Room → League Games → Persian Gulf League**. Up to 18 players choose different clubs; bots fill the remaining clubs. Invite friends with the room code; each joining player selects an available club before joining. Choose drafted or real club squads, human transfer windows (Open/Closed, 1–3 changes), optional +10 PGL ratings and the normal multiplayer draft controls. The simplified lobby omits AI transfers, mid-season tactics and automatic results. AI transfers and mid-season tactics are always disabled on the server in multiplayer leagues. All players must finish or skip a transfer window before another matchday can be generated; replacement offers are reserved to avoid conflicts. The host can continue to another season with the same squads, or create a rematch lobby.
+
+Single-player League Games has **no Pick Timer** controls and no automatic pick countdown. World Cup and multiplayer draft timers remain available.
+
+`server/src/data/competitions.js` is the league registry, `generate-pgl.js` validates and imports the source list, and `leagueEngine.js` builds fixtures and tracks the season. Additional leagues can be registered independently of the UI.
 
 ## Architecture
 

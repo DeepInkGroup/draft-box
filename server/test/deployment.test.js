@@ -536,7 +536,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const completedCareer=await careerEvent('league:finishSeason','league:seasonFinished',{});
   const oldReport=await request('/api/admin/leagues/'+career.code,{token:admin.token});
   assert.equal(completedCareer.viewedStep,34);
-  denied=new Promise(resolve=>outsider.once('error:message',resolve));outsider.emit('league:nextSeason',{code:career.code});assert.match((await denied).error,/Finish your/);
+  denied=new Promise(resolve=>outsider.once('error:message',resolve));outsider.emit('league:nextSeason',{code:career.code});assert.match((await denied).error,/Only the host/);
   const continuation=await careerEvent('league:nextSeason','league:nextSeasonReady',{});
   const repeat=await careerEvent('league:nextSeason','league:nextSeasonReady',{});
   assert.equal(continuation.newCode,repeat.newCode);assert.equal(continuation.seasonNumber,2);
@@ -606,6 +606,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   const autoRestored=await connect(login.token);promise=event(autoRestored,'room:state');autoRestored.emit('room:join',{code:automatic.code});
   const restoredAuto=await promise;assert.equal(restoredAuto.resultsOnly,true);assert.equal(restoredAuto.results.length,34);assert.deepEqual(restoredAuto.results,autoDone.results);
   await request('/api/auth/change-password', { token: admin.token, body: { currentPassword: 'test-admin-initial-password', newPassword: 'changed-admin-password' } });
+  await require('./multiplayerLeagueScenario')({ request, event, connect, host: login, guest: friend, outsider: injection,
+    restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await server.stop(); server = await startServer(dbPath, dir);
   await request('/api/auth/login', { body: { username: 'Admin', password: 'test-admin-initial-password' }, status: 401 });
   assert.deepEqual(await request('/api/about'), savedAbout, 'Published About Us survives server restarts');

@@ -251,9 +251,9 @@ const DashboardView = {
     container.querySelector('#singleLeague').addEventListener('click', () => this.renderLeagueSelect(container));
   },
 
-  async renderLeagueSelect(container) {
-    container.innerHTML = `${this.backButton()}<div class="card"><h3>League Games</h3><p class="muted">Choose your league. Single player is available now.</p><div id="leaguePicker">Loading leagues...</div></div>`;
-    container.querySelector('#btnBack').addEventListener('click', () => this.renderSingleplayerMenu(container));
+  async renderLeagueSelect(container, multiplayer = false) {
+    container.innerHTML = `${this.backButton()}<div class="card"><h3>League Games</h3><p class="muted">${multiplayer ? 'Choose a league to play with friends.' : 'Choose your league and club.'}</p><div id="leaguePicker">Loading leagues...</div></div>`;
+    container.querySelector('#btnBack').addEventListener('click', () => multiplayer ? this.renderCreateRoom(container) : this.renderSingleplayerMenu(container));
     const picker = container.querySelector('#leaguePicker');
     try {
       const { leagues } = await Api.leagues();
@@ -265,7 +265,7 @@ const DashboardView = {
       const describe = () => { const league = selected(); picker.querySelector('#leagueDetails').textContent = `${league.teamCount} clubs · ${league.matchdays} matchdays · home and away`; };
       select.addEventListener('change', describe);
       describe();
-      picker.querySelector('#btnSelectLeague').addEventListener('click', () => this.renderSingleplayer(container, selected()));
+      picker.querySelector('#btnSelectLeague').addEventListener('click', () => multiplayer ? this.renderCreateRoom(container, selected()) : this.renderSingleplayer(container, selected()));
     } catch (error) { picker.textContent = error.message; }
   },
 
@@ -277,8 +277,7 @@ const DashboardView = {
         <p class="muted">${league ? `Choose your club, draft from ${league.teamCount} league clubs, and play ${league.matchdays} matchdays against bots.` : 'Jump straight into the draft and compete in the World Cup against 47 bot teams.'}</p>
         ${league ? `<div class="field"><label for="spClub">Your club</label><select id="spClub">${league.teams.map((club) => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
         <div id="spFormation"></div>
-        <div class="field"><label>Pick Timer</label></div>
-        <div id="spTimer" style="margin-bottom:16px;"></div>
+${league ? '' : `<div class="field"><label>Pick Timer</label></div><div id="spTimer" style="margin-bottom:16px;"></div>`}
         <div class="field"><label>Show Ratings</label></div>
         <div id="spRatings" style="margin-bottom:16px;"></div>
         <div class="field"><label>Team Captain</label></div>
@@ -303,7 +302,7 @@ const DashboardView = {
     const showErr = (e) => { errorBox.textContent = e.message; errorBox.classList.remove('hidden'); };
 
     const spFormation = FormationPicker.render(container.querySelector('#spFormation'), { selected: '4-3-3' });
-    const spTimer = ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
+    const spTimer = league ? { value: 0 } : ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
     const spRatings = ToggleGroup.render(container.querySelector('#spRatings'), { options: this.ratingsOptions(), selected: true });
     const spCaptain = ToggleGroup.render(container.querySelector('#spCaptain'), { options: this.captainOptions(), selected: false });
     const spLength = league ? { value: 'full' } : ToggleGroup.render(container.querySelector('#spLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
@@ -331,7 +330,7 @@ const DashboardView = {
       midTactics = ToggleGroup.render(container.querySelector('#spMidseasonTactics'), { options: [{ value: false, title: 'Disabled', sub: 'Keep your season tactic' }, { value: true, title: 'Enabled', sub: 'Choose or keep a tactic at halfway' }], selected: false });
       squadMode = ToggleGroup.render(container.querySelector('#spSquadMode'), { options: [{ value: 'draft', title: 'Draft Style', sub: 'Build an XI from league clubs' }, { value: 'real', title: 'Real Club Squad', sub: "Play with your club's players" }], selected: 'draft', onChange: value => {
         const real = value === 'real';
-        for (const id of ['spTimer', 'spRerolls', 'spAutoDraft']) {
+        for (const id of ['spRerolls', 'spAutoDraft']) {
           const option = container.querySelector('#' + id);
           option.classList.toggle('hidden', real);
           option.previousElementSibling.classList.toggle('hidden', real);
@@ -366,18 +365,18 @@ const DashboardView = {
     });
   },
 
-  async renderCreateRoom(container) {
+  async renderCreateRoom(container, league = null) {
     container.innerHTML = `
       ${this.backButton()}
       <div class="card">
-        <h3>Create a New Room</h3>
+        <h3>${league ? 'Create a Multiplayer League' : 'Create a New Room'}</h3><div class="field"><label>Competition</label></div><div id="crMode"></div>${league ? `<p class="muted">${league.name}: ${league.teamCount} clubs, ${league.matchdays} matchdays. Choose different clubs; bots fill unclaimed clubs. Everyone completes or skips transfers before the season continues.</p><div class="field"><label for="crClub">Your club</label><select id="crClub">${league.teams.map(club => `<option value="${club.code}">${club.name}</option>`).join('')}</select></div>` : ''}
         <div class="field">
           <label>Room name</label>
           <input type="text" id="crName" placeholder="Friends Room" />
         </div>
         <div class="field">
-          <label>Max human players (1 to 32)</label>
-          <input type="number" id="crSlots" min="1" max="32" value="8" />
+          <label for="crSlots">Max human players (1 to ${league ? league.teamCount : 32})</label>
+          <input type="number" id="crSlots" min="1" max="${league ? league.teamCount : 32}" value="8" />
         </div>
         <div id="crFormation"></div>
         <div class="field"><label>Pick Timer</label></div>
@@ -386,16 +385,14 @@ const DashboardView = {
         <div id="crRatings" style="margin-bottom:16px;"></div>
         <div class="field"><label>Team Captain</label></div>
         <div id="crCaptain" style="margin-bottom:16px;"></div>
-        <div class="field"><label>Tournament Length</label></div>
-        <div id="crLength" style="margin-bottom:16px;"></div>
-        <div class="field"><label>Restrict Draft Teams (optional)</label></div>
-        <div id="crTeams" style="margin-bottom:16px;"></div>
+${league ? '' : `<div class="field"><label>Tournament Length</label></div><div id="crLength" style="margin-bottom:16px;"></div><div class="field"><label>Restrict Draft Teams (optional)</label></div><div id="crTeams" style="margin-bottom:16px;"></div>`}
         <div class="field"><label>Rerolls (skip a revealed team)</label></div>
         <div id="crRerolls" style="margin-bottom:16px;"></div>
         <div class="field"><label>Spoiler Mode</label></div>
         <div id="crSpoiler" style="margin-bottom:16px;"></div>
         <div class="field"><label>Shared Team Draft</label></div>
         <div id="crSharedDraft" style="margin-bottom:16px;"></div>
+${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id="crSquadMode"></div></section><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div id="crTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Release 1 to your selected limit, then choose between two random replacements per slot. The league waits for every player to finish or skip this window.</p></section><section class="league-transfer-options"><h3>End-of-season Transfers</h3><div id="crEndTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crEndTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Applies when the host continues to another season with the same squads.</p></section>${league.id === 'pgl' ? `<section class="league-transfer-options"><h3>PGL Overall Boost</h3><div id="crRatingBoost"></div></section>` : ''}` : ''}
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -404,29 +401,49 @@ const DashboardView = {
     const errorBox = container.querySelector('#dashError');
     const showErr = (e) => { errorBox.textContent = e.message; errorBox.classList.remove('hidden'); };
 
+    ToggleGroup.render(container.querySelector('#crMode'), { options: [{ value: 'worldcup', title: 'World Cup', sub: 'Tournament with friends' }, { value: 'league', title: 'League Games', sub: 'A full club season together' }], selected: league ? 'league' : 'worldcup', onChange: value => value === 'league' ? this.renderLeagueSelect(container, true) : this.renderCreateRoom(container) });
     const crFormation = FormationPicker.render(container.querySelector('#crFormation'), { selected: '4-3-3' });
     const crTimer = ToggleGroup.render(container.querySelector('#crTimer'), { options: this.timerOptions(), selected: 20000 });
     const crRatings = ToggleGroup.render(container.querySelector('#crRatings'), { options: this.ratingsOptions(), selected: true });
     const crCaptain = ToggleGroup.render(container.querySelector('#crCaptain'), { options: this.captainOptions(), selected: false });
-    const crLength = ToggleGroup.render(container.querySelector('#crLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
-    const crTeams = await this.renderTeamPicker(container.querySelector('#crTeams'));
+    const crLength = league ? { value: 'full' } : ToggleGroup.render(container.querySelector('#crLength'), { options: this.tournamentLengthOptions(), selected: 'full' });
+    const crTeams = league ? { count: 0, value: null } : await this.renderTeamPicker(container.querySelector('#crTeams'));
     const crRerolls = ToggleGroup.render(container.querySelector('#crRerolls'), { options: this.rerollOptions(), selected: 0 });
     const crSpoiler = ToggleGroup.render(container.querySelector('#crSpoiler'), { options: this.spoilerOptions(), selected: false });
     const crSharedDraft = ToggleGroup.render(container.querySelector('#crSharedDraft'), { options: this.sharedDraftOptions(), selected: false });
 
+    let squadMode, midTransfers, endTransfers, ratingBoost;
+    if (league) {
+      const windowControls = (prefix, enabled) => {
+        let limit;
+        const window = ToggleGroup.render(container.querySelector('#'+prefix+'Transfers'), { options: [{value:true,title:'Open',sub:'Allow player changes'},{value:false,title:'Closed',sub:'Keep squads together'}], selected:enabled, onChange:()=>limit.setDisabled(!window.value) });
+        limit = ToggleGroup.render(container.querySelector('#'+prefix+'TransferLimit'), { options:[1,2,3].map(value=>({value,title:String(value),sub:value===1?'1 player':value+' players'})),selected:2 });
+        limit.setDisabled(!window.value); return {window,limit};
+      };
+      midTransfers = windowControls('cr',true); endTransfers = windowControls('crEnd',false);
+      if (league.id==='pgl') ratingBoost = ToggleGroup.render(container.querySelector('#crRatingBoost'), {options:[{value:false,title:'Original Ratings',sub:'Use supplied ratings'},{value:true,title:'+10 Overall',sub:'Boost all PGL players'}],selected:false});
+      squadMode = ToggleGroup.render(container.querySelector('#crSquadMode'), {options:[{value:'draft',title:'Draft Style',sub:'Build your own XI'},{value:'real',title:'Real Club Squad',sub:"Use your selected club's players"}],selected:'draft',onChange:value=>{
+        for(const id of ['crTimer','crRerolls','crSharedDraft']) { const el=container.querySelector('#'+id);el.classList.toggle('hidden',value==='real');el.previousElementSibling.classList.toggle('hidden',value==='real'); }
+      }});
+    }
     container.querySelector('#btnCreateRoom').addEventListener('click', async () => {
+      const button = container.querySelector('#btnCreateRoom'); if (button.disabled) return;
       if (crTeams.count > 0 && crTeams.count < 4) return showErr(new Error('Pick at least 4 teams to restrict the draft pool, or clear the selection'));
       try {
+        button.disabled = true;
         const name = container.querySelector('#crName').value.trim();
         const slots = Number(container.querySelector('#crSlots').value) || 8;
         const room = await Api.createRoom({
+          mode: league ? 'league' : 'worldcup', leagueId: league?.id, clubCode: league ? container.querySelector('#crClub').value : undefined,
+          squadMode: squadMode?.value || 'draft', pglRatingBoost: ratingBoost?.value,
+          transferEnabled: midTransfers?.window.value, transferLimit: midTransfers?.limit.value, endTransferEnabled: endTransfers?.window.value, endTransferLimit: endTransfers?.limit.value,
           name, humanSlotsMax: slots, formation: crFormation.value, showOverall: crRatings.value,
-          pickTimeMs: crTimer.value, captainEnabled: crCaptain.value, tournamentLength: crLength.value,
+          pickTimeMs: squadMode?.value === 'real' ? 0 : crTimer.value, captainEnabled: crCaptain.value, tournamentLength: crLength.value,
           allowedTeams: crTeams.value, rerollsAllowed: crSharedDraft.value ? 0 : crRerolls.value,
-          spoilerMode: crSpoiler.value, sharedDraftMode: crSharedDraft.value
+          spoilerMode: crSpoiler.value, sharedDraftMode: squadMode?.value !== 'real' && crSharedDraft.value
         });
         App.goLobby(room.code);
-      } catch (e) { showErr(e); }
+      } catch (e) { showErr(e); button.disabled = false; }
     });
   },
 
@@ -439,6 +456,7 @@ const DashboardView = {
           <label>Room code</label>
           <input type="text" id="joinCode" placeholder="e.g. AB12CD" style="text-transform:uppercase" />
         </div>
+        <div id="joinRoomDetails"></div><div id="joinClubPicker"></div>
         <div id="joinFormation" style="margin-bottom:24px;"></div>
         <button id="btnJoinRoom" class="btn btn-primary btn-block">Join</button>
         <div class="error-text hidden" id="dashError"></div>
@@ -450,13 +468,38 @@ const DashboardView = {
 
     const joinFormation = FormationPicker.render(container.querySelector('#joinFormation'), { selected: '4-3-3' });
 
-    container.querySelector('#btnJoinRoom').addEventListener('click', async () => {
+    let selectedRoom = null;
+    const joinButton = container.querySelector('#btnJoinRoom'), codeInput = container.querySelector('#joinCode');
+    codeInput.addEventListener('input',()=>{selectedRoom=null;container.querySelector('#joinRoomDetails').textContent='';container.querySelector('#joinClubPicker').innerHTML='';joinButton.textContent='Join';});
+    joinButton.addEventListener('click', async () => {
+      if (joinButton.disabled) return;
+      const code = codeInput.value.trim().toUpperCase();
+      if (!code) return showErr(new Error('Enter a room code'));
+      joinButton.disabled = true; errorBox.classList.add('hidden');
       try {
-        const code = container.querySelector('#joinCode').value.trim().toUpperCase();
-        if (!code) return showErr(new Error('Enter a room code'));
-        await Api.joinRoom(code, joinFormation.value);
+        if (!selectedRoom || selectedRoom.code !== code) {
+          const room = await Api.getRoom(code);
+          if (codeInput.value.trim().toUpperCase() !== code || !container.contains(joinButton)) return;
+          if (room.status !== 'lobby') throw new Error('This room has already started. Resume an existing league from your dashboard.');
+          if (room.members.some(member=>member.userId===App.state.user.id)) return App.goLobby(code);
+          if (room.members.length >= room.humanSlotsMax) throw new Error('This room is full.');
+          selectedRoom=room;
+          if (room.mode==='league') {
+            const occupied=new Set(room.members.map(member=>member.clubCode));
+            const clubs=room.leagueClubs.filter(club=>!occupied.has(club.code));
+            if (!clubs.length) throw new Error('All clubs are already taken.');
+            container.querySelector('#joinRoomDetails').textContent=room.leagueName+' - Choose an available club before joining.';
+            const label=document.createElement('label');label.className='field';label.textContent='Your club';
+            const select=document.createElement('select');select.id='joinClub';
+            clubs.forEach(club=>{const option=document.createElement('option');option.value=club.code;option.textContent=club.name;select.append(option);});
+            label.append(select);container.querySelector('#joinClubPicker').replaceChildren(label);
+            joinButton.textContent='Choose Club & Join'; return;
+          }
+        }
+        await Api.joinRoom(code,joinFormation.value,container.querySelector('#joinClub')?.value);
         App.goLobby(code);
-      } catch (e) { showErr(e); }
+      } catch(e) { showErr(e); selectedRoom=null; }
+      finally { joinButton.disabled=false; }
     });
   }
 };

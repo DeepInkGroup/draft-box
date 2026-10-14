@@ -23,14 +23,19 @@ function serializeRoom(roomRow) {
 router.post('/', (req, res) => {
   const { name, humanSlotsMax, showOverall, pickTimeMs, captainEnabled, tournamentLength, allowedTeams, rerollsAllowed, spoilerMode, sharedDraftMode } = req.body || {};
   try {
+    const league = req.body?.mode === 'league' ? getLeague(req.body?.leagueId) : null;
+    if (req.body?.mode === 'league' && (!league || !league.teams.some(team => team.code === req.body?.clubCode))) throw new Error('choose an available league and club');
     const room = rm.createRoom({
       name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
       mode: req.body?.mode || 'worldcup', leagueId: req.body?.leagueId,
+      squadMode: req.body?.squadMode || 'draft', pglRatingBoost: req.body?.pglRatingBoost,
+      transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
+      endTransferEnabled: req.body?.endTransferEnabled, endTransferLimit: req.body?.endTransferLimit,
       showOverall: showOverall !== false, pickTimeMs, captainEnabled: !!captainEnabled,
       tournamentLength, allowedTeams, rerollsAllowed, spoilerMode: !!spoilerMode,
       sharedDraftMode: !!sharedDraftMode
     });
-    rm.joinRoom(room, req.user, req.body?.formation);
+    rm.joinRoom(room, req.user, req.body?.formation, req.body?.clubCode);
     res.status(201).json(serializeRoom(room));
   } catch (e) {
     res.status(400).json({ error: e.message });
@@ -77,7 +82,7 @@ router.post('/:code/join', (req, res) => {
   const room = rm.getRoomByCode(req.params.code);
   if (!room) return res.status(404).json({ error: 'room not found' });
   try {
-    rm.joinRoom(room, req.user, req.body?.formation);
+    rm.joinRoom(room, req.user, req.body?.formation, req.body?.clubCode);
     const updated = rm.getRoomRow(room.id);
     req.app.get('io')?.to(`room:${updated.code}`).emit('room:memberUpdate', rm.lobbySnapshot(updated));
     res.json(serializeRoom(updated));
@@ -104,7 +109,7 @@ router.post('/:code/start', (req, res) => {
   if (!room) return res.status(404).json({ error: 'room not found' });
   if (room.creator_id !== req.user.id) return res.status(403).json({ error: 'only the room creator can start the draft' });
   if (room.status !== 'lobby') return res.status(400).json({ error: 'room already started' });
-  rm.setRoomStatus(room.id, 'drafting');
+  try { rm.startRoomDraft(room); } catch (error) { return res.status(400).json({ error: error.message }); }
   const updated = rm.getRoomRow(room.id);
   req.app.get('io')?.to(`room:${updated.code}`).emit('room:started', {});
   res.json(serializeRoom(updated));
