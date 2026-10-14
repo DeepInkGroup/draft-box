@@ -61,6 +61,7 @@ const HelpViews = (() => {
   }
   function init() {
     AboutUs.init();
+    ClanProfile.init();
     const profile = document.getElementById('profileDialog'), selectProfile = tabs(profile, 'profile');
     document.getElementById('btnProfile').addEventListener('click', () => selectProfile('overview'));
     document.getElementById('profileCopyCode').onclick = async () => {

@@ -468,9 +468,24 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
 
     const joinFormation = FormationPicker.render(container.querySelector('#joinFormation'), { selected: '4-3-3' });
 
-    let selectedRoom = null;
+    let selectedRoom = null, lobbyPoll = null;
+    async function refreshAvailableClubs(code) {
+      if (!selectedRoom || selectedRoom.code !== code || !container.contains(joinButton)) return;
+      try {
+        const room = await Api.getRoom(code);
+        if (!selectedRoom || selectedRoom.code !== code || !container.contains(joinButton)) return;
+        if (room.status !== 'lobby' || room.members.length >= room.humanSlotsMax) { selectedRoom=null;joinButton.disabled=true;return showErr(new Error(room.status !== 'lobby' ? 'This room has started.' : 'This room is full.')); }
+        selectedRoom=room;
+        const select=container.querySelector('#joinClub'), previous=select.value, occupied=new Set(room.members.map(member=>member.clubCode));
+        const clubs=room.leagueClubs.filter(club=>!occupied.has(club.code));
+        select.replaceChildren(...clubs.map(club=>{const option=document.createElement('option');option.value=club.code;option.textContent=club.name;return option;}));
+        if(clubs.some(club=>club.code===previous))select.value=previous;
+        else App.toast('That club was just chosen. Select another available club.');
+      } catch(error) { selectedRoom=null;showErr(error); }
+      if (selectedRoom && container.contains(joinButton)) lobbyPoll=setTimeout(()=>refreshAvailableClubs(code),3000);
+    }
     const joinButton = container.querySelector('#btnJoinRoom'), codeInput = container.querySelector('#joinCode');
-    codeInput.addEventListener('input',()=>{selectedRoom=null;container.querySelector('#joinRoomDetails').textContent='';container.querySelector('#joinClubPicker').innerHTML='';joinButton.textContent='Join';});
+    codeInput.addEventListener('input',()=>{clearTimeout(lobbyPoll);selectedRoom=null;joinButton.disabled=false;container.querySelector('#joinRoomDetails').textContent='';container.querySelector('#joinClubPicker').innerHTML='';joinButton.textContent='Join';});
     joinButton.addEventListener('click', async () => {
       if (joinButton.disabled) return;
       const code = codeInput.value.trim().toUpperCase();
@@ -493,7 +508,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
             const select=document.createElement('select');select.id='joinClub';
             clubs.forEach(club=>{const option=document.createElement('option');option.value=club.code;option.textContent=club.name;select.append(option);});
             label.append(select);container.querySelector('#joinClubPicker').replaceChildren(label);
-            joinButton.textContent='Choose Club & Join'; return;
+            joinButton.textContent='Choose Club & Join';clearTimeout(lobbyPoll);lobbyPoll=setTimeout(()=>refreshAvailableClubs(code),3000); return;
           }
         }
         await Api.joinRoom(code,joinFormation.value,container.querySelector('#joinClub')?.value);

@@ -4,6 +4,7 @@ const db = require('../db');
 const { signToken, requireAuth, requirePlayer } = require('../middleware/auth');
 const { computeTeamRecord, findMyCode } = require('../game/tournamentEngine');
 const { analyzeMatch, resultOutcome } = require('../game/matchAnalysis');
+const { normalizeEmail } = require('../accountEmail');
 
 const router = express.Router();
 
@@ -44,7 +45,9 @@ function mapFriendRow(row, myId) {
 }
 
 router.post('/register', (req, res) => {
-  const { username, email, password } = req.body || {};
+  const { username, password } = req.body || {};
+  let email;
+  try { email = normalizeEmail(req.body?.email); } catch (error) { return res.status(400).json({ error: error.message }); }
   if (!username || !email || !password) {
     return res.status(400).json({ error: 'username, email and password are required' });
   }
@@ -56,7 +59,7 @@ router.post('/register', (req, res) => {
     return res.status(400).json({ error: 'password must be at least 6 characters' });
   }
 
-  const existing = db.prepare('SELECT id FROM users WHERE username = ? OR email = ?').get(username, email);
+  const existing = db.prepare('SELECT id FROM users WHERE username = ? OR lower(email) = ?').get(username, email);
   if (existing) return res.status(409).json({ error: 'username or email already taken' });
 
   const hash = bcrypt.hashSync(password, 10);
@@ -75,7 +78,7 @@ router.post('/login', (req, res) => {
   const { username, password } = req.body || {};
   if (!username || !password) return res.status(400).json({ error: 'username and password are required' });
 
-  const row = db.prepare('SELECT * FROM users WHERE username = ? OR email = ?').get(username, username);
+  const row = db.prepare('SELECT * FROM users WHERE username = ? OR lower(email) = ?').get(username, String(username).trim().toLowerCase());
   if (!row || !bcrypt.compareSync(password, row.password_hash)) {
     return res.status(401).json({ error: 'invalid credentials' });
   }
@@ -89,7 +92,18 @@ router.post('/login', (req, res) => {
 router.get('/me', requireAuth, (req, res) => {
   const row = db.prepare('SELECT id, username, email, friend_code AS friendCode, role, created_at FROM users WHERE id = ?').get(req.user.id);
   if (!row) return res.status(404).json({ error: 'not found' });
-  res.json({ user: row });
+  res.json({ user: { ...row, clan: require('../clans').membership(row.id) } });
+});
+
+router.put('/me/email', requireAuth, requirePlayer, (req, res) => {
+  let email;
+  try { email = normalizeEmail(req.body?.email); } catch (error) { return res.status(400).json({ error: error.message }); }
+  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
+  const password = req.body?.currentPassword;
+  if (typeof password !== 'string' || !bcrypt.compareSync(password, row.password_hash)) return res.status(400).json({ error: 'Current password is incorrect.' });
+  if (db.prepare('SELECT id FROM users WHERE lower(email) = ? AND id != ?').get(email, req.user.id)) return res.status(409).json({ error: 'This email address is already in use.' });
+  db.prepare('UPDATE users SET email = ? WHERE id = ?').run(email, req.user.id);
+  res.json({ user: { id: row.id, username: row.username, email, friendCode: row.friend_code, role: row.role } });
 });
 
 router.get('/friends', requireAuth, requirePlayer, (req, res) => {

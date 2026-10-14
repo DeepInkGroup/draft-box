@@ -37,6 +37,26 @@
 .profile-header { align-items: center; }
 .profile-modern-avatar { display: grid; place-items: center; width: 68px; height: 68px; flex: 0 0 68px; border-radius: 20px; background: linear-gradient(135deg, #9477ee, #5b3eba); font-size: 1.5rem; font-weight: 700; box-shadow: inset 0 1px 0 #ffffff33; }
 .profile-modern-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; font-size: .8rem; }
+.clan-profile-badge, .clan-tag { color: #d8c9ff; background: #7c5cff20; border: 1px solid #9d83ff40; border-radius: 8px; padding: 6px 10px; overflow-wrap: anywhere; max-width: 100%; }
+.clan-tag { display: inline-block; font-family: ui-monospace, monospace; font-weight: 700; letter-spacing: .06em; }
+.clan-title { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.clan-title > div { min-width: 0; }
+.clan-title h3 { overflow-wrap: anywhere; }
+.clan-description { white-space: pre-line; overflow-wrap: anywhere; }
+.clan-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.clan-note { font-size: .78rem !important; }
+.clan-member-layout { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)); gap: 16px; margin-top: 16px; }
+.clan-members { padding: 0; list-style: none; margin: 16px 0 0; }
+.clan-members li { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid #ffffff10; }
+.clan-members li:last-child { border: 0; }
+.clan-member-avatar { display: grid; place-items: center; flex: 0 0 36px; height: 36px; border-radius: 11px; color: #d8c9ff; background: #7c5cff20; }
+.clan-members li > div { min-width: 0; }
+.clan-members b { display: block; overflow-wrap: anywhere; font-size: .9rem; }
+.clan-members .muted { font-size: .75rem; }
+.help-field textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; background: #100f17; border: 1px solid #3a3447; border-radius: 10px; color: var(--ink); font: inherit; font-size: 16px; line-height: 1.6; resize: vertical; }
+.help-field textarea:focus { outline: 2px solid #9477ee; outline-offset: 2px; }
+#clanMessage, #profileEmailMessage { font-size: .85rem; line-height: 1.6; color: #c6b3ff; }
+#clanMessage.error, #profileEmailMessage.error { color: #ff9eac; }
 #profileDialog .profile-modern-career { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; margin: 0 0 20px; }
 #profileDialog .career-stat { padding: 18px 12px; min-width: 0; border: 1px solid #ffffff12; border-radius: 12px; background: #1a1822; text-align: left; }
 #profileDialog .career-value { font-size: 1.4rem; display: block; color: #f1eafa; margin-bottom: 7px; overflow-wrap: anywhere; }

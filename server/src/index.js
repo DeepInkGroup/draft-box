@@ -20,7 +20,7 @@ const app = express();
 app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins }));
 app.use(express.json());
 
-app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server', version: '2.1.3' }));
+app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server', version: '2.1.3', profileVersion: 2 }));
 app.get('/api/leagues', (req, res) => res.json({ leagues: leagueCatalog() }));
 app.get('/api/tactical-styles', (req, res) => res.json({ styles: tacticalCatalog() }));
 app.get('/api/about', (req, res) => {
@@ -32,6 +32,7 @@ app.get('/api/teams', (req, res) => {
 });
 app.use('/api/auth', authRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/clans', require('./routes/clans'));
 app.use('/api/tactics', tacticsRoutes);
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));

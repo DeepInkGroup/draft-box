@@ -97,7 +97,7 @@ function getRoomByCode(code) {
 }
 
 function getMembers(roomId) {
-  return db.prepare('SELECT * FROM room_members WHERE room_id = ? ORDER BY joined_at ASC').all(roomId);
+  return db.prepare(`SELECT m.*, c.tag AS clan_tag FROM room_members m LEFT JOIN clan_members cm ON cm.user_id = m.user_id LEFT JOIN clans c ON c.id = cm.clan_id WHERE m.room_id = ? ORDER BY m.joined_at ASC`).all(roomId);
 }
 
 function listUserLeagues(userId) {
@@ -451,6 +451,7 @@ function lobbySnapshot(roomRow) {
     members: members.map((m) => ({
       userId: m.user_id,
       username: m.username,
+      clanTag: m.clan_tag || null,
       formation: m.formation,
       clubCode: roomRow.mode === 'league' ? m.country_code : null,
       draftComplete: !!m.draft_complete,

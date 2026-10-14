@@ -45,7 +45,7 @@ ${room.mode === 'league' ? `<div id="lobbyLeagueSettings"><h3>${room.leagueName}
       slotsEl.textContent = `${snap.members.length} / ${snap.humanSlotsMax}`;
       memberList.innerHTML = snap.members.map((m) => `
         <li class="${m.userId === snap.creatorId ? 'member-leader' : ''}">
-          <span class="member-name">${m.userId === snap.creatorId ? '<span class="leader-star">*</span>' : ''}${m.username}${m.userId === App.state.user.id ? ' (you)' : ''}${m.userId === snap.creatorId ? '<span class="leader-badge">Leader</span>' : ''}</span>
+          <span class="member-name">${m.userId === snap.creatorId ? '<span class="leader-star">*</span>' : ''}${m.clanTag ? `<span class="clan-member-tag">[${m.clanTag}]</span>` : ''}${m.username}${m.userId === App.state.user.id ? ' (you)' : ''}${m.userId === snap.creatorId ? '<span class="leader-badge">Leader</span>' : ''}</span>
           <span class="badge">${snap.mode === 'league' ? (snap.leagueClubs.find(club=>club.code===m.clubCode)?.name || m.clubCode) + ' &middot; ' : ''}${m.formation}</span>
         </li>
       `).join('');

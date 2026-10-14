@@ -46,7 +46,7 @@ for (const width of [1280, 768, 390, 320]) {
     await page.locator('#profileTab-preferences').press('ArrowRight');
     await expect(page.locator('#profileTab-security')).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('#profileEmail')).toHaveValue(username + '@example.test');
-    await expect(page.locator('#profileEmail')).toBeDisabled();
+    await expect(page.locator('#profileEmail')).toBeEnabled();
     await page.locator('#profileCurrentPassword').fill('test-password');
     await page.locator('#profileNewPassword').fill('tiny');
     await page.locator('#btnChangePassword').click();

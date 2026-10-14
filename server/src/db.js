@@ -245,4 +245,18 @@ db.exec(`CREATE TABLE IF NOT EXISTS site_content (
   updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );`);
 require('./adminBootstrap')(db, uniqueFriendCode);
+db.exec(`CREATE TABLE IF NOT EXISTS clans (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  tag TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  owner_id INTEGER NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS clan_members (
+  user_id INTEGER PRIMARY KEY REFERENCES users(id),
+  clan_id INTEGER NOT NULL REFERENCES clans(id) ON DELETE CASCADE,
+  joined_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_clan_members_clan ON clan_members(clan_id);`);
 module.exports = db;

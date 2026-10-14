@@ -90,6 +90,10 @@ If you serve `web/` separately, enter `http://localhost:4321` in its server sett
 
 **Profile** groups career statistics, friends, draft layout preferences and password settings into separate tabs. **Formations & Tactics** includes a live formation preview and searchable cards using the actual tactical catalog. **Rulebook** has topic navigation, search and expandable explanations for World Cup and League Games.
 
+**Profile → Security** lets players change their email after confirming their current password. Addresses are validated and compared without case sensitivity, and the new address can be used to sign in immediately. **Profile → Clan** creates a group with a unique 2–6 character tag or joins an existing group by tag. Players belong to one clan at a time; clan tags appear on profiles and lobby member lists. Leaders can edit the name/description. Leaving transfers leadership to the earliest remaining member; an empty clan closes and frees its tag. Clan members see usernames and roles, with no email addresses exposed.
+
+Multiplayer league club choices refresh while joining. Drafted footballers are exclusive across the room: a pick disables that card on other open draft screens and cancels a stale position chooser. The server and database reject duplicate picks, including after reconnects.
+
 The **About Us** information icon in the header opens a public introduction. **Admin Panel → About Us** edits the page title, short introduction, story, organization name, contact email and website/GitHub/Telegram links, with a live preview. **Save & publish** makes the content public immediately; empty optional fields disappear. Content is plain text, URLs are validated, and concurrent changes are protected by revision checks. Content is stored in SQLite alongside accounts and games and requires persistent hosting storage to survive redeploys.
 
 After completing or skipping mid-season transfers, **Finish Season & View Results** simulates the remaining fixtures and saves every match. Results include the final table, champion, relegated clubs, team record, awards, top scorers, creators, goalkeeper saves and star moments.

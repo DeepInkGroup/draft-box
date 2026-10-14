@@ -191,7 +191,12 @@ function renderStatsChart(stats) {
     const profileDialog = document.getElementById('profileDialog');
     const profileError = document.getElementById('profileError');
     profileBtn.addEventListener('click', async () => {
+      const profileUserId = state.user?.id;
       profileError.classList.add('hidden');
+      document.getElementById('profileEmailPassword').value = '';
+      document.getElementById('profileEmailMessage').textContent = '';
+      document.getElementById('profileEmail').disabled = true;
+      document.getElementById('btnUpdateEmail').disabled = true;
       document.getElementById('profileCurrentPassword').value = '';
       document.getElementById('profileNewPassword').value = '';
       const profileName = state.user ? state.user.username : 'Manager';
@@ -229,12 +234,16 @@ function renderStatsChart(stats) {
       profileDialog.showModal();
       try {
         const { user } = await Api.me();
+        if (state.user?.id !== profileUserId || !profileDialog.open) return;
         document.getElementById('profileEmail').value = user.email;
         document.getElementById('profileFriendCode').textContent = user.friendCode || '-----';
         document.getElementById('profileHeroName').textContent = user.username;
         document.getElementById('profileHeroInitials').textContent = user.username.split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase() || 'DB';
         state.user = { ...state.user, ...user };
-      } catch { /* ignore — dialog still usable for password change / logout */ }
+        document.getElementById('profileEmail').disabled = false;
+        document.getElementById('btnUpdateEmail').disabled = false;
+        ClanProfile.badge(user.clan);
+      } catch { document.getElementById('profileEmailMessage').textContent = 'Could not load your account details. Reopen Profile to try again.'; /* ignore — dialog still usable for password change / logout */ }
       loadProfileFriends();
       try {
         const stats = await Api.careerStats();
@@ -254,6 +263,19 @@ function renderStatsChart(stats) {
         if (insightsEl) insightsEl.innerHTML = '<div class="profile-insight-card wide"><span>Coach Note</span><b>Career insights unavailable right now.</b></div>';
         if (roadmapEl) roadmapEl.innerHTML = '<div class="profile-idea-head">Profile Game Plan</div><p class="muted">Recommendations unavailable right now.</p>';
       }
+    });
+    document.getElementById('profileEmailForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = document.getElementById('btnUpdateEmail'), input = document.getElementById('profileEmail'), password = document.getElementById('profileEmailPassword'), message = document.getElementById('profileEmailMessage');
+      if (button.disabled) return;
+      const userId = state.user?.id;
+      button.disabled = true; message.textContent = 'Saving email...'; message.classList.remove('error');
+      try {
+        const data = await Api.put('/api/auth/me/email', { email: input.value, currentPassword: password.value });
+        if (state.user?.id !== userId) return;
+        state.user = { ...state.user, ...data.user }; input.value = data.user.email; password.value = ''; message.textContent = 'Email updated successfully.';
+      } catch(error) { message.textContent = error.message; message.classList.add('error'); }
+      finally { button.disabled = false; }
     });
     document.getElementById('btnCloseProfile').addEventListener('click', () => profileDialog.close());
     document.getElementById('btnViewHistory').addEventListener('click', () => {

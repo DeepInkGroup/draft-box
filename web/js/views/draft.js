@@ -11,6 +11,7 @@ const DraftView = {
     let captainEnabled = false;
     let sortMode = 'rating';
     let lastPlayers = [];
+    let slotChoicePlayerId = null;
     let isCreator = false;
     let singlePlayer = false;
     let spoilerMode = false;
@@ -335,6 +336,7 @@ const DraftView = {
     }
 
     function renderReveal(payload) {
+      slotChoicePlayerId = null;
       if (payload.done) {
         stopTimer();
         myDraftComplete = true;
@@ -411,13 +413,14 @@ const DraftView = {
       const players = sortPlayers(lastPlayers, sortMode);
       const lockedByTurn = sharedDraftMode && sharedDraft && !sharedDraft.isMyTurn;
       grid.innerHTML = players.map((p) => `
-        <div class="player-card ${p.available && !lockedByTurn ? '' : 'unavailable'}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
+        <div class="player-card ${p.available && !lockedByTurn ? '' : 'unavailable'}" role="button" tabindex="${p.available && !lockedByTurn ? 0 : -1}" aria-disabled="${!p.available || !!lockedByTurn}" data-id="${p.id}" data-pos="${p.pos}" data-name="${p.name.replace(/"/g, '&quot;')}">
           <div class="pname">${p.isStar ? '<span class="star">★</span> ' : ''}${p.name}</div>
-          <div class="pmeta"><span>${p.rawPos || POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>
+          <div class="pmeta"><span>${p.rawPos || POS_LABEL[p.pos]}</span>${p.overall !== null ? `<span class="overall">${p.overall}</span>` : ''}</div>${p.poolAvailable === false ? '<small class="player-taken-label">Taken</small>' : ''}
         </div>
       `).join('');
 
       grid.querySelectorAll('.player-card').forEach((card) => {
+        card.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); card.click(); } });
         card.addEventListener('click', () => {
           if (card.classList.contains('unavailable') || (sharedDraftMode && sharedDraft && !sharedDraft.isMyTurn)) return;
           const playerId = card.dataset.id;
@@ -562,6 +565,7 @@ const DraftView = {
     }
 
     function showSlotChoice(playerId, playerName, candidateSlots) {
+      slotChoicePlayerId = playerId;
       revealCard.innerHTML = `
         <div class="reveal-team">${playerName}</div>
         <div class="reveal-sub">Which position should they play?</div>
@@ -663,6 +667,13 @@ const DraftView = {
 
     App.onSocket('draft:poolUpdate', (u) => {
       poolCount.textContent = u.poolRemaining;
+      if (!u.playerId || !lastPlayers.some(player => player.id === u.playerId)) return;
+      lastPlayers = lastPlayers.map(player => player.id === u.playerId ? { ...player, available: false, poolAvailable: false } : player);
+      if (lastRevealPayload) lastRevealPayload.players = lastPlayers;
+      if (slotChoicePlayerId === u.playerId) {
+        renderReveal(lastRevealPayload);
+        App.toast('That player was just drafted. Choose another player.');
+      } else renderPlayerGrid();
     });
 
     App.onSocket('tournament:started', () => { sessionStorage.removeItem(`draftbox.autoDraft.${code}`); stopTimer(); App.goTournament(code); });

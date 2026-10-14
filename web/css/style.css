@@ -203,6 +203,8 @@ button.transfer-player-card { cursor: pointer; }
 .member-list li:last-child { border-bottom: none; }
 .member-list li.member-leader { background: rgba(250, 204, 21, .06); border-radius: var(--radius-sm); padding-inline: 10px; }
 .member-name { display: inline-flex; align-items: center; gap: 7px; min-width: 0; flex-wrap: wrap; }
+.clan-member-tag { padding: 3px 6px; border-radius: 6px; background: var(--accent-soft); color: #cbbaff; font-size: .75rem; font-weight: 600; }
+.player-taken-label { display: block; margin-top: 10px; color: #b5adbe; font-size: .75rem; }
 .league-lobby-members li { flex-wrap: wrap; gap: 10px; }
 .league-lobby-members .member-name { overflow-wrap: anywhere; }
 .league-lobby-members .badge { white-space: normal; line-height: 1.5; }
