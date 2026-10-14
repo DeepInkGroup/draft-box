@@ -14,6 +14,7 @@ const AdminView = (() => {
     ['players', 'Player Analysis', 'M12 3v18 M3 12h18 M5 5l14 14 M5 19 19 5'],
     ['leagues', 'League Reports', 'M4 20h16 M6 16V9 M12 16V4 M18 16v-5'],
     ['tactics', 'Tactics Lab', 'M9 3h6 M10 3v7L4 20h16l-6-10V3 M8 15h8'],
+    ['about', 'About Us', 'M12 11v6 M12 7h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0'],
     ['settings', 'Account', 'M12 3 3 7v6c0 4 5 7 9 9 4-2 9-5 9-9V7z M8 12l3 3 5-5']
   ];
   async function render(container, initialTab = 'overview') {
@@ -26,15 +27,16 @@ const AdminView = (() => {
     <section data-admin-panel="players" class="admin-panel hidden"><section class="card"><div class="admin-section-head"><div><h2>Player Database</h2><p class="muted">Filter the roster, then select up to three players to compare.</p></div><span class="badge">PGL + World Cup</span></div><div class="admin-filters"><label>Competition<select id="adminCompetition"><option value="pgl">Persian Gulf League</option><option value="worldcup">World Cup</option></select></label><label>Club<select id="adminClub"></select></label><label>Position<select id="adminPosition"><option value="">All positions</option><option>GK</option><option value="DF">Defense</option><option value="MF">Midfield</option><option value="FW">Forward</option></select></label><label>Minimum OVR<input id="adminRating" type="number" min="0" max="99" value="0"></label><label>Search<input id="adminSearch" type="search" placeholder="Player or position"></label></div><p id="adminPlayerSummary" class="muted"></p><div id="adminComparison"></div><div id="adminPlayers" class="admin-player-grid"></div><button id="adminMore" class="btn btn-ghost">Show More Players</button></section></section>
     <section data-admin-panel="leagues" class="admin-panel hidden"><section class="card"><h2>League Analysis</h2><p class="muted">Inspect a season without changing any player's progress.</p><div class="field"><label for="adminLeague">Season</label><select id="adminLeague"><option value="">Choose a season</option></select></div><div id="adminLeagueReport" aria-live="polite"></div></section></section>
     <section data-admin-panel="tactics" class="admin-panel hidden"><div id="adminTacticsBody"></div></section>
+    <section data-admin-panel="about" class="admin-panel hidden"><div id="adminAboutBody"></div></section>
     <section data-admin-panel="settings" class="admin-panel hidden"><section class="card admin-account-card"><h2>Administrator Account</h2><p class="muted">${esc(App.state.user.username)} · Administrator</p><form id="adminPasswordForm"><label>Current password<input id="adminCurrentPassword" type="password" autocomplete="current-password" required></label><label>New password<input id="adminNewPassword" type="password" minlength="6" autocomplete="new-password" required></label><label>Confirm new password<input id="adminConfirmPassword" type="password" minlength="6" autocomplete="new-password" required></label><p id="adminPasswordMessage" aria-live="polite"></p><button class="btn btn-primary" type="submit">Update Password</button></form></section></section></div></div>`;
     const $ = (selector) => container.querySelector(selector);
     const root = $('#adminConsole');
     const alive = () => container.contains(root);
-    let tacticsLoaded = false, userPage = 1, userPages = 1, userRequest = 0, detailRequest = 0, selectedUser = null, searchTimer;
+    let aboutLoaded = false, tacticsLoaded = false, userPage = 1, userPages = 1, userRequest = 0, detailRequest = 0, selectedUser = null, searchTimer;
     const descriptions = {
       overview: 'Your accounts, competitions and analysis tools in one place.', users: 'Inspect user emails, roles, activity and game history.',
       players: 'Explore rosters and compare the players behind every team.', leagues: 'Review standings and player statistics across saved seasons.',
-      tactics: 'Create, version and test tactics with the match engine.', settings: 'Manage your administrator login.'
+      tactics: 'Create, version and test tactics with the match engine.', about: 'Edit the public About Us page and community links.', settings: 'Manage your administrator login.'
     };
     function selectTab(id) {
       if (!tabs.some((tab) => tab[0] === id)) id = 'overview';
@@ -48,6 +50,7 @@ const AdminView = (() => {
       $('#adminPageTitle').textContent = label; $('#adminBreadcrumb').textContent = label;
       $('#adminPageDescription').textContent = descriptions[id];
       location.hash = id === 'overview' ? 'admin' : `admin/${id}`;
+      if (id === 'about' && !aboutLoaded) { aboutLoaded = true; AboutUs.edit($('#adminAboutBody')); }
       if (id === 'tactics' && !tacticsLoaded) { tacticsLoaded = true; TacticsView.init($('#adminTacticsBody')); }
     }
     root.querySelectorAll('[data-admin-tab], [data-admin-open]').forEach((button) => button.onclick = () => selectTab(button.dataset.adminTab || button.dataset.adminOpen));

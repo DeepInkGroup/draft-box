@@ -238,5 +238,11 @@ for (const user of usersWithoutFriendCode) setFriendCode.run(uniqueFriendCode(),
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_friend_code ON users(friend_code);`);
 db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_friendships_pair ON friendships(requester_id, addressee_id);`);
 
+db.exec(`CREATE TABLE IF NOT EXISTS site_content (
+  key TEXT PRIMARY KEY,
+  content TEXT NOT NULL,
+  revision INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);`);
 require('./adminBootstrap')(db, uniqueFriendCode);
 module.exports = db;

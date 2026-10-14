@@ -84,6 +84,10 @@ If you serve `web/` separately, enter `http://localhost:4321` in its server sett
 
 ## Version 2.1.3: season results and admin tools
 
+**Profile** groups career statistics, friends, draft layout preferences and password settings into separate tabs. **Formations & Tactics** includes a live formation preview and searchable cards using the actual tactical catalog. **Rulebook** has topic navigation, search and expandable explanations for World Cup and League Games.
+
+The **About Us** information icon in the header opens a public introduction. **Admin Panel → About Us** edits the page title, short introduction, story, organization name, contact email and website/GitHub/Telegram links, with a live preview. **Save & publish** makes the content public immediately; empty optional fields disappear. Content is plain text, URLs are validated, and concurrent changes are protected by revision checks. Content is stored in SQLite alongside accounts and games and requires persistent hosting storage to survive redeploys.
+
 After completing or skipping mid-season transfers, **Finish Season & View Results** simulates the remaining fixtures and saves every match. Results include the final table, champion, relegated clubs, team record, awards, top scorers, creators, goalkeeper saves and star moments.
 
 **Admin** signs directly into a dedicated admin workspace. Administrator accounts cannot create/join games, draft, play leagues or connect to the live game server; the server enforces this separation. Normal players keep all 12 built-in tactical styles. **Custom Tactics** is an administrative analysis tool inside the panel.

@@ -23,6 +23,10 @@ app.use(express.json());
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server', version: '2.1.3' }));
 app.get('/api/leagues', (req, res) => res.json({ leagues: leagueCatalog() }));
 app.get('/api/tactical-styles', (req, res) => res.json({ styles: tacticalCatalog() }));
+app.get('/api/about', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(require('./siteContent').getAbout());
+});
 app.get('/api/teams', (req, res) => {
   res.json({ teams: ALL_TEAMS.map((t) => ({ code: t.code, name: t.name })) });
 });

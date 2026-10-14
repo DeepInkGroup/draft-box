@@ -9,6 +9,20 @@ const { clubSquadSnapshot } = require('../game/leagueSquads');
 const { seasonResults } = require('../game/leagueResults');
 const { activityStatus } = require('../userActivity');
 router.use(requireAuth, requireAdmin);
+const { getAbout, validateAbout, saveAbout } = require('../siteContent');
+router.get('/about', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json(getAbout());
+});
+router.put('/about', (req, res) => {
+  if (!Number.isSafeInteger(req.body.revision) || req.body.revision < 1) return res.status(400).json({ error: 'A valid content revision is required.' });
+  let content;
+  try { content = validateAbout(req.body.content); } catch (error) { return res.status(400).json({ error: error.message }); }
+  getAbout();
+  const saved = saveAbout(content, req.body.revision);
+  if (!saved) return res.status(409).json({ error: 'Another administrator updated this page. Reload saved content before editing again.' });
+  res.json(saved);
+});
 const userFields = 'id, username, email, friend_code AS friendCode, role, created_at AS createdAt, last_login_at, last_seen_at';
 function userSummary(user) {
   return { id: user.id, username: user.username, email: user.email, friendCode: user.friendCode, role: user.role,

@@ -32,6 +32,13 @@ async function request(url, verify, options = {}, attempts = 6) {
   await request(apiBase + '/api/teams', async (response) => {
     assert.equal((await response.json()).teams.length, 48);
   });
+  await request(apiBase + '/api/about', async (response) => {
+    const about = await response.json();
+    assert.equal(about.formatVersion, 1, 'Wait for editable About Us deployment');
+    assert.ok(about.revision >= 1);
+    assert.equal(typeof about.content.title, 'string');
+    assert.equal(typeof about.content.body, 'string');
+  }, {}, 60);
   await request(apiBase + '/api/tactical-styles', async (response) => {
     const styles = (await response.json()).styles;
     assert.equal(styles.length, 12);
@@ -68,6 +75,11 @@ async function request(url, verify, options = {}, attempts = 6) {
   configUrl.searchParams.set('check', process.env.GITHUB_RUN_ID || Date.now().toString());
   await request(configUrl, async (response) => {
     assert.ok((await response.text()).includes(JSON.stringify(apiBase)), 'Pages must contain the deployed server address');
+  });
+  const helpUrl = new URL('js/components/help.js', pagesUrl);
+  helpUrl.searchParams.set('check', process.env.GITHUB_RUN_ID || Date.now().toString());
+  await request(helpUrl, async (response) => {
+    assert.match(await response.text(), /const HelpViews/);
   });
 })().catch((error) => {
   console.error(error.message);

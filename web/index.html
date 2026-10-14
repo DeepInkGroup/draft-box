@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/help.css" />
 </head>
 <body>
   <header class="topbar">
@@ -25,6 +26,7 @@
       <button id="btnGameGuide" class="btn btn-ghost btn-sm icon-btn" title="Formations and tactics guide">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M12 4v16"/><circle cx="8" cy="8" r="1.4"/><circle cx="7" cy="16" r="1.4"/><circle cx="16" cy="12" r="1.4"/><path d="m8 8 8 4-9 4"/></svg>
       </button>
+      <button id="btnAbout" class="btn btn-ghost btn-sm icon-btn" title="About Us" aria-label="About Us"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg></button>
       <button id="btnProfile" class="btn btn-ghost btn-sm icon-btn hidden" title="Profile">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
       </button>
@@ -91,269 +93,27 @@
     </div>
 </dialog>
 
-    <dialog id="profileDialog" class="dialog dialog-wide">
-    <div class="dialog-form profile-shell profile-redesign">
-      <header class="profile-hero">
-        <div class="profile-hero-glow" aria-hidden="true"></div>
-        <div class="profile-avatar" id="profileHeroInitials" aria-hidden="true">DB</div>
-        <div class="profile-hero-copy">
-          <span class="profile-eyebrow">Draft Box Manager</span>
-          <h3 id="profileHeroName">Your Profile</h3>
-          <p>Shape your setup, track your form, and stay connected to your rivals.</p>
-          <div class="profile-status-line">
-            <span class="profile-rank" id="profileHeroRank">Fresh Start</span>
-            <span id="profileHeroMeta">Career data loading...</span>
-          </div>
-        </div>
-        <div class="profile-head-actions">
-          <button id="btnViewHistory" class="btn btn-ghost btn-sm">Match History</button>
-          <button id="btnCloseProfile" class="profile-close" aria-label="Close profile">&times;</button>
-        </div>
-      </header>
+    <dialog id="profileDialog" class="dialog help-dialog profile-modern" aria-labelledby="profileHeroName">
+ <div class="help-shell">
+ <header class="help-header profile-header"><div class="profile-modern-avatar" id="profileHeroInitials" aria-hidden="true">DB</div><div class="help-heading"><p class="help-eyebrow">YOUR MANAGER PROFILE</p><h2 id="profileHeroName">Your profile</h2><div class="profile-modern-meta"><span class="badge" id="profileHeroRank">Fresh start</span><span id="profileHeroMeta" class="muted"></span></div></div><button id="btnCloseProfile" class="help-close" aria-label="Close profile" title="Close">&times;</button></header>
+ <nav class="help-tabs" role="tablist" aria-label="Profile sections"><button class="help-tab" role="tab" id="profileTab-overview" aria-controls="profilePanel-overview" aria-selected="true" tabindex="0" data-profile-tab="overview">Overview</button><button class="help-tab" role="tab" id="profileTab-friends" aria-controls="profilePanel-friends" aria-selected="false" tabindex="-1" data-profile-tab="friends">Friends</button><button class="help-tab" role="tab" id="profileTab-preferences" aria-controls="profilePanel-preferences" aria-selected="false" tabindex="-1" data-profile-tab="preferences">Preferences</button><button class="help-tab" role="tab" id="profileTab-security" aria-controls="profilePanel-security" aria-selected="false" tabindex="-1" data-profile-tab="security">Security</button></nav>
+ <div class="help-scroll">
+ <section id="profilePanel-overview" role="tabpanel" aria-labelledby="profileTab-overview" data-profile-panel="overview" class="help-panel"><div class="help-section-heading"><div><h3>Your career at a glance</h3><p class="muted">Your record from completed competitions.</p></div><button id="btnViewHistory" class="btn btn-ghost">Match history &rarr;</button></div><div id="profileCareer" class="career-grid profile-modern-career"></div><div class="profile-modern-record"><section class="help-card"><h3>Match record</h3><p class="muted">Wins, draws and losses over your career.</p><div id="profileMatchRecord" aria-label="Career wins, draws and losses"></div></section><section class="help-card"><h3>Performance insights</h3><div id="profileInsights" class="profile-insights"></div></section></div><section id="profileRoadmap" class="help-card profile-modern-roadmap"></section></section>
+ <section id="profilePanel-friends" role="tabpanel" aria-labelledby="profileTab-friends" data-profile-panel="friends" class="help-panel hidden"><div class="help-section-heading"><div><h3>Football is better with friends</h3><p class="muted">Share your code, send requests and compare careers.</p></div></div><div class="profile-friends-grid"><section class="help-card"><h3>Your friend code</h3><p class="muted">Send this code to someone you want to play with.</p><div class="profile-code-row"><b id="profileFriendCode">-----</b><button id="profileCopyCode" class="btn btn-ghost">Copy code</button></div><hr><label class="help-field">Add a friend<div class="friend-add-row"><input id="friendCodeInput" type="text" maxlength="5" placeholder="e.g. A1234" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Friend code"><button id="btnAddFriend" class="btn btn-primary">Send request</button></div></label></section><section class="help-card"><h3>Friends &amp; requests</h3><div id="profileFriends" class="friends-list" aria-live="polite"></div></section></div></section>
+ <section id="profilePanel-preferences" role="tabpanel" aria-labelledby="profileTab-preferences" data-profile-panel="preferences" class="help-panel hidden"><section class="help-card"><span class="help-eyebrow">MAKE IT YOURS</span><h3>Draft screen layout</h3><p class="muted">Choose where the player list and squad pitch appear. Changes are saved automatically on this browser.</p><div id="profileDraftLayout" class="profile-layout-options"></div></section><div class="help-callout"><b>Playing on a phone?</b><p>Pitch First keeps your squad at the top so you can see the position you are filling.</p></div></section>
+ <section id="profilePanel-security" role="tabpanel" aria-labelledby="profileTab-security" data-profile-panel="security" class="help-panel hidden"><div class="profile-security-grid"><section class="help-card"><h3>Account details</h3><label class="help-field">Username<input id="profileUsername" type="text" disabled></label><label class="help-field">Email address<input id="profileEmail" type="email" disabled></label><p class="muted">These are the details associated with your account.</p></section><section class="help-card"><h3>Change your password</h3><p class="muted">Use at least 6 characters for your new password.</p><label class="help-field">Current password<input id="profileCurrentPassword" type="password" autocomplete="current-password"></label><label class="help-field">New password<input id="profileNewPassword" type="password" minlength="6" autocomplete="new-password"></label><button id="btnChangePassword" class="btn btn-primary">Update password</button></section></div></section>
+ <p id="profileError" class="error hidden" role="alert"></p>
+ </div><footer class="help-footer"><span class="muted">Your squad. Your story.</span><button id="btnLogout" class="btn btn-ghost">Sign out</button></footer></div>
+ </dialog>
 
-      <div class="profile-dashboard">
-        <aside class="profile-sidebar">
-          <section class="profile-panel identity-panel">
-            <div class="profile-section-heading"><span>01</span><div><h4>Manager Card</h4><p>Your account identity</p></div></div>
-            <div class="profile-account-fields">
-              <div class="field"><label>Username</label><input id="profileUsername" type="text" disabled /></div>
-              <div class="field"><label>Email</label><input id="profileEmail" type="text" disabled /></div>
-            </div>
-            <div class="friend-card compact">
-              <div><span>Friend ID</span><b id="profileFriendCode">-----</b></div>
-              <p>Share this code with another manager.</p>
-            </div>
-          </section>
+  <dialog id="gameGuideDialog" class="dialog help-dialog" aria-labelledby="gameGuideTitle"><div class="help-shell"><header class="help-header"><div class="help-heading"><p class="help-eyebrow">BUILD YOUR GAME PLAN</p><h2 id="gameGuideTitle">Formations &amp; Tactics</h2><p class="muted">Find a shape and style that suit your squad.</p></div><button id="btnCloseGameGuide" class="help-close" aria-label="Close formations and tactics" title="Close">&times;</button></header><nav class="help-tabs" role="tablist" aria-label="Guide sections"><button class="help-tab" role="tab" id="guideTab-formations" aria-controls="guidePanel-formations" aria-selected="true" tabindex="0" data-guide-tab="formations">Formations</button><button class="help-tab" role="tab" id="guideTab-styles" aria-controls="guidePanel-styles" aria-selected="false" tabindex="-1" data-guide-tab="styles">Tactical styles</button><button class="help-tab" role="tab" id="guideTab-chemistry" aria-controls="guidePanel-chemistry" aria-selected="false" tabindex="-1" data-guide-tab="chemistry">Team chemistry</button></nav><div class="help-scroll">
+ <section id="guidePanel-formations" role="tabpanel" aria-labelledby="guideTab-formations" data-guide-panel="formations" class="help-panel"><div class="formation-explorer"><section class="help-card guide-pitch-card"><label class="help-field">Explore a formation<select id="guideFormation"></select></label><div id="guidePitch" role="img" aria-label="Selected formation on a football pitch"></div><p class="muted guide-pitch-note">Attacking direction &uarr;</p></section><section class="formation-explorer-copy"><span class="help-eyebrow">THE SHAPE OF YOUR TEAM</span><h3 id="guideFormationName"></h3><p id="guideFormationDescription"></p><div id="guideLineCounts" class="guide-line-counts"></div><div class="help-callout"><b>Start with your players</b><p>Choose a formation that gives your strongest players a natural position. More attackers can add threat, but leave less cover behind them.</p></div><details class="guide-position-details"><summary>See all 11 positions</summary><div id="guideRoles" class="guide-role-list"></div></details></section></div></section>
+ <section id="guidePanel-styles" role="tabpanel" aria-labelledby="guideTab-styles" data-guide-panel="styles" class="help-panel hidden"><div class="help-section-heading"><div><h3>Choose your approach</h3><p class="muted">Every style has strengths and tradeoffs. Check the formation fit when you choose a style in-game.</p></div></div><label class="help-field help-search">Search styles<input id="guideStyleSearch" type="search" placeholder="Try pressing, passing or counter"></label><p id="guideStyleCount" class="muted" role="status"></p><div id="guideStyles" class="tactic-explorer-grid"></div><p class="muted">Custom Tactics are available in the administrator's Tactics Lab.</p></section>
+ <section id="guidePanel-chemistry" role="tabpanel" aria-labelledby="guideTab-chemistry" data-guide-panel="chemistry" class="help-panel hidden"><div class="help-section-heading"><div><h3>A good XI plays together</h3><p class="muted">Overall ratings are only part of your team's performance.</p></div></div><div class="chemistry-guide-grid"><article class="help-card"><span class="guide-step">01</span><h3>Use natural positions</h3><p>Match players to their preferred roles. Position fit and balanced lines help your squad create chances and defend as a unit.</p></article><article class="help-card"><span class="guide-step">02</span><h3>Connect your squad</h3><p>Player links, leadership and squad balance contribute to chemistry. A mix of creators, finishers and defensive cover gives your plan a stronger foundation.</p></article><article class="help-card"><span class="guide-step">03</span><h3>Allow time to settle</h3><p>In League Games, new signings briefly reduce coordination. Chemistry returns over the next few matches as the new lineup settles in.</p></article><article class="help-card"><span class="guide-step">04</span><h3>Read the match report</h3><p>Look at chances, xG, possession and the match review alongside the score. Use those clues to decide where your squad or style needs help.</p></article></div><div class="help-callout"><b>No perfect formula</b><p>Formation fit, tactical matchups and player quality all matter. Even a well-built team can lose a close match.</p></div></section>
+ </div><footer class="help-footer"><span class="muted">Explore here. Choose your setup in the lobby or draft.</span></footer></div></dialog>
+  <dialog id="rulebookDialog" class="dialog help-dialog" aria-labelledby="rulebookTitle"><div class="help-shell"><header class="help-header"><div class="help-heading"><p class="help-eyebrow">THE PLAYBOOK</p><h2 id="rulebookTitle">Rulebook</h2><p class="muted">Everything you need, one topic at a time.</p></div><button id="btnCloseRulebook" class="help-close" aria-label="Close rulebook" title="Close">&times;</button></header><div class="help-scroll"><label class="help-field help-search">Find a rule<input id="rulebookSearch" type="search" placeholder="Search transfers, captains, friends..."></label><div class="rulebook-explorer"><nav id="rulebookNav" class="rulebook-nav" aria-label="Rulebook topics"></nav><div><p id="rulebookResultCount" class="muted" role="status"></p><div id="rulebookTopics"></div></div></div></div><footer class="help-footer"><span class="muted">Want the technical details?</span><a href="rulebook.pdf" target="_blank" rel="noopener noreferrer" download>Download match engine PDF &darr;</a></footer></div></dialog>
 
-          <section class="profile-panel network-panel">
-            <div class="profile-section-heading"><span>02</span><div><h4>Manager Network</h4><p>Friends and challengers</p></div></div>
-            <div class="friend-add-row">
-              <input id="friendCodeInput" type="text" maxlength="5" placeholder="ENTER ID" aria-label="Friend ID" />
-              <button id="btnAddFriend" class="btn btn-primary btn-sm">Add</button>
-            </div>
-            <div id="profileFriends" class="friend-list"><p class="muted">Loading friends...</p></div>
-          </section>
-        </aside>
-
-        <main class="profile-main">
-          <section class="profile-panel stats-panel profile-career-panel">
-            <div class="profile-section-heading"><span>03</span><div><h4>Career Pulse</h4><p>Your competitive record at a glance</p></div></div>
-            <div id="profileCareer" class="career-grid"><p class="muted">Loading...</p></div>
-            <div class="profile-performance-grid">
-              <div class="profile-chart-card">
-                <span class="profile-chart-label">Match outcomes</span>
-                <div class="profile-chart-wrap"><canvas id="statsChart"></canvas></div>
-              </div>
-              <div id="profileInsights" class="profile-insights"></div>
-            </div>
-          </section>
-
-          <div class="profile-preferences-grid">
-            <section class="profile-panel settings-panel">
-              <div class="profile-section-heading"><span>04</span><div><h4>Draft Workspace</h4><p>Choose your ideal board</p></div></div>
-              <div id="profileDraftLayout"></div>
-            </section>
-
-            <section class="profile-panel security-panel">
-              <div class="profile-section-heading"><span>05</span><div><h4>Security</h4><p>Refresh your password</p></div></div>
-              <div class="password-grid">
-                <div class="field"><label>Current password</label><input id="profileCurrentPassword" type="password" autocomplete="current-password" /></div>
-                <div class="field"><label>New password</label><input id="profileNewPassword" type="password" autocomplete="new-password" placeholder="6+ characters" /></div>
-              </div>
-              <button id="btnChangePassword" class="btn btn-primary btn-block">Update Password</button>
-              <div class="error-text hidden" id="profileError"></div>
-            </section>
-          </div>
-
-          <section id="profileRoadmap" class="profile-ideas profile-panel plan-panel">
-            <div class="profile-idea-head">Manager Game Plan</div>
-            <div class="profile-idea-list">
-              <div><b>Draft Focus</b><span>Loading your next squad priority...</span></div>
-              <div><b>Match Plan</b><span>Reading your recent form...</span></div>
-              <div><b>Next Milestone</b><span>Building your next target...</span></div>
-            </div>
-          </section>
-        </main>
-      </div>
-
-      <footer class="profile-footer">
-        <span>Your Draft Box profile updates after every completed tournament.</span>
-        <button id="btnLogout" class="btn btn-ghost btn-sm profile-logout">Log out</button>
-      </footer>
-    </div>
-  </dialog>
-
-  <dialog id="gameGuideDialog" class="dialog dialog-wide game-guide-dialog">
-    <div class="dialog-form">
-      <div class="dialog-actions" style="justify-content: space-between; margin-bottom: 8px;">
-        <h3 style="margin:0;">Formations &amp; Tactics</h3>
-        <button id="btnCloseGameGuide" class="btn btn-ghost btn-sm">Close</button>
-      </div>
-      <div class="game-guide-body">
-        <div class="guide-purple-hero">
-          <b>Purple Tactical Board</b>
-          <span>Every formation is read as a pitch shape: width, midfield density, back-line security, front-line pressure, compactness and vertical gaps. Tactical style then modifies how that shape creates xG, converts chances, protects transitions and handles late-game pressure.</span>
-        </div>
-        <div class="guide-hero-grid">
-          <div><b>Formation Shape</b><span>Back line, front line, midfield density, width, central presence and vertical gaps all affect Attack, Defense and transition quality.</span></div>
-          <div><b>Chemistry</b><span>Natural positions, balanced lines and fewer OOP picks raise the team multiplier before match events are sampled.</span></div>
-          <div><b>Star Moments</b><span>Game Changers can create late pressure in finals, extra time, penalty rounds and matches after minute 80.</span></div>
-          <div><b>Creation vs Conversion</b><span>Midfield creates raw xG volume; strikers decide how many go in. Low-xG wins now exist.</span></div>
-          <div><b>Style Synergy</b><span>Formation + style fit gives a visible bonus (~+1.8–3.2% Attack/Defense) before the match kicks off.</span></div>
-        </div>
-        <h4>Tactical Styles (12 available)</h4>
-        <div class="tactic-guide-grid">
-          <div><b>Vertical Tiki-Taka <span class="new-badge">NEW</span></b><span>Fast central combinations and forward passing. Good with a connected midfield; exposed to counterattacks and aggressive pressing.</span></div>
-          <div><b>Overlapping Fullbacks <span class="new-badge">NEW</span></b><span>Wide defenders join the attack for crossing and corner threat. Strong against narrow blocks, with less cover on the flanks.</span></div>
-          <div><b>Catenaccio <span class="new-badge">NEW</span></b><span>Deep defensive cover, set pieces and selective breaks. Sacrifices creation and possession; patient width can stretch the block.</span></div>
-          <div><b>Direct Play</b><span>Long balls and forward runs favor finishing over midfield creation. Useful for strong forwards, with less possession and passing accuracy.</span></div>
-          <div><b>Counter Attack</b><span>Absorb pressure then sprint speed on breaks. Good vs Gegenpress &amp; Possession; weak vs Defensive low-blocks that deny space.</span></div>
-          <div><b>Defensive</b><span>Good vs Counter &amp; Direct play. Weak vs Possession &amp; Wing Play because deep blocks get stretched.</span></div>
-          <div><b>Balanced</b><span>Stable baseline, no sharp weakness or upside. Best when your XI is simply stronger and you want low-volatility results.</span></div>
-          <div><b>Compact Midfield</b><span>Good vs Gegenpress &amp; Counter by closing central lanes. Weak vs Wing Play &amp; Possession circulation.</span></div>
-          <div><b>Gegenpress</b><span>Good vs Possession &amp; Tiki-Taka (force turnovers). Weak vs Counter &amp; Compact teams that survive the first press.</span></div>
-          <div><b>Wing Play</b><span>Good vs Defensive &amp; Compact via width. Weak vs Possession &amp; presses that trap the wide lanes.</span></div>
-          <div><b>Possession</b><span>Good vs Defensive &amp; Compact by territory. Weak vs Gegenpress &amp; fast counters. Creation-heavy, conversion-light.</span></div>
-          <div><b>Tiki-Taka</b><span>Patient short passing emphasizes control and creation, with slower transitions and less finishing emphasis. Vulnerable to Gegenpress and counters.</span></div>
-        </div>
-        <h4>Style Matchup Matrix</h4>
-        <div class="guide-matrix">
-          <div><b>Vertical Tiki-Taka</b><span>Small edges against Defensive and Catenaccio. Vulnerable to Counter, Gegenpress and Compact Midfield.</span></div>
-          <div><b>Overlapping Fullbacks</b><span>Good against Compact Midfield, Defensive and Catenaccio. Vulnerable to Counter, Gegenpress and Possession.</span></div>
-          <div><b>Catenaccio</b><span>Good against Counter and Direct Play. Vulnerable to Tiki-Taka, Possession, Wing Play and Overlapping Fullbacks.</span></div>
-          <div><b>Defensive</b><span>Good vs Counter and Direct because space is denied. Bad vs Possession, Tiki-Taka and Wing Play because deep blocks get stretched or circulated around.</span></div>
-          <div><b>Gegenpress</b><span>Good vs Possession and Tiki-Taka by forcing high turnovers. Bad vs Counter and Compact when the first press is survived.</span></div>
-          <div><b>Possession</b><span>Good vs Defensive and Compact through territory control. Bad vs Gegenpress and Counter because turnovers are punished.</span></div>
-          <div><b>Counter Attack</b><span>Good vs Gegenpress, Possession and Tiki-Taka. Bad vs Defensive or Direct teams that do not leave useful space.</span></div>
-          <div><b>Wing Play</b><span>Good vs Defensive and Compact by overloading wide lanes. Bad vs Possession and Gegenpress when wide outlets are trapped.</span></div>
-          <div><b>Compact Midfield</b><span>Good vs Gegenpress, Counter and Direct by winning second balls. Bad vs Wing Play and patient Possession.</span></div>
-          <div><b>Direct Play</b><span>Good vs slow creation-heavy teams with weak forwards. Bad vs Defensive, Compact and Wing Play because long balls become predictable.</span></div>
-          <div><b>Tiki-Taka</b><span>Good vs passive Defensive teams through repeated creation. Bad vs Gegenpress, Counter and Direct pressure on turnovers.</span></div>
-          <div><b>Balanced</b><span>No hard counter. It protects squad quality when your XI is stronger and you do not want high tactical volatility.</span></div>
-        </div>
-        <h4>Two-phase xG: Created xG vs Converted xG</h4>
-        <div class="guide-flow">
-          <span><b>Creation phase (Midfield)</b> — volume of chances. Raised by Tiki-Taka, Possession, Gegenpress, Compact + 5-midfielder formations.</span>
-          <span><b>Conversion phase (Strikers)</b> — how many chances → goals. Raised by Direct, Counter, Wing Play, 2–4 striker formations &amp; STs rated 86+.</span>
-          <span>Realism now: <i>low xG teams can absolutely win</i>. 4-2-4 + Direct with a pair of 88-rated strikers outperforms their xG; a beautiful-passing Tiki-Taka team with a 76-rated ST will underperform theirs.</span>
-          <span>Synergy bonus shows in the match preview — 4-2-3-1 + Possession is a great fit; 5-4-1 + Tiki-Taka is wasted.</span>
-        </div>
-        <h4>Custom Tactics</h4>
-        <div class="guide-flow">
-          <span><b>Personal saved styles</b> - tactics built in Engine Lab appear in the post-draft style picker under Saved. Only the owner can lock and use them.</span>
-          <span><b>Live trade-offs</b> - sliders show Attack, Defense, Control, xG Creation, Finishing, Transition, Risk, Discipline, Set Pieces and Star Moment changes before saving.</span>
-          <span><b>Engine impact</b> - saved values feed the same match simulator fields as built-in styles, including xG split, card risk, star moments and set-piece pressure.</span>
-          <span><b>Use case</b> - build one tactic for elite midfield creators, one for clinical strikers, and one safer knockout tactic for protecting a lead.</span>
-        </div>
-        <h4>Formation Reading</h4>
-        <div class="guide-flow">
-          <span>Wide outlets improve crossing and stretch compact blocks.</span>
-          <span>Midfield density improves control, second balls and defensive cover.</span>
-          <span>Large vertical gaps hurt chemistry and make transitions less reliable.</span>
-          <span>High front lines raise pressure and shot volume but increase defensive risk.</span>
-          <span>Formations with ≥5 CMs (3-5-2, 4-3-2-1, 2-5-2-1) pair with Possession/Tiki-Taka; formations with 3–4 forwards (4-2-4, 3-4-3, 5-2-3) pair with Direct/Counter.</span>
-        </div>
-        <h4>Draft-to-Tactic Recipes</h4>
-        <div class="guide-matrix guide-purple-cards">
-          <div><b>Elite midfield core</b><span>Use Possession, Tiki-Taka or Compact with 4-2-3-1, 3-5-2, 4-3-2-1 or 2-5-2-1. Your CMs create cleaner xG and keep pressure stable.</span></div>
-          <div><b>Elite striker pair</b><span>Use Direct, Counter or Wing Play with 4-4-2, 3-3-2-2 or 4-3-1-2. Lower xG can still convert if your ST/CF quality is high.</span></div>
-          <div><b>Weak back line</b><span>Use Defensive or Compact, avoid high-risk custom tactics, and prefer 5-2-2-1, 5-3-2 or 4-1-4-1 to reduce transition exposure.</span></div>
-          <div><b>Star-heavy XI</b><span>Balanced, Counter and Possession protect star moments best. Keep stars in natural roles so late-game pressure has real engine value.</span></div>
-          <div><b>Low chemistry squad</b><span>Choose Balanced or Compact before risky systems. Fix OOP slots first; tactical bonuses cannot fully cover bad positional fit.</span></div>
-          <div><b>Must-win final match</b><span>Morale urgency rewards controlled aggression. Gegenpress or Counter can spike chances, but red cards and late fatigue become more likely.</span></div>
-        </div>
-        <h4>Formation Risk Tags</h4>
-        <div class="guide-flow guide-risk-tags">
-          <span><b>High-line risk</b> 3-4-3, 3-3-1-3, 4-2-4 create pressure but concede transition xG.</span>
-          <span><b>Striker isolation</b> 4-1-4-1 and 5-2-2-1 need strong creators or the lone ST gets low-quality shots.</span>
-          <span><b>Width dependency</b> Wing Play needs LB/RB/LM/RM quality; weak wide players reduce both xG and crossing threat.</span>
-          <span><b>Midfield overload</b> 3-5-1-1 and 2-5-2-1 dominate control but can underconvert without elite finishers.</span>
-        </div>
-        <h4>Engine Reads During Matches</h4>
-        <div class="guide-flow">
-          <span><b>xG source</b> tells whether chances came from midfield control, counters, wing pressure, set pieces or star moments.</span>
-          <span><b>Shot quality</b> separates volume from danger: ten bad shots can lose to three elite striker chances.</span>
-          <span><b>Keeper swing</b> high GK overall improves saves, penalty pressure and close-game survival.</span>
-          <span><b>Discipline pressure</b> risky tactics raise fouls/cards; red cards immediately bend attack, defense and morale.</span>
-        </div>
-      </div>
-    </div>
-  </dialog>
-  <dialog id="rulebookDialog" class="dialog dialog-wide">
-    <div class="dialog-form">
-      <div class="dialog-actions" style="justify-content: space-between; margin-bottom: 8px;">
-        <h3 style="margin:0;">Rulebook</h3>
-        <button id="btnCloseRulebook" class="btn btn-ghost btn-sm">Close</button>
-      </div>
-      <div class="rulebook-body">
-        <div class="rulebook-highlights">
-          <div><b>Draft</b><span>Build an XI from real 2026 squad players, shared across the whole room.</span></div>
-          <div><b>Engine</b><span>Ratings, chemistry, tactical style, captain, morale, keeper quality and formation shape drive xG.</span></div>
-          <div><b>Knockouts</b><span>Same-group qualifiers are split across early-path blocks before the bracket starts.</span></div>
-        </div>
-
-        <h3>Rooms &amp; Settings</h3>
-        <p>Create a room to get a 6-character invite code, or join one with a friend's code, or jump straight into <b>Single Player</b> against 47 bots. The room creator configures:</p>
-        <ul>
-          <li><b>Human slots</b> — up to 32 real players in one room.</li>
-          <li><b>Pick timer</b> — 10s / 20s / 30s / 45s per draft pick, or <b>No Limit</b> to disable the countdown entirely. Run out (in a timed room) and the server auto-picks the best available player for you.</li>
-          <li><b>Show Ratings</b> — turn off for a "blind" draft where overalls are hidden entirely.</li>
-          <li><b>Team Captain</b> — if on, everyone must choose a captain (+6 overall, applied before position weighting) once their draft is complete.</li>
-          <li><b>Tournament Length</b> — Off (full 48-team group stage), <b>Blitz</b> (skip straight to the Round of 32), or <b>Top 8</b> (skip straight to the Quarter-Finals, 1/4). Every human is guaranteed a spot in a shortened bracket; bots are randomly trimmed to fill the rest.</li>
-          <li><b>Restrict Draft Teams (optional)</b> — the creator can limit which nations are eligible to be revealed during the draft to a hand-picked list of at least 4 teams, grouped by confederation for easy browsing. Leave it empty for the default: all 48 teams eligible.</li>
-          <li><b>Rerolls</b> — Off, 1, 2, or 3 per drafter. A reroll skips the currently revealed team for a brand new one without picking from it — that skipped team still counts as seen and won't come back around later.</li>
-          <li><b>Experimental Auto Draft</b> - Single Player only. When enabled, the engine drafts your full XI for the locked formation, picks the highest-rated captain when needed, locks a tactical style, and starts the tournament automatically.</li>
-
-          <li><b>Spoiler Mode</b> - multiplayer-only. The tournament starts automatically once everyone finishes drafting, then active players advance each stage together. Eliminated players become spectators: they keep seeing each stage's results as they arrive, but never need to mark the next stage as ready.</li>
-        </ul>
-        <p class="muted">Once every member finishes drafting, Spoiler Mode and Singleplayer start immediately. In standard multiplayer rooms, the creator confirms the start with a "Start Tournament" button so nobody gets pulled into the World Cup mid-draft.</p>
-
-        <h3>The Draft</h3>
-        <p>Each round a random real 2026 World Cup team is revealed with its actual squad — every player in the game is a real 2026 squad member, no fictional players anywhere. A team is never revealed to you twice — every eligible nation shows up at most once over the course of your draft. Pick one available player — a position already full for you, or a player someone else in the room already grabbed, is greyed out. All 1,248 real players sit in one pool shared by the whole room, so a player you want can be sniped before your next reveal. If a room restricts draft teams, only that list is eligible — otherwise every eligible nation reveals independently to each drafter, so two people revealed the same country at once simply pick from that team's available squad separately, exactly like any other reveal. If a slot's position group has more than one open slot (say two open center-back spots), you choose exactly which one your pick fills. Use the sort icons above the player grid to reorder it by rating, position, or shuffle it randomly.</p>
-        <p class="muted">Your Profile controls the Draft screen layout. <b>Pitch First</b> puts your squad map above the player list, which is the recommended mobile setup; Vertical and Side-by-Side remain available for laptop play. Formation is locked once the draft starts, so the shape you chose before entering draft cannot change. You can still tap a filled pitch slot and then another compatible slot in the same position group to move or swap players before locking the tactical style.</p>
-
-        <h3>Formations</h3>
-        <p>24 formations to choose from (4-3-3, 4-4-2, 5-2-3, 3-2-4-1, 3-3-2-2, 4-1-4-1, 5-2-2-1, 3-5-1-1, 2-5-2-1, 3-3-1-3, 4-3-2-1, 4-3-1-2, and more), each an explicit named layout — not just position counts — so you always know exactly which slot (LB vs RB, which CB, etc.) a pick will fill.</p>
-
-        <h3>Match Engine</h3>
-        <p>Every match — bot vs bot, human vs bot, human vs human — comes from the same engine:</p>
-        <ul>
-          <li><b>Attack / Defense ratings</b> - a weighted average of your 11 players' overalls, weighted by how advanced or deep their slot sits. The player-quality curve is stronger now, so the gap between 70, 80 and 90 overall players is visible in ratings, goals, assists, saves and penalties.</li>
-          <li><b>Chemistry</b> - a multiplier built from linkage, balanced squad quality, Game Changer leadership, correct position fit, line balance across defense/midfield/attack, and penalties for out-of-position picks. Bot squads are one real nation, so they keep perfect linkage; human all-star squads must manage fit and balance.</li>
-          <li><b>Tactical Style</b> - after the draft, each team locks a style (9 available: 2 new styles added — Direct Play and Tiki-Taka). Every style has modifiers for Attack, Defense, Tempo, Risk, Press, Control, Transition, Set Pieces and Star Moment, plus a <b>Midfield Creation Bias</b> × <b>Finisher Conversion Bias</b> pair (see below). Matchups matter: Defensive beats Counter but struggles vs Possession; Gegenpress beats Possession/Tiki-Taka but is vulnerable to Counter; Possession beats Defensive but struggles vs pressing/counters; Counter beats Gegenpress and Possession but struggles vs Defensive; Wing Play beats Defensive/Compact but struggles vs Possession/Gegenpress; Compact beats Gegenpress/Counter but struggles vs Wing Play/Possession; Direct beats creation-heavy teams with bad finishers but struggles vs compact deep blocks; Tiki-Taka dominates possession vs passive teams but collapses vs gegenpress swarms; Balanced has no major weakness.</li>
-          <li><b>Two-phase xG (Creation vs Conversion)</b> — xG is now calculated in two independent passes. First, your midfielders + tactical style generate <i>chance creation volume</i> (Tiki-Taka, Possession, Gegenpress and ≥5-CM formations all amplify this). Then your top finishers' quality + style decide <i>conversion rate</i> (Direct, Counter, 4-2-4, and 86+ rated STs/CFs strongly amplify this). It is now entirely possible to win with <b>low total xG</b>: a bad midfield paired with Direct + elite strikers will generate fewer chances but convert far more of the ones they get. The opposite also applies (great midfield + bad striker = lots of xG, few goals).</li>
-          <li><b>Formation + Style Synergy</b> — a visible bonus/penalty (+2.5% Attack for a great fit, -3.5% for a poor fit, and a smaller linked defensive adjustment) applied before xG is sampled if your tactical style fits (or clashes with) your chosen formation. 4-2-3-1 + Possession is "Great fit"; 5-4-1 + Tiki-Taka is "Poor fit" (shown on the style picker cards).</li>
-          <li><b>Morale Dynamic</b> - recent results carry into the next match as persistent morale. On Matchday 3, qualification pressure is calculated from current rank, points and goal difference; must-win teams receive a controlled urgency/composure lift and a small volatility increase before xG is sampled.</li>
-          <li><b>Star Moments</b> - starred Game Changers can create a special late chance after minute 80, in finals, extra time or pressure penalty rounds. These moments add real xG before the score is sampled, so they are part of the engine rather than cosmetic text.</li>
-          <li><b>Human vs AI Boost</b> - human-controlled teams play at 1.2x Attack and Defense only when facing an AI team. Human vs human and AI vs AI matches stay neutral.</li>
-          <li><b>Formation Edge</b> — attacking shape vs. the opponent's defensive shape, plus a width mismatch bonus.</li>
-          <li><b>Captain Bonus</b> — a designated captain's overall is boosted before all of the above.</li>
-          <li><b>Red Card Morale Hit</b> — a player sent off rattles their own team for a short spell afterward, regardless of that player's individual quality: a temporary Attack + Defense reduction. Losing the captain hits harder — the affected spell runs 1.8x longer.</li>
-        </ul>
-        <p class="muted">Goals are then sampled from a Poisson distribution around each side's "expected goals," so the better team wins more often - never automatically. The lineup reveal's Predict Chance now uses the same engine power model: weighted player overalls, chemistry, tactical style, Game Changer threat, formation fit and the 48-team field strength. It also projects likely scorer, creator and pressure player from the same role/quality weights used by live match events. Full formulas are in the downloadable Match Engine PDF.</p>
-
-        <h3>World Cup Format</h3>
-        <p>48 real teams, 12 random groups of 4, round-robin (3 matchdays). Top 2 of each group plus the best 8 third-placed teams (24 + 8 = 32) advance to the Round of 32 — the real FIFA 2026 format. The knockout draw separates same-group qualifiers into different early-path blocks, so a group winner and runner-up do not immediately meet again in Round of 32 or Round of 16. Then single elimination runs: Round of 32 → Round of 16 → Quarter-Finals → Semi-Finals → Final. <b>Blitz Game</b> rooms skip straight to Round of 32; <b>Top 8</b> rooms skip straight to Quarter-Finals. A tied knockout match plays extra time before penalties.</p>
-
-        <h3>Live Reports &amp; Results</h3>
-        <p>Results arrive one stage at a time — nobody is forced to watch 24 matches at once, and one person clicking "Continue" doesn't drag anyone else's screen forward unless Spoiler Mode is on, where every still-active human player must finish the current stage before the next one can be generated. Your own match plays out on a live ticking clock (goals, assists, cards) through extra time if needed, and a penalty shootout — if it comes to that — plays out kick by kick, not as an instant result. Every other match in that round is available as a static final report via the match picker. Every report also shows team performance stats — possession, shots (on target), passes and accuracy, corners, fouls, cards, saves, and xG — derived from the same Attack/Defense ratings that decided the match.</p>
-
-        <h3>Elimination</h3>
-        <p>If your team is knocked out, you're not removed from the room — you become a spectator for the rest of that World Cup, right through to the champion.</p>
-
-        <h3>Tournament Awards</h3>
-        <p>Once a champion is crowned, the results screen shows the winning user first when the champion is human, with the team name below it. The same page tallies the tournament into Golden Ball, Golden Boot, Creator Award, Golden Glove, Knockout Hero, and Heat Check. The full knockout route opens as a two-sided bracket chart: one half advances from the left, the other from the right, and the final lands in the center. Engine Match Review adds a post-match breakdown from xG, player quality, chemistry, morale pressure, tactical style, star moments, shot pressure, possession, passing, saves, cards, extra time and penalties; it explains why the match tilted without changing the score after the fact.</p>
-
-        <h3>Data</h3>
-        <p class="muted">All 48 qualified nations and every player are real 2026 World Cup squad members (sourced from official squad lists). Overall ratings are gameplay values, not an official license.</p>
-
-        <a class="rulebook-pdf-link" href="rulebook.pdf" target="_blank" rel="noopener noreferrer" download>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-          Download full Match Engine PDF
-        </a>
-      </div>
-    </div>
-  </dialog>
+  <dialog id="aboutDialog" class="dialog help-dialog about-dialog" aria-labelledby="aboutDialogTitle"><div class="help-shell"><header class="help-header"><div class="help-heading"><p class="help-eyebrow">MEET DRAFT BOX</p><h2 id="aboutDialogTitle">About Us</h2></div><button id="btnCloseAbout" class="help-close" aria-label="Close about us" title="Close">&times;</button></header><div class="help-scroll" id="aboutContent" aria-live="polite"></div></div></dialog>
 
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
   <script src="js/deploy-config.js"></script>
@@ -371,6 +131,8 @@
   <script src="js/views/tournament.js"></script>
   <script src="js/views/matchHistory.js"></script>
   <script src="js/views/tactics.js"></script>
+  <script src="js/components/about.js"></script>
+  <script src="js/components/help.js"></script>
   <script src="js/views/admin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="js/app.js"></script>

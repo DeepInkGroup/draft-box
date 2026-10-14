@@ -7,7 +7,6 @@ const App = (() => {
   const adminBtn = document.getElementById('btnAdmin');
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
-  let profileStatsChart = null;
   let friendStatsChart = null;
 
   function toast(msg, isError) {
@@ -116,122 +115,22 @@ const App = (() => {
   }
 
   function renderProfileInsights(el, roadmapEl, stats, layoutLabel) {
-  const totalMatches = stats.w + stats.d + stats.l;
-  const winRate = totalMatches > 0 ? Math.round((stats.w / totalMatches) * 100) : 0;
-  const lossRate = totalMatches > 0 ? Math.round((stats.l / totalMatches) * 100) : 0;
-  const titleRate = stats.tournaments > 0 ? Math.round((stats.titles / stats.tournaments) * 100) : 0;
-  const goalDiff = stats.gf - stats.ga;
-  const goalsPerMatch = totalMatches > 0 ? (stats.gf / totalMatches).toFixed(1) : '0.0';
-  const goalsAgainstPerMatch = totalMatches > 0 ? (stats.ga / totalMatches).toFixed(1) : '0.0';
-  const attackIndex = Math.min(99, Math.round(Number(goalsPerMatch) * 28 + Math.max(goalDiff, 0) * 2));
-  const controlIndex = Math.max(1, Math.min(99, Math.round(86 - Number(goalsAgainstPerMatch) * 24 + Math.max(goalDiff, 0) * 1.4)));
-  const momentumTier = totalMatches === 0 ? 'Fresh Start' : winRate >= 65 && goalDiff > 0 ? 'Hot Run' : lossRate <= 25 ? 'Stable' : 'Volatile';
-  const formLabel = totalMatches === 0 ? 'Unranked' : winRate >= 65 ? 'Title Contender' : winRate >= 45 ? 'Knockout Threat' : 'Rebuild Mode';
-  const heroRank = document.getElementById('profileHeroRank');
-  const heroMeta = document.getElementById('profileHeroMeta');
-  if (heroRank) heroRank.textContent = formLabel;
-  if (heroMeta) heroMeta.textContent = totalMatches ? `${totalMatches} matches · ${winRate}% win rate` : 'Ready for a first tournament';
-  const profileStyle = totalMatches === 0
-    ? 'Play one tournament to unlock a style read.'
-    : goalDiff >= 6
-      ? 'Front-foot manager: your sides create separation over a full run.'
-      : Number(goalsAgainstPerMatch) <= 1.1
-        ? 'Compact manager: defensive control is carrying your results.'
-        : Number(goalsPerMatch) >= 1.8
-          ? 'High-event manager: strong attack, but game control still matters.'
-          : 'Fine-margin manager: improve chance quality before chasing risk.';
-  const coachNote = totalMatches === 0
-    ? 'No finished tournaments yet. Your first completed run will unlock form notes here.'
-    : winRate >= 60
-      ? 'Strong tournament form. Your teams are converting enough chances to stay ahead.'
-      : goalDiff < 0
-        ? 'Defensive balance is the next area to clean up. Check match summaries for recurring concessions.'
-        : 'Competitive record. A small upgrade in finishing can turn draws into wins.';
-  const nextTarget = stats.titles > 0
-    ? 'Defend the title and push your win rate higher.'
-    : stats.tournaments > 0
-      ? 'Reach your first final and convert one deep run into a title.'
-      : 'Finish one tournament to build your career baseline.';
-  const draftFocus = Number(goalsAgainstPerMatch) > 1.4
-    ? 'Prioritize a natural back line, CDM cover and chemistry before chasing another attacker.'
-    : Number(goalsPerMatch) < 1.4 && totalMatches > 0
-      ? 'Add one high-overall creator or star forward to raise shot quality in tight games.'
-      : 'Keep the core balanced: one creator, one ball-winner and clean position fit.';
-  const matchPlan = winRate >= 60
-    ? 'Protect leads with Balanced or Possession after minute 70 instead of over-pressing.'
-    : lossRate >= 45
-      ? 'Reduce risky styles against stronger squads and lean on Counter Attack as an upset plan.'
-      : 'Your results are close. Use tactical matchup edges before changing the XI.';
-  const milestone = stats.titles > 0
-    ? `Next milestone: ${stats.titles + 1} titles and a ${Math.min(90, winRate + 5)}% win-rate push.`
-    : stats.tournaments > 0
-      ? 'Next milestone: first title, then build a repeatable draft identity.'
-      : 'Next milestone: finish a tournament to unlock richer history reads.';
-  el.innerHTML = `
-    <div class="profile-insight-card wide"><span>Coach Note</span><b>${coachNote}</b></div>
-    <div class="profile-insight-card"><span>Goal Diff</span><b>${goalDiff >= 0 ? '+' : ''}${goalDiff}</b></div>
-    <div class="profile-insight-card"><span>Goals / Match</span><b>${goalsPerMatch}</b></div>
-    <div class="profile-insight-card"><span>Conceded / Match</span><b>${goalsAgainstPerMatch}</b></div>
-    <div class="profile-insight-card"><span>Title Rate</span><b>${titleRate}%</b></div>
-    <div class="profile-insight-card"><span>Attack Index</span><b>${attackIndex}</b></div>
-    <div class="profile-insight-card"><span>Control Index</span><b>${controlIndex}</b></div>
-    <div class="profile-insight-card"><span>Momentum</span><b>${momentumTier}</b></div>
-    <div class="profile-insight-card"><span>Form Label</span><b>${formLabel}</b></div>
-    <div class="profile-insight-card wide"><span>Next Target</span><b>${nextTarget}</b></div>
-    <div class="profile-insight-card wide"><span>Draft Setup</span><b>${layoutLabel}</b></div>
-    <div class="profile-insight-card wide"><span>Manager Read</span><b>${profileStyle}</b></div>
-  `;
-  if (roadmapEl) {
-    roadmapEl.innerHTML = `
-      <div class="profile-idea-head">Profile Game Plan</div>
-      <div class="profile-idea-list">
-        <div><b>Draft Focus</b><span>${draftFocus}</span></div>
-        <div><b>Match Plan</b><span>${matchPlan}</span></div>
-        <div><b>Next Milestone</b><span>${milestone}</span></div>
-      </div>
-    `;
+    const total = stats.w + stats.d + stats.l;
+    const winRate = total ? Math.round(stats.w / total * 100) : 0;
+    const difference = stats.gf - stats.ga;
+    document.getElementById('profileHeroRank').textContent = stats.titles ? 'Title winner' : total ? 'Active manager' : 'Fresh start';
+    document.getElementById('profileHeroMeta').textContent = total ? total + ' matches played' : 'Ready for your first competition';
+    el.innerHTML = [['Goal difference',(difference >= 0 ? '+' : '') + difference],['Goals per match',total ? (stats.gf / total).toFixed(1) : '\u2014'],['Conceded per match',total ? (stats.ga / total).toFixed(1) : '\u2014'],['Win rate',winRate + '%']].map(([label,value]) => '<div class="profile-insight-card"><span>' + label + '</span><b>' + value + '</b></div>').join('');
+    roadmapEl.innerHTML = '<h3>' + (total ? 'Keep building your career' : 'Your first chapter starts here') + '</h3><p class="muted">' + (total ? 'Open Match History to review your results and see where your squad can improve.' : 'Finish a World Cup or league season to start filling your career record. Try a balanced formation and players in natural positions.') + '</p>';
   }
-}
 
 function renderStatsChart(stats) {
-  const canvas = document.getElementById('statsChart');
-  if (!canvas) return;
-  if (profileStatsChart) profileStatsChart.destroy();
-  profileStatsChart = new Chart(canvas.getContext('2d'), {
-    type: 'doughnut',
-    data: {
-      labels: ['Wins', 'Draws', 'Losses'],
-      datasets: [{
-        data: [stats.w, stats.d, stats.l],
-        backgroundColor: [
-          'rgba(34, 197, 94, 0.7)',
-          'rgba(255, 255, 255, 0.5)',
-          'rgba(240, 69, 90, 0.7)'
-        ],
-        borderColor: [
-          '#22c55e',
-          '#ffffff',
-          '#f0455a'
-        ],
-        borderWidth: 0,
-        hoverOffset: 5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '72%',
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#8b8b96', boxWidth: 8, boxHeight: 8, usePointStyle: true, padding: 14 }
-        },
-        title: {
-          display: false
-        }
-      }
-    }
-  });
+  const container = document.getElementById('profileMatchRecord');
+  const total = stats.w + stats.d + stats.l;
+  const wins = total ? stats.w / total * 100 : 0;
+  const draws = total ? (stats.w + stats.d) / total * 100 : 0;
+  const gradient = total ? 'conic-gradient(#55ce9d 0% ' + wins + '%,#afabc0 ' + wins + '% ' + draws + '%,#f08094 ' + draws + '% 100%)' : '#35303f';
+  container.innerHTML = '<div class="profile-record-ring" style="background:' + gradient + '" aria-hidden="true"><div><b>' + total + '</b><span>matches</span></div></div><dl class="profile-record-legend">' + [['Wins',stats.w,'win'],['Draws',stats.d,'draw'],['Losses',stats.l,'loss']].map(([label,count,kind]) => '<div class="record-' + kind + '"><dt><i aria-hidden="true"></i>' + label + '</dt><dd>' + count + '</dd></div>').join('') + '</dl>' + (total ? '' : '<p class="muted profile-record-empty">Your first completed competition starts your record.</p>');
 }
 
   function renderFriends(el, friends) {
@@ -287,13 +186,7 @@ function renderStatsChart(stats) {
       disconnectSocket();
     });
 
-    const rulebookDialog = document.getElementById('rulebookDialog');
-    document.getElementById('btnRulebook').addEventListener('click', () => rulebookDialog.showModal());
-    document.getElementById('btnCloseRulebook').addEventListener('click', () => rulebookDialog.close());
-
-    const gameGuideDialog = document.getElementById('gameGuideDialog');
-    document.getElementById('btnGameGuide').addEventListener('click', () => gameGuideDialog.showModal());
-    document.getElementById('btnCloseGameGuide').addEventListener('click', () => gameGuideDialog.close());
+    HelpViews.init();
 
     const profileDialog = document.getElementById('profileDialog');
     const profileError = document.getElementById('profileError');
