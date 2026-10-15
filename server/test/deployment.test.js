@@ -608,6 +608,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   await request('/api/auth/change-password', { token: admin.token, body: { currentPassword: 'test-admin-initial-password', newPassword: 'changed-admin-password' } });
   await require('./multiplayerLeagueScenario')({ request, event, connect, host: login, guest: friend, outsider: injection,
     restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
+  await require('./leagueCareerScenario')({ request, event, connect, host: login, guest: friend, outsider: injection,
+    restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await require('./profileSocialScenario')({ request, host: login, guest: friend, outsider: injection, admin,
     restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await server.stop(); server = await startServer(dbPath, dir);

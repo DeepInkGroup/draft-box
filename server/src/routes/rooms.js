@@ -28,6 +28,7 @@ router.post('/', (req, res) => {
     const room = rm.createRoom({
       name, creatorId: req.user.id, humanSlotsMax, singlePlayer: false,
       mode: req.body?.mode || 'worldcup', leagueId: req.body?.leagueId,
+      managerOffers: req.body?.managerOffers, playerDepartures: req.body?.playerDepartures,
       squadMode: req.body?.squadMode || 'draft', pglRatingBoost: req.body?.pglRatingBoost,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
       endTransferEnabled: req.body?.endTransferEnabled, endTransferLimit: req.body?.endTransferLimit,

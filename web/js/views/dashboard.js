@@ -42,7 +42,7 @@ const DashboardView = {
     const resume = container.querySelector('#activeLeagueSeasons');
     Api.activeLeagues().then(({ leagues }) => {
       if (!container.contains(resume) || !leagues.length) return;
-      resume.innerHTML = `<div class="card"><h3>Your League Seasons</h3>${leagues.map((season) => `<div class="league-resume-row"><div><b>${season.clubName}</b><p class="muted">${season.leagueName} · ${season.status === 'drafting' ? 'Draft in progress' : `Matchday ${season.matchday}`}</p></div><button class="btn btn-primary btn-sm" data-resume="${season.code}">Resume</button></div>`).join('')}</div>`;
+      resume.innerHTML = `<div class="card"><h3>Your League Seasons</h3>${leagues.map((season) => `<div class="league-resume-row"><div><b>${season.clubName}</b><p class="muted">${season.leagueName} · ${season.betweenSeasons ? 'Between seasons - decisions pending' : season.status === 'drafting' ? 'Draft in progress' : `Matchday ${season.matchday}`}</p></div><button class="btn btn-primary btn-sm" data-resume="${season.code}">Resume</button></div>`).join('')}</div>`;
       resume.querySelectorAll('[data-resume]').forEach((button) => button.addEventListener('click', () => {
         const season = leagues.find((entry) => entry.code === button.dataset.resume);
         season.status === 'drafting' ? App.goDraft(season.code) : App.goTournament(season.code);
@@ -392,7 +392,8 @@ ${league ? '' : `<div class="field"><label>Tournament Length</label></div><div i
         <div id="crSpoiler" style="margin-bottom:16px;"></div>
         <div class="field"><label>Shared Team Draft</label></div>
         <div id="crSharedDraft" style="margin-bottom:16px;"></div>
-${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id="crSquadMode"></div></section><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div id="crTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Release 1 to your selected limit, then choose between two random replacements per slot. The league waits for every player to finish or skip this window.</p></section><section class="league-transfer-options"><h3>End-of-season Transfers</h3><div id="crEndTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crEndTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Applies when the host continues to another season with the same squads.</p></section>${league.id === 'pgl' ? `<section class="league-transfer-options"><h3>PGL Overall Boost</h3><div id="crRatingBoost"></div></section>` : ''}` : ''}
+${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id="crSquadMode"></div></section><section class="league-transfer-options"><h3>Mid-season Transfers</h3><div id="crTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Release 1 to your selected limit, then choose between two random replacements per slot. The league waits for every player to finish or skip this window.</p></section><section class="league-transfer-options"><h3>End-of-season Transfers</h3><div id="crEndTransfers"></div><div class="field"><label>Maximum player changes</label></div><div id="crEndTransferLimit" class="transfer-limit-toggle"></div><p class="muted">Opens before the first matchday when the host continues to the next season.</p></section>${league.id === 'pgl' ? `<section class="league-transfer-options"><h3>PGL Overall Boost</h3><div id="crRatingBoost"></div></section>` : ''}` : ''}
+        ${league ? `<section class="league-transfer-options"><h3>Between Seasons</h3><label>AI Club Manager Offers</label><div id="crManagerOffers"></div><p class="muted">After a season, receive zero, one or two job offers from AI clubs. Accept an offer to manage that club and its squad, or stay. Human-managed clubs never make offers.</p><label>Player Departures After Poor Results</label><div id="crPlayerDepartures"></div><p class="muted">At season end, bottom-third clubs may lose 1 or 2 footballers. Applies to AI and human clubs. Eligible reserves step up automatically, keeping a complete XI even if transfer windows are closed.</p></section>` : ''}
         <button id="btnCreateRoom" class="btn btn-primary btn-block">Create Room &amp; Get Code</button>
         <div class="error-text hidden" id="dashError"></div>
       </div>
@@ -412,7 +413,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
     const crSpoiler = ToggleGroup.render(container.querySelector('#crSpoiler'), { options: this.spoilerOptions(), selected: false });
     const crSharedDraft = ToggleGroup.render(container.querySelector('#crSharedDraft'), { options: this.sharedDraftOptions(), selected: false });
 
-    let squadMode, midTransfers, endTransfers, ratingBoost;
+    let squadMode, midTransfers, endTransfers, ratingBoost, managerOffers, playerDepartures;
     if (league) {
       const windowControls = (prefix, enabled) => {
         let limit;
@@ -420,6 +421,8 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
         limit = ToggleGroup.render(container.querySelector('#'+prefix+'TransferLimit'), { options:[1,2,3].map(value=>({value,title:String(value),sub:value===1?'1 player':value+' players'})),selected:2 });
         limit.setDisabled(!window.value); return {window,limit};
       };
+      managerOffers = ToggleGroup.render(container.querySelector('#crManagerOffers'), {options:[{value:false,title:'Off',sub:'Stay at your club'},{value:true,title:'On',sub:'Receive AI job offers'}],selected:false});
+      playerDepartures = ToggleGroup.render(container.querySelector('#crPlayerDepartures'), {options:[{value:false,title:'Off',sub:'Keep all footballers'},{value:true,title:'On',sub:'Poor results may cause exits'}],selected:false});
       midTransfers = windowControls('cr',true); endTransfers = windowControls('crEnd',false);
       if (league.id==='pgl') ratingBoost = ToggleGroup.render(container.querySelector('#crRatingBoost'), {options:[{value:false,title:'Original Ratings',sub:'Use supplied ratings'},{value:true,title:'+10 Overall',sub:'Boost all PGL players'}],selected:false});
       squadMode = ToggleGroup.render(container.querySelector('#crSquadMode'), {options:[{value:'draft',title:'Draft Style',sub:'Build your own XI'},{value:'real',title:'Real Club Squad',sub:"Use your selected club's players"}],selected:'draft',onChange:value=>{
@@ -435,6 +438,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
         const slots = Number(container.querySelector('#crSlots').value) || 8;
         const room = await Api.createRoom({
           mode: league ? 'league' : 'worldcup', leagueId: league?.id, clubCode: league ? container.querySelector('#crClub').value : undefined,
+          managerOffers: managerOffers?.value, playerDepartures: playerDepartures?.value,
           squadMode: squadMode?.value || 'draft', pglRatingBoost: ratingBoost?.value,
           transferEnabled: midTransfers?.window.value, transferLimit: midTransfers?.limit.value, endTransferEnabled: endTransfers?.window.value, endTransferLimit: endTransfers?.limit.value,
           name, humanSlotsMax: slots, formation: crFormation.value, showOverall: crRatings.value,

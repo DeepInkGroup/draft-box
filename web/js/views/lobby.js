@@ -22,7 +22,7 @@ const LobbyView = {
         <p class="muted">Share this code with your friends so they can join the room</p>
         <div class="code-display">${room.code}</div>
         <p class="muted">Human player capacity: <b id="lobbySlots"></b></p>
-${room.mode === 'league' ? `<div id="lobbyLeagueSettings"><h3>${room.leagueName}</h3><p class="muted">${room.squadMode === 'real' ? 'Real Club Squads' : 'Draft Style'} &middot; ${room.leagueClubs.length} clubs &middot; ${room.transferEnabled ? 'Mid-season transfers: up to ' + room.transferLimit + (room.transferLimit === 1 ? ' player' : ' players') : 'Mid-season transfers closed'}</p><p class="muted">Unclaimed clubs are managed by bots. During open transfer windows, every player completes or skips transfers before play resumes.</p></div>` : ''}
+${room.mode === 'league' ? `<div id="lobbyLeagueSettings"><h3>${room.leagueName}</h3><p class="muted">${room.squadMode === 'real' ? 'Real Club Squads' : 'Draft Style'} &middot; ${room.leagueClubs.length} clubs &middot; ${room.transferEnabled ? 'Mid-season transfers: up to ' + room.transferLimit + (room.transferLimit === 1 ? ' player' : ' players') : 'Mid-season transfers closed'}</p><p class="muted">AI club manager offers: <b>${room.managerOffers ? 'On' : 'Off'}</b> &middot; Poor-results player departures: <b>${room.playerDepartures ? 'On' : 'Off'}</b></p><p class="muted">Unclaimed clubs are managed by bots. During open transfer windows, every player completes or skips transfers before play resumes.</p></div>` : ''}
         <p class="muted">Spoiler mode: <b>${room.spoilerMode ? 'On' : 'Off'}</b></p>
       </div>
       <div class="card">

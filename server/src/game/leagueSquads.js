@@ -17,11 +17,13 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
   const activeXI = t.endTransferWindow && t.matchday === 0 ? slot.xi : beforeTransfers ? t.initialXIs?.[clubCode] || slot.xi : slot.xi;
   const xi = new Map(activeXI.map((player) => [player.id, player]));
   const released = new Set([
+    ...(t.seasonDepartures || []).filter(entry => entry.clubCode === clubCode).map(entry => entry.player),
     ...(t.endTransferWindow?.users[slot.userId]?.outgoing || []),
     ...(!beforeTransfers ? t.transferWindow?.users[slot.userId]?.outgoing || [] : [])
   ].map(player => player.id));
   const clubPlayers = beforeTransfers ? t.initialClubRosters?.[clubCode] || club.players : t.clubRosters?.[clubCode] || club.players;
   const roster = new Map(clubPlayers.map((player) => [player.id, player]));
+  for (const entry of (t.seasonDepartures || []).filter(entry => entry.clubCode === clubCode)) roster.set(entry.player.id, entry.player);
   const departed = new Set();
   for (const entry of (t.transferLog || []).filter(entry => entry.matchday <= matchday)) {
     const player = entry.from === clubCode ? entry.player : entry.to === clubCode ? entry.exchangedPlayer || entry.releasedPlayer : null;

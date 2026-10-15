@@ -43,13 +43,13 @@ for (const viewport of [{width:320,height:568},{width:375,height:812},{width:768
       if(viewport.width<=640) {
         const wrapper=page.locator('#leagueZone .league-table-scroll');
         expect(await wrapper.evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBe(true);
-        await expect(page.locator('#leagueZone thead th:visible')).toHaveCount(5);
+        await expect(page.locator('#leagueZone thead th:visible')).toHaveCount(4);
         const cells=await page.locator('#leagueZone tbody tr').first().locator('td:visible').evaluateAll(cells=>cells.map(cell=>{const r=cell.getBoundingClientRect();return {left:r.left,right:r.right};}));
         for(let i=1;i<cells.length;i++)expect(cells[i].left).toBeGreaterThanOrEqual(cells[i-1].right-1);
         await page.locator('#leagueTableToggleStats').click();await expect(page.locator('#leagueZone thead th:visible')).toHaveCount(10);
         await wrapper.evaluate(el=>el.scrollLeft=el.scrollWidth);
         await expect(page.locator('#leagueZone tbody tr').first().locator('td').last()).toBeInViewport();
-        await page.locator('#leagueTableToggleStats').click();await expect(page.locator('#leagueZone thead th:visible')).toHaveCount(5);
+        await page.locator('#leagueTableToggleStats').click();await expect(page.locator('#leagueZone thead th:visible')).toHaveCount(4);
         await page.locator('#leagueZone').screenshot({path:'test-results/standings-'+viewport.width+'.png'});
       }
       await page.locator('#leagueSquadBrowser summary').click();await expect(page.locator('#leagueClubPlayers .transfer-player-card').first()).toBeVisible();

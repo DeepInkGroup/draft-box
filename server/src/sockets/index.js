@@ -8,6 +8,7 @@ const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep } = require('..
 const { leagueSnapshot } = require('../game/leagueEngine');
 const { transferSnapshot, planTransfer, transfersPending } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
+const { careerSnapshot, chooseManagerClub } = require('../game/leagueCareer');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey, tacticalCatalog } = require('../game/tacticalStyles');
 const {
@@ -227,6 +228,7 @@ function registerSocketHandlers(io) {
           historyLength,
           tournamentStage: state.tournament.stage,
           league: leagueSnapshot(state.tournament, viewedStep),
+          career: careerSnapshot(state.tournament, socket.user.id),
           transfers: transferSnapshot(state.tournament, socket.user.id, viewedStep),
           spectator: !!member.eliminated,
           advanceReady: state.spoilerMode ? advanceReadySnapshot(state) : null
@@ -262,6 +264,7 @@ function registerSocketHandlers(io) {
         mode: roomRow.mode,
         leagueId: roomRow.league_id,
         squadMode: roomRow.squad_mode, pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
+        managerOffers: !!roomRow.manager_offers, playerDepartures: !!roomRow.player_departures,
         transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
         midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
         endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
@@ -610,11 +613,35 @@ function registerSocketHandlers(io) {
       } catch (error) { socket.emit('error:message',{ error: error.message }); }
     });
 
+    function publishCareer(room, state) {
+      const recipients = new Set(io.sockets.adapter.rooms.get(channelName(room.code)) || []);
+      recipients.add(socket.id);
+      for (const id of recipients) {
+        const client = io.sockets.sockets.get(id);
+        if (client && state.members.has(client.user.id)) client.emit('league:careerState', { career: careerSnapshot(state.tournament, client.user.id) });
+      }
+    }
+
+    socket.on('league:managerDecision', ({ code, clubCode }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.status !== 'finished' || room.next_season_id) throw new Error('This season is not accepting manager decisions');
+        const state = rm.loadRoomState(room);
+        if (!state.members.has(socket.user.id)) throw new Error('Not a member of this league');
+        const planned = structuredClone(state.tournament);
+        chooseManagerClub(planned, socket.user.id, clubCode);
+        db.prepare('UPDATE rooms SET tournament_state = ? WHERE id = ?').run(JSON.stringify(planned), room.id);
+        state.tournament = planned;
+        publishCareer(room, state);
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
+    });
+
     socket.on('league:nextSeason', ({ code }) => {
       try {
         const room = rm.getRoomByCode(code);
         if (!room) throw new Error('League not found');
         const next = rm.continueLeagueSeason(room,socket.user.id);
+        if (!next) return publishCareer(room, rm.loadRoomState(room));
         const payload = { newCode: next.code, seasonNumber: next.season_number };
         io.to(channelName(code)).emit('league:nextSeasonReady', payload);
         if (!socket.rooms.has(channelName(code))) socket.emit('league:nextSeasonReady', payload);

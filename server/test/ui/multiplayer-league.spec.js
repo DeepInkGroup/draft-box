@@ -38,6 +38,9 @@ for (const width of [1280, 390]) {
       await choose(page, 'crSquadMode', 'real');
       await choose(page, 'crTransferLimit', '1');
       await choose(page, 'crEndTransfers', 'true'); await choose(page, 'crEndTransferLimit', '1');
+      await expect(page.locator('#crManagerOffers [data-value="false"]')).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('#crPlayerDepartures [data-value="false"]')).toHaveAttribute('aria-pressed', 'true');
+      if (width === 390) { await choose(page, 'crManagerOffers', 'true'); await choose(page, 'crPlayerDepartures', 'true'); }
       await page.locator('#crSlots').fill('2'); await page.locator('#crName').fill('Friends PGL');
       const hostClub = await page.locator('#crClub').inputValue();
       await fits(page); await page.screenshot({ path: `test-results/multiplayer-league-setup-${width}.png`, fullPage: true });
@@ -50,6 +53,7 @@ for (const width of [1280, 390]) {
       await friend.locator('#btnJoinRoom').click();
       await expect(page.locator('#memberList li')).toHaveCount(2); await expect(friend.locator('#memberList li')).toHaveCount(2);
       await expect(page.locator('#lobbyLeagueSettings')).toContainText('Persian Gulf League');
+      await expect(page.locator('#lobbyLeagueSettings')).toContainText('AI club manager offers: ' + (width === 390 ? 'On' : 'Off'));
       await expect(page.locator('#lobbySlots')).toHaveText('2 / 2');
       await fits(friend); await page.screenshot({ path: `test-results/multiplayer-league-lobby-${width}.png`, fullPage: true });
       await page.locator('#btnStart').click();
@@ -80,6 +84,26 @@ for (const width of [1280, 390]) {
       for (const player of [page, friend]) { await expect(player.locator('#seasonResults')).toContainText('306 matches'); await fits(player); }
       await expect(friend.locator('#btnNextLeagueSeason')).toHaveCount(0);
       await page.locator('#btnNextLeagueSeason').click();
+      if (width === 390) {
+        for (const player of [page, friend]) await expect(player.locator('#leagueCareerZone')).toBeVisible();
+        // Reconnecting must preserve the same choices, including a summer with no offers.
+        const offers = await page.locator('[data-manager-club]').evaluateAll(buttons => buttons.map(button => button.dataset.managerClub));
+        expect(offers.length).toBeLessThanOrEqual(2);
+        await page.reload(); await expect(page.locator('#leagueCareerZone')).toBeVisible();
+        expect(await page.locator('[data-manager-club]').evaluateAll(buttons => buttons.map(button => button.dataset.managerClub))).toEqual(offers);
+        if (offers.length) {
+          await page.locator('[data-manager-club]').first().click();
+          await expect(page.locator('#leagueCareerZone')).toContainText('Decision saved');
+        }
+        if (await friend.locator('#btnKeepManagerClub').count()) {
+          await friend.locator('#btnKeepManagerClub').click();
+          await expect(friend.locator('#leagueCareerZone')).toContainText('Decision saved');
+        }
+        await expect(page.locator('#btnNextLeagueSeason')).toBeEnabled();
+        await fits(page); await fits(friend);
+        await page.locator('#leagueCareerZone').screenshot({ path: 'test-results/league-career-390.png' });
+        await page.locator('#btnNextLeagueSeason').click();
+      }
       for (const player of [page, friend]) {
         await expect(player.locator('#leagueZone')).toContainText('Season 2');
         await expect(player.locator('#transferZone')).toContainText('End-of-season Transfer Window');

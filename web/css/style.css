@@ -1764,6 +1764,20 @@ input, select, textarea { max-width: 100%; }
 
 /* Compact phone standings avoid overlapping frozen columns. */
 .league-table-toggle { display: none; }
+.league-club-meta { font-size: .7rem; color: var(--muted); }
+.league-mobile-gd { display: none; }
+.league-table tr.human { background: var(--accent-soft); }
+.league-table tr.human td:nth-child(2) { color: var(--accent-strong); }
+.league-table tr.league-relegation { background: rgba(239, 68, 68, .045); }
+.league-table td:last-child { font-variant-numeric: tabular-nums; color: var(--ink); }
+.league-career { scroll-margin-top: 90px; }
+.manager-offer-grid, .season-departure-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,240px),1fr)); gap: 14px; margin: 18px 0; }
+.manager-offer, .season-departure-list article { padding: 18px; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); overflow-wrap: anywhere; }
+.manager-offer h3 { margin: 12px 0; }
+.season-departure-list article > span { display: block; font-size: .75rem; color: var(--muted); margin-top: 4px; }
+.season-departure-list p { margin-bottom: 0; font-size: .85rem; }
+.league-career summary { cursor: pointer; padding: 14px 0; font-weight: 700; }
+.manager-decision-status { border-left: 3px solid var(--accent); padding: 12px; background: var(--accent-soft); }
 .my-fixture { border: 1px solid var(--accent); background: var(--accent-soft); }
 #stepCard { scroll-margin-top: 90px; }
 @media (max-width:640px) {
@@ -1772,13 +1786,16 @@ input, select, textarea { max-width: 100%; }
   .league-table-scroll:not(.league-full-stats) { overflow-x: visible; }
   .league-table-scroll:not(.league-full-stats) .league-table { width: 100%; min-width: 0; table-layout: fixed; }
   .league-table-scroll:not(.league-full-stats) .league-table th,
-  .league-table-scroll:not(.league-full-stats) .league-table td { padding: 9px 4px; }
-  .league-table-scroll:not(.league-full-stats) :is(th,td):first-child { width: 28px; text-align: center; }
-  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(2) { width: auto; min-width: 0; overflow-wrap: anywhere; line-height: 1.45; text-align: left; }
-  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(3) { width: 30px; }
-  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(9),
-  .league-table-scroll:not(.league-full-stats) :is(th,td):last-child { width: 38px; }
-  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(n+4):nth-child(-n+8) { display: none; }
+  .league-table-scroll:not(.league-full-stats) .league-table td { padding: 12px 5px; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):first-child { width: 26px; text-align: center; font-variant-numeric: tabular-nums; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(2) { width: auto; min-width: 0; overflow-wrap: break-word; line-height: 1.4; text-align: left; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(3) { width: 29px; font-variant-numeric: tabular-nums; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):last-child { width: 37px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+  .league-table-scroll:not(.league-full-stats) :is(th,td):nth-child(n+4):nth-child(-n+9) { display: none; }
+  .league-table-scroll:not(.league-full-stats) .league-club-name { display: block; font-weight: 600; }
+  .league-table-scroll:not(.league-full-stats) .league-club-meta { display: block; margin-top: 4px; font-size: .68rem; }
+  .league-table-scroll:not(.league-full-stats) .league-mobile-gd { display: inline; }
+  .league-table-scroll:not(.league-full-stats) tr.human td:first-child { box-shadow: inset 3px 0 var(--accent); }
   .league-full-stats .league-table { min-width: 620px; table-layout: auto; }
   .league-full-stats .league-table :is(th,td):nth-child(2) { min-width: 150px; }
   .league-full-stats .league-table-hint { display: block; }

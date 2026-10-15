@@ -65,7 +65,10 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.pglRatingBoostAvailable, true);
     assert.equal(pgl.resultsOnlyAvailable, true);
     assert.equal(pgl.resultsOnlyVersion, 2);
-    assert.equal(pgl.standingsLayoutVersion, 2);
+    assert.equal(pgl.standingsLayoutVersion, 3);
+    assert.equal(pgl.careerOptions?.managerOffers, true);
+    assert.equal(pgl.careerOptions.maxManagerOffers, 2);
+    assert.equal(pgl.careerOptions.playerDepartures, true);
     assert.equal(pgl.squadBrowserVersion, 2);
   }, {}, 60);
   await request(apiBase + '/', async (response) => {
@@ -85,6 +88,11 @@ async function request(url, verify, options = {}, attempts = 6) {
   helpUrl.searchParams.set('check', process.env.GITHUB_RUN_ID || Date.now().toString());
   await request(helpUrl, async (response) => {
     assert.match(await response.text(), /const HelpViews/);
+  });
+  const tournamentUrl = new URL('js/views/tournament.js', pagesUrl);
+  tournamentUrl.searchParams.set('check', process.env.GITHUB_RUN_ID || Date.now().toString());
+  await request(tournamentUrl, async response => {
+    assert.match(await response.text(), /league:managerDecision/);
   });
 })().catch((error) => {
   console.error(error.message);
