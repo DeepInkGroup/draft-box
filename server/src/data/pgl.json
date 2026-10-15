@@ -243,7 +243,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 70
+      "baseOverall": 70,
+      "headCoach": {
+        "id": "pgl-coach-mehdi-tartar",
+        "name": "Mehdi Tartar"
+      },
+      "logo": "assets/clubs/pgl/persepolis.png"
     },
     {
       "id": "pgl-esteghlal",
@@ -458,7 +463,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 68
+      "baseOverall": 68,
+      "headCoach": {
+        "id": "pgl-coach-sohrab-bakhtiarizadeh",
+        "name": "Sohrab Bakhtiarizadeh"
+      },
+      "logo": "assets/clubs/pgl/esteghlal.png"
     },
     {
       "id": "pgl-kheybar",
@@ -700,7 +710,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-faraz-kamalvand",
+        "name": "Faraz Kamalvand"
+      },
+      "logo": "assets/clubs/pgl/kheybar.png"
     },
     {
       "id": "pgl-gol-gohar",
@@ -1023,7 +1038,12 @@
           "isStar": true
         }
       ],
-      "baseOverall": 63
+      "baseOverall": 63,
+      "headCoach": {
+        "id": "pgl-coach-mehdi-rahmati",
+        "name": "Mehdi Rahmati"
+      },
+      "logo": "assets/clubs/pgl/gol-gohar.png"
     },
     {
       "id": "pgl-aluminium-arak",
@@ -1337,7 +1357,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-pirouz-ghorbani",
+        "name": "Pirouz Ghorbani"
+      },
+      "logo": "assets/clubs/pgl/aluminium-arak.png"
     },
     {
       "id": "pgl-foolad",
@@ -1597,7 +1622,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 65
+      "baseOverall": 65,
+      "headCoach": {
+        "id": "pgl-coach-hamid-motahari",
+        "name": "Hamid Motahari"
+      },
+      "logo": "assets/clubs/pgl/foolad.png"
     },
     {
       "id": "pgl-tractor",
@@ -1866,7 +1896,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 67
+      "baseOverall": 67,
+      "headCoach": {
+        "id": "pgl-coach-javad-nekounam",
+        "name": "Javad Nekounam"
+      },
+      "logo": "assets/clubs/pgl/tractor.png"
     },
     {
       "id": "pgl-fajr-sepasi",
@@ -2144,7 +2179,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 63
+      "baseOverall": 63,
+      "headCoach": {
+        "id": "pgl-coach-mehdi-rajabzadeh",
+        "name": "Mehdi Rajabzadeh"
+      },
+      "logo": "assets/clubs/pgl/fajr-sepasi.png"
     },
     {
       "id": "pgl-malavan",
@@ -2359,7 +2399,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 63
+      "baseOverall": 63,
+      "headCoach": {
+        "id": "pgl-coach-maziar-zare",
+        "name": "Maziar Zare"
+      },
+      "logo": "assets/clubs/pgl/malavan.png"
     },
     {
       "id": "pgl-paykan",
@@ -2592,7 +2637,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-saket-elhami",
+        "name": "Saket Elhami"
+      },
+      "logo": "assets/clubs/pgl/paykan.png"
     },
     {
       "id": "pgl-sepahan",
@@ -2879,7 +2929,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 66
+      "baseOverall": 66,
+      "headCoach": {
+        "id": "pgl-coach-moharram-navidkia",
+        "name": "Moharram Navidkia"
+      },
+      "logo": "assets/clubs/pgl/sepahan.png"
     },
     {
       "id": "pgl-zob-ahan",
@@ -3157,7 +3212,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 63
+      "baseOverall": 63,
+      "headCoach": {
+        "id": "pgl-coach-abdollah-veisi",
+        "name": "Abdollah Veisi"
+      },
+      "logo": "assets/clubs/pgl/zob-ahan.png"
     },
     {
       "id": "pgl-sanat-naft-abadan",
@@ -3525,7 +3585,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-sirous-pourmousavi",
+        "name": "Sirous Pourmousavi"
+      },
+      "logo": "assets/clubs/pgl/sanat-naft-abadan.png"
     },
     {
       "id": "pgl-mes-shahr-babak",
@@ -3722,7 +3787,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 63
+      "baseOverall": 63,
+      "headCoach": {
+        "id": "pgl-coach-ghasem-shahba",
+        "name": "Ghasem Shahba"
+      },
+      "logo": "assets/clubs/pgl/mes-shahr-babak.png"
     },
     {
       "id": "pgl-shams-azar-qazvin",
@@ -3964,7 +4034,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 61
+      "baseOverall": 61,
+      "headCoach": {
+        "id": "pgl-coach-vahid-rezaei",
+        "name": "Vahid Rezaei"
+      },
+      "logo": "assets/clubs/pgl/shams-azar-qazvin.png"
     },
     {
       "id": "pgl-nassaji-mazandaran",
@@ -4170,7 +4245,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-saeid-daghighi",
+        "name": "Saeid Daghighi"
+      },
+      "logo": "assets/clubs/pgl/nassaji-mazandaran.png"
     },
     {
       "id": "pgl-esteghlal-khuzestan",
@@ -4466,7 +4546,12 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-amir-khalifeh-asl",
+        "name": "Amir Khalifeh Asl"
+      },
+      "logo": "assets/clubs/pgl/esteghlal-khuzestan.png"
     },
     {
       "id": "pgl-chadormalu-ardakan",
@@ -4735,7 +4820,94 @@
           "isStar": false
         }
       ],
-      "baseOverall": 62
+      "baseOverall": 62,
+      "headCoach": {
+        "id": "pgl-coach-saeid-akhbari",
+        "name": "Saeid Akhbari"
+      },
+      "logo": "assets/clubs/pgl/chadormalu-ardakan.png"
+    }
+  ],
+  "freeAgentCoaches": [
+    {
+      "id": "pgl-coach-yahya-golmohammadi",
+      "name": "Yahya Golmohammadi"
+    },
+    {
+      "id": "pgl-coach-mojtaba-hosseini",
+      "name": "Mojtaba Hosseini"
+    },
+    {
+      "id": "pgl-coach-mohammad-rabiei",
+      "name": "Mohammad Rabiei"
+    },
+    {
+      "id": "pgl-coach-alireza-mansourian",
+      "name": "Alireza Mansourian"
+    },
+    {
+      "id": "pgl-coach-rasoul-khatibi",
+      "name": "Rasoul Khatibi"
+    },
+    {
+      "id": "pgl-coach-farhad-majidi",
+      "name": "Farhad Majidi"
+    },
+    {
+      "id": "pgl-coach-majid-jalali",
+      "name": "Majid Jalali"
+    },
+    {
+      "id": "pgl-coach-ali-daei",
+      "name": "Ali Daei"
+    },
+    {
+      "id": "pgl-coach-hosseinabdi",
+      "name": "HosseinAbdi"
+    },
+    {
+      "id": "pgl-coach-reza-enayati",
+      "name": "Reza Enayati"
+    },
+    {
+      "id": "pgl-coach-rahman-rezaei",
+      "name": "Rahman Rezaei"
+    },
+    {
+      "id": "pgl-coach-omid-ravankhah",
+      "name": "Omid Ravankhah"
+    },
+    {
+      "id": "pgl-coach-mehdi-pashazadeh",
+      "name": "Mehdi Pashazadeh"
+    },
+    {
+      "id": "pgl-coach-mahmoud-fekri",
+      "name": "Mahmoud Fekri"
+    },
+    {
+      "id": "pgl-coach-davoud-mahabadi",
+      "name": "Davoud Mahabadi"
+    },
+    {
+      "id": "pgl-coach-akbar-misaghian",
+      "name": "Akbar Misaghian"
+    },
+    {
+      "id": "pgl-coach-firouz-karimi",
+      "name": "Firouz Karimi"
+    },
+    {
+      "id": "pgl-coach-parviz-mazloumi",
+      "name": "Parviz Mazloumi"
+    },
+    {
+      "id": "pgl-coach-nader-dastneshan",
+      "name": "Nader Dastneshan"
+    },
+    {
+      "id": "pgl-coach-masoud-shojaei",
+      "name": "Masoud Shojaei"
     }
   ]
 }

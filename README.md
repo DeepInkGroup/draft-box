@@ -14,6 +14,10 @@ Full game design & rules: **[RULES.md](RULES.md)**
 
 ## League Games
 
+Club head coaches and the 20 free-agent coaches are imported from **[PGL-Coaches.txt](PGL-Coaches.txt)**. Setup previews, multiplayer lobbies and **Teams & Player Stats** show each club's supplied head coach separately from its human manager. The free-agent coach directory is available in league selection and during the season. These are roster profiles; coaches do not add match modifiers or hiring mechanics.
+
+All 18 club crests from **PGL Logos.rar** appear in club previews, lobbies, draft reveals, standings, fixtures, match scores and team profiles. Assets are bundled locally for both the game server and GitHub Pages. Regenerate league data with `node server/src/data/generate-pgl.js`; reimport logos with `node scripts/import-pgl-logos.cjs` (requires a RAR-capable tar and the server's Playwright browser). The importer converts mislabeled WebP sources to actual PNGs.
+
 The PGL roster comes directly from **[PGL-Players.txt](PGL-Players.txt)**: all 18 supplied clubs and 510 players, including their ratings, exact positions and `*` star markers. This is the game's supplied roster, rather than a claim about current official league membership.
 
 Choose **Single Player → League Games → Persian Gulf League**, then your club and **Squad Mode**. **Draft Style** builds an XI from the league's players; **Real Club Squad** fills your chosen formation with players from the selected club. Lock your tactics and represent that club against the other clubs' bot squads. The season has **34 matchdays and 306 matches**: each club faces every other club once at home and once away. Draws remain draws; there are no knockout rounds. A win earns 3 points, a draw 1. Standings use points, goal difference, then goals scored; exact ties use club name for a stable game order. The top club at the end wins the title.

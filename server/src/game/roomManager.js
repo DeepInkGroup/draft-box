@@ -452,7 +452,7 @@ function lobbySnapshot(roomRow) {
     managerOffers: !!roomRow.manager_offers, playerDepartures: !!roomRow.player_departures,
     seasonNumber: roomRow.season_number || 1,
     leagueName: getLeague(roomRow.league_id)?.name || null,
-    leagueClubs: roomRow.mode === 'league' ? getLeague(roomRow.league_id).teams.map(({ code, name }) => ({ code, name })) : null,
+    leagueClubs: roomRow.mode === 'league' ? getLeague(roomRow.league_id).teams.map(({ code, name, headCoach, logo }) => ({ code, name, headCoach, logo })) : null,
     spoilerMode: !!roomRow.spoiler_mode,
     name: roomRow.name,
     status: roomRow.status,

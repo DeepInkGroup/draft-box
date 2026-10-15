@@ -8,8 +8,9 @@ RUN npm ci --omit=dev --no-audit --no-fund
 COPY server/src ./src
 COPY web /app/web
 COPY PGL-Players.txt /app/PGL-Players.txt
+COPY PGL-Coaches.txt /app/PGL-Coaches.txt
 
-# Regenerate the final player database at build time.
+# Regenerate the player and coach database at build time.
 RUN npm run gen:data
 
 ENV NODE_ENV=production

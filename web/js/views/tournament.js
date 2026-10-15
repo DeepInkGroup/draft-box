@@ -103,7 +103,7 @@ const TournamentView = {
       const xi = data.players.filter(player => player.status === 'Starting XI');
       const goals = data.players.filter(player => player.stats.goals > 0).sort((a,b) => b.stats.goals - a.stats.goals);
       const metrics = [['Position',row ? '#' + row.rank : '-'],['Points',row?.pts ?? 0],['Played',row?.played ?? 0],['Goals for / against',(row?.gf ?? 0) + ' / ' + (row?.ga ?? 0)],['Average XI OVR',xi.length ? (xi.reduce((sum,p) => sum+p.overall,0)/xi.length).toFixed(1) : '-'],['Squad players',data.players.filter(p => ['Starting XI','Club roster'].includes(p.status)).length]];
-      leagueTools.querySelector('#leagueClubOverview').innerHTML = `<div class="club-overview-heading"><span class="club-monogram" aria-hidden="true">${escapeLeagueText(data.name.split(' ').map(word => word[0]).slice(0,2).join(''))}</span><div><h3>${escapeLeagueText(data.name)}</h3><p>${data.code === myCode ? 'Your club' : data.isHuman ? 'Managed by ' + escapeLeagueText(data.username) : 'AI club'}<span class="badge">${xi.length} in starting XI</span></p></div></div><div class="club-overview-metrics">${metrics.map(([label,value]) => `<div><span>${label}</span><b>${value}</b></div>`).join('')}</div>${goals.length ? `<p class="club-top-player">Top scorer: <b>${escapeLeagueText(goals[0].name)}</b> / ${goals[0].stats.goals} goals</p>` : '<p class="club-top-player muted">Player statistics build up as the season progresses.</p>'}`;
+      leagueTools.querySelector('#leagueClubOverview').innerHTML = `<div class="club-overview-heading">${ClubIdentity.logo(data.code, true)}<div><h3>${escapeLeagueText(data.name)}</h3>${data.headCoach ? `<p class="club-coach">Head coach: <strong>${escapeLeagueText(data.headCoach.name)}</strong></p>` : ''}<p>${data.code === myCode ? 'Your club' : data.isHuman ? 'Managed by ' + escapeLeagueText(data.username) : 'AI club'}<span class="badge">${xi.length} in starting XI</span></p></div></div><div class="club-overview-metrics">${metrics.map(([label,value]) => `<div><span>${label}</span><b>${value}</b></div>`).join('')}</div>${goals.length ? `<p class="club-top-player">Top scorer: <b>${escapeLeagueText(goals[0].name)}</b> / ${goals[0].stats.goals} goals</p>` : '<p class="club-top-player muted">Player statistics build up as the season progresses.</p>'}`;
     }
     function clearClubFilters() {
       clubPage=1;
@@ -155,7 +155,7 @@ const TournamentView = {
       if (!resultRounds.some(round => round.matchday===resultMatchday)) resultMatchday=resultRounds[resultRounds.length-1].matchday;
       const round=resultRounds.find(round => round.matchday===resultMatchday);
       const matches=round.matches.slice().sort((a,b)=>Number(b.aCode===myCode || b.bCode===myCode)-Number(a.aCode===myCode || a.bCode===myCode));
-      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${escapeLeagueText(match.aName)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${escapeLeagueText(match.bName)}</span></div>`).join('')}</div>`;
+      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${ClubIdentity.name(match.aCode, match.aName)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${ClubIdentity.name(match.bCode, match.bName)}</span></div>`).join('')}</div>`;
       target.querySelector('#leagueResultMatchday').onchange=event => {resultMatchday=Number(event.target.value);renderScoreRounds();};
     }
 
@@ -170,7 +170,7 @@ const TournamentView = {
       leagueTools.style.display = '';
       if (!leagueTools.querySelector('#btnSkipToTransfers')) {
         const clubs = leagueState.table.slice().sort((a, b) => a.name.localeCompare(b.name));
-        leagueTools.innerHTML = `<div class="league-season-settings" id="leagueTransferRules"></div><div class="league-cohesion hidden" id="leagueCohesion"></div><p id="leagueTransferWaiting" class="help-callout hidden" role="status"></p><div class="league-skip"><button class="btn btn-primary" id="btnSkipToTransfers">Simulate to Transfer Window</button><p class="muted" id="leagueSkipNote">Simulate the remaining first-half fixtures and stop at mid-season transfers.</p></div>
+        leagueTools.innerHTML = `${ClubIdentity.freeAgents(leagueState.freeAgentCoaches)}<div class="league-season-settings" id="leagueTransferRules"></div><div class="league-cohesion hidden" id="leagueCohesion"></div><p id="leagueTransferWaiting" class="help-callout hidden" role="status"></p><div class="league-skip"><button class="btn btn-primary" id="btnSkipToTransfers">Simulate to Transfer Window</button><p class="muted" id="leagueSkipNote">Simulate the remaining first-half fixtures and stop at mid-season transfers.</p></div>
           <div class="league-finish" style="display:none"><button class="btn btn-primary" id="btnFinishLeague">Finish Season &amp; View Results</button><p class="muted">Play all remaining fixtures and see the champion, final standings, relegation and player awards.</p></div>
           <div id="leagueAutoStatus" class="league-auto-status" role="status" style="display:none"></div>
           <details id="leagueSquadBrowser" class="club-browser"><summary>Teams &amp; Player Stats<span class="club-browser-hint">Explore clubs, squads and season leaders</span></summary><div class="club-picker"><div class="field"><label for="leagueClubSelect">Browse a club</label><select id="leagueClubSelect">${clubs.map(club => `<option value="${club.code}">${escapeLeagueText(club.name)}</option>`).join('')}</select></div><div class="club-picker-actions"><button class="btn btn-ghost" id="leagueClubPrev" aria-label="Previous club">&larr;</button><button class="btn btn-ghost" id="leagueMyClub">My Club</button><button class="btn btn-ghost" id="leagueClubNext" aria-label="Next club">&rarr;</button><button class="btn btn-ghost" id="leagueRefreshClub" aria-label="Refresh club statistics">Refresh</button></div></div>
@@ -234,7 +234,7 @@ const TournamentView = {
       const changes = leagueState?.managerChanges || [];
       careerZone.style.display = careerState || departures.length || changes.length ? '' : 'none';
       const currentClub = leagueState?.table.find(club => club.code === careerState?.selectedClubCode)?.name || '';
-      careerZone.innerHTML = `${careerState ? `<h2>Between Seasons</h2><p class="muted">Review your next-season club before the host starts the season. Changing managers does not move footballers between clubs.</p>${careerState.phase === 'choose' ? `<h3>Your Manager Offers</h3><p>You have ${careerState.offers.length} ${careerState.offers.length === 1 ? 'offer' : 'offers'} from AI clubs. Your current club is yours to keep.</p><div class="manager-offer-grid">${careerState.offers.map(offer => `<article class="manager-offer"><span class="badge">AI club</span><h3>${escapeLeagueText(offer.name)}</h3><p class="muted">Take charge of this club's existing squad · ${escapeLeagueText(offer.formation)}</p><button class="btn btn-primary btn-block" data-manager-club="${offer.code}" ${managerDecisionPending ? 'disabled' : ''}>Accept Offer</button></article>`).join('')}</div><button class="btn btn-ghost" id="btnKeepManagerClub" ${managerDecisionPending ? 'disabled' : ''}>Decline Offers &amp; Stay</button>` : `<p class="manager-decision-status" role="status">${careerState.offers.length ? 'Decision saved.' : 'No AI club offers this summer.'} Your next club: <b>${escapeLeagueText(currentClub)}</b>.</p>`}<p class="muted" role="status">${careerState.waitingFor.length ? 'Waiting for manager decisions: ' + careerState.waitingFor.map(user => escapeLeagueText(user.username)).join(', ') : isCreator ? 'Everyone is ready. Start the next season below.' : 'Everyone is ready. Waiting for the host to start the next season.'}</p>` : ''}
+      careerZone.innerHTML = `${careerState ? `<h2>Between Seasons</h2><p class="muted">Review your next-season club before the host starts the season. Changing managers does not move footballers between clubs.</p>${careerState.phase === 'choose' ? `<h3>Your Manager Offers</h3><p>You have ${careerState.offers.length} ${careerState.offers.length === 1 ? 'offer' : 'offers'} from AI clubs. Your current club is yours to keep.</p><div class="manager-offer-grid">${careerState.offers.map(offer => `<article class="manager-offer"><span class="badge">AI club</span><h3>${ClubIdentity.name(offer.code, offer.name)}</h3><p class="muted">Take charge of this club's existing squad · ${escapeLeagueText(offer.formation)}</p><button class="btn btn-primary btn-block" data-manager-club="${offer.code}" ${managerDecisionPending ? 'disabled' : ''}>Accept Offer</button></article>`).join('')}</div><button class="btn btn-ghost" id="btnKeepManagerClub" ${managerDecisionPending ? 'disabled' : ''}>Decline Offers &amp; Stay</button>` : `<p class="manager-decision-status" role="status">${careerState.offers.length ? 'Decision saved.' : 'No AI club offers this summer.'} Your next club: <b>${escapeLeagueText(currentClub)}</b>.</p>`}<p class="muted" role="status">${careerState.waitingFor.length ? 'Waiting for manager decisions: ' + careerState.waitingFor.map(user => escapeLeagueText(user.username)).join(', ') : isCreator ? 'Everyone is ready. Start the next season below.' : 'Everyone is ready. Waiting for the host to start the next season.'}</p>` : ''}
         ${changes.length ? `<details><summary>Manager Moves (${changes.length})</summary>${changes.map(change => `<p><b>${escapeLeagueText(change.username)}</b>: ${escapeLeagueText(change.fromName)} &rarr; ${escapeLeagueText(change.toName)}</p>`).join('')}</details>` : ''}
         ${departures.length ? `<details id="seasonDepartures"><summary>Squad Departures (${departures.length})</summary><p class="muted">These footballers left bottom-third clubs after poor season results. Reserves replace them automatically, and team chemistry recovers over four matches.</p><div class="season-departure-list">${departures.map(entry => `<article><b>${escapeLeagueText(entry.clubName)}</b><span>Finished ${entry.rank}${entry.rank === 1 ? 'st' : entry.rank === 2 ? 'nd' : entry.rank === 3 ? 'rd' : 'th'}</span><p>Left: ${escapeLeagueText(entry.player.name)} (${escapeLeagueText(entry.player.rawPos || entry.player.pos)})</p><p class="muted">Replacement: ${escapeLeagueText(entry.replacement.name)}</p></article>`).join('')}</div></details>` : careerState ? '<p class="muted">No footballers departed after poor results this summer.</p>' : ''}`;
       const decide = clubCode => {
@@ -334,13 +334,13 @@ const TournamentView = {
       leagueZone.style.display = '';
       const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
       leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3>${leagueState.pglRatingBoost ? '<span class="badge">All players +10 OVR</span>' : ''}<span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
-        ${next ? `<p class="muted">Next: ${next.aName} vs ${next.bName} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
+        ${next ? `<p class="muted">Next: ${ClubIdentity.name(next.aCode, next.aName)} vs ${ClubIdentity.name(next.bCode, next.bName)} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
         <button class="btn btn-ghost league-table-toggle" id="leagueTableToggleStats" aria-pressed="${leagueFullStats}">${leagueFullStats ? 'Compact standings' : 'Show all stats'}</button><div class="league-table-scroll ${leagueFullStats ? 'league-full-stats' : ''}" tabindex="0" role="region" aria-label="League standings${leagueFullStats ? ', scroll horizontally for all statistics' : ''}"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th scope="col">#</th><th scope="col">Club</th><th scope="col" title="Played">P</th><th scope="col">W</th><th scope="col">D</th><th scope="col">L</th><th scope="col">GF</th><th scope="col">GA</th><th scope="col">GD</th><th scope="col" title="Points">Pts</th></tr></thead>
           <tbody>${leagueState.table.map((row, index) => {
             const bottomTwo = index >= leagueState.table.length - 2;
             const status = leagueState.matchday === leagueState.totalMatchdays ? 'Relegated' : 'Relegation zone';
-            return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td><span class="league-club-name">${escapeLeagueText(row.name)}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</span><span class="league-club-meta">${row.code === myCode ? '<b>You</b><span class="league-mobile-gd"> · </span>' : ''}<span class="league-mobile-gd">GD ${row.gd > 0 ? '+' : ''}${row.gd}</span></span></td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
+            return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td><span class="league-club-name">${ClubIdentity.name(row.code, row.name)}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</span><span class="league-club-meta">${row.code === myCode ? '<b>You</b><span class="league-mobile-gd"> · </span>' : ''}<span class="league-mobile-gd">GD ${row.gd > 0 ? '+' : ''}${row.gd}</span></span></td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
           }).join('')}</tbody>
         </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">P = Played · Pts = Points · GD = Goal difference.<br>${leagueFullStats ? 'Swipe the table to see every statistic.' : 'Goal difference appears below each club. Tap Show all stats for the full table.'}</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
       leagueZone.querySelector('.league-table-scroll').scrollLeft=leagueFullStats ? previousScroll : 0;
@@ -373,8 +373,8 @@ const TournamentView = {
     // A human-controlled slot is shown as just the player's username — the team name
     // underneath it doesn't add anything once a real person is playing it. Bot-controlled
     // slots still show the nation's name, since there's no username to fall back to.
-    function nameTag(name, isHuman, username) {
-      if (isLeague) return name;
+    function nameTag(name, isHuman, username, clubCode) {
+      if (isLeague) return ClubIdentity.name(clubCode, name);
       return isHuman ? username : name;
     }
 
@@ -418,7 +418,7 @@ const TournamentView = {
         </div>
       `;
       if (!visibleEvents.length) return '<p class="muted" style="margin:6px 0;">No notable events.</p>';
-      return `<div class="team-events-grid">${column('A', nameTag(m.aName, m.aHuman, m.aUsername))}${column('B', nameTag(m.bName, m.bHuman, m.bUsername))}</div>`;
+      return `<div class="team-events-grid">${column('A', nameTag(m.aName, m.aHuman, m.aUsername, m.aCode))}${column('B', nameTag(m.bName, m.bHuman, m.bUsername, m.bCode))}</div>`;
     }
 
     function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
@@ -620,7 +620,7 @@ const TournamentView = {
         const clockLabel = penaltyPhase ? 'PENS' : `${Math.min(clock, matchLenMinutes)}'${clock > 90 ? ' ET' : ''}`;
         return `
           <div class="center"><span class="live-clock" id="liveClock">${clockLabel}</span></div>
-          <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername)}</div>
+          <div class="live-final-score">${nameTag(m.aName, m.aHuman, m.aUsername, m.aCode)} <b id="liveMyScore">${myScore.a} - ${myScore.b}</b> ${nameTag(m.bName, m.bHuman, m.bUsername, m.bCode)}</div>
           ${m.wentToPenalties ? `<div class="center muted" id="livePenScore" style="${penaltyPhase ? '' : 'display:none;'}margin-bottom:10px;">Penalties: <b>${penScore.a} - ${penScore.b}</b></div>` : ''}
           <div id="liveStatsZone" style="${penaltyPhase ? 'display:none;' : ''}">${matchStatsHtml(liveStatsAtClock(m, clock, possessionJitter, matchLenMinutes, countCardsSoFar(myTimeline, cursor)))}</div>
           <div class="live-feed" id="liveFeed"></div>
@@ -630,7 +630,7 @@ const TournamentView = {
       function otherMatchBody(idx) {
         const om = step.matches[idx];
         return `
-          <div class="live-final-score">${nameTag(om.aName, om.aHuman, om.aUsername)} <b>${scoreText(om)}</b> ${nameTag(om.bName, om.bHuman, om.bUsername)}</div>
+          <div class="live-final-score">${nameTag(om.aName, om.aHuman, om.aUsername, om.aCode)} <b>${scoreText(om)}</b> ${nameTag(om.bName, om.bHuman, om.bUsername, om.bCode)}</div>
           ${matchStatsHtml(finalMatchStats(om))}
           ${penaltyShootoutHtml(om)}
           ${teamEventsHtml(om)}
@@ -889,9 +889,9 @@ const TournamentView = {
       const bWin = m.winnerCode && m.winnerCode === m.bCode;
       return `
         <article class="bracket-node ${isTerminal ? 'terminal' : ''}">
-          <div class="bracket-node-team ${aWin ? 'winner' : ''}"><span>${nameTag(m.aName, m.aHuman, m.aUsername)}</span><b>${m.result ? m.result.goalsA : '-'}</b></div>
+          <div class="bracket-node-team ${aWin ? 'winner' : ''}"><span>${nameTag(m.aName, m.aHuman, m.aUsername, m.aCode)}</span><b>${m.result ? m.result.goalsA : '-'}</b></div>
           <div class="bracket-node-mid">${bracketScoreHtml(m)}</div>
-          <div class="bracket-node-team ${bWin ? 'winner' : ''}"><span>${nameTag(m.bName, m.bHuman, m.bUsername)}</span><b>${m.result ? m.result.goalsB : '-'}</b></div>
+          <div class="bracket-node-team ${bWin ? 'winner' : ''}"><span>${nameTag(m.bName, m.bHuman, m.bUsername, m.bCode)}</span><b>${m.result ? m.result.goalsB : '-'}</b></div>
         </article>
       `;
     }
@@ -1011,13 +1011,13 @@ const TournamentView = {
         const bWin = m.winnerCode && m.winnerCode === m.bCode;
         return `
         <div class="match-row match-row-clickable" data-idx="${idx}">
-          <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername)}</span></div>
+          <div class="match-team ${aWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.aName, m.aHuman, m.aUsername, m.aCode)}</span></div>
           <div class="match-score-box">
             <span class="match-score-val">${m.goalsA} - ${m.goalsB}</span>
             ${m.wentToExtraTime ? `<span class="match-score-pens">AET</span>` : ''}
             ${m.wentToPenalties ? `<span class="match-score-pens">pens ${m.penalties.A}-${m.penalties.B}</span>` : ''}
           </div>
-          <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername)}</span></div>
+          <div class="match-team side-b ${bWin ? 'winner' : ''}"><span class="match-team-name">${nameTag(m.bName, m.bHuman, m.bUsername, m.bCode)}</span></div>
           ${chevronIcon}
         </div>
         <div class="match-report hidden" id="report-${idx}">
@@ -1077,7 +1077,7 @@ const TournamentView = {
         championZone.innerHTML = `
           <div class="champion-banner">
             <div class="champion-label">${isLeague ? leagueName : 'World Cup'} Champion</div>
-            <h2>${championTitle}</h2>
+            <h2>${isLeague ? ClubIdentity.name(step.champion.code, championTitle) : championTitle}</h2>
             <p class="champion-team-name">${championSub}</p>
             <div class="row" style="margin-top:16px;justify-content:center;">
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>

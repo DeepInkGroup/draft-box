@@ -1,6 +1,7 @@
 .git
 .codepilot-uploads
 .npm-cache
+.tmp
 .devcontainer
 **/node_modules
 **/.env

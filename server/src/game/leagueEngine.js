@@ -52,7 +52,7 @@ function startLeague(roomState) {
       formation: member.formation, tacticalStyle: normalizeStyle(member.tacticalStyle)
     } : bestBotSetup(club);
     slotByCode[club.code] = {
-      code: club.code, name: club.name, isHuman: !!member, userId: member?.userId || null, username: member?.username || null,
+      code: club.code, name: club.name, headCoach: club.headCoach, isHuman: !!member, userId: member?.userId || null, username: member?.username || null,
       ...setup, customTactic: member?.customTactic || null, strength: teamStrength(setup.xi), eliminated: false, morale: 0
     };
     standings[club.code] = { played: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
@@ -117,7 +117,7 @@ function simulateLeagueStep(roomState, applyResult) {
 function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
   const table = viewedStep > 0 ? t.history[viewedStep - 1]?.leagueTable : t.initialTable;
-  return { seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
+  return { freeAgentCoaches: getLeague(t.leagueId)?.freeAgentCoaches || [], seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
     nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => ({ ...fixture, aName: t.slotByCode[fixture.aCode].name, bName: t.slotByCode[fixture.bCode].name })) };
 }
 module.exports = { createFixtures, rankTable, startLeague, simulateLeagueStep, leagueSnapshot };

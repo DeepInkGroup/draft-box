@@ -35,7 +35,8 @@ function leagueCatalog() {
     resultsOnlyAvailable: true, resultsOnlyVersion: 2, standingsLayoutVersion: 3, squadBrowserVersion: 2, midseasonTacticsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,
     transferWindowAfterMatchday: league.teams.length - (league.teams.length % 2 ? 0 : 1),
     teamCount: league.teams.length, matchdays: 2 * (league.teams.length - (league.teams.length % 2 ? 0 : 1)),
-    teams: league.teams.map(({ code, name, players, baseOverall }) => ({ code, name, playerCount: players.length, baseOverall }))
+    freeAgentCoaches: league.freeAgentCoaches || [],
+    teams: league.teams.map(({ code, name, players, baseOverall, headCoach, logo }) => ({ code, name, headCoach, logo, playerCount: players.length, baseOverall }))
   }));
 }
 module.exports = { getLeague, teamsForRoom, getTeam, getPlayer, leagueCatalog, ratedPlayer, ratedClub };

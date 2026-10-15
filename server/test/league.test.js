@@ -8,7 +8,8 @@ const { createFixtures, rankTable } = require('../src/game/leagueEngine');
 
 test('PGL data exactly preserves the supplied clubs, player positions, ratings and stars', () => {
   const source = fs.readFileSync(path.join(__dirname, '..', '..', 'PGL-Players.txt'), 'utf8');
-  assert.deepEqual(parsePgl(source), pgl);
+  const coaches = fs.readFileSync(path.join(__dirname, '..', '..', 'PGL-Coaches.txt'), 'utf8');
+  assert.deepEqual(parsePgl(source, coaches), pgl);
   assert.equal(pgl.teams.length, 18);
   assert.equal(pgl.teams.flatMap((club) => club.players).length, 510);
   const players = pgl.teams.flatMap((club) => club.players);

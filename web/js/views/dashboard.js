@@ -259,10 +259,10 @@ const DashboardView = {
       const { leagues } = await Api.leagues();
       if (!leagues.length) { picker.textContent = 'No leagues are available yet.'; return; }
       picker.innerHTML = `<div class="field"><label for="leagueSelect">League</label><select id="leagueSelect">${leagues.map((league) => `<option value="${league.id}">${league.name} (${league.country})</option>`).join('')}</select></div>
-        <p class="muted" id="leagueDetails"></p><button class="btn btn-primary btn-block" id="btnSelectLeague">Choose League</button>`;
+        <p class="muted" id="leagueDetails"></p><div id="leagueCoaches"></div><button class="btn btn-primary btn-block" id="btnSelectLeague">Choose League</button>`;
       const select = picker.querySelector('#leagueSelect');
       const selected = () => leagues.find((league) => league.id === select.value);
-      const describe = () => { const league = selected(); picker.querySelector('#leagueDetails').textContent = `${league.teamCount} clubs · ${league.matchdays} matchdays · home and away`; };
+      const describe = () => { const league = selected(); picker.querySelector('#leagueDetails').textContent = `${league.teamCount} clubs · ${league.matchdays} matchdays · home and away`; picker.querySelector('#leagueCoaches').innerHTML = ClubIdentity.freeAgents(league.freeAgentCoaches); };
       select.addEventListener('change', describe);
       describe();
       picker.querySelector('#btnSelectLeague').addEventListener('click', () => multiplayer ? this.renderCreateRoom(container, selected()) : this.renderSingleplayer(container, selected()));
@@ -302,6 +302,7 @@ ${league ? '' : `<div class="field"><label>Pick Timer</label></div><div id="spTi
     const showErr = (e) => { errorBox.textContent = e.message; errorBox.classList.remove('hidden'); };
 
     const spFormation = FormationPicker.render(container.querySelector('#spFormation'), { selected: '4-3-3' });
+    if (league) ClubIdentity.bindPreview(container.querySelector('#spClub'), league.teams);
     const spTimer = league ? { value: 0 } : ToggleGroup.render(container.querySelector('#spTimer'), { options: this.timerOptions(), selected: 20000 });
     const spRatings = ToggleGroup.render(container.querySelector('#spRatings'), { options: this.ratingsOptions(), selected: true });
     const spCaptain = ToggleGroup.render(container.querySelector('#spCaptain'), { options: this.captainOptions(), selected: false });
@@ -404,6 +405,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
 
     ToggleGroup.render(container.querySelector('#crMode'), { options: [{ value: 'worldcup', title: 'World Cup', sub: 'Tournament with friends' }, { value: 'league', title: 'League Games', sub: 'A full club season together' }], selected: league ? 'league' : 'worldcup', onChange: value => value === 'league' ? this.renderLeagueSelect(container, true) : this.renderCreateRoom(container) });
     const crFormation = FormationPicker.render(container.querySelector('#crFormation'), { selected: '4-3-3' });
+    if (league) ClubIdentity.bindPreview(container.querySelector('#crClub'), league.teams);
     const crTimer = ToggleGroup.render(container.querySelector('#crTimer'), { options: this.timerOptions(), selected: 20000 });
     const crRatings = ToggleGroup.render(container.querySelector('#crRatings'), { options: this.ratingsOptions(), selected: true });
     const crCaptain = ToggleGroup.render(container.querySelector('#crCaptain'), { options: this.captainOptions(), selected: false });
@@ -485,6 +487,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
         select.replaceChildren(...clubs.map(club=>{const option=document.createElement('option');option.value=club.code;option.textContent=club.name;return option;}));
         if(clubs.some(club=>club.code===previous))select.value=previous;
         else App.toast('That club was just chosen. Select another available club.');
+        ClubIdentity.bindPreview(select, clubs);
       } catch(error) { selectedRoom=null;showErr(error); }
       if (selectedRoom && container.contains(joinButton)) lobbyPoll=setTimeout(()=>refreshAvailableClubs(code),3000);
     }
@@ -512,6 +515,7 @@ ${league ? `<section class="league-transfer-options"><h3>Squad Mode</h3><div id=
             const select=document.createElement('select');select.id='joinClub';
             clubs.forEach(club=>{const option=document.createElement('option');option.value=club.code;option.textContent=club.name;select.append(option);});
             label.append(select);container.querySelector('#joinClubPicker').replaceChildren(label);
+            ClubIdentity.bindPreview(select, clubs);
             joinButton.textContent='Choose Club & Join';clearTimeout(lobbyPoll);lobbyPoll=setTimeout(()=>refreshAvailableClubs(code),3000); return;
           }
         }

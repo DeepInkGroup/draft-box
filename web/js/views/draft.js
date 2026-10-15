@@ -375,7 +375,7 @@ const DraftView = {
       ` : '';
 
       revealCard.innerHTML = `
-        <div class="reveal-team">${payload.team.name}</div>
+        <div class="reveal-team">${ClubIdentity.name(payload.team.code, payload.team.name)}</div>
         <div class="reveal-sub">${sharedDraftMode ? (isMySharedTurn ? 'Pick one player, then the turn passes to the next player.' : 'Same team is visible for everyone; wait until your turn unlocks picks.') : (payload.deadline == null ? 'Pick one player from this team for your squad — no time limit, take your time' : 'Pick one player from this team for your squad — no skipping, the clock is running')}</div>
         ${sharedStatus}
         <div class="sort-toolbar" id="sortToolbar">
