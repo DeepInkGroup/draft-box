@@ -1782,7 +1782,7 @@ input, select, textarea { max-width: 100%; }
 #stepCard { scroll-margin-top: 90px; }
 @media (max-width:640px) {
   .league-table-toggle { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; }
-  .league-table-scroll .league-table th, .league-table-scroll .league-table td { position: static; min-width: 0; box-shadow: none; white-space: normal; }
+  .league-table-scroll .league-table th, .league-table-scroll .league-table td { position: static; min-width: 0; box-shadow: none; white-space: normal; background: transparent; }
   .league-table-scroll:not(.league-full-stats) { overflow-x: visible; }
   .league-table-scroll:not(.league-full-stats) .league-table { width: 100%; min-width: 0; table-layout: fixed; }
   .league-table-scroll:not(.league-full-stats) .league-table th,
