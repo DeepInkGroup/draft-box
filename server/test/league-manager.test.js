@@ -149,5 +149,9 @@ test('continuing a season saves each new manager with the offered club squad and
   assert.equal(nextState.tournament.previousSeasons[0].userPositions[ids[0]], 18);
   assert.throws(() => rm.createRoom({ creatorId: ids[0], managerOffers: 'true' }), /Career options/);
   assert.throws(() => rm.createRoom({ creatorId: ids[0], managerOffers: true }), /online leagues/);
+  const rematch = rm.createRematch(row, ids[0]);
+  assert.equal(rm.createRematch(row, ids[0]).id, rematch.id);
+  rm.setRoomStatus(rematch.id, 'finished');
+  assert.notEqual(rm.createRematch(row, ids[0]).id, rematch.id, 'A finished previous rematch must not reopen an old game');
   db.close();
 });

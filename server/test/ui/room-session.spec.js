@@ -67,7 +67,8 @@ for(const width of [1280,390])test(`online automatic season, rematch and fresh r
     let release;const received=new Promise(resolve=>release=resolve);let waiting;
     const delayed=new Promise(resolve=>waiting=resolve);
     await page.route('**/api/rooms/'+code,async route=>{waiting();await received;await route.fulfill({json:completed});});
-    await page.evaluate(old=>App.goLobby(old),code);await delayed;await page.locator('#btnHome').click();release();
+    await page.evaluate(old=>App.goLobby(old),code);await delayed;await page.locator('#btnHome').click();
+    const response=page.waitForResponse(result=>result.url().endsWith('/api/rooms/'+code));release();await(await response).finished();
     await expect(page.locator('#modeCreate')).toBeVisible();expect(await page.evaluate(()=>App.state.roomCode)).toBe(null);
     expect(errors).toEqual([]);
   }finally{await context.close();}

@@ -441,7 +441,10 @@ function createRematch(previous, userId) {
   previous = getRoomRow(previous.id);
   if (previous.creator_id !== userId) throw new Error('only the room creator can start a rematch');
   if (previous.status !== 'finished') throw new Error('the tournament has not finished yet');
-  if (previous.rematch_room_id) return getRoomRow(previous.rematch_room_id);
+  if (previous.rematch_room_id) {
+    const existing = getRoomRow(previous.rematch_room_id);
+    if (existing && existing.status !== 'finished') return existing;
+  }
   let next;
   runTransaction(() => {
     next = createRoom({ name: previous.name, creatorId: userId, mode: previous.mode, leagueId: previous.league_id,
