@@ -13,6 +13,7 @@ async function setup(page, token) {
   }, token);
 }
 for (const width of [320, 390]) test(`mobile room recovery across lobby, draft and live match at ${width}px`, { timeout: 90000 }, async ({ page, browser, request }) => {
+  test.setTimeout(90000);
   const suffix = width + '_' + Date.now().toString().slice(-6);
   const register = async prefix => {
     const username = prefix + suffix;

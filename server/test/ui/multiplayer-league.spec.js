@@ -15,6 +15,7 @@ async function round(page, day) {
 }
 for (const width of [1280, 390]) {
   test(`two players create, join and play a league with shared transfers at ${width}px`, { timeout: 150000 }, async ({ page, browser, request }) => {
+    test.setTimeout(150000);
     await page.setViewportSize({ width, height: 900 });
     const suffix = width + '_' + Date.now().toString().slice(-6);
     const register = async name => (await (await request.post('/api/auth/register', { data: { username: name, email: name + '@example.test', password: 'test-password' } })).json());
