@@ -34,7 +34,8 @@ const TournamentView = {
     let resultMatchday = null;
     let hasJoinedRoom = false;
     let automaticTimer = null;
-    App.onViewCleanup(() => clearAutomaticTimer());
+    let activeReport = null;
+    App.onViewCleanup(() => { clearAutomaticTimer(); stopLiveReport(); });
     let leagueFullStats = false;
     const releaseSelection = new Set();
     const offerSelection = new Map();
@@ -156,7 +157,7 @@ const TournamentView = {
       if (!resultRounds.some(round => round.matchday===resultMatchday)) resultMatchday=resultRounds[resultRounds.length-1].matchday;
       const round=resultRounds.find(round => round.matchday===resultMatchday);
       const matches=round.matches.slice().sort((a,b)=>Number(b.aCode===myCode || b.bCode===myCode)-Number(a.aCode===myCode || a.bCode===myCode));
-      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${ClubIdentity.name(match.aCode, match.aName)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${ClubIdentity.name(match.bCode, match.bName)}</span></div>`).join('')}</div>`;
+      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${nameTag(match.aName, match.aHuman, match.aUsername, match.aCode)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${nameTag(match.bName, match.bHuman, match.bUsername, match.bCode)}</span></div>`).join('')}</div>`;
       target.querySelector('#leagueResultMatchday').onchange=event => {resultMatchday=Number(event.target.value);renderScoreRounds();};
     }
 
@@ -335,13 +336,13 @@ const TournamentView = {
       leagueZone.style.display = '';
       const next = (leagueState.nextFixtures || []).find((match) => match.aCode === myCode || match.bCode === myCode);
       leagueZone.innerHTML = `<div class="league-table-heading"><h3>${leagueState.name} - Season ${leagueState.seasonNumber || 1}</h3>${leagueState.pglRatingBoost ? '<span class="badge">All players +10 OVR</span>' : ''}<span class="badge">Matchday ${leagueState.matchday} / ${leagueState.totalMatchdays}</span></div>
-        ${next ? `<p class="muted">Next: ${ClubIdentity.name(next.aCode, next.aName)} vs ${ClubIdentity.name(next.bCode, next.bName)} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
+        ${next ? `<p class="muted league-next-fixture">Next: ${nameTag(next.aName, next.aHuman, next.aUsername, next.aCode)} vs ${nameTag(next.bName, next.bHuman, next.bUsername, next.bCode)} · ${next.aCode === myCode ? 'Home' : 'Away'}</p>` : ''}
         <button class="btn btn-ghost league-table-toggle" id="leagueTableToggleStats" aria-pressed="${leagueFullStats}">${leagueFullStats ? 'Compact standings' : 'Show all stats'}</button><div class="league-table-scroll ${leagueFullStats ? 'league-full-stats' : ''}" tabindex="0" role="region" aria-label="League standings${leagueFullStats ? ', scroll horizontally for all statistics' : ''}"><table class="group-table league-table"><caption class="sr-only">League standings</caption>
           <thead><tr><th scope="col">#</th><th scope="col">Club</th><th scope="col" title="Played">P</th><th scope="col">W</th><th scope="col">D</th><th scope="col">L</th><th scope="col">GF</th><th scope="col">GA</th><th scope="col">GD</th><th scope="col" title="Points">Pts</th></tr></thead>
           <tbody>${leagueState.table.map((row, index) => {
             const bottomTwo = index >= leagueState.table.length - 2;
             const status = leagueState.matchday === leagueState.totalMatchdays ? 'Relegated' : 'Relegation zone';
-            return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td><span class="league-club-name">${ClubIdentity.name(row.code, row.name)}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</span><span class="league-club-meta">${row.code === myCode ? '<b>You</b><span class="league-mobile-gd"> · </span>' : ''}<span class="league-mobile-gd">GD ${row.gd > 0 ? '+' : ''}${row.gd}</span></span></td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
+            return `<tr class="${row.code === myCode ? 'human' : ''} ${bottomTwo ? 'league-relegation' : ''}"><td>${row.rank}</td><td><span class="league-club-name">${nameTag(row.name, row.isHuman, row.username, row.code)}${bottomTwo ? ` <span class="relegation-mark" role="img" aria-label="${status}" title="${status}">↓</span>` : ''}</span><span class="league-club-meta">${row.code === myCode ? '<b>You</b><span class="league-mobile-gd"> · </span>' : ''}<span class="league-mobile-gd">GD ${row.gd > 0 ? '+' : ''}${row.gd}</span></span></td><td>${row.played}</td><td>${row.w}</td><td>${row.d}</td><td>${row.l}</td><td>${row.gf}</td><td>${row.ga}</td><td>${row.gd > 0 ? '+' : ''}${row.gd}</td><td><b>${row.pts}</b></td></tr>`;
           }).join('')}</tbody>
         </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">P = Played · Pts = Points · GD = Goal difference.<br>${leagueFullStats ? 'Swipe the table to see every statistic.' : 'Goal difference appears below each club. Tap Show all stats for the full table.'}</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
       leagueZone.querySelector('.league-table-scroll').scrollLeft=leagueFullStats ? previousScroll : 0;
@@ -371,11 +372,9 @@ const TournamentView = {
       `;
     }
 
-    // A human-controlled slot is shown as just the player's username — the team name
-    // underneath it doesn't add anything once a real person is playing it. Bot-controlled
-    // slots still show the nation's name, since there's no username to fall back to.
+    // Online league clubs keep their identity alongside their human manager.
     function nameTag(name, isHuman, username, clubCode) {
-      if (isLeague) return ClubIdentity.name(clubCode, name);
+      if (isLeague) return ClubIdentity.name(clubCode, name, !singlePlayer && isHuman ? username : null);
       return isHuman ? username : name;
     }
 
@@ -587,6 +586,7 @@ const TournamentView = {
     // decided, offered as a static "final report" via the picker. Skippable. Hands off
     // to the normal, permanent results view (renderStep) when done.
     function playLiveReport(step, forCode, onDone) {
+      stopLiveReport();
       const myMatchIdx = step.matches.findIndex((m) => m.aCode === forCode || m.bCode === forCode);
       if (myMatchIdx === -1) { onDone(); return; } // no match of mine this round — nothing to watch live
 
@@ -611,6 +611,8 @@ const TournamentView = {
         if (finished) return;
         finished = true;
         clearInterval(timer);
+        clearInterval(penaltyTimer);
+        activeReport = null;
         liveZone.style.display = 'none';
         stepCard.style.display = 'block';
         continueZone.style.display = 'block';
@@ -670,7 +672,7 @@ const TournamentView = {
           <div class="live-picker-row">
             <span class="muted">Watching:</span>
             <select id="liveMatchSelect">
-              ${step.matches.map((sm, idx) => `<option value="${idx}" ${idx === viewIdx ? 'selected' : ''}>${sm.aName} vs ${sm.bName}${idx === myMatchIdx ? ' — Your Match' : ''}</option>`).join('')}
+              ${step.matches.map((sm, idx) => `<option value="${idx}" ${idx === viewIdx ? 'selected' : ''}>${escapeLeagueText(sm.aName + (isLeague && !singlePlayer && sm.aHuman ? ' @' + sm.aUsername : ''))} vs ${escapeLeagueText(sm.bName + (isLeague && !singlePlayer && sm.bHuman ? ' @' + sm.bUsername : ''))}${idx === myMatchIdx ? ' — Your Match' : ''}</option>`).join('')}
             </select>
           </div>
         `;
@@ -725,7 +727,13 @@ const TournamentView = {
           else finish();
         }
       }, 180);
-      App.onViewCleanup(() => { clearInterval(timer); clearInterval(penaltyTimer); });
+      activeReport = () => { finished = true; clearInterval(timer); clearInterval(penaltyTimer); };
+    }
+
+    function stopLiveReport() {
+      if (!activeReport) return;
+      activeReport(); activeReport = null;
+      liveZone.style.display = 'none'; stepCard.style.display = ''; continueZone.style.display = '';
     }
 
     // --- One-time reveal of the drafted XI, styled as a real lineup card, shown once
@@ -988,6 +996,7 @@ const TournamentView = {
     }
 
     function renderStep(step) {
+      stopLiveReport();
       renderLeagueTools();
       renderLeagueTable();
       renderTransfers();
@@ -1107,7 +1116,7 @@ const TournamentView = {
         const nextSeasonBtn = championZone.querySelector('#btnNextLeagueSeason');
         if (nextSeasonBtn) nextSeasonBtn.onclick = () => { if (nextSeasonPending) return; nextSeasonPending = true; nextSeasonBtn.disabled = true; nextSeasonBtn.textContent = 'Preparing Next Season...'; socket.emit('league:nextSeason',{ code }); };
         const newRoomBtn = championZone.querySelector('#btnNewRoom');
-        if (newRoomBtn) newRoomBtn.addEventListener('click', () => isLeague ? DashboardView.renderLeagueSelect(container, !singlePlayer) : App.goDashboard('create'));
+        if (newRoomBtn) newRoomBtn.addEventListener('click', () => App.goDashboard(isLeague ? singlePlayer ? 'league' : 'online-league' : 'create'));
         const rematchBtn = championZone.querySelector('#btnRematch');
         if (rematchBtn) rematchBtn.addEventListener('click', () => {
           rematchBtn.disabled = true;
@@ -1127,6 +1136,7 @@ const TournamentView = {
       if (s.stage === 'lobby') return App.goLobby(code);
       if (s.stage !== 'tournament') return;
       clearAutomaticTimer();
+      stopLiveReport();
       const firstJoin=!hasJoinedRoom;
       advancePending = false;
       isLeague = s.mode === 'league';
@@ -1139,7 +1149,11 @@ const TournamentView = {
       managerDecisionPending = false;
       transferPending = false;
       skipPending = false;
-      viewedStep = s.viewedStep || 0;
+      tacticPending = false;
+      nextSeasonPending = false;
+      const savedViewedStep = s.viewedStep || 0;
+      if (savedViewedStep !== viewedStep) resultMatchday = null;
+      viewedStep = savedViewedStep;
       historyLength = s.historyLength || 0;
       tournamentStage = s.tournamentStage || 'group';
       advanceReady = s.advanceReady || null;
@@ -1256,7 +1270,6 @@ const TournamentView = {
       if(leagueTools.querySelector('#leagueSquadBrowser')?.open)loadClubSquad();
       scheduleAutomaticResults();
     });
-    App.onSocket('connect',()=>{if(hasJoinedRoom && container.contains(leagueTools) && App.state.roomCode===code) socket.emit('room:join',{code});});
 
     App.onSocket('league:nextSeasonReady', (payload) => App.goTournament(payload.newCode));
 
@@ -1302,7 +1315,9 @@ const TournamentView = {
       socket.emit('tournament:advance', { code });
     });
 
-    App.onSocket('room:refresh', () => socket.emit('room:join', { code }));
-    socket.emit('room:join', { code });
+    App.watchRoom(code, () => {
+      clearAutomaticTimer(); stopLiveReport();
+      advancePending = transferPending = skipPending = tacticPending = nextSeasonPending = managerDecisionPending = false;
+    });
   }
 };

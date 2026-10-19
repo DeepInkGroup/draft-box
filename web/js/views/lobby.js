@@ -65,10 +65,7 @@ ${room.mode === 'league' ? `<div id="lobbyLeagueSettings"><h3>${room.leagueName}
     });
 
     const socket = App.ensureSocket();
-    let joined = false;
-    App.onSocket('room:state', s => { joined = true; if (s.stage === 'drafting') App.goDraft(code); else if (s.stage === 'tournament') App.goTournament(code); else renderMembers(s); });
-    App.onSocket('connect', () => { if (joined) socket.emit('room:join', { code }); });
-    App.onSocket('room:refresh', () => socket.emit('room:join', { code }));
+    App.onSocket('room:state', s => { if (s.stage === 'drafting') App.goDraft(code); else if (s.stage === 'tournament') App.goTournament(code); else renderMembers(s); });
     App.onSocket('room:memberUpdate', renderMembers);
     App.onSocket('room:started', () => App.goDraft(code));
     App.onSocket('error:message', (e) => App.toast(e.error, true));
@@ -80,6 +77,6 @@ ${room.mode === 'league' ? `<div id="lobbyLeagueSettings"><h3>${room.leagueName}
       });
     }
 
-    socket.emit('room:join', { code });
+    App.watchRoom(code);
   }
 };

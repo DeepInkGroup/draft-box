@@ -1709,6 +1709,10 @@ input, select, textarea { max-width: 100%; }
 .club-logo-large { width: 64px; height: 64px; flex-basis: 64px; }
 .club-identity { display: inline-flex; align-items: center; gap: 8px; max-width: 100%; min-width: 0; vertical-align: middle; text-align: left; }
 .club-identity > span { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+.club-identity .club-label { display: inline-flex; align-items: baseline; flex-wrap: wrap; column-gap: 6px; }
+.club-manager { color: var(--accent-strong); font-size: max(.85em, 11px); font-weight: 600; overflow-wrap: anywhere; }
+.league-next-fixture { overflow-wrap: anywhere; }
+.room-connection { position: sticky; top: 8px; z-index: 50; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 12px auto; padding: 12px; max-width: 700px; border: 1px solid var(--accent); border-radius: 12px; background: var(--surface-2); text-align: center; }
 .club-profile { display: flex; align-items: center; gap: 14px; min-width: 0; text-align: left; }
 .club-profile > div { min-width: 0; overflow-wrap: anywhere; }
 .club-coach { color: var(--muted); font-size: .82rem; margin: 6px 0; line-height: 1.5; }

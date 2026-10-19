@@ -45,7 +45,28 @@ for(const width of [1280,390])test(`online automatic season, rematch and fresh r
     };
     const advance=async(player,day)=>{await expect.poll(()=>player.evaluate(()=>window.roundWaiting())).toBe(true);await player.evaluate(()=>window.nextRound());await check(player,day);};
     for(const player of [page,friend])await check(player,1);
-    for(let day=2;day<=17;day++)for(const player of [page,friend])await advance(player,day);
+    for(const player of [page,friend]) {
+      await expect(player.locator('#leagueZone tbody .club-manager')).toHaveCount(2);
+      for(const user of [host,guest]) await expect(player.locator('#stepCard .club-manager').filter({hasText:'@'+user.user.username})).toHaveCount(1);
+    }
+    if(width===390) {
+      // The server saves a result, but the phone loses its response. Rejoining
+      // must release the pending flag and restore that exact saved matchday.
+      await page.evaluate(()=>{
+        const socket=App.state.socket,receive=socket.onevent;
+        socket.onevent=function(packet){
+          if(packet.data[0]==='league:autoResults'&&!window.droppedResult){window.droppedResult=true;socket.disconnect();return;}
+          return receive.call(this,packet);
+        };
+        window.nextRound();
+      });
+      await expect(page.locator('.room-connection')).toBeVisible();
+      expect(await page.locator('#app').evaluate(el=>el.inert)).toBe(true);
+      await page.evaluate(()=>window.dispatchEvent(new Event('online')));
+      await check(page,2);await expect(page.locator('.room-connection')).toBeHidden();
+      await advance(friend,2);
+    }
+    for(let day=width===390?3:2;day<=17;day++)for(const player of [page,friend])await advance(player,day);
     await page.locator('#btnSkipTransfers').click();await expect(page.locator('#leagueTransferWaiting')).toContainText(guest.user.username);
     await friend.locator('#btnSkipTransfers').click();for(const player of [page,friend])await check(player,18);
     for(let day=19;day<=34;day++)for(const player of [page,friend])await advance(player,day);

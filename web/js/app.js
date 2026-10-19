@@ -69,6 +69,53 @@ const App = (() => {
     if (state.socket) { state.socket.removeAllListeners(); state.socket.disconnect(); state.socket = null; }
   }
 
+  // Mobile browsers can suspend a page without immediately closing its socket.
+  // Rejoin the current room to restore the saved cursor, draft and transfer state.
+  function watchRoom(code, onSuspend = () => {}) {
+    const socket = ensureSocket(), currentView = viewId;
+    let syncing = false, wasHidden = document.hidden;
+    const banner = document.createElement('div');
+    banner.className = 'room-connection hidden'; banner.setAttribute('role', 'status');
+    banner.innerHTML = '<span>Reconnecting to your room...</span><button class="btn btn-ghost btn-sm" type="button">Try again</button>';
+    appEl.before(banner);
+    const active = () => currentView === viewId && state.socket === socket && state.roomCode === code;
+    function suspend() {
+      if (!active()) return;
+      syncing = false; onSuspend(); appEl.inert = true; banner.classList.remove('hidden');
+    }
+    function sync() {
+      if (!active() || syncing) return;
+      suspend();
+      if (!socket.connected) { socket.connect(); return; }
+      syncing = true; socket.emit('room:join', { code });
+    }
+    function restored() {
+      if (!active()) return;
+      syncing = false; appEl.inert = false; banner.classList.add('hidden');
+    }
+    function visible() {
+      if (document.hidden) wasHidden = true;
+      else if (wasHidden) { wasHidden = false; sync(); }
+    }
+    const pageShow = event => { if (event.persisted) sync(); };
+    onSocket('connect', () => { syncing = false; sync(); });
+    onSocket('disconnect', suspend);
+    onSocket('room:refresh', sync);
+    socket.on('room:state', restored);
+    socket.on('error:message', restored);
+    document.addEventListener('visibilitychange', visible);
+    window.addEventListener('pageshow', pageShow);
+    window.addEventListener('online', sync);
+    banner.querySelector('button').onclick = () => { syncing = false; sync(); };
+    onViewCleanup(() => {
+      socket.off('room:state', restored); socket.off('error:message', restored);
+      document.removeEventListener('visibilitychange', visible);
+      window.removeEventListener('pageshow', pageShow); window.removeEventListener('online', sync);
+      banner.remove(); appEl.inert = false;
+    });
+    sync();
+  }
+
   function goAuth() {
     beginView();
     document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
@@ -85,6 +132,7 @@ const App = (() => {
     location.hash = '';
     DashboardView.render(appEl);
     if (startMode === 'create') DashboardView.renderCreateRoom(appEl);
+    if (startMode === 'league' || startMode === 'online-league') DashboardView.renderLeagueSelect(appEl, startMode === 'online-league');
   }
 
   function goLobby(code) {
@@ -442,7 +490,7 @@ function renderStatsChart(stats) {
     goDashboard();
   }
 
-  return { state, get viewId() { return viewId; }, onViewCleanup, endSession, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, goAdmin, ensureSocket, onSocket, toast };
+  return { state, get viewId() { return viewId; }, onViewCleanup, watchRoom, endSession, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, goAdmin, ensureSocket, onSocket, toast };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());

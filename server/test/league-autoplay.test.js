@@ -2,7 +2,7 @@ const {test} = require('node:test');
 const assert = require('node:assert/strict');
 const {getLeague} = require('../src/data/competitions');
 const {bestXI} = require('../src/game/botEngine');
-const {startLeague,simulateLeagueStep} = require('../src/game/leagueEngine');
+const {startLeague,simulateLeagueStep,leagueSnapshot} = require('../src/game/leagueEngine');
 const {playAutomaticLeague,leagueScoreResults,resultsOnlyStep} = require('../src/game/leagueAutoplay');
 const {planTransfer,transferSnapshot,openEndSeasonTransfers} = require('../src/game/leagueTransfers');
 const {planTacticChange} = require('../src/game/leagueMidseason');
@@ -51,6 +51,15 @@ test('online automatic results replay each saved round per user and pause until 
   const club=getLeague('pgl').teams[1];
   state.members.set(2,{...state.members.get(1),userId:2,username:'peer',clubCode:club.code,squad:bestXI(club),viewedStep:0});
   startLeague(state);
+  const before = leagueSnapshot(state.tournament, 0);
+  assert.deepEqual(before.table.filter(row => row.isHuman).map(row => row.username).sort(), ['coach','peer']);
+  for (const fixture of before.nextFixtures) {
+    for (const side of ['a','b']) {
+      const club = state.tournament.slotByCode[fixture[side+'Code']];
+      assert.equal(fixture[side+'Human'], club.isHuman);
+      assert.equal(fixture[side+'Username'], club.username);
+    }
+  }
   assert.equal(playToPause(state),17);
   assert.equal(state.members.get(2).viewedStep,0);
   for(let day=1;day<=17;day++) {

@@ -118,6 +118,9 @@ function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
   const table = viewedStep > 0 ? t.history[viewedStep - 1]?.leagueTable : t.initialTable;
   return { freeAgentCoaches: getLeague(t.leagueId)?.freeAgentCoaches || [], seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
-    nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => ({ ...fixture, aName: t.slotByCode[fixture.aCode].name, bName: t.slotByCode[fixture.bCode].name })) };
+    nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => {
+      const a = t.slotByCode[fixture.aCode], b = t.slotByCode[fixture.bCode];
+      return { ...fixture, aName: a.name, bName: b.name, aHuman: a.isHuman, bHuman: b.isHuman, aUsername: a.username, bUsername: b.username };
+    }) };
 }
 module.exports = { createFixtures, rankTable, startLeague, simulateLeagueStep, leagueSnapshot };

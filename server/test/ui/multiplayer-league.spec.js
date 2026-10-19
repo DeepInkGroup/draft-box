@@ -62,6 +62,10 @@ for (const width of [1280, 390]) {
       for (const player of [page, friend]) {
         await player.locator('#btnEnterTournament').click();
         await expect(player.locator('#btnSkipToTransfers')).toBeHidden(); await expect(player.locator('#btnFinishLeague')).toBeHidden();
+        await expect(player.locator('#leagueZone tbody .club-manager')).toHaveCount(2);
+        for (const user of [host, guest]) await expect(player.locator('#leagueZone tbody')).toContainText('@' + user.user.username);
+        await expect(player.locator('.league-next-fixture .club-manager').first()).toBeVisible();
+        await fits(player);
       }
       for (let day = 1; day <= 17; day++) { await round(page, day); await round(friend, day); }
       for (const player of [page, friend]) {

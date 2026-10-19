@@ -5,8 +5,8 @@ const ClubIdentity = (() => {
     const src = `assets/clubs/pgl/${code.slice(4).toLowerCase()}.png`;
     return `<img class="club-logo${large ? ' club-logo-large' : ''}" src="${src}" alt="" width="${large ? 64 : 24}" height="${large ? 64 : 24}" decoding="async">`;
   }
-  function name(code, label) {
-    return `<span class="club-identity">${logo(code)}<span>${escape(label)}</span></span>`;
+  function name(code, label, username) {
+    return `<span class="club-identity">${logo(code)}<span class="club-label">${escape(label)}${username ? `<span class="club-manager" aria-label="Manager: ${escape(username)}">@${escape(username)}</span>` : ''}</span></span>`;
   }
   function profile(club) {
     if (!club) return '';

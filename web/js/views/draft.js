@@ -587,7 +587,9 @@ const DraftView = {
 
     App.onSocket('room:state', (s) => {
       if (s.stage === 'tournament') return App.goTournament(code);
+      if (s.stage === 'lobby') return App.goLobby(code);
       if (s.stage !== 'drafting') return;
+      stopTimer(); autoDraftRequested = false; moveFromSlot = null; slotChoicePlayerId = null;
       TACTICAL_STYLES = s.tacticalStyles || [];
       const me = (s.members || []).find((m) => m.userId === App.state.user.id);
       if (me) myFormation = me.formation;
@@ -686,7 +688,6 @@ const DraftView = {
 
     // Register every state listener before joining so a fast server response cannot
     // leave this view stuck on its loading state.
-    App.onSocket('room:refresh', () => socket.emit('room:join', { code }));
-    socket.emit('room:join', { code });
+    App.watchRoom(code, stopTimer);
   }
 };
