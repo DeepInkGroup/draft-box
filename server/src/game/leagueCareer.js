@@ -105,4 +105,48 @@ function applyDepartures(t, departures = []) {
   t.seasonDepartures = structuredClone(departures);
 }
 
-module.exports = { prepareCareer, careerPending, careerSnapshot, chooseManagerClub, applyDepartures };
+// With AI transfers disabled, human signings can leave the AI lineup unchanged.
+// Preserve existing human ownership when those clubs gain new managers.
+function settleManagerSquads(t, clubCodes) {
+  const rosters = ensureClubRosters(t);
+  const teams = [...new Set(clubCodes)].map(code => t.slotByCode[code])
+    .sort((a, b) => Number(b.isHuman) - Number(a.isHuman) || a.code.localeCompare(b.code));
+  const occupied = new Set(Object.values(t.slotByCode).flatMap(team => team.xi.map(player => player.id)));
+  const claimed = new Set(), vacancies = [];
+  for (const team of teams) team.xi.forEach((player, index) => {
+    if (claimed.has(player.id)) vacancies.push({ team, index, player, slot: getSlots(team.formation).find(slot => slot.code === player.slotCode) });
+    else claimed.add(player.id);
+  });
+  if (!vacancies.length) return [];
+  const candidates = vacancies.map(({ team, slot }) => [...new Map([
+    ...rosters[team.code], ...(t.freeAgents || []), ...Object.values(rosters).flat()
+  ].map(player => [player.id, player])).values()].filter(player => !occupied.has(player.id) && playerFitsSlot(player, slot)));
+  const owners = new Map();
+  function assign(index, visited) {
+    for (const player of candidates[index]) {
+      if (visited.has(player.id)) continue;
+      visited.add(player.id);
+      if (!owners.has(player.id) || assign(owners.get(player.id).index, visited)) { owners.set(player.id, { index, player }); return true; }
+    }
+    return false;
+  }
+  for (let index = 0; index < vacancies.length; index++) if (!assign(index, new Set())) throw new Error('No available reserve fits the incoming manager squad');
+  const changes = [], counts = new Map();
+  for (const { index, player } of owners.values()) {
+    const vacancy = vacancies[index], team = vacancy.team;
+    const replacement = { ...rosterPlayer(player), slotCode: vacancy.player.slotCode, isCaptain: !!vacancy.player.isCaptain };
+    team.xi[vacancy.index] = replacement;
+    for (const code of Object.keys(rosters)) rosters[code] = rosters[code].filter(entry => entry.id !== player.id);
+    rosters[team.code].push(rosterPlayer(player));
+    t.freeAgents = (t.freeAgents || []).filter(entry => entry.id !== player.id);
+    counts.set(team.code, (counts.get(team.code) || 0) + 1);
+    changes.push({ clubCode: team.code, player: rosterPlayer(vacancy.player), replacement: rosterPlayer(player) });
+  }
+  for (const [code, count] of counts) {
+    t.slotByCode[code].strength = teamStrength(t.slotByCode[code].xi);
+    startCohesionRecovery(t.slotByCode[code], count, 0);
+  }
+  return changes;
+}
+
+module.exports = { prepareCareer, careerPending, careerSnapshot, chooseManagerClub, applyDepartures, settleManagerSquads };

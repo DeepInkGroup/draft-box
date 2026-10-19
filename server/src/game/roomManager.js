@@ -373,7 +373,7 @@ function continueLeagueSeason(previous, userId) {
   if (previous.next_season_id) return getRoomRow(previous.next_season_id);
   const priorState = loadRoomState(previous), prior = priorState.tournament;
   if (prior?.stage !== 'done') throw new Error('The season has not finished');
-  const { prepareCareer, careerPending, applyDepartures } = require('./leagueCareer');
+  const { prepareCareer, careerPending, applyDepartures, settleManagerSquads } = require('./leagueCareer');
   if (previous.manager_offers || previous.player_departures) {
     const newlyPrepared = !prior.careerTransition;
     prepareCareer(prior); persistTournamentSnapshot(priorState);
@@ -382,6 +382,7 @@ function continueLeagueSeason(previous, userId) {
   const carry = structuredClone(prior);
   applyDepartures(carry, prior.careerTransition?.departures || []);
   const selectedClubs = new Map([...priorState.members.keys()].map(id => [id, prior.careerTransition?.users[id]?.selectedClubCode || Object.values(prior.slotByCode).find(team => team.isHuman && team.userId === id)?.code]));
+  const managerSquadChanges = settleManagerSquads(carry, [...selectedClubs.values()]);
   let next;
   try {
     runTransaction(() => {
@@ -415,7 +416,7 @@ function continueLeagueSeason(previous, userId) {
       t.clubRosters = structuredClone(carry.clubRosters || t.clubRosters);
       t.freeAgents = structuredClone(carry.freeAgents || []);
       t.seasonDepartures = structuredClone(carry.seasonDepartures || []);
-      t.managerChanges = [...selectedClubs].filter(([id, club]) => prior.careerTransition?.users[id]?.clubCode !== club && prior.careerTransition?.users[id]).map(([id, club]) => ({ userId: id, username: priorState.members.get(id).username, from: prior.careerTransition.users[id].clubCode, to: club, fromName: prior.slotByCode[prior.careerTransition.users[id].clubCode].name, toName: prior.slotByCode[club].name }));
+      t.managerChanges = [...selectedClubs].filter(([id, club]) => prior.careerTransition?.users[id]?.clubCode !== club && prior.careerTransition?.users[id]).map(([id, club]) => ({ userId: id, username: priorState.members.get(id).username, from: prior.careerTransition.users[id].clubCode, to: club, fromName: prior.slotByCode[prior.careerTransition.users[id].clubCode].name, toName: prior.slotByCode[club].name, squadUpdates: managerSquadChanges.filter(change => change.clubCode === club) }));
       const { openEndSeasonTransfers } = require('./leagueTransfers');
       openEndSeasonTransfers(t);
       t.initialClubRosters = structuredClone(t.clubRosters);

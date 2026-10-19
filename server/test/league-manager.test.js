@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const { startLeague } = require('../src/game/leagueEngine');
 const { getLeague } = require('../src/data/competitions');
 const { bestXI } = require('../src/game/botEngine');
-const { prepareCareer, careerSnapshot, careerPending, chooseManagerClub, applyDepartures } = require('../src/game/leagueCareer');
+const { prepareCareer, careerSnapshot, careerPending, chooseManagerClub, applyDepartures, settleManagerSquads } = require('../src/game/leagueCareer');
 const { cohesionSnapshot } = require('../src/game/leagueCohesion');
 const { clubSquadSnapshot } = require('../src/game/leagueSquads');
 
@@ -99,6 +99,32 @@ test('poor-results departures affect human and AI bottom-third clubs only, keep 
   assert.equal(careerPending(disabled), false);
 });
 
+test('incoming managers get distinct reserve replacements while existing owners keep their players', () => {
+  const t = season().tournament;
+  const owner = Object.values(t.slotByCode).find(team => team.isHuman);
+  const incoming = Object.values(t.slotByCode).filter(team => !team.isHuman).slice(0, 2);
+  const keeper = owner.xi.find(player => player.pos === 'GK');
+  const before = JSON.stringify(owner.xi);
+  for (const team of incoming) {
+    const index = team.xi.findIndex(player => player.pos === 'GK');
+    team.xi[index] = { ...keeper, slotCode: team.xi[index].slotCode, isCaptain: true };
+  }
+  const clubs = [incoming[0].code, owner.code, incoming[1].code];
+  const changes = settleManagerSquads(t, clubs);
+  assert.equal(changes.length, 2); assert.equal(JSON.stringify(owner.xi), before);
+  const players = clubs.flatMap(code => t.slotByCode[code].xi.map(player => player.id));
+  assert.equal(players.length, 33); assert.equal(new Set(players).size, 33);
+  for (const team of incoming) {
+    const replacement = team.xi.find(player => player.pos === 'GK');
+    assert.notEqual(replacement.id, keeper.id); assert.equal(replacement.isCaptain, true);
+    assert.ok(cohesionSnapshot(team).penaltyPercent > 0);
+    assert.ok(t.clubRosters[team.code].some(player => player.id === replacement.id));
+  }
+  const settled = JSON.stringify(t.slotByCode);
+  assert.deepEqual(settleManagerSquads(t, clubs), []);
+  assert.equal(JSON.stringify(t.slotByCode), settled);
+});
+
 test('continuing a season saves each new manager with the offered club squad and preserves the original room', () => {
   process.env.DB_PATH = ':memory:';
   process.env.ADMIN_INITIAL_PASSWORD = 'test-only-admin-password';
@@ -119,6 +145,12 @@ test('continuing a season saves each new manager with the offered club squad and
   assert.throws(() => rm.continueLeagueSeason(row, ids[1]), /Only the host/);
   assert.equal(rm.continueLeagueSeason(row, ids[0]), null);
   const target = career.users[ids[0]].offers[0].code;
+  // Legacy seasons can retain an AI starter after a human has signed him.
+  // Taking over that AI club must not duplicate another human's footballer.
+  const targetTeam = state.tournament.slotByCode[target];
+  const keeperIndex = targetTeam.xi.findIndex(player => player.pos === 'GK');
+  const peerKeeper = state.tournament.slotByCode[clubs[1].code].xi.find(player => player.pos === 'GK');
+  targetTeam.xi[keeperIndex] = { ...peerKeeper, slotCode: targetTeam.xi[keeperIndex].slotCode };
   const targetXI = structuredClone(state.tournament.slotByCode[target].xi);
   chooseManagerClub(state.tournament, ids[0], target);
   assert.equal(rm.continueLeagueSeason(row, ids[0]), null);
@@ -128,8 +160,14 @@ test('continuing a season saves each new manager with the offered club squad and
   const nextState = rm.loadRoomState(next);
   assert.equal(next.season_number, 2); assert.equal(next.manager_offers, 1); assert.equal(next.player_departures, 1);
   assert.equal(nextState.members.get(ids[0]).clubCode, target);
-  assert.deepEqual(nextState.members.get(ids[0]).squad.map(player => player.id).sort(), targetXI.map(player => player.id).sort());
-  for (const player of targetXI) assert.equal(nextState.members.get(ids[0]).slots[player.slotCode].id, player.id);
+  const incomingSquad = nextState.members.get(ids[0]).squad;
+  assert.equal(incomingSquad.length, 11);
+  for (const player of targetXI.filter(player => player.id !== peerKeeper.id)) assert.equal(nextState.members.get(ids[0]).slots[player.slotCode].id, player.id);
+  assert.ok(!incomingSquad.some(player => player.id === peerKeeper.id));
+  assert.ok(nextState.members.get(ids[1]).squad.some(player => player.id === peerKeeper.id));
+  const humanPlayers = [...nextState.members.values()].flatMap(member => member.squad.map(player => player.id));
+  assert.equal(new Set(humanPlayers).size, 22);
+  assert.equal(nextState.tournament.managerChanges[0].squadUpdates[0].player.id, peerKeeper.id);
   assert.equal(nextState.members.get(ids[1]).clubCode, clubs[1].code);
   assert.equal(nextState.tournament.slotByCode[clubs[0].code].isHuman, false);
   assert.equal(nextState.tournament.slotByCode[target].userId, ids[0]);
