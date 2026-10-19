@@ -32,8 +32,9 @@ for(const {width,windows} of [{width:390,windows:false},{width:768,windows:true}
     },width===390);
     await page.goto('/');await expect(page.locator('#modeSingle')).toBeVisible();
     await page.evaluate(()=>{
-      const socket=App.ensureSocket(),emit=socket.emit;window.__gameCommands=[];window.__liveShown=false;
-      socket.emit=function(name,...args){window.__gameCommands.push(name);return emit.call(this,name,...args);};
+      const ensure=App.ensureSocket;window.__gameCommands=[];window.__liveShown=false;
+      App.ensureSocket=function(...args){const socket=ensure(...args);if(!socket.__observingCommands){const emit=socket.emit;socket.emit=function(name,...args){window.__gameCommands.push(name);return emit.call(this,name,...args);};socket.__observingCommands=true;}return socket;};
+      App.ensureSocket();
       new MutationObserver(()=>{const zone=document.querySelector('#liveZone');if(zone&&zone.style.display==='block')window.__liveShown=true;}).observe(document.documentElement,{attributes:true,subtree:true,attributeFilter:['style']});
     });
     await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();

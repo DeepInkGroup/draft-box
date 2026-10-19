@@ -26,7 +26,7 @@ test('automatic results finish a season without match decisions and never replay
   assert.ok(scores.flatMap(round=>round.matches).every(match=>!('events' in match)&&!('lineups' in match)&&Number.isInteger(match.goalsA)));
   const result=resultsOnlyStep(t,{matches:t.history[0].matches,myMatchAnalyses:[{commentary:true}]});
   assert.equal(result.myMatchAnalyses,undefined);assert.equal(result.matches.length,9);
-  for(const options of [{resultsOnly:false},{mode:'worldcup'},{singlePlayer:false}]) assert.throws(()=>playAutomaticLeague({...state,...options},1,()=>{}),/only available/);
+  for(const options of [{resultsOnly:false},{mode:'worldcup'}]) assert.throws(()=>playAutomaticLeague({...state,...options},1,()=>{}),/only available/);
   assert.throws(()=>playAutomaticLeague(state,2,()=>{}),/Not a member/);
 });
 test('automatic fixtures respect each management window and resume after choices without losing reports',()=>{
@@ -44,4 +44,27 @@ test('automatic fixtures respect each management window and resume after choices
   assert.equal(playToPause(state),17);assert.equal(state.tournament.stage,'done');
   assert.equal(JSON.stringify(state.tournament.matchLog.slice(0,153)),firstHalf);
   assert.equal(state.tournament.slotByCode[snapshot.squad[0].team]?.xi.length,11);
+});
+
+test('online automatic results replay each saved round per user and pause until all transfers finish',()=>{
+  const state=season({singlePlayer:false,transferEnabled:true});
+  const club=getLeague('pgl').teams[1];
+  state.members.set(2,{...state.members.get(1),userId:2,username:'peer',clubCode:club.code,squad:bestXI(club),viewedStep:0});
+  startLeague(state);
+  assert.equal(playToPause(state),17);
+  assert.equal(state.members.get(2).viewedStep,0);
+  for(let day=1;day<=17;day++) {
+    assert.equal(playAutomaticLeague(state,2,()=>{throw Error('must replay saved round');},day-1),0);
+    assert.equal(state.members.get(2).viewedStep,day);
+  }
+  state.tournament=planTransfer(state.tournament,1,'skip');assert.equal(play(state,17),0);
+  state.tournament=planTransfer(state.tournament,2,'skip');assert.equal(playToPause(state),17);
+  const snapshot=JSON.stringify(state.tournament);
+  for(let day=18;day<=34;day++) {
+    playAutomaticLeague(state,2,()=>{throw Error('finished season must not simulate again');},day-1);
+    assert.equal(state.members.get(2).viewedStep,day);
+  }
+  assert.equal(JSON.stringify(state.tournament),snapshot);
+  playAutomaticLeague(state,2,()=>{throw Error('stale request');},0);
+  assert.equal(state.members.get(2).viewedStep,34);
 });

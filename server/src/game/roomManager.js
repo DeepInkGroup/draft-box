@@ -65,7 +65,8 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   if (league && !singlePlayer) { midseasonTactics = false; aiTransfers = false; endAiTransfers = false; }
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   if (typeof pglRatingBoost !== 'boolean' || (pglRatingBoost && (mode !== 'league' || leagueId !== 'pgl'))) throw new Error('Overall boost is available only for the Persian Gulf League');
-  if (typeof resultsOnly !== 'boolean' || (resultsOnly && (mode !== 'league' || !singlePlayer))) throw new Error('Results-only mode is available only in single-player leagues');
+  if (typeof resultsOnly !== 'boolean' || (resultsOnly && mode !== 'league')) throw new Error('Results-only mode is available only in leagues');
+  if (resultsOnly) spoilerMode = false;
   if (typeof managerOffers !== 'boolean' || typeof playerDepartures !== 'boolean') throw new Error('Career options must be enabled or disabled');
   if ((managerOffers || playerDepartures) && (mode !== 'league' || singlePlayer)) throw new Error('Career options are available only in online leagues');
   const transfers = transferSettings(transferEnabled, transferLimit);
@@ -99,7 +100,7 @@ function getRoomByCode(code) {
 }
 
 function getMembers(roomId) {
-  return db.prepare(`SELECT m.*, c.tag AS clan_tag FROM room_members m LEFT JOIN clan_members cm ON cm.user_id = m.user_id LEFT JOIN clans c ON c.id = cm.clan_id WHERE m.room_id = ? ORDER BY m.joined_at ASC`).all(roomId);
+  return db.prepare(`SELECT m.*, c.tag AS clan_tag FROM room_members m JOIN users u ON u.id = m.user_id LEFT JOIN clan_members cm ON cm.user_id = m.user_id LEFT JOIN clans c ON c.id = cm.clan_id WHERE m.room_id = ? AND u.banned = 0 AND u.deleted_at IS NULL ORDER BY m.joined_at ASC`).all(roomId);
 }
 
 function listUserLeagues(userId) {
@@ -436,6 +437,39 @@ function allMembersDraftComplete(roomState) {
   return Array.from(roomState.members.values()).every((m) => m.draftComplete);
 }
 
+function createRematch(previous, userId) {
+  previous = getRoomRow(previous.id);
+  if (previous.creator_id !== userId) throw new Error('only the room creator can start a rematch');
+  if (previous.status !== 'finished') throw new Error('the tournament has not finished yet');
+  if (previous.rematch_room_id) return getRoomRow(previous.rematch_room_id);
+  let next;
+  runTransaction(() => {
+    next = createRoom({ name: previous.name, creatorId: userId, mode: previous.mode, leagueId: previous.league_id,
+      humanSlotsMax: previous.human_slots_max, singlePlayer: !!previous.single_player, squadMode: previous.squad_mode,
+      showOverall: !!previous.show_overall, captainEnabled: !!previous.captain_enabled, pickTimeMs: previous.pick_time_ms,
+      tournamentLength: previous.tournament_length, allowedTeams: previous.allowed_teams ? JSON.parse(previous.allowed_teams) : null,
+      rerollsAllowed: previous.rerolls_allowed, spoilerMode: !!previous.spoiler_mode, sharedDraftMode: !!previous.shared_draft_mode,
+      transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit,
+      midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers,
+      endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit, endAiTransfers: !!previous.end_ai_transfers,
+      pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only,
+      managerOffers: !!previous.manager_offers, playerDepartures: !!previous.player_departures });
+    for (const member of getMembers(previous.id)) {
+      joinRoom(next, { id: member.user_id, username: member.username }, member.formation, member.country_code);
+      if (next.squad_mode === 'real') {
+        const club = teamsForRoom({ mode: next.mode, leagueId: next.league_id, pglRatingBoost: !!next.pgl_rating_boost }).find(team => team.code === member.country_code);
+        const xi = bestXI(club, member.formation);
+        if (xi.length !== 11) throw new Error('A complete club XI is required');
+        for (const player of xi) persistPick(next.id, member.user_id, player, player.team, player.slotCode);
+        markMemberDraftComplete(next.id, member.user_id);
+      }
+    }
+    if (next.single_player) setRoomStatus(next.id, 'drafting');
+    db.prepare('UPDATE rooms SET rematch_room_id = ? WHERE id = ?').run(next.id, previous.id);
+  });
+  return getRoomRow(next.id);
+}
+
 function lobbySnapshot(roomRow) {
   const members = getMembers(roomRow.id);
   const captainEnabled = !!roomRow.captain_enabled;
@@ -485,6 +519,7 @@ function lobbySnapshot(roomRow) {
 }
 
 module.exports = {
+  createRematch,
   createRoom,
   getRoomRow,
   getRoomByCode,

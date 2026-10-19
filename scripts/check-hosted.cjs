@@ -27,6 +27,8 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(health.ok, true);
     assert.equal(health.version, '2.1.3', 'Wait for the updated server deployment');
     assert.equal(health.profileVersion, 2, 'Wait for email editing and clans');
+    assert.equal(health.moderationVersion, 1, 'Wait for account moderation');
+    assert.equal(health.roomSessionVersion, 2, 'Wait for room lifecycle fixes');
     const origin = response.headers.get('access-control-allow-origin');
     assert.ok(origin === '*' || origin === pagesOrigin, `Server CORS must allow ${pagesOrigin}; received ${origin}`);
   }, { headers: { Origin: pagesOrigin } }, 60);
@@ -52,7 +54,7 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.singlePlayerOnly, false);
     assert.equal(pgl.multiplayerVersion, 1);
     assert.equal(pgl.multiplayerMaxPlayers, 18);
-    assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: false, resultsOnly: false, humanTransfers: true, continuousSeasons: true });
+    assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: false, resultsOnly: true, humanTransfers: true, continuousSeasons: true });
     assert.equal(pgl.matchdays, 34);
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);

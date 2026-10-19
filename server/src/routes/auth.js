@@ -79,9 +79,11 @@ router.post('/login', (req, res) => {
   if (!username || !password) return res.status(400).json({ error: 'username and password are required' });
 
   const row = db.prepare('SELECT * FROM users WHERE username = ? OR lower(email) = ?').get(username, String(username).trim().toLowerCase());
-  if (!row || !bcrypt.compareSync(password, row.password_hash)) {
+  if (!row || row.deleted_at || !bcrypt.compareSync(password, row.password_hash)) {
     return res.status(401).json({ error: 'invalid credentials' });
   }
+
+  if (row.banned) return res.status(403).json({ error: 'This account is banned.' + (row.ban_reason ? ' ' + row.ban_reason : ''), code: 'ACCOUNT_BANNED' });
 
   const user = { id: row.id, username: row.username, friendCode: row.friend_code, role: row.role };
   db.prepare("UPDATE users SET last_login_at = datetime('now'), last_seen_at = datetime('now') WHERE id = ?").run(user.id);

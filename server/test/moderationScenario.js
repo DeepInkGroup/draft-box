@@ -1,0 +1,53 @@
+const assert = require('node:assert/strict');
+module.exports = async ({ request, event, connect, restart, admin }) => {
+  const password='test-password';
+  const register=async name=>request('/api/auth/register',{status:201,body:{username:name,email:name+'@moderation.test',password}});
+  let owner=await register('mod_owner'); const peer=await register('mod_peer');
+  const base=`/api/admin/users/${owner.user.id}`;
+  await request(base+'/kick',{token:peer.token,method:'POST',status:403});
+  for(const action of ['kick','ban','unban']) await request(`/api/admin/users/${admin.user.id}/${action}`,{token:admin.token,method:'POST',status:403});
+  await request(`/api/admin/users/${admin.user.id}`,{token:admin.token,method:'DELETE',status:403});
+  const clubs=(await request('/api/leagues')).leagues[0].teams;
+  const room=await request('/api/rooms',{token:owner.token,status:201,body:{mode:'league',leagueId:'pgl',clubCode:clubs[0].code,squadMode:'real',resultsOnly:true}});
+  await request(`/api/rooms/${room.code}/join`,{token:peer.token,body:{clubCode:clubs[1].code}});
+  await request(`/api/rooms/${room.code}/start`,{token:owner.token,method:'POST'});
+  let a=await connect(owner.token), b=await connect(peer.token);
+  function pull(client,input,output,body={}){const ready=event(client,output);client.emit(input,{code:room.code,...body});return ready;}
+  for(const client of [a,b]) { await pull(client,'room:join','room:state'); await pull(client,'draft:setTacticalStyle','draft:tacticalStyleSet',{tacticalStyle:'balanced'}); }
+  await pull(a,'room:startTournament','tournament:started');
+  const revoked=event(a,'account:revoked');
+  await request(base+'/kick',{token:admin.token,method:'POST'}); assert.equal((await revoked).code,'SESSION_REVOKED');
+  await request('/api/auth/me',{token:owner.token,status:401});
+  owner=await request('/api/auth/login',{body:{username:'mod_owner',password}}); a=await connect(owner.token); await pull(a,'room:join','room:state');
+  for(let day=1;day<=17;day++) { await pull(a,'league:autoplay','league:autoResults',{afterMatchday:day-1}); await pull(b,'league:autoplay','league:autoResults',{afterMatchday:day-1}); }
+  await request(base+'/ban',{token:admin.token,body:{reason:'Test moderation'}});
+  await request('/api/auth/me',{token:owner.token,status:401});
+  await request('/api/auth/login',{body:{username:'mod_owner',password},status:403});
+  const blocked=(await request('/api/admin/users?status=banned',{token:admin.token})).users;
+  assert.ok(blocked.some(user=>user.id===owner.user.id&&user.banReason==='Test moderation'));
+  const state=await pull(b,'room:join','room:state'); assert.equal(state.creatorId,peer.user.id); assert.equal(state.members.length,1);
+  assert.equal(state.transfers.waitingFor.length,0);
+  await pull(b,'league:transfer','league:transferState',{action:'skip'});
+  assert.equal((await pull(b,'league:autoplay','league:autoResults',{afterMatchday:17})).viewedStep,18);
+  const club=await request(`/api/rooms/${room.code}/clubs/${clubs[0].code}`,{token:peer.token});
+  assert.equal(club.isHuman,false); assert.equal(club.players.filter(player=>player.status==='Starting XI').length,11);
+  await restart(); b=await connect(peer.token); await pull(b,'room:join','room:state');
+  await request('/api/auth/login',{body:{username:'mod_owner',password},status:403});
+  await request(base+'/unban',{token:admin.token,method:'POST'});
+  await request('/api/auth/me',{token:owner.token,status:401});
+  owner=await request('/api/auth/login',{body:{username:'mod_owner',password}});
+  const clan=await request('/api/clans',{token:owner.token,status:201,body:{tag:'MODT',name:'Moderation clan'}});
+  await request('/api/clans/join',{token:peer.token,body:{tag:'MODT'}});
+  const lobby=await request('/api/rooms',{token:owner.token,status:201,body:{name:'Deleted host lobby'}});
+  await request(`/api/rooms/${lobby.code}/join`,{token:peer.token,body:{}});
+  await request(base,{token:peer.token,method:'DELETE',status:403});
+  await request(base,{token:admin.token,method:'DELETE'});
+  await request(base,{token:admin.token,status:404});
+  await request('/api/auth/me',{token:owner.token,status:401});
+  await request('/api/auth/login',{body:{username:'mod_owner',password},status:401});
+  assert.equal((await request(`/api/rooms/${lobby.code}`,{token:peer.token})).creatorId,peer.user.id);
+  assert.equal((await request('/api/clans/me',{token:peer.token})).clan.ownerId,peer.user.id);
+  const restored=await pull(b,'room:join','room:state'); assert.ok(!JSON.stringify(restored).includes('mod_owner'));
+  assert.equal((await request('/api/admin/users?search=mod_owner',{token:admin.token})).users.length,0);
+  await restart(); await request('/api/auth/login',{body:{username:'mod_owner',password},status:401});
+};

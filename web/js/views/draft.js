@@ -6,6 +6,7 @@ const DraftView = {
 
     let myFormation = '4-3-3';
     let timerInterval = null;
+    App.onViewCleanup(() => stopTimer());
     let lastOpenSlots = [];
     let pickTimeMs = 20000;
     let captainEnabled = false;
@@ -685,6 +686,7 @@ const DraftView = {
 
     // Register every state listener before joining so a fast server response cannot
     // leave this view stuck on its loading state.
+    App.onSocket('room:refresh', () => socket.emit('room:join', { code }));
     socket.emit('room:join', { code });
   }
 };

@@ -11,7 +11,7 @@ function prepareCareer(t, random = Math.random) {
   if (t.careerTransition) return t.careerTransition;
   const aiClubs = Object.values(t.slotByCode).filter(team => !team.isHuman);
   const available = randomSample(aiClubs, aiClubs.length, random);
-  const humans = Object.values(t.slotByCode).filter(team => team.isHuman);
+  const humans = Object.values(t.slotByCode).filter(team => team.isHuman && !team.managerUnavailable);
   const users = {};
   // Rotate the allocation order randomly; offers are exclusive until everyone decides.
   for (const team of randomSample(humans, humans.length, random)) {

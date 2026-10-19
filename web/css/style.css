@@ -1790,6 +1790,12 @@ input, select, textarea { max-width: 100%; }
 @media(max-width:480px) { .club-pagination .btn { flex: 1; padding: 10px 8px; font-size: .78rem; } .club-pagination > span { order: 3; width: 100%; text-align: center; } }
 
 /* Compact phone standings avoid overlapping frozen columns. */
+.btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+.admin-moderation { margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+.admin-moderation .row { flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+#adminModerationConfirm { margin-top: 18px; padding: 16px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.admin-status.status-banned { color: var(--danger); }
+.admin-status.status-banned i { background: var(--danger); }
 .league-table-toggle { display: none; }
 .league-club-meta { font-size: .7rem; color: var(--muted); }
 .league-mobile-gd { display: none; }

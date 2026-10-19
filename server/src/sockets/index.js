@@ -1,4 +1,4 @@
-const { verifyToken } = require('../middleware/auth');
+const { verifyToken, sessionError } = require('../middleware/auth');
 const db = require('../db');
 const activity = require('../userActivity');
 const rm = require('../game/roomManager');
@@ -166,14 +166,22 @@ function registerSocketHandlers(io) {
     const token = socket.handshake.auth?.token;
     const payload = token && verifyToken(token);
     if (!payload) return next(new Error('unauthorized'));
-    const user = db.prepare('SELECT id, username, role FROM users WHERE id = ?').get(payload.id);
-    if (!user) return next(new Error('unauthorized'));
+    const user = db.prepare('SELECT id, username, role, auth_version, banned, ban_reason, deleted_at FROM users WHERE id = ?').get(payload.id);
+    const denied = sessionError(user, payload);
+    if (denied) { const error = new Error(denied.error); error.data = { code: denied.code }; return next(error); }
     if (user.role === 'admin') return next(new Error('Administrator accounts can only use the admin panel'));
     socket.user = user;
+    socket.authPayload = payload;
     next();
   });
 
   io.on('connection', (socket) => {
+    socket.use((packet, next) => {
+      const user = db.prepare('SELECT * FROM users WHERE id = ?').get(socket.user.id);
+      const denied = sessionError(user, socket.authPayload);
+      if (denied) { socket.emit('account:revoked', { message: denied.error, code: denied.code }); socket.disconnect(true); return; }
+      next();
+    });
     activity.connected(socket.user.id, socket.id);
     socket.onAny(() => activity.touchUser(socket.user.id));
     socket.on('room:join', ({ code }) => {
@@ -181,6 +189,7 @@ function registerSocketHandlers(io) {
       if (!roomRow) return socket.emit('error:message', { error: 'room not found' });
       const isMember = rm.getMembers(roomRow.id).some((member) => Number(member.user_id) === Number(socket.user.id));
       if (!isMember) return socket.emit('error:message', { error: 'you are not a member of this room' });
+      for (const joined of socket.rooms) if (joined.startsWith('room:') && joined !== channelName(roomRow.code)) socket.leave(joined);
       socket.join(channelName(roomRow.code));
       socket.data.roomCode = roomRow.code;
 
@@ -226,7 +235,7 @@ function registerSocketHandlers(io) {
           myLineup,
           viewedStep,
           historyLength,
-          tournamentStage: state.tournament.stage,
+          tournamentStage: state.resultsOnly && viewedStep < state.tournament.fixtures.length ? 'league' : state.tournament.stage,
           league: leagueSnapshot(state.tournament, viewedStep),
           career: careerSnapshot(state.tournament, socket.user.id),
           transfers: transferSnapshot(state.tournament, socket.user.id, viewedStep),
@@ -236,6 +245,11 @@ function registerSocketHandlers(io) {
       }
 
       io.to(channelName(roomRow.code)).emit('room:memberUpdate', lobbySnapshot(roomRow));
+    });
+
+    socket.on('room:leave', () => {
+      for (const joined of socket.rooms) if (joined.startsWith('room:')) socket.leave(joined);
+      socket.data.roomCode = null;
     });
 
     socket.on('room:start', ({ code }) => {
@@ -257,35 +271,12 @@ function registerSocketHandlers(io) {
       if (roomRow.creator_id !== socket.user.id) return socket.emit('error:message', { error: 'only the room creator can start a rematch' });
       if (roomRow.status !== 'finished') return socket.emit('error:message', { error: 'the tournament has not finished yet' });
 
-      const members = rm.getMembers(roomRow.id);
-      const allowedTeams = roomRow.allowed_teams ? JSON.parse(roomRow.allowed_teams) : null;
-      const newRoom = rm.createRoom({
-        name: roomRow.name,
-        mode: roomRow.mode,
-        leagueId: roomRow.league_id,
-        squadMode: roomRow.squad_mode, pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
-        managerOffers: !!roomRow.manager_offers, playerDepartures: !!roomRow.player_departures,
-        transferEnabled: roomRow.transfer_enabled !== 0, transferLimit: roomRow.transfer_limit ?? 2,
-        midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
-        endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
-        creatorId: roomRow.creator_id,
-        humanSlotsMax: roomRow.human_slots_max,
-        singlePlayer: !!roomRow.single_player,
-        showOverall: !!roomRow.show_overall,
-        pickTimeMs: roomRow.pick_time_ms,
-        captainEnabled: !!roomRow.captain_enabled,
-        tournamentLength: roomRow.tournament_length,
-        allowedTeams,
-        rerollsAllowed: roomRow.rerolls_allowed,
-        spoilerMode: !!roomRow.spoiler_mode,
-        sharedDraftMode: !!roomRow.shared_draft_mode
-      });
-      for (const m of members) {
-        rm.joinRoom(newRoom, { id: m.user_id, username: m.username }, m.formation, m.country_code);
-        if (newRoom.squad_mode === 'real') rm.initializeRealSquad(newRoom, m.user_id);
-      }
-      if (newRoom.single_player) rm.setRoomStatus(newRoom.id, 'drafting');
-      io.to(channelName(roomRow.code)).emit('room:rematchReady', { newCode: newRoom.code });
+      try {
+        const newRoom = rm.createRematch(roomRow, socket.user.id);
+        const payload = { newCode: newRoom.code, fromCode: roomRow.code };
+        io.to(channelName(roomRow.code)).emit('room:rematchReady', payload);
+        if (!socket.rooms.has(channelName(roomRow.code))) socket.emit('room:rematchReady', payload);
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
     socket.on('draft:reveal', ({ code }) => {
@@ -535,16 +526,13 @@ function registerSocketHandlers(io) {
         const state = rm.loadRoomState(room);
         playAutomaticLeague(state,socket.user.id,() => {
           persistSimulatedTournamentStep(io,socket,code,room,state);
-          const member = state.members.get(socket.user.id);
-          member.viewedStep = state.tournament.matchday;
-          rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
         },afterMatchday);
         const t = state.tournament, member = state.members.get(socket.user.id);
         rm.persistViewedStep(room.id,socket.user.id,member.viewedStep);
         socket.emit('league:autoResults', {
           step: resultsOnlyStep(t,tournamentEngine.decorateStep(state,member.viewedStep-1,socket.user.id)),
           results: leagueScoreResults(t,member.viewedStep), viewedStep: member.viewedStep,
-          historyLength: tournamentEngine.historyLength(state), stage: t.stage,
+          historyLength: tournamentEngine.historyLength(state), stage: member.viewedStep < t.fixtures.length ? 'league' : t.stage,
           league: leagueSnapshot(t,member.viewedStep), transfers: transferSnapshot(t,socket.user.id,member.viewedStep)
         });
       } catch (error) { socket.emit('error:message',{ error: error.message }); }

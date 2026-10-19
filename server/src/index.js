@@ -20,7 +20,7 @@ const app = express();
 app.use(cors({ origin: config.corsOrigins.includes('*') ? true : config.corsOrigins }));
 app.use(express.json());
 
-app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server', version: '2.1.3', profileVersion: 2 }));
+app.get('/api/health', (req, res) => res.json({ ok: true, service: 'draft-box-server', version: '2.1.3', profileVersion: 2, moderationVersion: 1, roomSessionVersion: 2 }));
 app.get('/api/leagues', (req, res) => res.json({ leagues: leagueCatalog() }));
 app.get('/api/tactical-styles', (req, res) => res.json({ styles: tacticalCatalog() }));
 app.get('/api/about', (req, res) => {

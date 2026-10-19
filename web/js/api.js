@@ -16,6 +16,7 @@ const Api = (() => {
   }
 
   async function request(path, { method = 'GET', body } = {}) {
+    const requestToken = token();
     if (window.location.hostname.endsWith('.github.io') && getApiBase() === window.location.origin) {
       throw new Error('Set your game server address in the server settings to connect.');
     }
@@ -23,13 +24,16 @@ const Api = (() => {
       method,
       headers: {
         'Content-Type': 'application/json',
-        ...(token() ? { Authorization: `Bearer ${token()}` } : {})
+        ...(requestToken ? { Authorization: `Bearer ${requestToken}` } : {})
       },
       body: body ? JSON.stringify(body) : undefined
     });
     let data = null;
     try { data = await res.json(); } catch { /* no body */ }
-    if (!res.ok) throw new Error((data && data.error) || `Server error (${res.status})`);
+    if (!res.ok) {
+      if (['ACCOUNT_DELETED', 'ACCOUNT_BANNED', 'SESSION_REVOKED'].includes(data?.code) && requestToken && requestToken === token()) App.endSession(data.error);
+      throw new Error((data && data.error) || `Server error (${res.status})`);
+    }
     return data;
   }
 

@@ -146,6 +146,9 @@ if (!columnExists('rooms', 'squad_mode')) {
 if (!columnExists('users', 'role')) {
   db.exec("ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'user';");
 }
+for (const [column, definition] of [['auth_version', 'INTEGER NOT NULL DEFAULT 0'], ['banned', 'INTEGER NOT NULL DEFAULT 0'], ['ban_reason', "TEXT NOT NULL DEFAULT ''"], ['deleted_at', 'TEXT']]) {
+  if (!columnExists('users', column)) db.exec(`ALTER TABLE users ADD COLUMN ${column} ${definition};`);
+}
 for (const column of ['last_login_at', 'last_seen_at']) {
   if (!columnExists('users', column)) db.exec(`ALTER TABLE users ADD COLUMN ${column} TEXT;`);
 }
@@ -164,6 +167,7 @@ for (const column of ['manager_offers', 'player_departures']) {
 if (!columnExists('rooms', 'season_number')) db.exec('ALTER TABLE rooms ADD COLUMN season_number INTEGER NOT NULL DEFAULT 1;');
 if (!columnExists('rooms', 'previous_season_id')) db.exec('ALTER TABLE rooms ADD COLUMN previous_season_id INTEGER;');
 if (!columnExists('rooms', 'next_season_id')) db.exec('ALTER TABLE rooms ADD COLUMN next_season_id INTEGER;');
+if (!columnExists('rooms', 'rematch_room_id')) db.exec('ALTER TABLE rooms ADD COLUMN rematch_room_id INTEGER;');
 db.exec(`CREATE TABLE IF NOT EXISTS tactic_versions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   tactic_id INTEGER NOT NULL REFERENCES custom_tactics(id) ON DELETE CASCADE,

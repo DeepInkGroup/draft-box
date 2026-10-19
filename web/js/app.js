@@ -8,6 +8,24 @@ const App = (() => {
   const toastEl = document.getElementById('toast');
   let toastTimer = null;
   let friendStatsChart = null;
+  let viewId = 0;
+  const viewListeners = new Map();
+  let viewCleanups = [];
+
+  function onViewCleanup(cleanup) { viewCleanups.push(cleanup); }
+  function beginView(roomCode = null) {
+    viewId++;
+    for (const cleanup of viewCleanups.splice(0)) cleanup();
+    if (state.socket) for (const [event, listener] of viewListeners) state.socket.off(event, listener);
+    viewListeners.clear();
+    if (state.roomCode !== roomCode) disconnectSocket();
+    state.roomCode = roomCode;
+  }
+
+  function endSession(message) {
+    logout();
+    if (message) toast(message, true);
+  }
 
   function toast(msg, isError) {
     toastEl.textContent = msg;
@@ -33,21 +51,27 @@ const App = (() => {
     if (state.user?.role === 'admin') throw new Error('Administrator accounts can only use the admin panel');
     if (state.socket) return state.socket;
     state.socket = io(getApiBase(), { auth: { token: sessionStorage.getItem('draftbox.token') } });
-    state.socket.on('connect_error', (e) => toast('Server connection error: ' + e.message, true));
+    state.socket.on('account:revoked', (e) => endSession(e.message || 'Your session has ended. Please sign in again.'));
+    state.socket.on('connect_error', (e) => e.data?.code ? endSession(e.message) : toast('Server connection error: ' + e.message, true));
     return state.socket;
   }
 
   function onSocket(event, handler) {
     const socket = ensureSocket();
-    socket.off(event);
-    socket.on(event, handler);
+    if (viewListeners.has(event)) socket.off(event, viewListeners.get(event));
+    const currentView = viewId;
+    const listener = (...args) => { if (currentView === viewId && socket === state.socket) handler(...args); };
+    viewListeners.set(event, listener);
+    socket.on(event, listener);
   }
 
   function disconnectSocket() {
-    if (state.socket) { state.socket.disconnect(); state.socket = null; }
+    if (state.socket) { state.socket.removeAllListeners(); state.socket.disconnect(); state.socket = null; }
   }
 
   function goAuth() {
+    beginView();
+    document.querySelectorAll('dialog[open]').forEach(dialog => dialog.close());
     location.hash = '';
     disconnectSocket();
     state.user = null;
@@ -57,6 +81,7 @@ const App = (() => {
 
   function goDashboard(startMode) {
     if (state.user?.role === 'admin') return goAdmin();
+    beginView();
     location.hash = '';
     DashboardView.render(appEl);
     if (startMode === 'create') DashboardView.renderCreateRoom(appEl);
@@ -64,27 +89,28 @@ const App = (() => {
 
   function goLobby(code) {
     if (state.user?.role === 'admin') return goAdmin();
-    state.roomCode = code;
+    beginView(code);
     location.hash = `lobby/${code}`;
     LobbyView.render(appEl, code);
   }
 
   function goDraft(code) {
     if (state.user?.role === 'admin') return goAdmin();
-    state.roomCode = code;
+    beginView(code);
     location.hash = `draft/${code}`;
     DraftView.render(appEl, code);
   }
 
   function goTournament(code) {
     if (state.user?.role === 'admin') return goAdmin();
-    state.roomCode = code;
+    beginView(code);
     location.hash = `tournament/${code}`;
     TournamentView.render(appEl, code);
   }
 
   function goMatchHistory() {
     if (state.user?.role === 'admin') return goAdmin();
+    beginView();
     location.hash = 'history';
     MatchHistoryView.render(appEl);
   }
@@ -96,6 +122,7 @@ const App = (() => {
 
   function goAdmin(tab = 'overview') {
     if (state.user?.role !== 'admin') { toast('Admin access required.', true); return goDashboard(); }
+    beginView();
     disconnectSocket();
     location.hash = tab === 'overview' ? 'admin' : `admin/${tab}`;
     AdminView.render(appEl, tab);
@@ -247,6 +274,7 @@ function renderStatsChart(stats) {
       loadProfileFriends();
       try {
         const stats = await Api.careerStats();
+        if (state.user?.id !== profileUserId || !profileDialog.open) return;
         const selectedLayout = localStorage.getItem('draftbox.draftLayout') || 'vertical';
         const winRate = stats.w + stats.d + stats.l > 0 ? Math.round((stats.w / (stats.w + stats.d + stats.l)) * 100) : 0;
         careerEl.innerHTML = `
@@ -414,7 +442,7 @@ function renderStatsChart(stats) {
     goDashboard();
   }
 
-  return { state, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, goAdmin, ensureSocket, onSocket, toast };
+  return { state, get viewId() { return viewId; }, onViewCleanup, endSession, init, onAuthed, logout, goAuth, goDashboard, goLobby, goDraft, goTournament, goMatchHistory, goTactics, goAdmin, ensureSocket, onSocket, toast };
 })();
 
 document.addEventListener('DOMContentLoaded', () => App.init());

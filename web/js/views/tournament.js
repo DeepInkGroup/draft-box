@@ -34,6 +34,7 @@ const TournamentView = {
     let resultMatchday = null;
     let hasJoinedRoom = false;
     let automaticTimer = null;
+    App.onViewCleanup(() => clearAutomaticTimer());
     let leagueFullStats = false;
     const releaseSelection = new Set();
     const offerSelection = new Map();
@@ -133,7 +134,7 @@ const TournamentView = {
       leagueTools.querySelector('#leagueClubPlayers').innerHTML = players.length ? players.slice((clubPage-1)*12,clubPage*12).map(player => `<article class="transfer-player-card club-player-card ${player.status==='Starting XI' ? 'club-starter' : ''}"><div class="club-player-header"><span class="club-position club-position-${player.pos.toLowerCase()}">${player.pos}</span><div><h4>${escapeLeagueText(player.name)}</h4><span class="muted">${escapeLeagueText(player.rawPos || player.pos)}${player.slotCode ? ' / ' + escapeLeagueText(player.slotCode) : ''}</span></div><span class="club-overall">${player.overall}<small>OVR</small></span></div><div class="club-player-badges"><span class="badge">${player.status==='Club roster' ? 'Club roster / Reserve' : player.status}</span>${player.isStar ? '<span class="badge">Star</span>' : ''}${player.isCaptain ? '<span class="badge">Captain</span>' : ''}</div><p class="club-source">Source club: ${escapeLeagueText(player.clubName)}</p><dl class="transfer-player-stats club-player-stats">${[['Apps',player.stats.appearances],['Goals',player.stats.goals],['Assists',player.stats.assists],['Saves',player.stats.saves],['Yellow',player.stats.yellowCards],['Red',player.stats.redCards],['Star moments',player.stats.starMoments]].map(([label,value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl></article>`).join('') : '<div class="club-empty"><b>No matching players</b><p>Try another name, position or squad filter. Clear filters to see the full club.</p></div>';
     }
     function automaticResultsReady() {
-      return resultsOnly && container.contains(leagueTools) && App.state.roomCode===code && tournamentStage!=='done' && !advancePending && socket.connected && !['release','sign'].includes(transferState?.phase) && transferState?.tactics?.phase!=='choose';
+      return resultsOnly && container.contains(leagueTools) && App.state.roomCode===code && (viewedStep < historyLength || tournamentStage!=='done') && !advancePending && socket.connected && !['release','sign'].includes(transferState?.phase) && transferState?.tactics?.phase!=='choose';
     }
     function clearAutomaticTimer() {
       if (automaticTimer!==null) clearTimeout(automaticTimer);
@@ -724,6 +725,7 @@ const TournamentView = {
           else finish();
         }
       }, 180);
+      App.onViewCleanup(() => { clearInterval(timer); clearInterval(penaltyTimer); });
     }
 
     // --- One-time reveal of the drafted XI, styled as a real lineup card, shown once
@@ -1300,6 +1302,7 @@ const TournamentView = {
       socket.emit('tournament:advance', { code });
     });
 
+    App.onSocket('room:refresh', () => socket.emit('room:join', { code }));
     socket.emit('room:join', { code });
   }
 };

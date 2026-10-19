@@ -23,10 +23,10 @@ router.put('/about', (req, res) => {
   if (!saved) return res.status(409).json({ error: 'Another administrator updated this page. Reload saved content before editing again.' });
   res.json(saved);
 });
-const userFields = 'id, username, email, friend_code AS friendCode, role, created_at AS createdAt, last_login_at, last_seen_at';
+const userFields = 'id, username, email, friend_code AS friendCode, role, banned, ban_reason, created_at AS createdAt, last_login_at, last_seen_at';
 function userSummary(user) {
   return { id: user.id, username: user.username, email: user.email, friendCode: user.friendCode, role: user.role,
-    createdAt: user.createdAt, lastLogin: user.last_login_at, lastSeen: user.last_seen_at, status: activityStatus(user) };
+    banned: !!user.banned, banReason: user.ban_reason, createdAt: user.createdAt, lastLogin: user.last_login_at, lastSeen: user.last_seen_at, status: user.banned ? 'banned' : activityStatus(user) };
 }
 function gameCounts(id) {
   return db.prepare(`SELECT COUNT(*) AS total, COALESCE(SUM(r.status = 'finished'), 0) AS finished,
@@ -35,8 +35,8 @@ function gameCounts(id) {
 router.get('/users', (req, res) => {
   const query = String(req.query.search || '').trim().slice(0, 100);
   const role = ['admin', 'user'].includes(req.query.role) ? req.query.role : '';
-  const status = ['online', 'recent', 'offline', 'new'].includes(req.query.status) ? req.query.status : '';
-  const all = db.prepare(`SELECT ${userFields} FROM users ORDER BY created_at DESC, id DESC`).all().map(userSummary);
+  const status = ['online', 'recent', 'offline', 'new', 'banned'].includes(req.query.status) ? req.query.status : '';
+  const all = db.prepare(`SELECT ${userFields} FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC, id DESC`).all().map(userSummary);
   const filtered = all.filter((user) => (!role || user.role === role) && (!status || user.status === status) &&
     (!query || `${user.username} ${user.email} ${user.friendCode}`.toLowerCase().includes(query.toLowerCase())));
   if (req.query.sort === 'name') filtered.sort((a, b) => a.username.localeCompare(b.username));
@@ -50,14 +50,23 @@ router.get('/users', (req, res) => {
 router.get('/users/:id', (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isSafeInteger(id) || id < 1) return res.status(400).json({ error: 'Invalid user ID' });
-  const user = db.prepare(`SELECT ${userFields} FROM users WHERE id = ?`).get(id);
+  const user = db.prepare(`SELECT ${userFields} FROM users WHERE id = ? AND deleted_at IS NULL`).get(id);
   if (!user) return res.status(404).json({ error: 'User not found' });
   const rooms = db.prepare(`SELECT r.code, r.name, r.mode, r.status, r.created_at AS createdAt FROM room_members m
     JOIN rooms r ON r.id = m.room_id WHERE m.user_id = ? ORDER BY r.id DESC LIMIT 10`).all(id);
   res.json({ user: userSummary(user), games: gameCounts(id), rooms });
 });
+function moderation(req, res, action) {
+  try { res.json(require('../userModeration').moderateUser(Number(req.params.id), action, req.body?.reason ?? '', req.app.get('io'))); }
+  catch (error) { res.status(error.message === 'User not found' ? 404 : error.message.startsWith('Administrator') ? 403 : 400).json({ error: error.message }); }
+}
+router.post('/users/:id/:action', (req, res) => {
+  if (!['kick', 'ban', 'unban'].includes(req.params.action)) return res.status(404).json({ error: 'Unknown action' });
+  moderation(req, res, req.params.action);
+});
+router.delete('/users/:id', (req, res) => moderation(req, res, 'delete'));
 router.get('/overview', (req, res) => res.json({
-  users: db.prepare('SELECT COUNT(*) AS count FROM users').get().count,
+  users: db.prepare('SELECT COUNT(*) AS count FROM users WHERE deleted_at IS NULL').get().count,
   rooms: db.prepare('SELECT COUNT(*) AS count FROM rooms').get().count,
   finished: db.prepare("SELECT COUNT(*) AS count FROM rooms WHERE status = 'finished'").get().count,
   tactics: db.prepare('SELECT COUNT(*) AS count FROM custom_tactics').get().count,
