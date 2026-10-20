@@ -58,7 +58,7 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, endseasonTactics = false, midseasonFormations = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false, resultsOnly = false, managerOffers = false, playerDepartures = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, endseasonTactics = false, midseasonFormations = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false, resultsOnly = false, knockoutCup = false, managerOffers = false, playerDepartures = false }) {
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
@@ -66,6 +66,7 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   if (typeof pglRatingBoost !== 'boolean' || (pglRatingBoost && (mode !== 'league' || leagueId !== 'pgl'))) throw new Error('Overall boost is available only for the Persian Gulf League');
   if (typeof resultsOnly !== 'boolean' || (resultsOnly && mode !== 'league')) throw new Error('Results-only mode is available only in leagues');
+  if (typeof knockoutCup !== 'boolean' || (knockoutCup && (!league || league.id !== 'pgl'))) throw new Error('Knockout Cup is available only in the Persian Gulf League');
   if (resultsOnly) spoilerMode = false;
   if (typeof managerOffers !== 'boolean' || typeof playerDepartures !== 'boolean') throw new Error('Career options must be enabled or disabled');
   if ((managerOffers || playerDepartures) && (mode !== 'league' || singlePlayer)) throw new Error('Career options are available only in online leagues');
@@ -82,13 +83,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, results_only, manager_offers, player_departures, endseason_tactics, midseason_formations, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, results_only, manager_offers, player_departures, endseason_tactics, midseason_formations, knockout_cup, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       league && singlePlayer ? 0 : normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0, managerOffers ? 1 : 0, playerDepartures ? 1 : 0, endseasonTactics ? 1 : 0, midseasonFormations ? 1 : 0
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0, managerOffers ? 1 : 0, playerDepartures ? 1 : 0, endseasonTactics ? 1 : 0, midseasonFormations ? 1 : 0, knockoutCup ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -212,7 +213,7 @@ function loadRoomState(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
-    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
+    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only, knockoutCup: !!roomRow.knockout_cup,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
     midseasonTactics: !!roomRow.midseason_tactics, endseasonTactics: !!roomRow.endseason_tactics, midseasonFormations: !!roomRow.midseason_formations, aiTransfers: !!roomRow.ai_transfers,
@@ -376,6 +377,7 @@ function continueLeagueSeason(previous, userId) {
   if (previous.next_season_id) return getRoomRow(previous.next_season_id);
   const priorState = loadRoomState(previous), prior = priorState.tournament;
   if (prior?.stage !== 'done') throw new Error('The season has not finished');
+  if (prior.knockoutCup && priorState.members.get(userId).viewedStep < prior.history.length) throw new Error('View the cup final before continuing to the next season');
   const { prepareCareer, careerPending, applyDepartures, settleManagerSquads } = require('./leagueCareer');
   if (previous.manager_offers || previous.player_departures) {
     const newlyPrepared = !prior.careerTransition;
@@ -393,7 +395,7 @@ function continueLeagueSeason(previous, userId) {
         managerOffers: !!previous.manager_offers, playerDepartures: !!previous.player_departures,
         squadMode: previous.squad_mode, singlePlayer: !!previous.single_player, humanSlotsMax: previous.human_slots_max, spoilerMode: !!previous.spoiler_mode, showOverall: !!previous.show_overall, pickTimeMs: previous.pick_time_ms,
         captainEnabled: !!previous.captain_enabled, transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit ?? 2,
-        midseasonTactics: !!previous.midseason_tactics, endseasonTactics: !!previous.endseason_tactics, midseasonFormations: !!previous.midseason_formations, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, rerollsAllowed: previous.rerolls_allowed });
+        midseasonTactics: !!previous.midseason_tactics, endseasonTactics: !!previous.endseason_tactics, midseasonFormations: !!previous.midseason_formations, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, knockoutCup: !!previous.knockout_cup, rerollsAllowed: previous.rerolls_allowed });
       db.prepare('UPDATE rooms SET season_number = ?, previous_season_id = ? WHERE id = ?').run((previous.season_number || 1) + 1,previous.id,next.id);
       for (const member of priorState.members.values()) {
         const team = carry.slotByCode[selectedClubs.get(member.userId)];
@@ -429,7 +431,7 @@ function continueLeagueSeason(previous, userId) {
       t.initialTactics = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, team.tacticalStyle]));
       const ownCode = Object.values(prior.slotByCode).find(team => team.userId === userId)?.code;
       t.previousSeasons = (prior.previousSeasons || []).concat({ seasonNumber: prior.seasonNumber || 1, roomCode: previous.code,
-        champion: prior.slotByCode[prior.champion].name, position: rankTable(prior).find(team => team.code === ownCode)?.rank,
+        champion: prior.slotByCode[prior.champion].name, cupChampion: prior.cup?.champion ? prior.slotByCode[prior.cup.champion].name : null, position: rankTable(prior).find(team => team.code === ownCode)?.rank,
         userPositions: Object.fromEntries(Object.values(prior.slotByCode).filter(team => team.isHuman).map(team => [team.userId, rankTable(prior).find(row => row.code === team.code)?.rank])),
         positions: Object.fromEntries(rankTable(prior).map(team => [team.code, team.rank])) });
       state.status = 'league_stage';
@@ -462,7 +464,7 @@ function createRematch(previous, userId) {
       transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit,
       midseasonTactics: !!previous.midseason_tactics, endseasonTactics: !!previous.endseason_tactics, midseasonFormations: !!previous.midseason_formations, aiTransfers: !!previous.ai_transfers,
       endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit, endAiTransfers: !!previous.end_ai_transfers,
-      pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only,
+      pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, knockoutCup: !!previous.knockout_cup,
       managerOffers: !!previous.manager_offers, playerDepartures: !!previous.player_departures });
     for (const member of getMembers(previous.id)) {
       joinRoom(next, { id: member.user_id, username: member.username }, member.formation, member.country_code);
@@ -488,7 +490,7 @@ function lobbySnapshot(roomRow) {
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
-    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
+    squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only, knockoutCup: !!roomRow.knockout_cup,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
     midseasonTactics: !!roomRow.midseason_tactics, endseasonTactics: !!roomRow.endseason_tactics, midseasonFormations: !!roomRow.midseason_formations, aiTransfers: !!roomRow.ai_transfers,

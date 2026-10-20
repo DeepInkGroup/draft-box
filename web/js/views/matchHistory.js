@@ -47,7 +47,7 @@ const MatchHistoryView = {
     }
 
     function bestStage(matches) {
-      if (matches.some((match) => match.stage === 'league')) return `${matches.length} league matches`;
+      if (matches.some((match) => match.stage === 'league')) return `${matches.filter(match=>match.stage==='league').length} league matches${matches.some(match=>match.cup) ? ' / '+matches.filter(match=>match.cup).length+' cup matches' : ''}`;
       const best = matches.reduce((pick, m) => (stageRank[m.stage] || 0) > (stageRank[pick] || 0) ? m.stage : pick, 'group');
       return STAGE_HISTORY_LABEL[best] || best;
     }
@@ -85,7 +85,7 @@ const MatchHistoryView = {
     }
 
     function matchRow(m, ti, mi) {
-      const stageLabel = m.stage === 'league' ? `Matchday ${m.matchday}` : m.group ? `Group ${m.group}` : (STAGE_HISTORY_LABEL[m.stage] || m.stage);
+      const stageLabel = (m.cup ? 'PGL Cup / ' : '') + (m.stage === 'league' ? `Matchday ${m.matchday}` : m.group ? `Group ${m.group}` : (STAGE_HISTORY_LABEL[m.stage] || m.stage));
       const knockout = !['group', 'league'].includes(m.stage);
       return `
         <div class="match-row match-row-clickable history-match-row" data-ti="${ti}" data-mi="${mi}" data-outcome="${m.outcome}" data-knockout="${knockout ? '1' : '0'}">
@@ -136,7 +136,7 @@ const MatchHistoryView = {
         return `
         <div class="myteam-card history-tournament-card" style="margin-bottom:14px;">
           <div class="myteam-header">
-            <span>${tour.countryName}${tour.champion ? ' - Champion' : ''}</span>
+            <span>${tour.countryName}${tour.champion ? ' - Champion' : ''}${tour.cupChampion ? ' / PGL Knockout Cup Champion' : ''}</span>
             <span class="badge">${tour.competitionName || tour.roomName} &middot; ${dateLabel(tour.date)}</span>
           </div>
           <div class="history-tour-summary">

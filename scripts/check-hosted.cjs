@@ -56,6 +56,9 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.multiplayerMaxPlayers, 18);
     assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true });
     assert.equal(pgl.matchdays, 34);
+    assert.equal(pgl.knockoutCupAvailable, true);
+    assert.equal(pgl.knockoutCupVersion, 1);
+    assert.deepEqual(pgl.knockoutCupFormat, { qualifyingTeams: 16, rounds: ['r16', 'qf', 'sf', 'final'], singleElimination: true, randomDraw: true });
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);
     assert.deepEqual(pgl.transferOptions, { min: 1, max: 3, default: 2, canDisable: true });
@@ -94,7 +97,9 @@ async function request(url, verify, options = {}, attempts = 6) {
   const tournamentUrl = new URL('js/views/tournament.js', pagesUrl);
   tournamentUrl.searchParams.set('check', process.env.GITHUB_RUN_ID || Date.now().toString());
   await request(tournamentUrl, async response => {
-    assert.match(await response.text(), /league:managerDecision/);
+    const source = await response.text();
+    assert.match(source, /league:managerDecision/);
+    assert.match(source, /PGL Knockout Cup Champion/);
   });
 })().catch((error) => {
   console.error(error.message);

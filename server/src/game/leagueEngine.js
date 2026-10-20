@@ -8,6 +8,7 @@ const { recoverCohesion } = require('./leagueCohesion');
 const { ensureTacticWindow, tacticsPending } = require('./leagueMidseason');
 const { ensureFormationWindow, formationsPending } = require('./leagueFormation');
 const { runAiTransfers, ensureClubRosters } = require('./leagueAiTransfers');
+const { seedLeagueCup, simulateCupStep, cupSnapshot } = require('./leagueCup');
 
 function createFixtures(codes) {
   if (codes.length < 2 || new Set(codes).size !== codes.length) throw new Error('a league needs distinct clubs');
@@ -59,7 +60,7 @@ function startLeague(roomState) {
     standings[club.code] = { played: 0, w: 0, d: 0, l: 0, gf: 0, ga: 0, pts: 0 };
   }
   roomState.tournament = {
-    kind: 'league', resultsOnly: !!roomState.resultsOnly, pglRatingBoost: !!roomState.pglRatingBoost, leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
+    kind: 'league', knockoutCup: !!roomState.knockoutCup, resultsOnly: !!roomState.resultsOnly, pglRatingBoost: !!roomState.pglRatingBoost, leagueId: league.id, leagueName: league.name, stage: 'league', slotByCode, standings,
     transferSettings: transferSettings(roomState.transferEnabled, roomState.transferLimit),
     midseasonTactics: !!roomState.midseasonTactics, aiTransfers: !!roomState.aiTransfers,
     endseasonTactics: !!roomState.endseasonTactics, midseasonFormations: !!roomState.midseasonFormations,
@@ -78,9 +79,10 @@ function startLeague(roomState) {
   return roomState.tournament;
 }
 
-function simulateLeagueStep(roomState, applyResult) {
+function simulateLeagueStep(roomState, applyResult, updateMorale) {
   const t = roomState.tournament;
   if (!t || t.stage === 'done') return null;
+  if (t.stage.startsWith('cup_')) return simulateCupStep(roomState, undefined, updateMorale);
   if (tacticsPending(t)) throw new Error(`Choose or keep your ${t.matchday === 0 ? 'end-of-season' : 'mid-season'} tactic before the next matchday`);
   if (formationsPending(t)) throw new Error('Choose or keep your mid-season formation before the next matchday');
   if (transfersPending(t)) throw new Error(`complete or skip the ${t.matchday === 0 ? 'end-of-season' : 'mid-season'} transfer window before the next matchday`);
@@ -111,10 +113,11 @@ function simulateLeagueStep(roomState, applyResult) {
   if (t.matchday === t.fixtures.length) {
     t.stage = 'done';
     t.champion = table[0].code;
+    seedLeagueCup(roomState, table);
   }
   const step = {
     index: t.history.length, type: 'league', label: `${t.leagueName} — Matchday ${t.matchday} of ${t.fixtures.length}`,
-    matchday: t.matchday, totalMatchdays: t.fixtures.length, matches, leagueTable: table, champion: t.stage === 'done'
+    matchday: t.matchday, totalMatchdays: t.fixtures.length, matches, leagueTable: table, champion: t.matchday === t.fixtures.length, competitionFinished: t.stage === 'done'
   };
   t.history.push(step);
   return step;
@@ -122,8 +125,9 @@ function simulateLeagueStep(roomState, applyResult) {
 
 function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
-  const table = viewedStep > 0 ? t.history[viewedStep - 1]?.leagueTable : t.initialTable;
-  return { freeAgentCoaches: getLeague(t.leagueId)?.freeAgentCoaches || [], seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: viewedStep, totalMatchdays: t.fixtures.length, table: table || [],
+  const leagueStep = Math.min(viewedStep, t.fixtures.length);
+  const table = leagueStep > 0 ? t.history[leagueStep - 1]?.leagueTable : t.initialTable;
+  return { freeAgentCoaches: getLeague(t.leagueId)?.freeAgentCoaches || [], seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: leagueStep, totalMatchdays: t.fixtures.length, table: table || [], cup: cupSnapshot(t, viewedStep),
     nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => {
       const a = t.slotByCode[fixture.aCode], b = t.slotByCode[fixture.bCode];
       return { ...fixture, aName: a.name, bName: b.name, aHuman: a.isHuman, bHuman: b.isHuman, aUsername: a.username, bUsername: b.username };

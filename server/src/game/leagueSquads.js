@@ -12,8 +12,9 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
   const slot = t.slotByCode[clubCode];
   if (!club || !slot) throw new Error('club is not part of this league');
   const matchday = Math.min(member.viewedStep, t.matchday);
+  const throughStep = Math.min(member.viewedStep, Math.max(t.matchday, t.history.length));
   const beforeTransfers = matchday < Math.floor(t.fixtures.length / 2);
-  const stats = statsByPlayer(t, clubCode, matchday);
+  const stats = statsByPlayer(t, clubCode, throughStep);
   const activeXI = t.endTransferWindow && t.matchday === 0 ? slot.xi : beforeTransfers ? t.initialXIs?.[clubCode] || slot.xi : slot.xi;
   const xi = new Map(activeXI.map((player) => [player.id, player]));
   const released = new Set([
@@ -37,6 +38,6 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
   })).sort((a, b) => Number(xi.has(b.id)) - Number(xi.has(a.id)) || b.overall - a.overall || a.name.localeCompare(b.name));
   const style = beforeTransfers ? t.initialTactics?.[clubCode] || slot.tacticalStyle : slot.tacticalStyle;
   return { code: clubCode, name: slot.name, headCoach: slot.headCoach || club.headCoach, logo: club.logo, formation: beforeTransfers ? t.initialFormations?.[clubCode] || slot.formation : slot.formation, tacticalStyle: slot.customTactic?.name || TACTICAL_STYLES[style]?.label || 'Balanced',
-    isHuman: slot.isHuman, username: slot.username || null, matchday, players, cohesion: cohesionAtMatchday(slot, matchday) };
+    isHuman: slot.isHuman, username: slot.username || null, matchday, cupRounds: Math.max(0, throughStep - t.fixtures.length), players, cohesion: cohesionAtMatchday(slot, throughStep) };
 }
 module.exports = { clubSquadSnapshot };

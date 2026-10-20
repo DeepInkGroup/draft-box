@@ -614,6 +614,8 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
     restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await require('./onlineResultsScenario')({ request, event, connect, host: login, guest: friend,
     restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
+  await require('./leagueCupScenario')({ request, event, connect, host: login, guest: friend,
+    restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await require('./moderationScenario')({ request, event, connect, admin,
     restart: async () => { sockets.forEach(socket => socket.disconnect()); await server.stop(); server = await startServer(dbPath, dir); } });
   await server.stop(); server = await startServer(dbPath, dir);

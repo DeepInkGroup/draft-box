@@ -53,6 +53,7 @@ const TournamentView = {
       <div class="card" id="leagueSeasonHistoryZone" style="display:none;"></div>
       <div class="card league-tools" id="leagueTools" style="display:none;"></div>
       <div class="card" id="leagueZone" style="display:none;"></div>
+      <div class="card league-cup" id="leagueCupZone" style="display:none;"></div>
       <div class="card" id="liveZone" style="display:none;"></div>
       <div class="card" id="stepCard"></div>
       <div class="card center" id="continueZone">
@@ -71,6 +72,7 @@ const TournamentView = {
     const newPing = container.querySelector('#newPing');
     const advanceReadyPanel = container.querySelector('#advanceReadyPanel');
     const leagueZone = container.querySelector('#leagueZone');
+    const cupZone = container.querySelector('#leagueCupZone');
     const transferZone = container.querySelector('#transferZone');
     const tacticsZone = container.querySelector('#midseasonTacticsZone');
     const formationZone = container.querySelector('#midseasonFormationZone');
@@ -95,7 +97,7 @@ const TournamentView = {
         if (requestId !== clubRequest || !container.contains(leagueTools)) return;
         clubRoster = data;
         body.setAttribute('aria-busy','false');
-        leagueTools.querySelector('#leagueClubMeta').textContent = data.formation + ' / ' + data.tacticalStyle + ' / Stats through matchday ' + data.matchday;
+        leagueTools.querySelector('#leagueClubMeta').textContent = data.formation + ' / ' + data.tacticalStyle + ' / Stats through matchday ' + data.matchday + (data.cupRounds ? ' and ' + data.cupRounds + ' cup rounds' : '');
         renderClubOverview(); renderClubPlayers();
       } catch(error) {
         if (requestId !== clubRequest) return;
@@ -162,7 +164,7 @@ const TournamentView = {
       if (!resultRounds.some(round => round.matchday===resultMatchday)) resultMatchday=resultRounds[resultRounds.length-1].matchday;
       const round=resultRounds.find(round => round.matchday===resultMatchday);
       const matches=round.matches.slice().sort((a,b)=>Number(b.aCode===myCode || b.bCode===myCode)-Number(a.aCode===myCode || a.bCode===myCode));
-      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">Completed matchday</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>Matchday ${round.matchday}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${nameTag(match.aName, match.aHuman, match.aUsername, match.aCode)}</span><b>${match.goalsA} - ${match.goalsB}</b><span>${nameTag(match.bName, match.bHuman, match.bUsername, match.bCode)}</span></div>`).join('')}</div>`;
+      target.innerHTML=`<div class="score-round-picker"><label for="leagueResultMatchday">${leagueState?.cup && leagueState.cup.phase !== 'pending' ? 'Completed round' : 'Completed matchday'}</label><select id="leagueResultMatchday">${resultRounds.map(round => `<option value="${round.matchday}" ${round.matchday===resultMatchday ? 'selected' : ''}>${escapeLeagueText(round.label || 'Matchday '+round.matchday)}</option>`).join('')}</select><span class="muted">Final scores</span></div><div class="matchlog">${matches.map(match => `<div class="match-row result-only-row ${match.aCode===myCode || match.bCode===myCode ? 'my-fixture' : ''}"><span>${nameTag(match.aName, match.aHuman, match.aUsername, match.aCode)}</span><b>${scoreText(match)}</b><span>${nameTag(match.bName, match.bHuman, match.bUsername, match.bCode)}</span></div>`).join('')}</div>`;
       target.querySelector('#leagueResultMatchday').onchange=event => {resultMatchday=Number(event.target.value);renderScoreRounds();};
     }
 
@@ -173,7 +175,7 @@ const TournamentView = {
       renderTransferLog();
       const seasons = leagueState.previousSeasons || [];
       seasonHistoryZone.style.display = seasons.length ? '' : 'none';
-      seasonHistoryZone.innerHTML = seasons.length ? `<details><summary>Previous Seasons</summary>${seasons.map(season => `<div class="league-season-history"><span>Season ${season.seasonNumber} · Champion: ${escapeLeagueText(season.champion)} · Your position: ${season.userPositions?.[App.state.user.id] ?? season.positions?.[myCode] ?? season.position}</span><button class="btn btn-ghost btn-sm" data-season-code="${season.roomCode}">View Results</button></div>`).join('')}</details>` : '';
+      seasonHistoryZone.innerHTML = seasons.length ? `<details><summary>Previous Seasons</summary>${seasons.map(season => `<div class="league-season-history"><span>Season ${season.seasonNumber} · Champion: ${escapeLeagueText(season.champion)}${season.cupChampion ? " / Cup: " + escapeLeagueText(season.cupChampion) : ""} · Your position: ${season.userPositions?.[App.state.user.id] ?? season.positions?.[myCode] ?? season.position}</span><button class="btn btn-ghost btn-sm" data-season-code="${season.roomCode}">View Results</button></div>`).join('')}</details>` : '';
       seasonHistoryZone.querySelectorAll('[data-season-code]').forEach(button => button.onclick = () => App.goTournament(button.dataset.seasonCode));
       leagueTools.style.display = '';
       if (!leagueTools.querySelector('#btnSkipToTransfers')) {
@@ -230,13 +232,13 @@ const TournamentView = {
       const panel = leagueTools.querySelector('#leagueCohesion');
       panel.classList.toggle('hidden', !cohesion?.changedPlayers);
       if (cohesion?.changedPlayers) panel.innerHTML = cohesion.matchesRemaining ? `<b>Team Coordination · Settling In</b><p>${cohesion.changedPlayers} new signing${cohesion.changedPlayers === 1 ? '' : 's'} · Attack and defense currently −${cohesion.penaltyPercent}%. Recovery: ${cohesion.matchesPlayed}/${cohesion.recoveryMatches} matches played.</p><progress max="${cohesion.recoveryMatches}" value="${cohesion.matchesPlayed}" aria-label="Team coordination recovery"></progress>` : '<b>Team Coordination · Fully Settled</b><p>Your new signings have settled in. The temporary transfer penalty has ended.</p>';
-      leagueTools.querySelector('.league-finish').style.display = singlePlayer && !resultsOnly && tournamentStage !== 'done' && viewedStep >= halfway && transferState?.tactics?.phase !== 'choose' && transferState?.formations?.phase !== 'choose' && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
+      leagueTools.querySelector('.league-finish').style.display = singlePlayer && !resultsOnly && tournamentStage !== 'done' && viewedStep >= halfway && viewedStep < leagueState.totalMatchdays && transferState?.tactics?.phase !== 'choose' && transferState?.formations?.phase !== 'choose' && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
       const finishButton = leagueTools.querySelector('#btnFinishLeague');
       const autoStatus=leagueTools.querySelector('#leagueAutoStatus');
       autoStatus.style.display=resultsOnly && tournamentStage!=='done' ? '' : 'none';
       autoStatus.textContent=advancePending ? 'Preparing the next final result...' : automaticResultsReady() ? 'Next matchday follows automatically in 2 seconds.' : 'Complete your enabled transfer or tactic choices. Matches then resume automatically.';
       finishButton.disabled = advancePending || transferPending;
-      finishButton.textContent = advancePending ? 'Simulating Remaining Fixtures...' : 'Finish Season & View Results';
+      finishButton.textContent = advancePending ? 'Simulating Remaining Fixtures...' : leagueState.cup ? 'Finish League & Start Cup' : 'Finish Season & View Results';
     }
 
     const escapeLeagueText = (value) => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
@@ -375,6 +377,20 @@ const TournamentView = {
         </table></div><p class="league-table-note relegation-legend"><span class="relegation-mark" aria-hidden="true">↓</span> ${leagueState.matchday === leagueState.totalMatchdays ? 'Bottom two teams are relegated.' : 'Bottom two teams are in the relegation zone.'}</p><p class="muted league-table-note league-table-hint">P = Played · Pts = Points · GD = Goal difference.<br>${leagueFullStats ? 'Swipe the table to see every statistic.' : 'Goal difference appears below each club. Tap Show all stats for the full table.'}</p><p class="muted league-table-note">Win: 3 points · Draw: 1 point · Ranked by points, goal difference, then goals scored.</p>`;
       leagueZone.querySelector('.league-table-scroll').scrollLeft=leagueFullStats ? previousScroll : 0;
       leagueZone.querySelector('#leagueTableToggleStats').onclick=()=>{leagueFullStats=!leagueFullStats;renderLeagueTable();};
+    }
+
+    function renderLeagueCup() {
+      const cup = leagueState?.cup;
+      cupZone.style.display = cup ? '' : 'none';
+      if (!cup) return;
+      if (cup.phase === 'pending') {
+        cupZone.innerHTML = '<h3>PGL Knockout Cup</h3><p class="muted">The top 16 clubs qualify after all 34 league matchdays. A random draw starts four single-elimination rounds.</p>'; return;
+      }
+      const qualified = cup.qualifiers.some(team => team.code === myCode);
+      const out = cup.rounds.some(round => round.played && round.matches.some(match => (match.a.code === myCode || match.b.code === myCode) && match.winnerCode !== myCode));
+      const teamName = team => nameTag(team.name, team.isHuman, team.username, team.code);
+      const status = !qualified ? 'Your club did not qualify. You can follow the cup as a spectator.' : cup.champion?.code === myCode ? 'Your club won the PGL Knockout Cup!' : out ? 'Your club has been eliminated. Follow the remaining rounds below.' : 'Your club qualified for the PGL Knockout Cup.';
+      cupZone.innerHTML = `<div class="league-table-heading"><h2>PGL Knockout Cup</h2><span class="badge">Top 16 / Single elimination</span></div><p>League champion: ${teamName(cup.leagueChampion)}</p><p class="help-callout" role="status" id="leagueCupStatus">${status}</p>${cup.champion ? `<div class="cup-champion" id="cupChampion"><h3>PGL Knockout Cup Champion</h3>${teamName(cup.champion)}<p class="muted">Four rounds. Fifteen matches. One cup winner.</p></div>` : '<p class="muted">The initial draw is random and saved. Each winner advances along the bracket. Drawn matches use extra time and penalties.</p>'}<div class="cup-rounds">${cup.rounds.map((round,index) => `<details class="cup-round" ${index === Math.min(cup.completedRounds,3) ? 'open' : ''}><summary>${round.label}<span class="badge">${round.played ? 'Complete' : round.matches.length ? 'Next round' : 'Awaiting winners'}</span></summary><div class="cup-fixtures">${round.matches.length ? round.matches.map(match => `<article class="cup-fixture ${match.a.code === myCode || match.b.code === myCode ? 'my-fixture' : ''}"><div class="${match.winnerCode === match.a.code ? 'cup-winner' : ''}">${teamName(match.a)}<b>${round.played ? match.goalsA : '-'}</b></div><div class="${match.winnerCode === match.b.code ? 'cup-winner' : ''}">${teamName(match.b)}<b>${round.played ? match.goalsB : '-'}</b></div>${match.wentToPenalties ? `<small>Penalties: ${match.penalties.A} - ${match.penalties.B}</small>` : match.wentToExtraTime ? '<small>After extra time</small>' : ''}</article>`).join('') : '<p class="muted">Winners from the previous round advance here.</p>'}</div></details>`).join('')}</div>`;
     }
 
     function scoreText(m) {
@@ -593,7 +609,7 @@ const TournamentView = {
       } else if (advanceReady && isSpectator && Number(advanceReady.requiredMemberCount) > 0) {
         btnContinue.style.display = 'none';
       } else {
-        btnContinue.textContent = isLeague ? '▶ Play Next Matchday' : me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
+        btnContinue.textContent = isLeague ? leagueState?.cup?.phase === 'active' ? 'Play Cup - ' + leagueState.cup.rounds.find(round=>!round.played).label : '▶ Play Next Matchday' : me && me.ready ? '✓ Ready - waiting for players' : '✓ Ready for Next Stage';
         btnContinue.disabled = advancePending || !!(me && me.ready);
       }
       renderAdvanceReady();
@@ -1028,12 +1044,13 @@ const TournamentView = {
       stopLiveReport();
       renderLeagueTools();
       renderLeagueTable();
+      renderLeagueCup();
       renderTransfers();
       if (tournamentStage === 'done') {
         stagePill.parentElement.style.display = 'none';
       } else {
         stagePill.parentElement.style.display = '';
-        stagePill.textContent = isLeague ? leagueName : STAGE_LABEL[tournamentStage] || tournamentStage;
+        stagePill.textContent = isLeague ? leagueState?.cup?.phase === 'active' ? 'PGL Cup / ' + leagueState.cup.rounds.find(round => !round.played).label : leagueName : STAGE_LABEL[tournamentStage] || tournamentStage;
       }
       newResultsPing = false;
 
@@ -1100,7 +1117,7 @@ const TournamentView = {
         ${groupFinalHtml}
       `;
       if (resultsOnly) {
-        stepCard.innerHTML='<h3>Match Results - Matchday '+viewedStep+'</h3><div id="leagueScoreResults"></div>';
+        stepCard.innerHTML='<h3>'+escapeLeagueText(step.cup ? step.label : 'Match Results - Matchday '+viewedStep)+'</h3><div id="leagueScoreResults"></div>';
         renderScoreRounds();
       }
       stepCard.querySelectorAll('.match-row-clickable').forEach((row) => {
@@ -1123,8 +1140,8 @@ const TournamentView = {
               <button class="btn btn-ghost" id="btnBackHome">Back to Dashboard</button>
               <button class="btn btn-ghost" id="btnViewHistoryFromChampion">My Match History</button>
               ${isCreator ? `<button class="btn btn-ghost" id="btnNewRoom">${isLeague ? 'Create New League' : 'Start New Room'}</button>` : ''}
-              ${isCreator && isLeague ? '<button class="btn btn-primary" id="btnNextLeagueSeason">Continue to Next Season</button>' : ''}
-              ${isCreator ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
+              ${isCreator && isLeague && step.competitionFinished !== false ? '<button class="btn btn-primary" id="btnNextLeagueSeason">Continue to Next Season</button>' : ''}
+              ${isCreator && step.competitionFinished !== false ? '<button class="btn btn-primary" id="btnRematch">Rematch — Same Players</button>' : ''}
             </div>
           </div>
           ${myRecordCardHtml(step.myRecord)}

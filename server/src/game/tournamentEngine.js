@@ -362,7 +362,7 @@ function playKnockoutRound(roomState) {
 // forward — see sockets/index.js's tournament:advance handler.
 function simulateNextStep(roomState) {
   const t = roomState.tournament;
-  if (t?.kind === 'league') return simulateLeagueStep(roomState, applyGroupResult);
+  if (t?.kind === 'league') return simulateLeagueStep(roomState, applyGroupResult, updateMorale);
   if (!t || t.stage === 'done') return null;
 
   if (t.stage === 'group') {
@@ -717,6 +717,8 @@ function decorateStep(roomState, index, forUserId) {
   }
 
   const decorated = { index: raw.index, type: raw.type, label: raw.label, matches };
+  if (raw.cup) decorated.cup = true;
+  if (raw.competitionFinished !== undefined) decorated.competitionFinished = raw.competitionFinished;
   if (raw.type === 'league') {
     decorated.leagueName = t.leagueName;
     decorated.matchday = raw.matchday;
@@ -747,11 +749,13 @@ function decorateStep(roomState, index, forUserId) {
   }
 
   if (raw.champion) {
+    if (raw.cup) decorated.cupChampion = { code: t.cup.champion, ...t.slotByCode[t.cup.champion] };
     if (t.kind === 'league') decorated.seasonResults = require('./leagueResults').seasonResults(t);
-    decorated.myRecord = computeTeamRecord(t, myCode);
-    decorated.myMatchAnalyses = computeMyMatchAnalyses(t, myCode);
-    decorated.tournamentAwards = computeTournamentAwards(t);
-    decorated.tournamentSummary = computeTournamentSummary(t);
+    const viewedTournament = t.kind === 'league' ? { ...t, matchLog: t.matchLog.filter(match => (match.matchday || 0) <= index + 1) } : t;
+    decorated.myRecord = computeTeamRecord(viewedTournament, myCode);
+    decorated.myMatchAnalyses = computeMyMatchAnalyses(viewedTournament, myCode);
+    decorated.tournamentAwards = computeTournamentAwards(viewedTournament);
+    decorated.tournamentSummary = computeTournamentSummary(viewedTournament);
     decorated.completedBracket = completedBracket(t);
   }
 

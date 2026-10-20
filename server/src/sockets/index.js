@@ -6,6 +6,7 @@ const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep, managementPending } = require('../game/leagueAutoplay');
 const { leagueSnapshot } = require('../game/leagueEngine');
+const { leagueStageAtCursor } = require('../game/leagueCup');
 const { transferSnapshot, planTransfer, transfersPending } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
 const { planFormationChange } = require('../game/leagueFormation');
@@ -236,7 +237,7 @@ function registerSocketHandlers(io) {
           myLineup,
           viewedStep,
           historyLength,
-          tournamentStage: state.resultsOnly && viewedStep < state.tournament.fixtures.length ? 'league' : state.tournament.stage,
+          tournamentStage: state.mode === 'league' ? leagueStageAtCursor(state.tournament, viewedStep) : state.tournament.stage,
           league: leagueSnapshot(state.tournament, viewedStep),
           career: careerSnapshot(state.tournament, socket.user.id),
           transfers: transferSnapshot(state.tournament, socket.user.id, viewedStep),
@@ -511,7 +512,7 @@ function registerSocketHandlers(io) {
           step: tournamentEngine.decorateStep(state, member.viewedStep - 1, socket.user.id),
           viewedStep: member.viewedStep,
           historyLength: tournamentEngine.historyLength(state),
-          stage: t.stage,
+          stage: t.kind === 'league' ? leagueStageAtCursor(t, member.viewedStep) : t.stage,
           league: leagueSnapshot(t, member.viewedStep),
           transfers: transferSnapshot(t, socket.user.id, member.viewedStep),
           spectator: !!member.eliminated
@@ -534,7 +535,7 @@ function registerSocketHandlers(io) {
         socket.emit('league:autoResults', {
           step: resultsOnlyStep(t,tournamentEngine.decorateStep(state,member.viewedStep-1,socket.user.id)),
           results: leagueScoreResults(t,member.viewedStep), viewedStep: member.viewedStep,
-          historyLength: tournamentEngine.historyLength(state), stage: member.viewedStep < t.fixtures.length ? 'league' : t.stage,
+          historyLength: tournamentEngine.historyLength(state), stage: leagueStageAtCursor(t, member.viewedStep),
           league: leagueSnapshot(t,member.viewedStep), transfers: transferSnapshot(t,socket.user.id,member.viewedStep)
         });
       } catch (error) { socket.emit('error:message',{ error: error.message }); }
@@ -577,15 +578,15 @@ function registerSocketHandlers(io) {
         const t = state.tournament;
         const transfers = transferSnapshot(t, socket.user.id, member.viewedStep);
         if (member.viewedStep < Math.floor(t.fixtures.length / 2) || !['complete', 'skipped', 'disabled'].includes(transfers.phase) || transfers.tactics?.phase === 'choose' || member.squad.length !== 11) throw new Error('Choose or keep tactics and complete or skip mid-season transfers before finishing the season');
-        while (t.stage !== 'done') {
+        while (t.matchday < t.fixtures.length) {
           persistSimulatedTournamentStep(io, socket, code, room, state);
-          member.viewedStep = t.matchday;
+          member.viewedStep = t.history.length;
           rm.persistViewedStep(room.id, socket.user.id, member.viewedStep);
         }
         socket.emit('league:seasonFinished', {
           step: tournamentEngine.decorateStep(state, member.viewedStep - 1, socket.user.id), viewedStep: member.viewedStep,
           historyLength: tournamentEngine.historyLength(state), stage: t.stage,
-          league: leagueSnapshot(t, member.viewedStep), transfers: transferSnapshot(t, socket.user.id, member.viewedStep), spectator: false
+          league: leagueSnapshot(t, member.viewedStep), transfers: transferSnapshot(t, socket.user.id, member.viewedStep), spectator: !!member.eliminated
         });
       } catch (error) { socket.emit('error:message', { error: error.message }); }
     });

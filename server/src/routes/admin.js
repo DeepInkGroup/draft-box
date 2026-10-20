@@ -84,8 +84,8 @@ router.get('/leagues/:code', (req, res) => {
   if (state.tournament?.kind !== 'league') return res.status(400).json({ error: 'This season has not started' });
   const t = state.tournament;
   // A separate viewer map gives admins complete analysis without changing anyone's progress.
-  const analysisState = { ...state, members: new Map([[req.user.id, { viewedStep: t.matchday }]]) };
-  res.json({ name: t.leagueName, league: leagueSnapshot(t, t.matchday), results: seasonResults(t),
+  const analysisState = { ...state, members: new Map([[req.user.id, { viewedStep: t.history.length }]]) };
+  res.json({ name: t.leagueName, league: leagueSnapshot(t, t.history.length), results: seasonResults(t),
     clubs: Object.keys(t.slotByCode).map((code) => clubSquadSnapshot(analysisState, req.user.id, code)) });
 });
 module.exports = router;

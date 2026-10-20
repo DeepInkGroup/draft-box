@@ -2,7 +2,8 @@ const { statsByPlayer } = require('./leagueTransfers');
 const { rankTable } = require('./leagueEngine');
 
 function seasonResults(t) {
-  if (t.kind !== 'league' || t.stage !== 'done') return null;
+  if (t.kind !== 'league' || t.matchday < t.fixtures.length) return null;
+  t = { ...t, matchLog: t.matchLog.filter(match => !match.cup) };
   const profiles = new Map();
   for (const match of t.matchLog) for (const side of ['A', 'B']) {
     const club = t.slotByCode[side === 'A' ? match.aCode : match.bCode];

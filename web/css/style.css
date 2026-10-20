@@ -592,6 +592,7 @@ button.transfer-player-card { cursor: pointer; }
 }
 .champion-banner h2 { margin: 6px 0 4px; font-size: 1.7rem; color: var(--accent-strong); }
 .champion-team-name { margin: 0; color: var(--muted); font-size: .82rem; font-weight: 700; }
+.champion-banner .row > .btn { flex: 1 1 180px; overflow-wrap: anywhere; }
 
 .matchlog { max-height: 220px; overflow-y: auto; font-size: .82rem; }
 
@@ -717,8 +718,9 @@ button.transfer-player-card { cursor: pointer; }
   background: linear-gradient(180deg, rgba(34, 197, 94, .09), var(--surface) 30%);
   border-color: rgba(34, 197, 94, .28);
 }
-.engine-recap-list { display: grid; gap: 12px; }
+.engine-recap-list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .engine-recap-match {
+  min-width: 0;
   border: 1px solid var(--border); border-radius: 8px; padding: 12px;
   background: rgba(255, 255, 255, .025);
 }
@@ -1711,6 +1713,20 @@ input, select, textarea { max-width: 100%; }
 .club-identity > span { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
 .club-identity .club-label { display: inline-flex; align-items: baseline; flex-wrap: wrap; column-gap: 6px; }
 .club-manager { color: var(--accent-strong); font-size: max(.85em, 11px); font-weight: 600; overflow-wrap: anywhere; }
+.cup-rounds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.cup-round { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
+.cup-round summary { cursor: pointer; font-weight: 700; overflow-wrap: anywhere; }
+.cup-round summary .badge { display: block; width: fit-content; margin-top: 6px; }
+.cup-fixtures { display: grid; gap: 12px; margin-top: 14px; }
+.cup-fixture { min-width: 0; padding: 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.cup-fixture > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 6px 0; font-size: .85rem; }
+.cup-fixture small { display: block; color: var(--muted); margin-top: 6px; }
+.cup-fixture.my-fixture { border-color: var(--accent); }
+.cup-winner { color: var(--accent-strong); font-weight: 700; }
+.cup-champion { margin: 16px 0; padding: 20px; text-align: center; border: 1px solid var(--accent); border-radius: var(--radius); background: var(--accent-soft); }
+.cup-champion > .club-identity { font-size: 1.3rem; font-weight: 700; }
+@media (max-width: 1050px) { .cup-rounds { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .cup-rounds { grid-template-columns: minmax(0, 1fr); } }
 .league-next-fixture { overflow-wrap: anywhere; }
 .room-connection { position: sticky; top: 8px; z-index: 50; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 12px auto; padding: 12px; max-width: 700px; border: 1px solid var(--accent); border-radius: 12px; background: var(--surface-2); text-align: center; }
 .club-profile { display: flex; align-items: center; gap: 14px; min-width: 0; text-align: left; }

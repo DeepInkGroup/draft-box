@@ -277,6 +277,7 @@ router.get('/me/matches', requireAuth, requirePlayer, (req, res) => {
       const oppSlot = t.slotByCode[oppCode];
       const oppName = oppSlot ? oppSlot.name : 'Unknown';
       matches.push({
+        cup: !!m.cup,
         stage: m.stage,
         matchday: m.matchday || null,
         group: m.group || null,
@@ -301,6 +302,7 @@ router.get('/me/matches', requireAuth, requirePlayer, (req, res) => {
       date: row.created_at,
       countryName: myName,
       champion: t.champion === myCode,
+      cupChampion: !!t.cup?.champion && t.cup.champion === myCode,
       matches
     });
   }

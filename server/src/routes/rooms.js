@@ -30,6 +30,7 @@ router.post('/', (req, res) => {
       mode: req.body?.mode || 'worldcup', leagueId: req.body?.leagueId,
       managerOffers: req.body?.managerOffers, playerDepartures: req.body?.playerDepartures,
       resultsOnly: req.body?.resultsOnly,
+      knockoutCup: req.body?.knockoutCup,
       midseasonTactics: req.body?.midseasonTactics, endseasonTactics: req.body?.endseasonTactics, midseasonFormations: req.body?.midseasonFormations,
       squadMode: req.body?.squadMode || 'draft', pglRatingBoost: req.body?.pglRatingBoost,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
@@ -57,6 +58,7 @@ router.post('/singleplayer', (req, res) => {
     const room = rm.createRoom({
       name: league ? `${league.name} — ${req.user.username}` : `${req.user.username}'s Solo Run`,
       mode, leagueId, squadMode, pglRatingBoost: req.body?.pglRatingBoost, resultsOnly: req.body?.resultsOnly,
+      knockoutCup: req.body?.knockoutCup,
       transferEnabled: req.body?.transferEnabled, transferLimit: req.body?.transferLimit,
       midseasonTactics: req.body?.midseasonTactics, aiTransfers: req.body?.aiTransfers,
       endseasonTactics: req.body?.endseasonTactics,

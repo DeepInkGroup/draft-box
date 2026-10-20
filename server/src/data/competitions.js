@@ -30,6 +30,8 @@ function leagueCatalog() {
     id: league.id, name: league.name, country: league.country, singlePlayerOnly: false,
     multiplayerAvailable: true, multiplayerVersion: 2, multiplayerMaxPlayers: league.teams.length,
     multiplayerOptions: { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true },
+    knockoutCupAvailable: league.id === 'pgl', knockoutCupVersion: 1,
+    knockoutCupFormat: { qualifyingTeams: 16, rounds: ['r16', 'qf', 'sf', 'final'], singleElimination: true, randomDraw: true },
     careerOptions: { managerOffers: true, maxManagerOffers: 2, playerDepartures: true, maxDeparturesPerClub: 2, poorResultsBottomFraction: 1 / 3 },
     squadModes: ['draft', 'real'], pglRatingBoostAvailable: league.id === 'pgl', transferOptions: { min: 1, max: 3, default: 2, canDisable: true },
     resultsOnlyAvailable: true, resultsOnlyVersion: 2, standingsLayoutVersion: 3, squadBrowserVersion: 2, midseasonTacticsAvailable: true, endseasonTacticsAvailable: true, midseasonFormationsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,

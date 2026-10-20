@@ -16,23 +16,24 @@ function playAutomaticLeague(state, userId, saveRound, afterMatchday) {
   let rounds = 0;
   if (afterMatchday !== undefined && afterMatchday !== member.viewedStep) return 0;
   // Each user sees every saved round, even if another user's browser is ahead.
-  if (member.viewedStep < t.matchday) { member.viewedStep++; return 0; }
+  if (member.viewedStep < t.history.length) { member.viewedStep++; return 0; }
   if (t.stage !== 'done' && !managementPending(t)) {
     saveRound();
     rounds++;
   }
-  member.viewedStep = t.matchday;
+  member.viewedStep = t.history.length;
   return rounds;
 }
 function scoreResult(t, match) {
   const a = t.slotByCode[match.aCode], b = t.slotByCode[match.bCode];
   return { aCode: a.code, bCode: b.code, aName: a.name, bName: b.name,
     aHuman: a.isHuman, bHuman: b.isHuman, aUsername: a.username, bUsername: b.username,
-    goalsA: match.goalsA, goalsB: match.goalsB, winnerCode: match.winnerCode };
+    goalsA: match.goalsA, goalsB: match.goalsB, winnerCode: match.winnerCode,
+    wentToExtraTime: !!match.wentToExtraTime, wentToPenalties: !!match.wentToPenalties, penalties: match.penalties || null };
 }
 function leagueScoreResults(t, throughMatchday) {
   if (t?.kind !== 'league') return [];
-  return t.history.slice(0, throughMatchday).map(round => ({ matchday: round.matchday, matches: round.matches.map(match => scoreResult(t,match)) }));
+  return t.history.slice(0, throughMatchday).map((round,index) => ({ matchday: index + 1, cup: !!round.cup, label: round.cup ? round.label : 'Matchday ' + round.matchday, matches: round.matches.map(match => scoreResult(t,match)) }));
 }
 function resultsOnlyStep(t, step) {
   if (!step) return step;
