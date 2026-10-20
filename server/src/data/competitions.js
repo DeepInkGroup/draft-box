@@ -28,11 +28,11 @@ function getPlayer(id) { return LEAGUE_PLAYER_BY_ID.get(id) || worldCup.getPlaye
 function leagueCatalog() {
   return Array.from(LEAGUES.values()).map((league) => ({
     id: league.id, name: league.name, country: league.country, singlePlayerOnly: false,
-    multiplayerAvailable: true, multiplayerVersion: 1, multiplayerMaxPlayers: league.teams.length,
-    multiplayerOptions: { aiTransfers: false, midseasonTactics: false, resultsOnly: true, humanTransfers: true, continuousSeasons: true },
+    multiplayerAvailable: true, multiplayerVersion: 2, multiplayerMaxPlayers: league.teams.length,
+    multiplayerOptions: { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true },
     careerOptions: { managerOffers: true, maxManagerOffers: 2, playerDepartures: true, maxDeparturesPerClub: 2, poorResultsBottomFraction: 1 / 3 },
     squadModes: ['draft', 'real'], pglRatingBoostAvailable: league.id === 'pgl', transferOptions: { min: 1, max: 3, default: 2, canDisable: true },
-    resultsOnlyAvailable: true, resultsOnlyVersion: 2, standingsLayoutVersion: 3, squadBrowserVersion: 2, midseasonTacticsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,
+    resultsOnlyAvailable: true, resultsOnlyVersion: 2, standingsLayoutVersion: 3, squadBrowserVersion: 2, midseasonTacticsAvailable: true, endseasonTacticsAvailable: true, midseasonFormationsAvailable: true, aiTransfersAvailable: true, continuousSeasons: true, endSeasonTransfersAvailable: true, transferOfferCount: 2,
     transferWindowAfterMatchday: league.teams.length - (league.teams.length % 2 ? 0 : 1),
     teamCount: league.teams.length, matchdays: 2 * (league.teams.length - (league.teams.length % 2 ? 0 : 1)),
     freeAgentCoaches: league.freeAgentCoaches || [],

@@ -4,6 +4,7 @@ const { teamStrength } = require('./botEngine');
 const { settingsForSeason } = require('./leagueSettings');
 const { startCohesionRecovery, cohesionAtMatchday } = require('./leagueCohesion');
 const { tacticSnapshot } = require('./leagueMidseason');
+const { formationSnapshot } = require('./leagueFormation');
 const { randomSample } = require('./transferOffers');
 const { ensureClubRosters, rosterPlayer, runAiTransfers } = require('./leagueAiTransfers');
 
@@ -99,7 +100,7 @@ function transferSnapshot(t, userId, viewedStep) {
     .filter(([id, progress]) => Number(id) !== Number(userId) && ['release', 'sign'].includes(progress.phase))
     .map(([id]) => { const club = Object.values(t.slotByCode).find(slot => slot.isHuman && slot.userId === Number(id)); return { userId: Number(id), username: club.username, clubName: club.name }; }) : [];
   const common = { windowType: end ? 'endseason' : 'midseason', opensAfter: end ? 0 : Math.floor(t.fixtures.length / 2), ...settings, cohesion: cohesionAtMatchday(team, viewedStep),
-    waitingFor, tactics: tacticSnapshot(t, userId, viewedStep), aiEnabled: !!(t.aiTransfers || t.endAiTransfers),
+    waitingFor, tactics: tacticSnapshot(t, userId, viewedStep), formations: formationSnapshot(t, userId, viewedStep), aiEnabled: !!(t.aiTransfers || t.endAiTransfers),
     log: (t.transferLog || []).filter(entry => entry.matchday <= viewedStep).map(entry => ({ ...entry, fromName: t.slotByCode[entry.from]?.name || 'Free agents', toName: t.slotByCode[entry.to]?.name || 'Free agents' })) };
   if (!settings.enabled) return { ...common, phase: 'disabled' };
   const progress = window?.users[userId];

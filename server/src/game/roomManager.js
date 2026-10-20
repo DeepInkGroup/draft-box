@@ -58,11 +58,11 @@ function normalizePickTime(ms) {
   return ALLOWED_PICK_TIMES_MS.includes(n) ? n : 20000;
 }
 
-function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false, resultsOnly = false, managerOffers = false, playerDepartures = false }) {
+function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall = true, pickTimeMs, captainEnabled = false, tournamentLength = 'full', allowedTeams = null, rerollsAllowed = 0, spoilerMode = false, sharedDraftMode = false, mode = 'worldcup', leagueId = null, squadMode = 'draft', transferEnabled = true, transferLimit = 2, midseasonTactics = false, endseasonTactics = false, midseasonFormations = false, aiTransfers = false, endTransferEnabled = false, endTransferLimit = 2, endAiTransfers = false, pglRatingBoost = false, resultsOnly = false, managerOffers = false, playerDepartures = false }) {
   if (!['worldcup', 'league'].includes(mode)) throw new Error('invalid game mode');
   const league = mode === 'league' ? getLeague(leagueId) : null;
   if (mode === 'league' && !league) throw new Error('league is not available');
-  if (league && !singlePlayer) { midseasonTactics = false; aiTransfers = false; endAiTransfers = false; }
+  if (league && !singlePlayer) { aiTransfers = false; endAiTransfers = false; }
   if (!['draft', 'real'].includes(squadMode) || (mode !== 'league' && squadMode !== 'draft')) throw new Error('invalid squad mode');
   if (typeof pglRatingBoost !== 'boolean' || (pglRatingBoost && (mode !== 'league' || leagueId !== 'pgl'))) throw new Error('Overall boost is available only for the Persian Gulf League');
   if (typeof resultsOnly !== 'boolean' || (resultsOnly && mode !== 'league')) throw new Error('Results-only mode is available only in leagues');
@@ -71,7 +71,9 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   if ((managerOffers || playerDepartures) && (mode !== 'league' || singlePlayer)) throw new Error('Career options are available only in online leagues');
   const transfers = transferSettings(transferEnabled, transferLimit);
   const endTransfers = transferSettings(endTransferEnabled, endTransferLimit);
-  if (typeof midseasonTactics !== 'boolean' || typeof aiTransfers !== 'boolean' || typeof endAiTransfers !== 'boolean') throw new Error('League options must be enabled or disabled');
+  if ((midseasonTactics || endseasonTactics || midseasonFormations) && !league) throw new Error('Management windows are available only in leagues');
+  if (midseasonFormations && singlePlayer) throw new Error('Mid-season formation changes are available only in online leagues');
+  if (typeof endseasonTactics !== 'boolean' || typeof midseasonFormations !== 'boolean' || typeof midseasonTactics !== 'boolean' || typeof aiTransfers !== 'boolean' || typeof endAiTransfers !== 'boolean') throw new Error('League options must be enabled or disabled');
   const code = uniqueCode();
   const cappedSlots = singlePlayer ? 1 : Math.max(1, Math.min(league ? league.teams.length : 32, Math.floor(Number(humanSlotsMax) || 32)));
   const length = league ? 'full' : normalizeTournamentLength(tournamentLength);
@@ -80,13 +82,13 @@ function createRoom({ name, creatorId, humanSlotsMax, singlePlayer, showOverall 
   const rerolls = sharedDraft ? 0 : normalizeRerolls(rerollsAllowed);
   const info = db
     .prepare(
-      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, results_only, manager_offers, player_departures, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
+      `INSERT INTO rooms (code, name, creator_id, mode, human_slots_max, single_player, show_overall, pick_time_ms, captain_enabled, blitz_mode, tournament_length, allowed_teams, rerolls_allowed, spoiler_mode, shared_draft_mode, league_id, squad_mode, transfer_enabled, transfer_limit, midseason_tactics, ai_transfers, end_transfer_enabled, end_transfer_limit, end_ai_transfers, pgl_rating_boost, results_only, manager_offers, player_departures, endseason_tactics, midseason_formations, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'lobby')`
     )
     .run(
       code, name || `Room ${code}`, creatorId, mode, cappedSlots, singlePlayer ? 1 : 0, showOverall ? 1 : 0,
       league && singlePlayer ? 0 : normalizePickTime(pickTimeMs), captainEnabled ? 1 : 0, length === 'blitz' ? 1 : 0, length,
-      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0, managerOffers ? 1 : 0, playerDepartures ? 1 : 0
+      teams ? JSON.stringify(teams) : null, rerolls, spoilerMode ? 1 : 0, sharedDraft ? 1 : 0, league ? league.id : null, squadMode, transfers.enabled ? 1 : 0, transfers.maxChanges, midseasonTactics ? 1 : 0, transfers.enabled && aiTransfers ? 1 : 0, endTransfers.enabled ? 1 : 0, endTransfers.maxChanges, endTransfers.enabled && endAiTransfers ? 1 : 0, pglRatingBoost ? 1 : 0, resultsOnly ? 1 : 0, managerOffers ? 1 : 0, playerDepartures ? 1 : 0, endseasonTactics ? 1 : 0, midseasonFormations ? 1 : 0
     );
   return getRoomRow(Number(info.lastInsertRowid));
 }
@@ -213,7 +215,7 @@ function loadRoomState(roomRow) {
     squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
-    midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
+    midseasonTactics: !!roomRow.midseason_tactics, endseasonTactics: !!roomRow.endseason_tactics, midseasonFormations: !!roomRow.midseason_formations, aiTransfers: !!roomRow.ai_transfers,
     endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
     managerOffers: !!roomRow.manager_offers, playerDepartures: !!roomRow.player_departures,
     seasonNumber: roomRow.season_number || 1,
@@ -345,11 +347,12 @@ function persistLeagueRoster(roomState, userId, tournament) {
   runTransaction(() => {
     db.prepare('DELETE FROM drafted_players WHERE room_id = ? AND user_id = ?').run(roomState.roomId, userId);
     for (const player of slot.xi) persistPick(roomState.roomId, userId, player, player.team, player.slotCode);
-    db.prepare('UPDATE room_members SET captain_slot = ? WHERE room_id = ? AND user_id = ?').run(captainSlot, roomState.roomId, userId);
+    db.prepare('UPDATE room_members SET captain_slot = ?, formation = ? WHERE room_id = ? AND user_id = ?').run(captainSlot, slot.formation, roomState.roomId, userId);
     db.prepare('UPDATE rooms SET tournament_state = ? WHERE id = ?').run(JSON.stringify(tournament), roomState.roomId);
   });
   roomState.tournament = tournament;
   const member = roomState.members.get(userId);
+  member.formation = slot.formation;
   member.squad = slot.xi.map((player) => ({ ...player }));
   member.slots = Object.fromEntries(getSlots(member.formation).map((definition) => [definition.code, member.squad.find((player) => player.slotCode === definition.code) || null]));
   member.captainSlot = captainSlot;
@@ -390,7 +393,7 @@ function continueLeagueSeason(previous, userId) {
         managerOffers: !!previous.manager_offers, playerDepartures: !!previous.player_departures,
         squadMode: previous.squad_mode, singlePlayer: !!previous.single_player, humanSlotsMax: previous.human_slots_max, spoilerMode: !!previous.spoiler_mode, showOverall: !!previous.show_overall, pickTimeMs: previous.pick_time_ms,
         captainEnabled: !!previous.captain_enabled, transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit ?? 2,
-        midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, rerollsAllowed: previous.rerolls_allowed });
+        midseasonTactics: !!previous.midseason_tactics, endseasonTactics: !!previous.endseason_tactics, midseasonFormations: !!previous.midseason_formations, aiTransfers: !!previous.ai_transfers, endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit ?? 2, endAiTransfers: !!previous.end_ai_transfers, pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only, rerollsAllowed: previous.rerolls_allowed });
       db.prepare('UPDATE rooms SET season_number = ?, previous_season_id = ? WHERE id = ?').run((previous.season_number || 1) + 1,previous.id,next.id);
       for (const member of priorState.members.values()) {
         const team = carry.slotByCode[selectedClubs.get(member.userId)];
@@ -419,8 +422,11 @@ function continueLeagueSeason(previous, userId) {
       t.managerChanges = [...selectedClubs].filter(([id, club]) => prior.careerTransition?.users[id]?.clubCode !== club && prior.careerTransition?.users[id]).map(([id, club]) => ({ userId: id, username: priorState.members.get(id).username, from: prior.careerTransition.users[id].clubCode, to: club, fromName: prior.slotByCode[prior.careerTransition.users[id].clubCode].name, toName: prior.slotByCode[club].name, squadUpdates: managerSquadChanges.filter(change => change.clubCode === club) }));
       const { openEndSeasonTransfers } = require('./leagueTransfers');
       openEndSeasonTransfers(t);
+      require('./leagueMidseason').openEndSeasonTactics(t);
       t.initialClubRosters = structuredClone(t.clubRosters);
       t.initialXIs = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, structuredClone(team.xi)]));
+      t.initialFormations = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, team.formation]));
+      t.initialTactics = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, team.tacticalStyle]));
       const ownCode = Object.values(prior.slotByCode).find(team => team.userId === userId)?.code;
       t.previousSeasons = (prior.previousSeasons || []).concat({ seasonNumber: prior.seasonNumber || 1, roomCode: previous.code,
         champion: prior.slotByCode[prior.champion].name, position: rankTable(prior).find(team => team.code === ownCode)?.rank,
@@ -454,7 +460,7 @@ function createRematch(previous, userId) {
       tournamentLength: previous.tournament_length, allowedTeams: previous.allowed_teams ? JSON.parse(previous.allowed_teams) : null,
       rerollsAllowed: previous.rerolls_allowed, spoilerMode: !!previous.spoiler_mode, sharedDraftMode: !!previous.shared_draft_mode,
       transferEnabled: previous.transfer_enabled !== 0, transferLimit: previous.transfer_limit,
-      midseasonTactics: !!previous.midseason_tactics, aiTransfers: !!previous.ai_transfers,
+      midseasonTactics: !!previous.midseason_tactics, endseasonTactics: !!previous.endseason_tactics, midseasonFormations: !!previous.midseason_formations, aiTransfers: !!previous.ai_transfers,
       endTransferEnabled: !!previous.end_transfer_enabled, endTransferLimit: previous.end_transfer_limit, endAiTransfers: !!previous.end_ai_transfers,
       pglRatingBoost: !!previous.pgl_rating_boost, resultsOnly: !!previous.results_only,
       managerOffers: !!previous.manager_offers, playerDepartures: !!previous.player_departures });
@@ -485,7 +491,7 @@ function lobbySnapshot(roomRow) {
     squadMode: roomRow.squad_mode || 'draft', pglRatingBoost: !!roomRow.pgl_rating_boost, resultsOnly: !!roomRow.results_only,
     transferEnabled: roomRow.transfer_enabled !== 0,
     transferLimit: roomRow.transfer_limit ?? 2,
-    midseasonTactics: !!roomRow.midseason_tactics, aiTransfers: !!roomRow.ai_transfers,
+    midseasonTactics: !!roomRow.midseason_tactics, endseasonTactics: !!roomRow.endseason_tactics, midseasonFormations: !!roomRow.midseason_formations, aiTransfers: !!roomRow.ai_transfers,
     endTransferEnabled: !!roomRow.end_transfer_enabled, endTransferLimit: roomRow.end_transfer_limit ?? 2, endAiTransfers: !!roomRow.end_ai_transfers,
     managerOffers: !!roomRow.manager_offers, playerDepartures: !!roomRow.player_departures,
     seasonNumber: roomRow.season_number || 1,

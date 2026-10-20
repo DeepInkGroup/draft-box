@@ -34,8 +34,8 @@ for (const width of [1280, 390]) {
       await expect(page.locator('#crClub option')).toHaveCount(18);
       await expect(page.locator('#crSlots')).toHaveAttribute('max', '18');
       await expect(page.locator('#app')).not.toContainText('AI team transfers');
-      await expect(page.locator('#app')).not.toContainText('Mid-season Tactics');
-      await expect(page.locator('#crAiTransfers, #crMidseasonTactics, #crEndAiTransfers')).toHaveCount(0);
+      await expect(page.locator('#crMidseasonTactics, #crEndseasonTactics, #crMidseasonFormations')).toHaveCount(3);
+      await expect(page.locator('#crAiTransfers, #crEndAiTransfers')).toHaveCount(0);
       await choose(page, 'crSquadMode', 'real');
       await choose(page, 'crTransferLimit', '1');
       await choose(page, 'crEndTransfers', 'true'); await choose(page, 'crEndTransferLimit', '1');

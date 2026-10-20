@@ -22,7 +22,7 @@ function moderateUser(id, action, reason = '', io) {
           team.managerUnavailable = true;
           if (room.status !== 'finished') { team.formerUserId = id; team.isHuman = false; team.userId = null; team.username = null; }
         }
-        for (const window of [tournament.transferWindow, tournament.endTransferWindow, tournament.tacticWindow, tournament.careerTransition]) {
+        for (const window of [tournament.transferWindow, tournament.endTransferWindow, tournament.tacticWindow, tournament.endTacticWindow, tournament.formationWindow, tournament.careerTransition]) {
           if (window?.users) delete window.users[id];
         }
         if (tournament.advanceReady) tournament.advanceReady.userIds = tournament.advanceReady.userIds.filter(userId => userId !== id);

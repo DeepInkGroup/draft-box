@@ -221,7 +221,7 @@ for (const width of [1280,390]) {
   await page.addInitScript(token=>sessionStorage.setItem('draftbox.token',token),account.token);
   await page.goto('/');await page.locator('#modeSingle').click();await page.locator('#singleLeague').click();await page.locator('#btnSelectLeague').click();
   if(width===390) { await choose(page,'spEndTransfers','open'); await choose(page,'spEndTransferLimit',3); await choose(page,'spEndAiTransfers','on'); }
-  await choose(page, 'spMidseasonTactics', 'on');await choose(page, 'spAiTransfers', 'on');
+  await choose(page, 'spMidseasonTactics', 'on');await choose(page,'spEndseasonTactics','on');await choose(page, 'spAiTransfers', 'on');
   await choose(page, 'spSquadMode', 'real');await page.locator('#btnSingleplayer').click();
   await page.locator('#btnLockTacticalStyle').click();await page.locator('#btnEnterTournament').click();
   const oldCode=page.url().split('/').pop();
@@ -250,6 +250,10 @@ for (const width of [1280,390]) {
   const oldSquad=(await(await request.get('/api/rooms/'+oldCode+'/clubs/'+clubCode,{headers})).json()).players.filter(player=>player.status==='Starting XI').map(player=>player.id);
   await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#leagueZone')).toContainText('Season 2');await expect(page.locator('#leagueZone')).toContainText('Matchday 0 / 34');
   const nextCode=page.url().split('/').pop();expect(nextCode).not.toBe(oldCode);
+  await expect(page.locator('#midseasonTacticsZone')).toContainText('End-of-season Tactics');
+  await page.reload(); await expect(page.locator('#midseasonTacticsZone')).toContainText('End-of-season Tactics');
+  await page.locator('#midseasonStyle').selectOption('vertical'); await page.locator('#btnChangeLeagueTactic').click();
+  await expect(page.locator('#midseasonTacticsZone')).toBeHidden();
   await expect(page.locator('#leagueSeasonHistoryZone')).toContainText('Season 1');
   const nextSquad=(await(await request.get('/api/rooms/'+nextCode+'/clubs/'+clubCode,{headers})).json()).players.filter(player=>player.status==='Starting XI').map(player=>player.id);
   expect(nextSquad).toEqual(oldSquad);
@@ -268,7 +272,7 @@ for (const width of [1280,390]) {
     await expect(page.locator('#btnSkipToTransfers')).toBeEnabled();
   } else await expect(page.locator('#transferZone')).toBeHidden();
   await page.reload();await expect(page.locator('#leagueZone')).toContainText('Season 2');
-  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonStyle')).toHaveValue('counter');
+  await page.locator('#btnSkipToTransfers').click();await expect(page.locator('#midseasonStyle')).toHaveValue('vertical');
   await page.locator('#btnKeepLeagueTactic').click();
   if(width===390) {
     await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();

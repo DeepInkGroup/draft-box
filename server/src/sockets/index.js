@@ -4,10 +4,11 @@ const activity = require('../userActivity');
 const rm = require('../game/roomManager');
 const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
-const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep } = require('../game/leagueAutoplay');
+const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep, managementPending } = require('../game/leagueAutoplay');
 const { leagueSnapshot } = require('../game/leagueEngine');
 const { transferSnapshot, planTransfer, transfersPending } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
+const { planFormationChange } = require('../game/leagueFormation');
 const { careerSnapshot, chooseManagerClub } = require('../game/leagueCareer');
 const { computeSquadCard, computeChampionshipOdds, predictKeyPlayers } = require('../game/ratings');
 const { normalizeStyle, isCustomStyleKey, tacticalCatalog } = require('../game/tacticalStyles');
@@ -481,6 +482,7 @@ function registerSocketHandlers(io) {
 
         if (member.viewedStep >= currentHistoryLength) {
           if (t.kind === 'league' && transfersPending(t)) throw new Error('Waiting for all players to complete or skip the transfer window');
+          if (t.kind === 'league' && managementPending(t)) throw new Error('Waiting for all players to choose or keep their tactics and formations');
           if (t.stage === 'done') {
             return socket.emit('error:message', { error: 'the tournament has already finished' });
           }
@@ -588,17 +590,40 @@ function registerSocketHandlers(io) {
       } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
+    function publishLeagueChoices(code, state, actorId) {
+      for (const client of io.sockets.sockets.values()) {
+        const member = state.members.get(client.user.id);
+        if (member && (client.id === socket.id || client.rooms.has(channelName(code)))) {
+          client.emit('league:transferState', { userId: actorId, transfers: transferSnapshot(state.tournament, client.user.id, member.viewedStep) });
+        }
+      }
+    }
+
     socket.on('league:tactics', ({ code, action, tacticalStyle }) => {
       try {
         const room = rm.getRoomByCode(code);
-        if (!room || room.mode !== 'league' || !room.single_player || room.status !== 'league_stage') throw new Error('The mid-season tactic window is not open');
+        if (!room || room.mode !== 'league' || room.status !== 'league_stage') throw new Error('The tactic window is not open');
         const state = rm.loadRoomState(room), member = state.members.get(socket.user.id);
         if (!member) throw new Error('Not a member of this league');
-        if (member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('Reach mid-season before changing tactics');
+        const choice = transferSnapshot(state.tournament, socket.user.id, member.viewedStep).tactics;
+        if (choice.phase !== 'choose') throw new Error('The tactic window is not open for you. Reach mid-season or the enabled next-season window first.');
         const next = planTacticChange(state.tournament,socket.user.id,action,tacticalStyle);
         rm.persistLeagueTactic(state,socket.user.id,next);
-        socket.emit('league:transferState',{ transfers: transferSnapshot(next,socket.user.id,member.viewedStep) });
+        publishLeagueChoices(code, state, socket.user.id);
       } catch (error) { socket.emit('error:message',{ error: error.message }); }
+    });
+
+    socket.on('league:formation', ({ code, action, formation }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || room.single_player || room.status !== 'league_stage') throw new Error('The mid-season formation window is not open');
+        const state = rm.loadRoomState(room), member = state.members.get(socket.user.id);
+        if (!member) throw new Error('Not a member of this league');
+        if (member.viewedStep < Math.floor(state.tournament.fixtures.length / 2)) throw new Error('Reach mid-season before changing formation');
+        const next = planFormationChange(state.tournament, socket.user.id, action, formation);
+        rm.persistLeagueRoster(state, socket.user.id, next);
+        publishLeagueChoices(code, state, socket.user.id);
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
     function publishCareer(room, state) {

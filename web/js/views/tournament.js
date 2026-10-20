@@ -22,6 +22,8 @@ const TournamentView = {
     let transferPending = false;
     let skipPending = false;
     let tacticPending = false;
+    let formationPending = false;
+    let midseasonFormation = null;
     let nextSeasonPending = false;
     let careerState = null;
     let managerDecisionPending = false;
@@ -46,6 +48,7 @@ const TournamentView = {
       <div class="center"><span class="stage-pill" id="stagePill">...</span></div>
       <div class="card transfer-window" id="transferZone" style="display:none;"></div>
       <div class="card" id="midseasonTacticsZone" style="display:none;"></div>
+      <div class="card" id="midseasonFormationZone" style="display:none;"></div>
       <div class="card" id="leagueTransferLogZone" style="display:none;"></div>
       <div class="card" id="leagueSeasonHistoryZone" style="display:none;"></div>
       <div class="card league-tools" id="leagueTools" style="display:none;"></div>
@@ -70,6 +73,7 @@ const TournamentView = {
     const leagueZone = container.querySelector('#leagueZone');
     const transferZone = container.querySelector('#transferZone');
     const tacticsZone = container.querySelector('#midseasonTacticsZone');
+    const formationZone = container.querySelector('#midseasonFormationZone');
     const logZone = container.querySelector('#leagueTransferLogZone');
     const seasonHistoryZone = container.querySelector('#leagueSeasonHistoryZone');
     const leagueTools = container.querySelector('#leagueTools');
@@ -135,7 +139,8 @@ const TournamentView = {
       leagueTools.querySelector('#leagueClubPlayers').innerHTML = players.length ? players.slice((clubPage-1)*12,clubPage*12).map(player => `<article class="transfer-player-card club-player-card ${player.status==='Starting XI' ? 'club-starter' : ''}"><div class="club-player-header"><span class="club-position club-position-${player.pos.toLowerCase()}">${player.pos}</span><div><h4>${escapeLeagueText(player.name)}</h4><span class="muted">${escapeLeagueText(player.rawPos || player.pos)}${player.slotCode ? ' / ' + escapeLeagueText(player.slotCode) : ''}</span></div><span class="club-overall">${player.overall}<small>OVR</small></span></div><div class="club-player-badges"><span class="badge">${player.status==='Club roster' ? 'Club roster / Reserve' : player.status}</span>${player.isStar ? '<span class="badge">Star</span>' : ''}${player.isCaptain ? '<span class="badge">Captain</span>' : ''}</div><p class="club-source">Source club: ${escapeLeagueText(player.clubName)}</p><dl class="transfer-player-stats club-player-stats">${[['Apps',player.stats.appearances],['Goals',player.stats.goals],['Assists',player.stats.assists],['Saves',player.stats.saves],['Yellow',player.stats.yellowCards],['Red',player.stats.redCards],['Star moments',player.stats.starMoments]].map(([label,value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join('')}</dl></article>`).join('') : '<div class="club-empty"><b>No matching players</b><p>Try another name, position or squad filter. Clear filters to see the full club.</p></div>';
     }
     function automaticResultsReady() {
-      return resultsOnly && container.contains(leagueTools) && App.state.roomCode===code && (viewedStep < historyLength || tournamentStage!=='done') && !advancePending && socket.connected && !['release','sign'].includes(transferState?.phase) && transferState?.tactics?.phase!=='choose';
+      const waiting = (transferState?.waitingFor?.length || setupWaiting().length) && viewedStep >= historyLength;
+      return resultsOnly && container.contains(leagueTools) && App.state.roomCode===code && (viewedStep < historyLength || tournamentStage!=='done') && !advancePending && !waiting && socket.connected && !['release','sign'].includes(transferState?.phase) && transferState?.tactics?.phase!=='choose' && transferState?.formations?.phase!=='choose';
     }
     function clearAutomaticTimer() {
       if (automaticTimer!==null) clearTimeout(automaticTimer);
@@ -164,6 +169,7 @@ const TournamentView = {
     function renderLeagueTools() {
       if (!isLeague || !leagueState) return;
       renderMidseasonTactics();
+      renderMidseasonFormation();
       renderTransferLog();
       const seasons = leagueState.previousSeasons || [];
       seasonHistoryZone.style.display = seasons.length ? '' : 'none';
@@ -208,7 +214,7 @@ const TournamentView = {
       const button = leagueTools.querySelector('#btnSkipToTransfers');
       const halfway = Math.floor(leagueState.totalMatchdays / 2);
       leagueTools.querySelector('.league-skip').style.display = singlePlayer && !resultsOnly && viewedStep < halfway && tournamentStage !== 'done' ? '' : 'none';
-      button.disabled = advancePending || skipPending || transferPending || (transferState?.windowType === 'endseason' && ['release', 'sign'].includes(transferState.phase));
+      button.disabled = advancePending || skipPending || transferPending || (viewedStep === 0 && transferState?.tactics?.phase === 'choose') || (transferState?.windowType === 'endseason' && ['release', 'sign'].includes(transferState.phase));
       button.textContent = skipPending ? 'Simulating to Mid-season...' : transferState?.phase === 'disabled' ? 'Simulate to Mid-season' : 'Simulate to Transfer Window';
       leagueTools.querySelector('#leagueSkipNote').textContent = transferState?.windowType === 'endseason' && ['release', 'sign'].includes(transferState.phase) ? 'Complete or skip end-of-season transfers before playing the new season.' : transferState?.phase === 'disabled' ? 'Simulate the remaining first-half fixtures. Transfers are closed for this season.' : 'Simulate the remaining first-half fixtures and stop at mid-season transfers.';
       leagueTools.querySelector('#leagueTransferRules').textContent = transferState?.enabled === false ? 'Transfers closed for this season' : `${transferState?.windowType === 'endseason' ? 'End-of-season' : 'Mid-season'} transfers - Maximum ${transferState?.maxChanges ?? 2} player changes`;
@@ -216,11 +222,15 @@ const TournamentView = {
       const pendingPlayers = transferState?.waitingFor || [];
       waiting.classList.toggle('hidden', !pendingPlayers.length);
       waiting.textContent = pendingPlayers.length ? 'Waiting for ' + pendingPlayers.map(player=>player.username+' ('+player.clubName+')').join(', ') + ' to complete or skip transfers.' : '';
+      let setupStatus = leagueTools.querySelector('#leagueManagementWaiting');
+      if (!setupStatus) { setupStatus = document.createElement('p'); setupStatus.id = 'leagueManagementWaiting'; setupStatus.className = 'help-callout'; setupStatus.setAttribute('role','status'); waiting.after(setupStatus); }
+      const managers = setupWaiting(); setupStatus.classList.toggle('hidden', !managers.length);
+      setupStatus.textContent = managers.length ? 'Waiting for ' + managers.map(manager=>manager.username).join(', ') + ' to choose or keep their tactics and formations.' : '';
       const cohesion = transferState?.cohesion;
       const panel = leagueTools.querySelector('#leagueCohesion');
       panel.classList.toggle('hidden', !cohesion?.changedPlayers);
       if (cohesion?.changedPlayers) panel.innerHTML = cohesion.matchesRemaining ? `<b>Team Coordination · Settling In</b><p>${cohesion.changedPlayers} new signing${cohesion.changedPlayers === 1 ? '' : 's'} · Attack and defense currently −${cohesion.penaltyPercent}%. Recovery: ${cohesion.matchesPlayed}/${cohesion.recoveryMatches} matches played.</p><progress max="${cohesion.recoveryMatches}" value="${cohesion.matchesPlayed}" aria-label="Team coordination recovery"></progress>` : '<b>Team Coordination · Fully Settled</b><p>Your new signings have settled in. The temporary transfer penalty has ended.</p>';
-      leagueTools.querySelector('.league-finish').style.display = singlePlayer && !resultsOnly && tournamentStage !== 'done' && viewedStep >= halfway && transferState?.tactics?.phase !== 'choose' && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
+      leagueTools.querySelector('.league-finish').style.display = singlePlayer && !resultsOnly && tournamentStage !== 'done' && viewedStep >= halfway && transferState?.tactics?.phase !== 'choose' && transferState?.formations?.phase !== 'choose' && ['complete', 'skipped', 'disabled'].includes(transferState?.phase) ? '' : 'none';
       const finishButton = leagueTools.querySelector('#btnFinishLeague');
       const autoStatus=leagueTools.querySelector('#leagueAutoStatus');
       autoStatus.style.display=resultsOnly && tournamentStage!=='done' ? '' : 'none';
@@ -259,13 +269,31 @@ const TournamentView = {
       tacticsZone.style.display = choice?.phase === 'choose' ? '' : 'none';
       if (choice?.phase !== 'choose') { midseasonStyle = null; return; }
       if (!midseasonStyle) midseasonStyle = choice.current;
-      tacticsZone.innerHTML = `<h3>Mid-season Tactics</h3><p class="muted">Choose a tactic for the second half, or keep your current plan. Your first-half results remain unchanged.</p><div class="field"><label for="midseasonStyle">Tactical Style</label><select id="midseasonStyle" ${tacticPending ? 'disabled' : ''}>${choice.styles.map(style => `<option value="${style.key}">${style.label}</option>`).join('')}</select></div><p class="muted" id="midseasonStyleDescription"></p><div class="dialog-actions"><button class="btn btn-ghost" id="btnKeepLeagueTactic" ${tacticPending ? 'disabled' : ''}>Keep Current Tactic</button><button class="btn btn-primary" id="btnChangeLeagueTactic" ${tacticPending ? 'disabled' : ''}>Apply Tactic</button></div>`;
+      const end = choice.windowType === 'endseason';
+      tacticsZone.innerHTML = `<h3>${end ? 'End-of-season' : 'Mid-season'} Tactics</h3><p class="muted">${end ? 'Choose a tactic before the new season starts, or carry your current plan forward.' : 'Choose a tactic for the second half, or keep your current plan. Your first-half results remain unchanged.'}${singlePlayer ? '' : ' Every manager chooses or keeps a tactic before fixtures resume.'}</p><div class="field"><label for="midseasonStyle">Tactical Style</label><select id="midseasonStyle" ${tacticPending ? 'disabled' : ''}>${choice.styles.map(style => `<option value="${style.key}">${style.label}</option>`).join('')}</select></div><p class="muted" id="midseasonStyleDescription"></p><div class="dialog-actions"><button class="btn btn-ghost" id="btnKeepLeagueTactic" ${tacticPending ? 'disabled' : ''}>Keep Current Tactic</button><button class="btn btn-primary" id="btnChangeLeagueTactic" ${tacticPending ? 'disabled' : ''}>Apply Tactic</button></div>`;
       const select = tacticsZone.querySelector('#midseasonStyle'); select.value = midseasonStyle;
       const describe = () => { midseasonStyle = select.value; tacticsZone.querySelector('#midseasonStyleDescription').textContent = choice.styles.find(style => style.key === select.value)?.desc || ''; };
       select.onchange = describe; describe();
       const send = (action) => { if (tacticPending) return; tacticPending = true; renderMidseasonTactics(); socket.emit('league:tactics',{ code, action, tacticalStyle: midseasonStyle }); };
       tacticsZone.querySelector('#btnKeepLeagueTactic').onclick = () => send('keep');
       tacticsZone.querySelector('#btnChangeLeagueTactic').onclick = () => send('change');
+    }
+
+    function setupWaiting() {
+      return [...new Map([...(transferState?.tactics?.waitingFor || []), ...(transferState?.formations?.waitingFor || [])].map(manager => [manager.userId, manager])).values()];
+    }
+    function renderMidseasonFormation() {
+      const choice = transferState?.formations;
+      formationZone.style.display = choice?.phase === 'choose' ? '' : 'none';
+      if (choice?.phase !== 'choose') { midseasonFormation = null; return; }
+      if (!midseasonFormation) midseasonFormation = choice.current;
+      formationZone.innerHTML = `<h3>Mid-season Formation</h3><p class="muted">Choose any shape. Your eleven players and captain stay in the squad and are placed in the best available roles. Earlier match results stay unchanged.</p><div class="field"><label for="midseasonFormation">New formation</label><select id="midseasonFormation" ${formationPending ? 'disabled' : ''}>${choice.formations.map(formation=>`<option value="${formation}">${formation}</option>`).join('')}</select></div><div id="midseasonFormationPreview"></div>${choice.canChange ? '' : '<p class="help-callout">Complete your player transfers to restore eleven players before applying a formation. You can also keep your current formation.</p>'}<div class="dialog-actions"><button class="btn btn-ghost" id="btnKeepLeagueFormation" ${formationPending ? 'disabled' : ''}>Keep Current Formation</button><button class="btn btn-primary" id="btnChangeLeagueFormation" ${formationPending || !choice.canChange ? 'disabled' : ''}>Apply Formation</button></div>`;
+      const select = formationZone.querySelector('#midseasonFormation'); select.value = midseasonFormation;
+      const preview = () => { midseasonFormation = select.value; Pitch.render(formationZone.querySelector('#midseasonFormationPreview'), getSlots(midseasonFormation), slot=>({text:slot.short,title:slot.label})); };
+      select.onchange = preview; preview();
+      const send = action => { if (formationPending) return; formationPending = true; renderMidseasonFormation(); socket.emit('league:formation', {code,action,formation:midseasonFormation}); };
+      formationZone.querySelector('#btnKeepLeagueFormation').onclick = () => send('keep');
+      formationZone.querySelector('#btnChangeLeagueFormation').onclick = () => send('change');
     }
     function renderTransferLog() {
       if (!transferState) return;
@@ -542,7 +570,7 @@ const TournamentView = {
     function renderButton() {
       renderLeagueTools();
       if (resultsOnly) {continueZone.style.display='none';return;}
-      if (transferState && (['release', 'sign'].includes(transferState.phase) || transferState.tactics?.phase === 'choose')) {
+      if (transferState && (['release', 'sign'].includes(transferState.phase) || transferState.tactics?.phase === 'choose' || transferState.formations?.phase === 'choose')) {
         continueZone.style.display = 'none';
         return;
       }
@@ -555,6 +583,7 @@ const TournamentView = {
       btnContinue.style.display = '';
       btnContinue.disabled = advancePending;
       if (isLeague && viewedStep >= historyLength && transferState?.waitingFor?.length) { btnContinue.disabled = true; btnContinue.textContent = 'Waiting for player transfers'; renderAdvanceReady(); return; }
+      if (isLeague && viewedStep >= historyLength && setupWaiting().length) { btnContinue.disabled = true; btnContinue.textContent = 'Waiting for player setup'; renderAdvanceReady(); return; }
       const me = advanceReady && (advanceReady.members || []).find((m) => Number(m.userId) === Number(App.state.user.id));
       if (me) isSpectator = me.required === false;
       if (viewedStep === 0) {
@@ -1150,6 +1179,7 @@ const TournamentView = {
       transferPending = false;
       skipPending = false;
       tacticPending = false;
+      formationPending = false;
       nextSeasonPending = false;
       const savedViewedStep = s.viewedStep || 0;
       if (savedViewedStep !== viewedStep) resultMatchday = null;
@@ -1163,7 +1193,7 @@ const TournamentView = {
       if (resultsOnly) stagePill.parentElement.after(stepCard);
       renderLeagueTools();
       if (isLeague) renderLeagueTable();
-      if (viewedStep === 0 && s.myLineup && !lineupRevealShown && transferState?.windowType !== 'endseason' && !resultsOnly) {
+      if (viewedStep === 0 && s.myLineup && !lineupRevealShown && transferState?.windowType !== 'endseason' && transferState?.tactics?.windowType !== 'endseason' && !resultsOnly) {
         renderLineupReveal(s.myLineup);
       } else {
         renderStep(s.myStep || null);
@@ -1284,7 +1314,8 @@ const TournamentView = {
     App.onSocket('league:transferState', (payload) => {
       const ownUpdate = !payload.userId || payload.userId === App.state.user.id;
       const signing = ownUpdate && transferPending;
-      if (ownUpdate) { transferPending = false; tacticPending = false; }
+      const forming = ownUpdate && formationPending;
+      if (ownUpdate) { transferPending = false; tacticPending = false; formationPending = false; }
       if (transferState?.phase !== 'sign' || payload.transfers.phase !== 'sign') offerSelection.clear();
       transferState = payload.transfers;
       if (ownUpdate) releaseSelection.clear();
@@ -1293,12 +1324,13 @@ const TournamentView = {
       renderButton();
       if (leagueTools.querySelector('#leagueSquadBrowser')?.open) loadClubSquad();
       requestAutomaticResults();
+      if (forming && transferState.formations?.phase === 'complete') App.toast('Formation saved: ' + transferState.formations.current + '. Your XI is complete.');
       if (signing && transferState.phase === 'complete') App.toast(`${transferState.incoming.length === 1 ? 'One player' : `${transferState.incoming.length} players`} signed. Your XI is complete.`, false);
     });
 
     App.onSocket('error:message', (e) => {
       clearAutomaticTimer();
-      tacticPending = false; nextSeasonPending = false; managerDecisionPending = false; renderCareer();
+      tacticPending = false; formationPending = false; nextSeasonPending = false; managerDecisionPending = false; renderCareer();
       const nextButton = championZone.querySelector('#btnNextLeagueSeason'); if (nextButton) { nextButton.disabled = false; nextButton.textContent = 'Continue to Next Season'; }
       advancePending = false;
       skipPending = false;
@@ -1317,7 +1349,7 @@ const TournamentView = {
 
     App.watchRoom(code, () => {
       clearAutomaticTimer(); stopLiveReport();
-      advancePending = transferPending = skipPending = tacticPending = nextSeasonPending = managerDecisionPending = false;
+      advancePending = transferPending = skipPending = tacticPending = formationPending = nextSeasonPending = managerDecisionPending = false;
     });
   }
 };

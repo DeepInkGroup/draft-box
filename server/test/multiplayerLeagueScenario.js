@@ -12,12 +12,13 @@ module.exports = async function multiplayerLeagueScenario({ request, event, conn
   assert.equal(solo.pickTimeMs, 0);
   const room = await request('/api/rooms', { token: host.token, status: 201, body: {
     mode: 'league', leagueId: 'pgl', clubCode: clubA.code, squadMode: 'real', humanSlotsMax: 2, pickTimeMs: 30000,
-    midseasonTactics: true, aiTransfers: true, endAiTransfers: true, endTransferEnabled: true, endTransferLimit: 1,
+    midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, aiTransfers: true, endAiTransfers: true, endTransferEnabled: true, endTransferLimit: 1,
     tournamentLength: 'quarter', transferLimit: 3
   } });
   assert.equal(room.pickTimeMs, 30000);
   assert.equal(room.tournamentLength, 'full');
-  for (const key of ['midseasonTactics', 'aiTransfers', 'endAiTransfers', 'resultsOnly']) assert.equal(room[key], false);
+  for (const key of ['aiTransfers', 'endAiTransfers', 'resultsOnly']) assert.equal(room[key], false);
+  for (const key of ['midseasonTactics','endseasonTactics','midseasonFormations']) assert.equal(room[key], true);
   await request('/api/rooms/' + room.code + '/join', { token: guest.token, status: 400, body: { clubCode: clubA.code } });
   await request('/api/rooms/' + room.code + '/join', { token: guest.token, status: 400, body: { clubCode: 'IRN' } });
   await request('/api/rooms/' + room.code + '/join', { token: guest.token, body: { clubCode: clubB.code, formation: '4-4-2' } });
@@ -69,6 +70,7 @@ module.exports = async function multiplayerLeagueScenario({ request, event, conn
     });
   }
   const signingA = await transfer(a, host.user.id, 'release', { playerIds: [stepA.transfers.squad[0].id] });
+  assert.match(await denied(a, 'league:formation', room.code, {action:'change',formation:'3-5-2'}), /Complete your transfers/);
   const guestConnection = await connect(guest.token);
   const signingB = await transfer(guestConnection, guest.user.id, 'release', { playerIds: [stepB.transfers.squad[0].id] });
   assert.equal(new Set([...signingA.market, ...signingB.market].map(player => player.id)).size, 4);
@@ -83,6 +85,22 @@ module.exports = async function multiplayerLeagueScenario({ request, event, conn
   assert.match(await denied(a, 'tournament:advance'), /all players/);
   const completeB = await transfer(b, guest.user.id, 'sign', { picks: picks(signingB) });
   assert.equal(completeB.waitingFor.length, 0);
+  async function setupChoice(client, id, input, payload, code = room.code) {
+    const ready = new Promise(resolve => {
+      const listener = data => { if (data.userId !== id) return; client.off('league:transferState', listener); resolve(data.transfers); };
+      client.on('league:transferState', listener);
+    });
+    client.emit(input, {code,...payload}); return ready;
+  }
+  await setupChoice(a, host.user.id, 'league:tactics', {action:'change',tacticalStyle:'vertical'});
+  await setupChoice(a, host.user.id, 'league:formation', {action:'change',formation:'3-5-2'});
+  assert.match(await denied(a, 'tournament:advance'), /all players/);
+  await setupChoice(b, guest.user.id, 'league:tactics', {action:'keep'});
+  await setupChoice(b, guest.user.id, 'league:formation', {action:'keep'});
+  await restart(); a = await connect(host.token); b = await connect(guest.token);
+  const resumed = await pull(a,'room:join','room:state'); await pull(b,'room:join','room:state');
+  assert.equal(resumed.myLineup.formation,'3-5-2'); assert.equal(resumed.transfers.formations.phase,'complete');
+  assert.equal(resumed.transfers.tactics.current,'vertical'); assert.equal(resumed.myLineup.xi.length,11);
   for (let day = 18; day <= 34; day++) {
     stepA = await pull(a, 'tournament:advance', 'tournament:step');
     stepB = await pull(b, 'tournament:advance', 'tournament:step');
@@ -103,7 +121,11 @@ module.exports = async function multiplayerLeagueScenario({ request, event, conn
   assert.equal(continuedA.transfers.maxChanges, 1);
   assert.equal(continuedA.myLineup.xi.length, 11); assert.equal(continuedB.myLineup.xi.length, 11);
   assert.equal(continuedA.league.previousSeasons[0].positions[clubB.code], stepB.league.table.find(team => team.code === clubB.code).rank);
-  assert.equal(continuedA.aiTransfers, false); assert.equal(continuedA.midseasonTactics, false);
+  assert.equal(continuedA.aiTransfers, false); assert.equal(continuedA.midseasonTactics, true);
+  assert.equal(continuedA.myLineup.formation,'3-5-2'); assert.equal(continuedA.transfers.tactics.windowType,'endseason');
+  assert.equal(continuedA.transfers.tactics.phase,'choose'); assert.equal(continuedA.transfers.formations.phase,'closed');
+  await setupChoice(a, host.user.id, 'league:tactics', {action:'change',tacticalStyle:'counter'}, next.newCode);
+  await setupChoice(b, guest.user.id, 'league:tactics', {action:'keep'}, next.newCode);
 
   // Draft Style uses a shared player pool but keeps each user's club assignment.
   const draftRoom = await request('/api/rooms', { token: host.token, status: 201, body: { mode: 'league', leagueId: 'pgl', clubCode: clubA.code, humanSlotsMax: 2, pickTimeMs: 0, transferEnabled: false } });

@@ -160,6 +160,8 @@ if (!columnExists('rooms', 'results_only')) db.exec('ALTER TABLE rooms ADD COLUM
 if (!columnExists('rooms', 'pgl_rating_boost')) db.exec('ALTER TABLE rooms ADD COLUMN pgl_rating_boost INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'end_ai_transfers')) db.exec('ALTER TABLE rooms ADD COLUMN end_ai_transfers INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'midseason_tactics')) db.exec('ALTER TABLE rooms ADD COLUMN midseason_tactics INTEGER NOT NULL DEFAULT 0;');
+if (!columnExists('rooms', 'endseason_tactics')) db.exec('ALTER TABLE rooms ADD COLUMN endseason_tactics INTEGER NOT NULL DEFAULT 0;');
+if (!columnExists('rooms', 'midseason_formations')) db.exec('ALTER TABLE rooms ADD COLUMN midseason_formations INTEGER NOT NULL DEFAULT 0;');
 if (!columnExists('rooms', 'ai_transfers')) db.exec('ALTER TABLE rooms ADD COLUMN ai_transfers INTEGER NOT NULL DEFAULT 0;');
 for (const column of ['manager_offers', 'player_departures']) {
   if (!columnExists('rooms', column)) db.exec(`ALTER TABLE rooms ADD COLUMN ${column} INTEGER NOT NULL DEFAULT 0;`);
