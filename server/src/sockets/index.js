@@ -6,7 +6,7 @@ const draftEngine = require('../game/draftEngine');
 const tournamentEngine = require('../game/tournamentEngine');
 const { playAutomaticLeague, leagueScoreResults, resultsOnlyStep, managementPending } = require('../game/leagueAutoplay');
 const { leagueSnapshot } = require('../game/leagueEngine');
-const { leagueStageAtCursor } = require('../game/leagueCup');
+const { leagueStageAtCursor, startLeagueCup, cupAwaitingStart } = require('../game/leagueCup');
 const { transferSnapshot, planTransfer, transfersPending } = require('../game/leagueTransfers');
 const { planTacticChange } = require('../game/leagueMidseason');
 const { planFormationChange } = require('../game/leagueFormation');
@@ -482,6 +482,7 @@ function registerSocketHandlers(io) {
         if (spoilerMode) ensureAdvanceReady(state);
 
         if (member.viewedStep >= currentHistoryLength) {
+          if (cupAwaitingStart(t)) throw new Error('The competition owner must start the Knockout Cup first');
           if (t.kind === 'league' && transfersPending(t)) throw new Error('Waiting for all players to complete or skip the transfer window');
           if (t.kind === 'league' && managementPending(t)) throw new Error('Waiting for all players to choose or keep their tactics and formations');
           if (t.stage === 'done') {
@@ -520,6 +521,23 @@ function registerSocketHandlers(io) {
       } catch (e) {
         socket.emit('error:message', { error: e.message });
       }
+    });
+
+    socket.on('league:startCup', ({ code }) => {
+      try {
+        const room = rm.getRoomByCode(code);
+        if (!room || room.mode !== 'league' || room.status !== 'league_stage') throw new Error('Start the cup after finishing the league season');
+        const state = rm.loadRoomState(room);
+        state.creatorId = room.creator_id;
+        startLeagueCup(state, socket.user.id);
+        rm.persistTournamentSnapshot(state);
+        for (const client of io.sockets.sockets.values()) {
+          const member = state.members.get(client.user.id);
+          if (member && (client.id === socket.id || client.rooms.has(channelName(code)))) client.emit('league:cupStarted', {
+            code, league: leagueSnapshot(state.tournament, member.viewedStep), stage: leagueStageAtCursor(state.tournament, member.viewedStep)
+          });
+        }
+      } catch (error) { socket.emit('error:message', { error: error.message }); }
     });
 
     socket.on('league:autoplay', ({ code, afterMatchday }) => {

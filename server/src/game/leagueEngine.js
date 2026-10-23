@@ -9,6 +9,7 @@ const { ensureTacticWindow, tacticsPending } = require('./leagueMidseason');
 const { ensureFormationWindow, formationsPending } = require('./leagueFormation');
 const { runAiTransfers, ensureClubRosters } = require('./leagueAiTransfers');
 const { seedLeagueCup, simulateCupStep, cupSnapshot } = require('./leagueCup');
+const { ensureCoachMarket, reviewAiCoaches, coachSnapshot } = require('./leagueCoaches');
 
 function createFixtures(codes) {
   if (codes.length < 2 || new Set(codes).size !== codes.length) throw new Error('a league needs distinct clubs');
@@ -71,6 +72,7 @@ function startLeague(roomState) {
     matchLog: [], history: [], champion: null, bracket: {}
   };
   roomState.tournament.initialTable = rankTable(roomState.tournament);
+  ensureCoachMarket(roomState.tournament);
   ensureClubRosters(roomState.tournament);
   roomState.tournament.initialClubRosters = structuredClone(roomState.tournament.clubRosters);
   roomState.tournament.initialXIs = Object.fromEntries(Object.values(slotByCode).map(team => [team.code, structuredClone(team.xi)]));
@@ -110,6 +112,7 @@ function simulateLeagueStep(roomState, applyResult, updateMorale) {
   runAiTransfers(t);
   ensureTransferWindow(t);
   const table = rankTable(t);
+  reviewAiCoaches(t, table);
   if (t.matchday === t.fixtures.length) {
     t.stage = 'done';
     t.champion = table[0].code;
@@ -127,7 +130,7 @@ function leagueSnapshot(t, viewedStep = 0) {
   if (t.kind !== 'league') return null;
   const leagueStep = Math.min(viewedStep, t.fixtures.length);
   const table = leagueStep > 0 ? t.history[leagueStep - 1]?.leagueTable : t.initialTable;
-  return { freeAgentCoaches: getLeague(t.leagueId)?.freeAgentCoaches || [], seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: leagueStep, totalMatchdays: t.fixtures.length, table: table || [], cup: cupSnapshot(t, viewedStep),
+  return { ...coachSnapshot(t, leagueStep), seasonDepartures: t.seasonDepartures || [], managerChanges: t.managerChanges || [], name: t.leagueName, resultsOnly: !!t.resultsOnly, pglRatingBoost: !!t.pglRatingBoost, seasonNumber: t.seasonNumber || 1, previousSeasons: t.previousSeasons || [], matchday: leagueStep, totalMatchdays: t.fixtures.length, table: table || [], cup: cupSnapshot(t, viewedStep),
     nextFixtures: (t.fixtures[viewedStep] || []).map((fixture) => {
       const a = t.slotByCode[fixture.aCode], b = t.slotByCode[fixture.bCode];
       return { ...fixture, aName: a.name, bName: b.name, aHuman: a.isHuman, bHuman: b.isHuman, aUsername: a.username, bUsername: b.username };

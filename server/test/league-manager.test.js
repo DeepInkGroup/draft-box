@@ -84,7 +84,7 @@ test('poor-results departures affect human and AI bottom-third clubs only, keep 
       assert.ok(Object.values(next.clubRosters).every(roster => !roster.some(player => player.id === entry.player.id)));
       assert.equal(team.xi.length, 11);
       assert.equal(new Set(team.xi.map(player => player.id)).size, 11);
-      assert.ok(cohesionSnapshot(team).penaltyPercent > 0);
+      assert.equal(cohesionSnapshot(team).penaltyPercent, 0);
       const profile = clubSquadSnapshot(browserState, 1, entry.clubCode).players.find(player => player.id === entry.player.id);
       assert.equal(profile.status, 'Released');
     }
@@ -117,7 +117,7 @@ test('incoming managers get distinct reserve replacements while existing owners 
   for (const team of incoming) {
     const replacement = team.xi.find(player => player.pos === 'GK');
     assert.notEqual(replacement.id, keeper.id); assert.equal(replacement.isCaptain, true);
-    assert.ok(cohesionSnapshot(team).penaltyPercent > 0);
+    assert.equal(cohesionSnapshot(team).penaltyPercent, 0);
     assert.ok(t.clubRosters[team.code].some(player => player.id === replacement.id));
   }
   const settled = JSON.stringify(t.slotByCode);

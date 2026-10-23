@@ -22,13 +22,25 @@ function seedLeagueCup(state, table, random = Math.random) {
   for (let index = draw.length - 1; index > 0; index--) {
     const other = Math.floor(random() * (index + 1)); [draw[index], draw[other]] = [draw[other], draw[index]];
   }
-  t.cup = { qualifiers, draw, rounds: [{ ...CUP_ROUNDS[0], fixtures: pairTeams(draw), played: false }], champion: null };
+  t.cup = { qualifiers, draw, started: false, rounds: [{ ...CUP_ROUNDS[0], fixtures: pairTeams(draw), played: false }], champion: null };
   for (const code of Object.keys(t.slotByCode)) if (!qualifiers.includes(code)) eliminate(state, code);
-  t.stage = 'cup_r16';
+  t.stage = 'cup_waiting';
+}
+const cupAwaitingStart = t => !!t?.cup && (t.cup.started === false ||
+  t.cup.started === undefined && !t.cup.champion && !t.cup.rounds.some(round => round.played));
+function startLeagueCup(state, userId) {
+  if (state.creatorId !== userId) throw new Error('Only the competition owner can start the Knockout Cup');
+  const member = state.members.get(userId), t = state.tournament;
+  if (!member) throw new Error('Not a member of this league');
+  if (!t?.knockoutCup || !t.cup || t.matchday !== t.fixtures.length) throw new Error('Finish the league season before starting the Knockout Cup');
+  if (member.viewedStep < t.fixtures.length) throw new Error('View the final league results before starting the Knockout Cup');
+  if (!cupAwaitingStart(t)) return false;
+  t.cup.started = true; t.stage = 'cup_r16'; return true;
 }
 function simulateCupStep(state, simulate = simulateMatch, updateMorale = () => {}) {
   const t = state.tournament, cup = t.cup;
   if (!cup || t.stage === 'done') return null;
+  if (cupAwaitingStart(t)) throw new Error('The competition owner must start the Knockout Cup first');
   const roundIndex = cup.rounds.findIndex(round => !round.played);
   if (roundIndex < 0) throw new Error('The cup has no pending round');
   const round = cup.rounds[roundIndex], matches = [], winners = [];
@@ -58,6 +70,7 @@ function leagueStageAtCursor(t, cursor) {
   if (cursor < t.fixtures.length) return 'league';
   if (!t.knockoutCup) return t.stage;
   const index = cursor - t.fixtures.length;
+  if (index === 0 && cupAwaitingStart(t)) return 'cup_waiting';
   return index >= CUP_ROUNDS.length ? 'done' : 'cup_' + CUP_ROUNDS[index].stage;
 }
 function cupSnapshot(t, cursor) {
@@ -69,7 +82,7 @@ function cupSnapshot(t, cursor) {
   const rounds = CUP_ROUNDS.map((info, index) => ({ ...info, played: index < visible,
     matches: index <= visible ? (t.cup.rounds[index]?.fixtures || []).map(match => ({ a: team(match.aCode), b: team(match.bCode),
       ...(index < visible ? { winnerCode: match.winnerCode, goalsA: match.goalsA, goalsB: match.goalsB, wentToExtraTime: match.wentToExtraTime, wentToPenalties: match.wentToPenalties, penalties: match.penalties } : {}) })) : [] }));
-  return { ...common, phase: visible === 4 ? 'done' : 'active', completedRounds: visible, qualifiers: t.cup.qualifiers.map(team),
+  return { ...common, phase: visible === 4 ? 'done' : cupAwaitingStart(t) ? 'ready' : 'active', completedRounds: visible, qualifiers: t.cup.qualifiers.map((code, index) => ({ ...team(code), rank: index + 1 })),
     leagueChampion: team(t.champion), champion: visible === 4 ? team(t.cup.champion) : null, rounds };
 }
-module.exports = { CUP_ROUNDS, seedLeagueCup, simulateCupStep, cupSnapshot, leagueStageAtCursor };
+module.exports = { CUP_ROUNDS, seedLeagueCup, startLeagueCup, cupAwaitingStart, simulateCupStep, cupSnapshot, leagueStageAtCursor };

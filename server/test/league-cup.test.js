@@ -4,7 +4,7 @@ const { getLeague } = require('../src/data/competitions');
 const { bestXI } = require('../src/game/botEngine');
 const { startLeague, rankTable, leagueSnapshot } = require('../src/game/leagueEngine');
 const { simulateNextStep, decorateStep } = require('../src/game/tournamentEngine');
-const { seedLeagueCup, simulateCupStep, cupSnapshot, leagueStageAtCursor } = require('../src/game/leagueCup');
+const { seedLeagueCup, startLeagueCup, simulateCupStep, cupSnapshot, leagueStageAtCursor } = require('../src/game/leagueCup');
 const { playAutomaticLeague, leagueScoreResults } = require('../src/game/leagueAutoplay');
 const { seasonResults } = require('../src/game/leagueResults');
 const { clubSquadSnapshot } = require('../src/game/leagueSquads');
@@ -15,7 +15,7 @@ function season(options = {}) {
     userId: i + 1, username: 'manager' + i, clubCode: club.code, squad: bestXI(club),
     formation: '4-3-3', tacticalStyle: 'balanced', tacticalStyleLocked: true, viewedStep: 0
   }]));
-  const state = { mode: 'league', leagueId: 'pgl', knockoutCup: true, resultsOnly: true, transferEnabled: false, ...options, members };
+  const state = { creatorId: 1, mode: 'league', leagueId: 'pgl', knockoutCup: true, resultsOnly: true, transferEnabled: false, ...options, members };
   startLeague(state); return state;
 }
 function regularSeason(state) { for (let day = 0; day < 34; day++) simulateNextStep(state); return state.tournament; }
@@ -26,7 +26,15 @@ test('cup qualifies exactly the top sixteen after all league fixtures, with a sa
   assert.equal(t.cup, undefined); assert.equal(cupSnapshot(t, 33).phase, 'pending');
   const last = simulateNextStep(state), table = rankTable(t);
   assert.equal(last.champion, true); assert.equal(last.competitionFinished, false);
-  assert.equal(t.matchLog.length, 306); assert.equal(t.stage, 'cup_r16');
+  assert.equal(t.matchLog.length, 306); assert.equal(t.stage, 'cup_waiting');
+  assert.equal(cupSnapshot(t, 34).phase, 'ready');
+  delete t.cup.started; t.stage = 'cup_r16';
+  assert.equal(cupSnapshot(t, 34).phase, 'ready', 'Older unplayed cup draws also wait for the owner');
+  assert.throws(() => simulateNextStep(state), /owner must start/);
+  assert.throws(() => startLeagueCup(state, 2), /Only the competition owner/);
+  assert.throws(() => startLeagueCup(state, 1), /View the final league results/);
+  state.members.get(1).viewedStep = 34;
+  assert.equal(startLeagueCup(state, 1), true); assert.equal(startLeagueCup(state, 1), false);
   assert.deepEqual(t.cup.qualifiers, table.slice(0, 16).map(row => row.code));
   assert.deepEqual([...t.cup.draw].sort(), [...t.cup.qualifiers].sort());
   assert.equal(new Set(t.cup.draw).size, 16); assert.equal(t.cup.rounds[0].fixtures.length, 8);
@@ -41,6 +49,7 @@ test('cup qualifies exactly the top sixteen after all league fixtures, with a sa
 test('single elimination advances 8, 4, 2 and 1 winners, preserving the league title and standings', () => {
   const state = season(), t = regularSeason(state), leagueTitle = t.champion;
   const finalTable = JSON.stringify(rankTable(t)), regularAwards = seasonResults(t);
+  state.members.get(1).viewedStep = 34; startLeagueCup(state, 1);
   let entrants = t.cup.draw;
   for (const [index, count] of [8, 4, 2, 1].entries()) {
     const step = simulateNextStep(state), winners = step.matches.map(match => match.winnerCode);
@@ -54,6 +63,7 @@ test('single elimination advances 8, 4, 2 and 1 winners, preserving the league t
       assert.equal(t.slotByCode[match.winnerCode === match.aCode ? match.bCode : match.aCode].eliminated, true);
     }
     assert.equal(step.competitionFinished, index === 3); entrants = winners;
+    if (index === 0) delete t.cup.started; // Older cups already in progress keep running.
   }
   assert.equal(t.cup.champion, entrants[0]); assert.equal(t.stage, 'done'); assert.equal(t.champion, leagueTitle);
   assert.equal(t.matchday, 34); assert.equal(t.history.length, 38); assert.equal(t.matchLog.length, 321);
@@ -71,6 +81,7 @@ test('single elimination advances 8, 4, 2 and 1 winners, preserving the league t
 
 test('penalties resolve drawn cup ties and behind members cannot see future bracket winners', () => {
   const state = season(), t = regularSeason(state);
+  state.members.get(1).viewedStep = 34; startLeagueCup(state, 1);
   const penalties = () => ({ goalsA: 1, goalsB: 1, wentToExtraTime: true, wentToPenalties: true, penaltyWinner: 'B', penalties: { A: 3, B: 4 }, events: [] });
   for (let round = 0; round < 4; round++) {
     const step = simulateCupStep(state, penalties);
@@ -97,6 +108,12 @@ test('penalties resolve drawn cup ties and behind members cannot see future brac
 test('automatic multiplayer results show all four cup rounds once per member, including eliminated spectators', () => {
   const state = season();
   for (let cursor = 0; cursor < 38; cursor++) {
+    if (cursor === 34) {
+      assert.equal(playAutomaticLeague(state, 1, () => { throw Error('Cup must wait for the owner'); }, cursor), 0);
+      const restored = JSON.parse(JSON.stringify(state.tournament));
+      assert.equal(restored.cup.started, false); assert.equal(restored.history.length, 34);
+      startLeagueCup(state, 1);
+    }
     assert.equal(playAutomaticLeague(state, 1, () => simulateNextStep(state), cursor), 1);
     assert.equal(state.members.get(1).viewedStep, cursor + 1);
   }

@@ -1,7 +1,7 @@
 const RECOVERY_MATCHES = 4;
 const PENALTY_PER_PLAYER = 0.015;
 function cohesionSnapshot(team) {
-  const state = team?.rosterCohesion;
+  const state = team?.rosterCohesion?.changedAfterMatchday === 0 ? null : team?.rosterCohesion;
   const changedPlayers = state?.changedPlayers || 0;
   const played = Math.min(RECOVERY_MATCHES, Math.max(0, state?.matchesPlayed || 0));
   const penalty = changedPlayers * PENALTY_PER_PLAYER * (1 - played / RECOVERY_MATCHES);
@@ -10,6 +10,7 @@ function cohesionSnapshot(team) {
     penaltyPercent: +(penalty * 100).toFixed(3), multiplier: +(1 - penalty).toFixed(6) };
 }
 function startCohesionRecovery(team, changedPlayers, matchday) {
+  if (matchday <= 0) { team.rosterCohesion = null; return; }
   team.rosterCohesion = { changedPlayers, matchesPlayed: 0, changedAfterMatchday: matchday };
 }
 function recoverCohesion(team) {

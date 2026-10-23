@@ -567,7 +567,7 @@ test('hosted app supports multiplayer, World Cup, a complete PGL season and pers
   assert.ok(endRestored.transfers.market.every(player=>player.overall===basePlayer(player.id).overall+10));
   assert.deepEqual(endRestored.transfers.market,endOffers.market);assert.equal(endRestored.transfers.windowType,'endseason');
   promise=event(resumeCareer,'league:transferState');resumeCareer.emit('league:transfer',{code:continuation.newCode,action:'sign',picks:endOffers.vacancies.map(slot=>({slotCode:slot.code,playerId:endOffers.market.find(player=>player.eligibleSlots.includes(slot.code)).id}))});
-  const endSigned=(await promise).transfers;assert.equal(endSigned.squad.length,11);assert.equal(endSigned.cohesion.penaltyPercent,4.5);assert.equal(endSigned.log.length,3);
+  const endSigned=(await promise).transfers;assert.equal(endSigned.squad.length,11);assert.equal(endSigned.cohesion.penaltyPercent,0);assert.equal(endSigned.log.length,3);
   assert.ok(endSigned.log.every(entry=>entry.windowType==='endseason'&&entry.matchday===0));
   assert.deepEqual(await request('/api/admin/leagues/'+career.code,{token:admin.token}),oldReport);
   promise=event(resumeCareer,'league:midseason');resumeCareer.emit('league:skipToTransfers',{code:continuation.newCode});await promise;

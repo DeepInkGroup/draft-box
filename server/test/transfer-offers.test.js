@@ -38,7 +38,7 @@ test('random offers ignore ratings, stay fixed, reject unoffered players and can
     assert.notEqual(JSON.stringify(progress.offers), first);
   }
 });
-test('end-season settings are independent, block play and apply chemistry to the new season', () => {
+test('end-season settings are independent, block play and start the new season without a chemistry penalty', () => {
   for (const maxChanges of [1, 2, 3]) {
     const state = season({transferEnabled: false, endTransferEnabled: true, endTransferLimit: maxChanges, endAiTransfers: true});
     const t = state.tournament;
@@ -54,7 +54,8 @@ test('end-season settings are independent, block play and apply chemistry to the
     const signing = transferSnapshot(next, 1, 0);
     const picks = signing.vacancies.map(slot => ({slotCode: slot.code, playerId: signing.market.find(player => player.eligibleSlots.includes(slot.code)).id}));
     state.tournament = planTransfer(next, 1, 'sign', {picks});
-    assert.equal(transferSnapshot(state.tournament, 1, 0).cohesion.penaltyPercent, maxChanges * 1.5);
+    assert.equal(transferSnapshot(state.tournament, 1, 0).cohesion.penaltyPercent, 0);
+    assert.ok(Object.values(state.tournament.slotByCode).every(team => !team.rosterCohesion));
     for (let day = 1; day <= 4; day++) simulateLeagueStep(state, () => {});
     assert.equal(transferSnapshot(state.tournament, 1, 4).cohesion.penaltyPercent, 0);
     assert.equal(transferSnapshot(state.tournament, 1, 4).phase, 'disabled');

@@ -1,9 +1,10 @@
 const { transfersPending } = require('./leagueTransfers');
 const { tacticsPending } = require('./leagueMidseason');
 const { formationsPending } = require('./leagueFormation');
+const { cupAwaitingStart } = require('./leagueCup');
 
 function managementPending(t) {
-  return transfersPending(t) || tacticsPending(t) || formationsPending(t);
+  return transfersPending(t) || tacticsPending(t) || formationsPending(t) || cupAwaitingStart(t);
 }
 // Return one completed matchday at a time so the browser can present each result.
 // An expected cursor prevents delayed or duplicate requests from skipping ahead.

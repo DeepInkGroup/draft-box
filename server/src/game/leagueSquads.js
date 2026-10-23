@@ -2,6 +2,7 @@ const { getLeague, getTeam, ratedClub } = require('../data/competitions');
 const { statsByPlayer } = require('./leagueTransfers');
 const { TACTICAL_STYLES } = require('./tacticalStyles');
 const { cohesionAtMatchday } = require('./leagueCohesion');
+const { coachSnapshot } = require('./leagueCoaches');
 
 function clubSquadSnapshot(roomState, userId, clubCode) {
   const member = roomState.members.get(userId);
@@ -37,7 +38,7 @@ function clubSquadSnapshot(roomState, userId, clubCode) {
     stats: stats.get(player.id) || { appearances: 0, goals: 0, assists: 0, saves: 0, yellowCards: 0, redCards: 0, starMoments: 0 }
   })).sort((a, b) => Number(xi.has(b.id)) - Number(xi.has(a.id)) || b.overall - a.overall || a.name.localeCompare(b.name));
   const style = beforeTransfers ? t.initialTactics?.[clubCode] || slot.tacticalStyle : slot.tacticalStyle;
-  return { code: clubCode, name: slot.name, headCoach: slot.headCoach || club.headCoach, logo: club.logo, formation: beforeTransfers ? t.initialFormations?.[clubCode] || slot.formation : slot.formation, tacticalStyle: slot.customTactic?.name || TACTICAL_STYLES[style]?.label || 'Balanced',
+  return { code: clubCode, name: slot.name, headCoach: coachSnapshot(t, matchday).headCoaches[clubCode] || club.headCoach, logo: club.logo, formation: beforeTransfers ? t.initialFormations?.[clubCode] || slot.formation : slot.formation, tacticalStyle: slot.customTactic?.name || TACTICAL_STYLES[style]?.label || 'Balanced',
     isHuman: slot.isHuman, username: slot.username || null, matchday, cupRounds: Math.max(0, throughStep - t.fixtures.length), players, cohesion: cohesionAtMatchday(slot, throughStep) };
 }
 module.exports = { clubSquadSnapshot };

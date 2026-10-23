@@ -57,7 +57,10 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true });
     assert.equal(pgl.matchdays, 34);
     assert.equal(pgl.knockoutCupAvailable, true);
-    assert.equal(pgl.knockoutCupVersion, 1);
+    assert.equal(pgl.knockoutCupOwnerStart, true);
+    assert.equal(pgl.coachManagementVersion, 1);
+    assert.deepEqual(pgl.transferChemistry, { midseason: true, endseason: false, recoveryMatches: 4 });
+    assert.equal(pgl.knockoutCupVersion, 2);
     assert.deepEqual(pgl.knockoutCupFormat, { qualifyingTeams: 16, rounds: ['r16', 'qf', 'sf', 'final'], singleElimination: true, randomDraw: true });
     assert.ok(pgl.squadModes.includes('real'), 'Real club squads must be available');
     assert.equal(pgl.transferWindowAfterMatchday, 17);
@@ -100,6 +103,8 @@ async function request(url, verify, options = {}, attempts = 6) {
     const source = await response.text();
     assert.match(source, /league:managerDecision/);
     assert.match(source, /PGL Knockout Cup Champion/);
+    assert.match(source, /league:startCup/);
+    assert.match(source, /AI Coaching Changes/);
   });
 })().catch((error) => {
   console.error(error.message);

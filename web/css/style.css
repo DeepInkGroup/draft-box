@@ -1714,6 +1714,24 @@ input, select, textarea { max-width: 100%; }
 .club-identity .club-label { display: inline-flex; align-items: baseline; flex-wrap: wrap; column-gap: 6px; }
 .club-manager { color: var(--accent-strong); font-size: max(.85em, 11px); font-weight: 600; overflow-wrap: anywhere; }
 .cup-rounds { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-items: start; }
+.cup-start-card { margin: 18px 0; padding: 20px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: var(--radius); }
+.cup-start-card h3 { margin-top: 12px; }
+.cup-start-card p { line-height: 1.6; }
+.cup-start-card .btn { min-height: 48px; }
+.cup-progress { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 20px 0; }
+.cup-progress li { min-width: 0; padding: 10px 8px; border: 1px solid var(--border); border-radius: 8px; font-size: .78rem; color: var(--muted); overflow-wrap: anywhere; }
+.cup-progress li > span { display: block; font-size: .68rem; font-weight: 700; margin-bottom: 5px; }
+.cup-progress li.current { border-color: var(--accent); color: var(--accent-strong); background: var(--accent-soft); }
+.cup-progress li.complete { color: var(--pitch-accent); }
+.cup-next-round { padding: 12px; background: var(--surface-2); border-radius: 8px; }
+.cup-qualifiers { margin: 18px 0; }
+.cup-qualifiers summary { cursor: pointer; font-weight: 600; }
+.cup-qualifiers > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+.cup-qualifiers p { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: .85rem; }
+.coach-change-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; }
+.coach-change-list article { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); min-width: 0; overflow-wrap: anywhere; }
+.coach-change-list h4 { margin: 12px 0; }
+@media (max-width: 640px) { .cup-progress { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cup-qualifiers > div { grid-template-columns: minmax(0, 1fr); } }
 .cup-round { min-width: 0; padding: 12px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-2); }
 .cup-round summary { cursor: pointer; font-weight: 700; overflow-wrap: anywhere; }
 .cup-round summary .badge { display: block; width: fit-content; margin-top: 6px; }
@@ -1738,8 +1756,8 @@ input, select, textarea { max-width: 100%; }
 .lobby-club-info { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; min-width: 0; }
 .lobby-club-info .club-logo-large { width: 40px; height: 40px; flex-basis: 40px; }
 .lobby-club-info .club-profile { flex: 1 1 180px; }
-.coach-directory { margin: 16px 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
-.coach-directory summary { cursor: pointer; font-weight: 600; }
+.coach-directory, .coach-change-directory { margin: 16px 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.coach-directory summary, .coach-change-directory summary { cursor: pointer; font-weight: 600; }
 .coach-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 8px 24px; padding-left: 20px; margin: 16px 0 0; color: var(--muted); font-size: .85rem; }
 .league-club-name > .club-identity { vertical-align: middle; }
 .match-team-name:has(.club-identity) { white-space: normal; overflow: visible; }

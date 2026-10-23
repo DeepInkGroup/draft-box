@@ -210,6 +210,7 @@ function loadRoomState(roomRow) {
 
   const state = {
     roomId: roomRow.id,
+    creatorId: roomRow.creator_id,
     code: roomRow.code,
     mode: roomRow.mode,
     leagueId: roomRow.league_id || null,
@@ -415,9 +416,12 @@ function continueLeagueSeason(previous, userId) {
       const { teamStrength } = require('./botEngine');
       startLeague(state);
       for (const [code,team] of Object.entries(carry.slotByCode)) {
-        Object.assign(state.tournament.slotByCode[code],{ xi: structuredClone(team.xi), formation: team.formation, tacticalStyle: team.tacticalStyle, strength: teamStrength(team.xi), rosterCohesion: structuredClone(team.rosterCohesion || null) });
+        Object.assign(state.tournament.slotByCode[code],{ headCoach: structuredClone(team.headCoach || null), xi: structuredClone(team.xi), formation: team.formation, tacticalStyle: team.tacticalStyle, strength: teamStrength(team.xi), rosterCohesion: null });
       }
       const t = state.tournament;
+      t.freeAgentCoaches = structuredClone(carry.freeAgentCoaches || getLeague(t.leagueId).freeAgentCoaches || []);
+      t.initialFreeAgentCoaches = structuredClone(t.freeAgentCoaches);
+      t.initialHeadCoaches = Object.fromEntries(Object.values(t.slotByCode).map(team => [team.code, structuredClone(team.headCoach || null)]));
       t.clubRosters = structuredClone(carry.clubRosters || t.clubRosters);
       t.freeAgents = structuredClone(carry.freeAgents || []);
       t.seasonDepartures = structuredClone(carry.seasonDepartures || []);

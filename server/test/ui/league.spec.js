@@ -268,7 +268,8 @@ for (const width of [1280,390]) {
     await page.reload();await expect(page.locator('#transferPick0 button')).toHaveCount(2);
     await page.locator('#transferPick0 button').last().click();await page.locator('#btnSignPlayers').click();
     await expect(page.locator('#transferZone')).toBeHidden();
-    await expect(page.locator('#leagueCohesion')).toContainText('0/4 matches');
+    await expect(page.locator('#leagueCohesion')).toBeHidden();
+    expect((await(await request.get('/api/rooms/'+nextCode+'/clubs/'+clubCode,{headers})).json()).cohesion.penaltyPercent).toBe(0);
     await expect(page.locator('#btnSkipToTransfers')).toBeEnabled();
   } else await expect(page.locator('#transferZone')).toBeHidden();
   await page.reload();await expect(page.locator('#leagueZone')).toContainText('Season 2');
@@ -278,6 +279,7 @@ for (const width of [1280,390]) {
     await page.locator('[data-release]').first().click();await page.locator('#btnReleasePlayers').click();
     await expect(page.locator('#btnSignPlayers')).toBeDisabled();
     await page.locator('#transferPick0 button').first().click();await page.locator('#btnSignPlayers').click();
+    await expect(page.locator('#leagueCohesion')).toContainText('0/4 matches');
   } else await page.locator('#btnSkipTransfers').click();
   await page.locator('#btnFinishLeague').click();await expect(page.locator('#seasonResults')).toContainText('306 matches',{timeout:20000});
   await page.locator('#btnNextLeagueSeason').click();await expect(page.locator('#leagueZone')).toContainText('Season 3');
