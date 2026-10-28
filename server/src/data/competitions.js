@@ -28,6 +28,7 @@ function getPlayer(id) { return LEAGUE_PLAYER_BY_ID.get(id) || worldCup.getPlaye
 function leagueCatalog() {
   return Array.from(LEAGUES.values()).map((league) => ({
     id: league.id, name: league.name, country: league.country, singlePlayerOnly: false,
+    gameplayVersion: 1, gameplay: { fairHumanAI: true, roleBasedRatings: true, homeAdvantage: true, neutralCup: true, timeWeightedRedCards: true },
     multiplayerAvailable: true, multiplayerVersion: 2, multiplayerMaxPlayers: league.teams.length,
     multiplayerOptions: { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true },
     knockoutCupAvailable: league.id === 'pgl', knockoutCupVersion: 2, knockoutCupOwnerStart: true, coachManagementVersion: 1, transferChemistry: { midseason: true, endseason: false, recoveryMatches: 4 },

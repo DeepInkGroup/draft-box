@@ -278,7 +278,7 @@ function analyzeMatch(m, mySide, myName, oppName) {
   addFactor('Finishing', `${finishingDiff >= 0 ? '+' : ''}${fmt1(finishingDiff)}`, finishingDiff >= 0.8 ? 'Finished well above expected output.' : finishingDiff <= -0.8 ? 'Chances were left on the table.' : 'Conversion tracked the chance quality.', finishingDiff >= 0.6 ? 'good' : finishingDiff <= -0.6 ? 'bad' : 'neutral');
   if (myFinishing && oppFinishing) {
     const finEdge = (myFinishing.finishingMultiplier || 1) - (oppFinishing.finishingMultiplier || 1);
-    const finDetail = `Own finisher multiplier ${fmt1((myFinishing.finishingMultiplier || 1) * 100)}% vs opponent ${fmt1((oppFinishing.finishingMultiplier || 1) * 100)}%; top finisher quality ${myFinishing.finisherQuality || '-'} vs ${oppFinishing.finisherQuality || '-'}.`;
+    const finDetail = `Own finisher multiplier ${fmt1((myFinishing.finishingMultiplier || 1) * 100)}% vs opponent ${fmt1((oppFinishing.finishingMultiplier || 1) * 100)}%; finisher quality ${myFinishing.attackerAverage ?? myFinishing.finisherQuality ?? '-'} vs ${oppFinishing.attackerAverage ?? oppFinishing.finisherQuality ?? '-'}.`;
     addFactor('Finishing Edge', `${finEdge >= 0 ? '+' : ''}${fmt1(finEdge * 100)}%`, finDetail, finEdge >= 0.04 ? 'good' : finEdge <= -0.04 ? 'bad' : 'neutral');
   }
   if (myXgSplit && oppXgSplit) {
@@ -294,6 +294,18 @@ function analyzeMatch(m, mySide, myName, oppName) {
   }
   addFactor('Control', `${possDiff >= 0 ? '+' : ''}${possDiff}%`, `${myStats.possession}% possession and ${myStats.passAccuracy}% pass accuracy.`, possDiff >= 10 ? 'good' : possDiff <= -10 ? 'bad' : 'neutral');
   addFactor('Keeper Impact', `${saveSwing >= 0 ? '+' : ''}${saveSwing}`, `${myStats.saves} saves for, ${oppStats.saves} against.`, saveSwing >= 2 ? 'good' : saveSwing <= -2 ? 'bad' : 'neutral');
+  if (m.leagueGameplay) {
+    const model = m.leagueGameplay, own = model[mySide], opponent = model[oppSide];
+    addFactor('League Venue', model.homeSide === mySide ? 'Home' : model.homeSide ? 'Away' : 'Neutral', model.homeSide ? 'The home club receives a modest chance-creation advantage. Human and AI managers use the same rules.' : 'Cup ties have no home advantage. Human and AI managers use the same rules.', model.homeSide === mySide ? 'good' : 'neutral');
+    if (own && opponent) {
+      const changes = own.adjustments.map(player => `${player.name}: ${player.assignedRole}`).join('; ');
+      addFactor('Player Roles', `${Math.round(own.roleFit * 100)}% fit`, changes ? `Players covering less familiar roles: ${changes}. Their quality is adjusted for this match.` : 'Every player is in a compatible role. Forwards drive finishing, midfielders build chances and defenders protect the goal.', changes ? 'bad' : 'good');
+      const midfieldEdge = own.lines.midfield - opponent.lines.midfield;
+      addFactor('Midfield Quality', `${midfieldEdge >= 0 ? '+' : ''}${fmt1(midfieldEdge)}`, `Midfield quality ${fmt1(own.lines.midfield)} vs ${fmt1(opponent.lines.midfield)} shapes possession and passing.`, midfieldEdge > 4 ? 'good' : midfieldEdge < -4 ? 'bad' : 'neutral');
+    }
+    const red = model.redCardImpact[mySide];
+    if (red.attack < 1) addFactor('Sending-off Impact', `-${fmt1((1 - red.attack) * 100)}% attack`, 'The performance loss depends on how much of the match remained when players were sent off.', 'bad');
+  }
   if (myChem && oppChem) {
     const chemDiff = myChem.multiplier - oppChem.multiplier;
     addFactor('Chemistry', `${chemDiff >= 0 ? '+' : ''}${fmt1(chemDiff * 100)}%`, `Fit ${Math.round((myChem.positionFit || 0) * 100)}%, line balance ${Math.round((myChem.lineBalance || 0) * 100)}%, OOP ${myChem.outOfPosition || 0}.`, chemDiff >= 0.015 ? 'good' : chemDiff <= -0.015 ? 'bad' : 'neutral');
@@ -347,6 +359,11 @@ function analyzeMatch(m, mySide, myName, oppName) {
     starStory(starEvents, mySide, oppSide)
   ].filter(Boolean);
   const finalVerdict = verdict(outcome, xgDiff, finishingDiff);
+  if (m.leagueGameplay) {
+    const leagueFactors = ['League Venue', 'Player Roles', 'Midfield Quality', 'Sending-off Impact'];
+    const priority = factor => leagueFactors.includes(factor.label) ? leagueFactors.indexOf(factor.label) : leagueFactors.length;
+    factors.sort((a, b) => priority(a) - priority(b));
+  }
 
   return {
     summary: parts.join(' '),

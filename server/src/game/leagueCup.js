@@ -1,5 +1,5 @@
 const { simulateMatch } = require('./matchSim');
-const { prepareBotForMatch } = require('./botEngine');
+const { prepareLeagueFixture } = require('./botEngine');
 const { recoverCohesion } = require('./leagueCohesion');
 const CUP_ROUNDS = [
   { stage: 'r16', label: 'Round of 16' }, { stage: 'qf', label: 'Quarterfinals' },
@@ -46,9 +46,9 @@ function simulateCupStep(state, simulate = simulateMatch, updateMorale = () => {
   const round = cup.rounds[roundIndex], matches = [], winners = [];
   for (const fixture of round.fixtures) {
     const a = t.slotByCode[fixture.aCode], b = t.slotByCode[fixture.bCode];
-    prepareBotForMatch(a, b); prepareBotForMatch(b, a);
+    prepareLeagueFixture(a, b);
     const moraleA = a.morale, moraleB = b.morale;
-    const result = simulate(a, b, { knockout: true, stage: round.stage });
+    const result = simulate(a, b, { knockout: true, stage: round.stage, competition: 'league' });
     if (result.goalsA === result.goalsB && (!result.wentToPenalties || !['A', 'B'].includes(result.penaltyWinner))) throw new Error('A knockout match must have a winner');
     const winnerCode = result.goalsA === result.goalsB ? result.penaltyWinner === 'A' ? a.code : b.code : result.goalsA > result.goalsB ? a.code : b.code;
     const match = { ...fixture, ...result, winnerCode, moraleA, moraleB, cup: true, stage: round.stage, matchday: t.fixtures.length + roundIndex + 1,

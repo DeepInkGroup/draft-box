@@ -94,7 +94,7 @@ for (const width of [1280, 768, 390, 320]) {
     await page.locator('#btnRulebook').click();
     await page.locator('[data-rule-category="league"]').click();
     await expect(page.locator('#rulebookTopics')).toContainText('34 matchdays');
-    await expect(page.locator('#rulebookTopics .rule-topic')).toHaveCount(11);
+    await expect(page.locator('#rulebookTopics .rule-topic')).toHaveCount(12);
     await expect(page.locator('#rulebookTopics')).toContainText('Manager offers between online seasons');
     await expect(page.locator('#rulebookTopics')).toContainText('Footballers leaving after poor results');
     await page.locator('#rulebookSearch').fill('transfers');

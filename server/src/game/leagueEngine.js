@@ -1,5 +1,5 @@
 const { getLeague, teamsForRoom, ratedPlayer } = require('../data/competitions');
-const { bestBotSetup, teamStrength, prepareBotForMatch } = require('./botEngine');
+const { bestBotSetup, teamStrength, prepareLeagueFixture } = require('./botEngine');
 const { simulateMatch } = require('./matchSim');
 const { normalizeStyle } = require('./tacticalStyles');
 const { ensureTransferWindow, transfersPending } = require('./leagueTransfers');
@@ -92,11 +92,10 @@ function simulateLeagueStep(roomState, applyResult, updateMorale) {
   for (const fixture of t.fixtures[t.matchday]) {
     const a = t.slotByCode[fixture.aCode];
     const b = t.slotByCode[fixture.bCode];
-    prepareBotForMatch(a, b);
-    prepareBotForMatch(b, a);
+    prepareLeagueFixture(a, b);
     const moraleA = a.morale;
     const moraleB = b.morale;
-    const result = simulateMatch(a, b, { knockout: false, stage: 'league' });
+    const result = simulateMatch(a, b, { knockout: false, stage: 'league', homeSide: 'A' });
     const match = { ...fixture, ...result, stage: 'league', matchday: t.matchday + 1, moraleA, moraleB,
       lineups: { A: a.xi.map((player) => ({ ...player })), B: b.xi.map((player) => ({ ...player })) } };
     if (result.goalsA !== result.goalsB) match.winnerCode = result.goalsA > result.goalsB ? a.code : b.code;

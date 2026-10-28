@@ -52,6 +52,9 @@ test('solo mobile cup draws sixteen clubs, plays each round and crowns a separat
   await page.locator('#btnFinishLeague').click();
   await expect(page.locator('#leagueZone')).toContainText('Matchday 34 / 34');
   await expect(page.locator('#seasonResults')).toContainText('306 matches');
+  await expect(page.locator('#championZone')).toContainText('League Venue');
+  await expect(page.locator('#championZone')).toContainText('Player Roles');
+  await expect(page.locator('#championZone')).toContainText('Midfield Quality');
   await expect(page.locator('#leagueCupZone .cup-fixture')).toHaveCount(8);
   await expect(page.locator('#btnNextLeagueSeason')).toHaveCount(0); await expect(page.locator('#btnRematch')).toHaveCount(0);
   await expect(page.locator('#btnStartCup')).toBeVisible(); await expect(page.locator('#continueZone')).toBeHidden();

@@ -199,4 +199,9 @@ function prepareBotForMatch(team, opponent) {
   return team;
 }
 
-module.exports = { bestXI, teamStrength, bestBotSetup, prepareBotForMatch, BOT_FORMATION };
+function prepareLeagueFixture(a, b) {
+  const previousA = { ...a }, previousB = { ...b };
+  prepareBotForMatch(a, previousB); prepareBotForMatch(b, previousA);
+}
+
+module.exports = { bestXI, teamStrength, bestBotSetup, prepareBotForMatch, prepareLeagueFixture, BOT_FORMATION };

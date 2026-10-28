@@ -56,6 +56,8 @@ async function request(url, verify, options = {}, attempts = 6) {
     assert.equal(pgl.multiplayerMaxPlayers, 18);
     assert.deepEqual(pgl.multiplayerOptions, { aiTransfers: false, midseasonTactics: true, endseasonTactics: true, midseasonFormations: true, resultsOnly: true, humanTransfers: true, continuousSeasons: true });
     assert.equal(pgl.matchdays, 34);
+    assert.equal(pgl.gameplayVersion, 1);
+    assert.deepEqual(pgl.gameplay, { fairHumanAI: true, roleBasedRatings: true, homeAdvantage: true, neutralCup: true, timeWeightedRedCards: true });
     assert.equal(pgl.knockoutCupAvailable, true);
     assert.equal(pgl.knockoutCupOwnerStart, true);
     assert.equal(pgl.coachManagementVersion, 1);

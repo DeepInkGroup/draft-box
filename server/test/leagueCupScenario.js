@@ -21,6 +21,7 @@ module.exports = async ({ request, event, connect, restart, host, guest }) => {
   assert.equal(draw.viewedStep, 34); assert.equal(draw.stage, 'cup_waiting'); assert.equal(draw.league.cup.phase, 'ready');
   assert.equal(draw.league.cup.qualifiers.length, 16); assert.equal(draw.league.cup.rounds[0].matches.length, 8);
   assert.equal(draw.step.seasonResults.matches, 306); assert.equal(draw.step.competitionFinished, false);
+  assert.ok(draw.step.matches.every(match => match.leagueGameplay?.version === 1 && match.leagueGameplay.homeSide === 'A'));
   assert.equal((await request('/api/rooms/' + solo.code, { token: host.token })).status, 'league_stage');
   await denied(a, 'league:nextSeason', solo.code, /Finish/);
   await denied(a, 'room:rematch', solo.code, /not finished/);
@@ -34,6 +35,7 @@ module.exports = async ({ request, event, connect, restart, host, guest }) => {
   for (const [index, count] of [8, 4, 2, 1].entries()) {
     const result = await pull(a, 'tournament:advance', 'tournament:step', solo.code);
     assert.equal(result.viewedStep, 35 + index); assert.equal(result.step.matches.length, count);
+    assert.ok(result.step.matches.every(match => match.leagueGameplay?.version === 1 && match.leagueGameplay.homeSide === null));
     assert.equal(result.league.matchday, 34); assert.equal(result.step.cup, true);
     if (index === 3) { assert.ok(result.league.cup.champion); assert.equal(result.step.seasonResults.matches, 306); }
   }

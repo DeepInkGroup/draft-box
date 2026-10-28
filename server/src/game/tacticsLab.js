@@ -22,7 +22,7 @@ function analyseTactic(body) {
     for (let i = 0; i < samples; i++) {
       const a = { code: own.code, name: own.name, xi: structuredClone(xi), formation, tacticalStyle: custom ? 'custom:0' : 'balanced', customTactic: custom ? tactic : null, isHuman: true, morale: 0 };
       const b = { code: opponent.code, name: opponent.name, xi: structuredClone(opponentXI), formation: '4-3-3', tacticalStyle: 'balanced', isHuman: true, morale: 0 };
-      const match = simulateMatch(a, b, { knockout: false, stage: 'league' });
+      const match = simulateMatch(a, b, { knockout: false, stage: body.competition === 'worldcup' ? 'group' : 'league' });
       totals[match.goalsA > match.goalsB ? 'wins' : match.goalsA === match.goalsB ? 'draws' : 'losses']++;
       totals.goalsFor += match.goalsA; totals.goalsAgainst += match.goalsB;
       totals.xg += match.xgA; totals.xgAgainst += match.xgB;
